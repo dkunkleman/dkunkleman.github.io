@@ -1,0 +1,50 @@
+
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Public Proofs — Like Charlie Network</title>
+<style>
+  :root{--navy:#0a1227;--sky:#3b82f6;--red:#dc2626}
+  html,body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#0a1227;color:#eef3ff}
+  .container{max-width:1100px;margin:0 auto;padding:22px}
+  .btn{display:inline-flex;gap:.5rem;padding:.7rem 1rem;border-radius:12px;border:1px solid rgba(255,255,255,.15);font-weight:800;cursor:pointer}
+  .blue{background:#3b82f6;color:#fff;border:none}.white{background:#fff;color:#0a1227}.red{background:#dc2626;color:#fff;border:none}
+  .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px;margin-top:12px}
+  code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:6px}.muted{color:#cbd5e1}
+</style></head>
+<body>
+<div class="container">
+  <h1>Public Proofs — Daily Merkle Roots & Logs</h1>
+  <p class="muted">Import your <code>transparency_log.json</code>, view daily Merkle roots, and verify inclusion of a canonical claim JSON (SHA-256). This page also shows a Merkle “branch” (sibling hash path) for matched leaves.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+    <button id="refresh" class="btn blue">Refresh</button>
+    <button id="export" class="btn white">Export log</button>
+    <label class="btn white">Import log <input id="import" type="file" accept=".json" style="display:none"></label>
+    <button id="clear" class="btn red">Clear log</button>
+  </div>
+  <div id="list" class="card"></div>
+
+  <div class="card">
+    <h3>Verify inclusion & branch</h3>
+    <p class="muted">Paste canonical JSON (keys sorted—example: <code>{"url":"...","action":"SERVE","date":"YYYY-MM-DD","state":"FL","city":"...","org":"..."}</code>).</p>
+    <textarea id="canon" rows="6" style="width:100%;background:#0e1b3a;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:.7rem"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="check" class="btn blue">Check</button>
+      <p id="out" class="muted" style="margin:0"></p>
+    </div>
+    <pre id="branch" style="white-space:pre-wrap;font-size:.9rem;margin-top:8px"></pre>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+function refresh(){const wrap=$('list');wrap.innerHTML='';const log=JSON.parse(localStorage.getItem('lc_transparency')||'{}');const days=Object.keys(log).sort().reverse();if(!days.length){wrap.innerHTML='<p class="muted">No log found. Import one.</p>';return;}days.forEach(d=>{const it=log[d];const div=document.createElement('div');div.className='card';div.innerHTML='<strong>'+d+'</strong><br>Merkle Root: <code>'+it.root+'</code>'+(it.items?('<details style="margin-top:6px;"><summary>Items ('+it.items.length+')</summary><pre style="white-space:pre-wrap">'+JSON.stringify(it.items,null,2)+'</pre></details>'):'');wrap.appendChild(div);});}
+$('refresh').onclick=refresh;
+$('export').onclick=()=>{const data=localStorage.getItem('lc_transparency')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='transparency_log.json';a.click();};
+$('import').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const obj=JSON.parse(ev.target.result);localStorage.setItem('lc_transparency',JSON.stringify(obj));refresh();}catch{alert('Invalid JSON')}};r.readAsText(f);};
+$('clear').onclick=()=>{if(confirm('Clear local log?')){localStorage.removeItem('lc_transparency');refresh();}};
+async function sha256hex(txt){const enc=new TextEncoder().encode(txt);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function branch(leaves,idx){if(!leaves.length)return[];let level=leaves.slice();let i=idx;const path=[];while(level.length>1){const isR=(i%2===1),sib=isR?level[i-1]:(level[i+1]||level[i]);path.push({sibling:sib,side:isR?'left':'right'});const next=[];for(let j=0;j<level.length;j+=2){const L=level[j],R=level[j+1]||L;next.push(await sha256hex(L+R));}i=Math.floor(i/2);level=next;}return path;}
+$('check').onclick=async()=>{try{const obj=JSON.parse($('canon').value.trim());const cj=JSON.stringify(obj,Object.keys(obj).sort());const leaf=await sha256hex(cj);const log=JSON.parse(localStorage.getItem('lc_transparency')||'{}');const days=Object.keys(log).sort();const hits=[];for(const d of days){const it=log[d];if(!it.items)continue;const idx=it.items.findIndex(x=>x.sha256===leaf);if(idx>=0)hits.push({day:d,idx,items:it.items});}if(!hits.length){$('out').textContent='No match in current log.';$('branch').textContent='';return;}const first=hits[0];$('out').textContent='Found in: '+hits.map(h=>h.day+' (leaf #'+(h.idx+1)+')').join(', ');$('branch').textContent=JSON.stringify(await branch(first.items.map(x=>x.sha256),first.idx),null,2);}catch(e){$('out').textContent='Invalid JSON';$('branch').textContent='';}};
+refresh();
+</script>
+</body></html>

@@ -1,0 +1,271 @@
+
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Like Charlie Network — Like Charlie, I live my faith, serve, build, and defend freedom.</title>
+<style>
+  :root {
+    --navy:#0a1227; --blue:#1e3a8a; --sky:#3b82f6; --red:#dc2626; --gold:#fbbf24; --white:#ffffff; --slate:#94a3b8; --green:#22c55e; --indigo:#4338ca;
+    --hero:url('./img/patriotism.jpeg');
+    --flag:url('./img/patriotism.jpeg');
+  }
+  html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#0a1227;color:#eef3ff}
+  a{color:#9fd0ff;text-decoration:none}
+  .container{max-width:1220px;margin:0 auto;padding:0 20px}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.1rem;border-radius:14px;border:1px solid rgba(255,255,255,.15);font-weight:900;cursor:pointer;transition:.2s;box-shadow:0 6px 20px rgba(17,24,39,.25) inset,0 1px 0 rgba(255,255,255,.08)}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-red{background:linear-gradient(180deg,#ef4444,#b91c1c);color:#fff}
+  .btn-blue{background:linear-gradient(180deg,#60a5fa,#1e3a8a);color:#fff;border-color:transparent}
+  .btn-white{background:#fff;color:#0b1733}
+  header.nav{position:sticky;top:0;z-index:60;background:rgba(10,18,39,.85);border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
+  header.nav .inner{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
+  nav a{color:#e2e8f0;font-weight:800;margin:0 .6rem}
+  nav a:hover{color:#fff}
+  .hero{min-height:56vh;display:flex;align-items:center;text-align:center;background-image:linear-gradient(rgba(3,6,22,.55),rgba(3,6,22,.65)),var(--hero);background-size:cover;background-position:center}
+  .hero h1{font-size:clamp(2rem,6vw,3.6rem);margin:0;font-weight:1000;letter-spacing:.02em;text-shadow:0 2px 18px rgba(0,0,0,.4)}
+  .hero p{max-width:900px;margin:14px auto 0;color:#dbeafe}
+  .stars{height:10px;background:repeating-linear-gradient(90deg,transparent 0 28px,rgba(255,255,255,.18) 28px 30px);border-radius:999px;margin:18px auto;max-width:360px}
+  .topstates{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .7rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;font-weight:800}
+  .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:18px 20px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 10px 24px rgba(0,0,0,.25)}
+  .section{margin-top:30px}
+  input,select,textarea{width:100%;background:#0e1b3a;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:.8rem 1rem;position:relative;z-index:2}
+  select{appearance:auto;-webkit-appearance:menulist;-moz-appearance:menulist}
+  .grid{display:grid;gap:16px}.cols-2{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:900px){.cols-2,.cols-3{grid-template-columns:1fr}}
+  .muted{color:#cbd5e1}.note{font-size:.9rem;opacity:.85}
+  table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.12)}th{color:#fde68a;font-weight:900;letter-spacing:.01em}
+  .flag-strap{background-image:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),var(--flag);background-size:cover;background-position:center;border-radius:14px;border:1px solid rgba(255,255,255,.2)}
+  .req::after{content:" *";color:#fca5a5;font-weight:900}
+</style></head>
+<body>
+<header class="nav"><div class="container inner">
+  <div style="font-weight:1000">Like Charlie Network</div>
+  <nav>
+    <a href="#postnow">Post</a><a href="#claim">Claim</a><a href="#impact">Impact</a>
+    <a href="#civic">Civic</a><a href="proofs.html">Proofs (Press)</a><a href="#resources">Resources</a>
+  </nav>
+</div></header>
+
+<section class="hero"><div class="container">
+  <h1>Like Charlie, I live my faith, serve, build, and defend freedom.</h1>
+  <p>(Test locally or live—no renaming needed.)</p>
+  <div class="stars"></div>
+  <div class="topstates" id="topStates"></div>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+    <a class="btn btn-blue" href="#postnow">📣 Post Now</a>
+    <a class="btn btn-white" href="#claim">Claim & track</a>
+    <a class="btn btn-red" href="#impact">See Impact</a>
+  </div>
+</div></section>
+
+<div class="container section" id="postnow">
+  <h2>Post your challenge in seconds</h2>
+  <p class="muted">After you generate your post, we prefill the claim form below so your action is tracked. Social platforms don’t allow automatic claiming.</p>
+  <div class="card flag-strap">
+    <form id="postForm" class="grid cols-2">
+      <label>Pick your action <span class="muted">— most-used actions float to the top</span>
+        <select id="p_action">
+          <option>Starter — Share a verse with a friend</option>
+          <option>Serve</option><option>Forgive</option><option>Family Life</option>
+          <option>Stand & Speak (Podium)</option><option>Invite to Church</option>
+          <option>Share Christ (Evangelism)</option><option>Bridge Builder (Note/Call/Visit)</option>
+          <option>Public Testimony (Online Post)</option><option>Film Night Host (Christian Film Night)</option>
+          <option>Favorite Charlie Video (Share + why)</option>
+          <option>Hands-Free Driver (No phone while driving)</option>
+          <option>Family Table Focus (Streak)</option><option>Quiet Time Focus (Streak)</option>
+          <option>Honor Service (Thank a First Responder)</option>
+          <option>Creator Proceeds Donor</option><option>YouTube Proceeds Donor</option>
+          <option>Phone Off at Church</option><option>Inspire</option>
+        </select>
+      </label>
+      <label>Tag 3 friends <input id="p_friends" placeholder="@friend1 @friend2 @friend3"></label>
+      <label>State <input id="p_state" placeholder="FL"></label>
+      <label>City/Metro <input id="p_city" placeholder="Pensacola"></label>
+      <label>Organization <input id="p_org" placeholder="Grace Youth"></label>
+      <label>Verse (optional) <input id="p_verse" placeholder="Book Ch:V (e.g., Joshua 1:9)"></label>
+      <label>Version <select id="p_version"><option></option><option>KJV</option><option>ESV</option><option>NIV</option><option>NKJV</option><option>CSB</option><option>NASB</option><option>NLT</option></select></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-blue" type="button" id="genPost">Generate post</button>
+        <button class="btn btn-white" type="button" id="oneClick">Post + Start Claim</button>
+      </div>
+      <p class="muted" style="grid-column:1/-1;">Fields with a <span style="color:#fca5a5;">*</span> in the Claim section are required for your action to be counted.</p>
+    </form>
+    <div id="capOut" class="card" style="display:none;margin-top:14px;background:rgba(12,18,35,.75)">
+      <h3>Post text (copy & paste)</h3>
+      <textarea id="capText" rows="6"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <a id="toX" class="btn btn-white" target="_blank">Open X</a>
+        <a id="toFB" class="btn btn-white" target="_blank">Open Facebook</a>
+        <a id="toIG" class="btn btn-white" target="_blank">Open Instagram</a>
+        <a id="toTT" class="btn btn-white" target="_blank">Open TikTok</a>
+        <a id="toAll" class="btn btn-white" target="_blank">Copy text</a>
+      </div>
+      <p class="muted" style="margin-top:8px;">We prefilled the claim form below so your action is tracked. Add your post URL and hit submit.</p>
+    </div>
+  </div>
+</div>
+
+<div class="container section" id="claim">
+  <h2>Claim & track</h2>
+  <p class="muted">Required: Email, Action. Helpful for boards: State/City/Org. Donations: add <code>$25</code>-style amount.</p>
+  <div class="card">
+    <form id="storyForm" class="grid cols-3">
+      <label class="req">Email <input name="email" type="email" placeholder="you@example.com" required></label>
+      <label>State <input name="state" placeholder="FL"></label>
+      <label>City/Metro <input name="city" placeholder="Pensacola"></label>
+      <label>Organization <input name="org" placeholder="Grace Youth"></label>
+      <label>Post URL <input name="url" type="url" placeholder="https://... (optional if no public post)"></label>
+      <label class="req">Action
+        <select name="action" id="claim_action" required>
+          <option value="">Choose…</option>
+          <option>Starter Badge — Share a verse with a friend</option><option>Serve Badge</option>
+          <option>Forgive Badge</option><option>Family Life Badge</option>
+          <option>Stand & Speak (Podium)</option><option>Invite to Church Badge</option>
+          <option>Share Christ Badge</option><option>Bridge Builder Badge</option>
+          <option>Public Testimony Badge</option><option>Film Night Host Badge</option>
+          <option>Favorite Charlie Video Badge</option>
+          <option>Hands-Free Driver Badge</option>
+          <option>Family Table Focus — 7-Day</option><option>Quiet Time Focus — 7-Day</option>
+          <option>Family Table Focus — 30-Day</option><option>Quiet Time Focus — 30-Day</option>
+          <option>Honor Service Badge</option>
+          <option>Creator Proceeds Donor</option><option>YouTube Proceeds Donor</option>
+          <option>Phone Off at Church Badge</option><option>Inspire Badge</option>
+        </select>
+      </label>
+      <label>Donation $ (optional) <input name="amount" placeholder="$25"></label>
+      <label>Referral code <input name="ref" placeholder="lc-abc123"></label>
+      <button class="btn btn-red" type="submit">Submit claim</button><span id="submitStatus"></span>
+    </form>
+    <p id="pendingNotice" class="muted" style="display:none;margin-top:8px;">Pending claim saved — paste your post URL when you’re ready and hit “Submit claim.”</p>
+  </div>
+</div>
+
+<div class="container section" id="impact">
+  <h2>Impact Index — State Score • Posts • $</h2>
+  <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+    <span class="muted">View:</span>
+    <button class="btn btn-white" id="viewRaw">Raw</button>
+    <button class="btn btn-white" id="viewCapita">Per Capita</button>
+  </div>
+  <div class="card" style="overflow:auto">
+    <table id="impactTable">
+      <thead><tr><th>State</th><th>Weighted Score</th><th>Posts</th><th>Donations $</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container section" id="civic">
+  <h2>Civic Concierge — 50-State Quick Links</h2>
+  <div class="card flag-strap">
+    <p class="muted">Pick your state and we’ll surface quick links for Governor contact and State Legislature contact (search-based so they stay fresh).</p>
+    <div class="grid cols-3">
+      <label>State
+        <select id="stateSel">
+          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NC</option><option>ND</option><option>NE</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NV</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+        </select>
+      </label>
+      <div><button class="btn btn-blue" id="civLoad">Load links</button></div>
+    </div>
+    <div id="civLinks" class="grid cols-2" style="margin-top:8px"></div>
+    <h3 style="margin-top:10px">Other (local)</h3>
+    <div class="grid cols-3">
+      <label>Name <input id="c_name" placeholder="e.g., City Hall Contact"></label>
+      <label>Link <input id="c_url" placeholder="https://..."></label>
+      <div><button class="btn btn-white" id="c_add">Add link</button></div>
+    </div>
+    <div id="c_list" class="grid cols-3" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="container section" id="resources">
+  <h2>Resources — from TPUSA</h2>
+  <div class="card">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">Conversation Guides</a>
+      <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">Biblical Studies</a>
+      <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">Community Templates</a>
+      <a class="btn btn-white" target="_blank" href="https://donate.tpusa.com/">Donate to TPUSA</a>
+    </div>
+  </div>
+</div>
+
+<footer class="nav"><div class="container inner" style="justify-content:space-between">
+  <div><div>Donations default to TPUSA • You may donate to a charity of your choice.</div>
+  <small class="muted">Inspired by Charlie’s public legacy • Not affiliated with charliechallenge.org.</small></div>
+</div></footer>
+
+<script>
+const p=id=>document.getElementById(id);
+
+/* Image rotation (hero/flag) */
+(function(){
+  const IMGSET=[
+    './img/patriotism.jpeg',
+    './img/istockphoto-1495316224-612x612.jpg',
+    './img/istockphoto-1502557306-612x612.jpg',
+    './img/istockphoto-2152081731-612x612.jpg',
+    './img/istockphoto-2165679972-612x612.jpg',
+    './img/istockphoto-2190110933-612x612.jpg',
+    './img/istockphoto-2203271689-612x612.webp',
+    './img/istockphoto-2211801215-612x612.jpg',
+    './img/istockphoto-145152803-612x612.jpg',
+    './img/istockphoto-1333234668-612x612.webp',
+    './img/photo-1542037104857-ffbb0b9155fb.avif'
+  ];
+  const pick=IMGSET[Math.floor(Math.random()*IMGSET.length)];
+  document.documentElement.style.setProperty('--hero', `url('${pick}')`);
+  document.documentElement.style.setProperty('--flag', `url('${pick}')`);
+})();
+
+/* Top States banner */
+function weight(a){
+  const W={'STARTER_BADGE_—_SHARE_A_VERSE_WITH_A_FRIEND':1.0,'SERVE_BADGE':1.6,'FORGIVE_BADGE':1.4,'FAMILY_LIFE_BADGE':1.4,'STAND_&_SPEAK_(PODIUM)':1.7,'INVITE_TO_CHURCH_BADGE':1.5,'SHARE_CHRIST_BADGE':1.8,'BRIDGE_BUILDER_BADGE':1.5,'PUBLIC_TESTIMONY_BADGE':1.9,'FILM_NIGHT_HOST_BADGE':1.6,'FAVORITE_CHARLIE_VIDEO_BADGE':1.2,'HANDS-FREE_DRIVER_BADGE':1.3,'FAMILY_TABLE_FOCUS_—_7-DAY':1.4,'QUIET_TIME_FOCUS_—_7-DAY':1.4,'FAMILY_TABLE_FOCUS_—_30-DAY':1.8,'QUIET_TIME_FOCUS_—_30-DAY':1.8,'HONOR_SERVICE_BADGE':1.2,'CREATOR_PROCEEDS_DONOR':1.7,'YOUTUBE_PROCEEDS_DONOR':1.7,'PHONE_OFF_AT_CHURCH_BADGE':1.1,'INSPIRE_BADGE':1.0}; 
+  return W[(a||'').toUpperCase().replace(/\s+/g,'_')]||1.0;
+}
+function dollars(s){if(!s)return 0;const m=String(s).replace(/,/g,'').match(/\$\s*(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):0;}
+function agg(){const c=JSON.parse(localStorage.getItem('lc_claims')||'[]'), m={};c.forEach(x=>{const st=(x.state||'').toUpperCase();if(!st)return;m[st]=m[st]||{score:0,posts:0,dollars:0};m[st].posts++;m[st].score+=weight(x.action||'');if((x.action||'').toLowerCase().includes('donor'))m[st].dollars+=dollars(x.amount||'');});return m;}
+function renderTopStates(){const a=agg();const top=Object.entries(a).sort((A,B)=>B[1].score-A[1].score).slice(0,3);const w=p('topStates');w.innerHTML='';top.forEach(([st,v])=>{const c=document.createElement('div');c.className='chip';c.innerHTML=`<span>${st}</span><span>•</span><span>${v.score.toFixed(1)}</span>`;w.appendChild(c);});}
+
+/* Dropdown popularity */
+function bump(action){const map=JSON.parse(localStorage.getItem('lc_action_counts')||'{}');const k=String(action||'').trim();if(!k)return;map[k]=(map[k]||0)+1;localStorage.setItem('lc_action_counts',JSON.stringify(map));sortDrop();}
+function sortDrop(){const sel=p('p_action');if(!sel)return;const map=JSON.parse(localStorage.getItem('lc_action_counts')||'{}');const opts=[...sel.options].map(o=>({t:o.text,v:o.value}));const head=opts.shift();opts.sort((a,b)=>(map[b.t]||0)-(map[a.t]||0));sel.innerHTML='';[head,...opts].forEach(o=>{const op=document.createElement('option');op.text=o.t;op.value=o.v;sel.appendChild(op);});}
+
+/* Generate post + one-click start claim */
+function gen(prefillOnly=false){
+  const link='LikeCharlie.org/claim?ref='+(localStorage.getItem('lc_myref')||('lc-'+Math.random().toString(36).slice(2,8))); localStorage.setItem('lc_myref',link.split('ref=')[1]);
+  const act=(p('p_action').value||'Action'), verse=p('p_verse').value||'', ver=p('p_version').value||'';
+  const where=[p('p_state').value||'',p('p_city').value||'',p('p_org').value||''].filter(Boolean).join(' • ');
+  const lines=[]; lines.push('Today I chose, like Charlie — '+act+'.'); if(verse) lines.push('Verse: '+verse+(ver?(' ('+ver+')'):''));
+  lines.push('I nominate '+(p('p_friends').value||'')+' to act within 48 hours.'); lines.push('Claim your badge: '+link); lines.push('#LikeCharlie #LikeCharlieNetwork');
+  p('capText').value=lines.join('\n'); p('capOut').style.display='block';
+  const f=p('storyForm'); f.elements['action'].value=act.replace('(Christian Film Night)','Badge').replace(' (Streak)',' — 7-Day').replace('Favorite Charlie Video (Share + why)','Favorite Charlie Video Badge');
+  f.elements['state'].value=p('p_state').value||''; f.elements['city'].value=p('p_city').value||''; f.elements['org'].value=p('p_org').value||'';
+  if(prefillOnly){ localStorage.setItem('lc_pending_claim',JSON.stringify({ts:Date.now(),action:f.elements['action'].value,state:f.elements['state'].value,city:f.elements['city'].value,org:f.elements['org'].value})); p('pendingNotice').style.display='block'; }
+  f.scrollIntoView({behavior:'smooth',block:'start'});
+}
+p('genPost').onclick=()=>{gen(false);bump(p('p_action').value);};
+p('oneClick').onclick=()=>{gen(true);bump(p('p_action').value);};
+['toX','toFB','toIG','toTT','toAll'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.onclick=e=>{e.preventDefault();if(id==='toX'){const t=encodeURIComponent(p('capText').value);window.open('https://x.com/intent/tweet?text='+t,'_blank');}else if(id==='toAll'){const ta=p('capText');ta.select();document.execCommand('copy');alert('Copied.');}else{alert('Open the app and paste your text.');}}});
+
+/* Impact table (raw/per capita) */
+const POP={AL:5098741,AK:733583,AZ:7359197,AR:3042017,CA:38965193,CO:5845526,CT:3605597,DE:1030000,FL:22389689,GA:11095453,HI:1440195,ID:1939033,IL:12582032,IN:6956056,IA:3200517,KS:2937150,KY:4512310,LA:4552219,ME:1395847,MD:6181645,MA:7093637,MI:10034113,MN:5797173,MS:2940057,MO:6168187,MT:1125755,NE:1967923,NV:3241289,NH:1395231,NJ:9267130,NM:2117522,NY:19431507,NC:10698973,ND:812178,OH:11756058,OK:4023178,OR:4237256,PA:12964056,RI:1093734,SC:5328210,SD:919318,TN:7099997,TX:30029572,UT:3405121,VT:647064,VA:8638218,WA:7800592,WV:1766387,WI:5892539,WY:581381};
+let perCapita=false;
+function renderImpactTable(){
+  const tb=document.querySelector('#impactTable tbody'); if(!tb) return; tb.innerHTML='';
+  const c=JSON.parse(localStorage.getItem('lc_claims')||'[]'); const m={};
+  c.forEach(x=>{const st=(x.state||'').toUpperCase(); if(!st) return; m[st]=m[st]||{score:0,posts:0,dollars:0}; m[st].posts++; m[st].score+=weight(x.action||''); if((x.action||'').toLowerCase().includes('donor')) m[st].dollars+=dollars(x.amount||'');});
+  const rows=Object.entries(m).map(([st,v])=>{const norm=perCapita&&POP[st]?v.score/(POP[st]/1000000):v.score;return [st,v,norm];}).sort((a,b)=>b[2]-a[2]);
+  rows.forEach(([st,v])=>{const tr=document.createElement('tr'); tr.innerHTML='<td>'+st+'</td><td>'+(perCapita?(v.score/(POP[st]/1000000)).toFixed(2)+' /M':v.score.toFixed(1))+'</td><td>'+v.posts+'</td><td>$'+v.dollars.toFixed(2)+'</td>'; tb.appendChild(tr);});
+  renderTopStates();
+}
+p('viewRaw').onclick=()=>{perCapita=false;renderImpactTable();};
+p('viewCapita').onclick=()=>{perCapita=true;renderImpactTable();};
+
+/* Civic quick links */
+p('civLoad').onclick=()=>{const st=p('stateSel').value;const wrap=p('civLinks');wrap.innerHTML='';const gov='https://www.google.com/search?q=Contact+Governor+'+st;const leg='https://www.google.com/search?q='+st+' state legislature contact';[['Governor contact',gov],['State legislature',leg]].forEach(([label,url])=>{const d=document.createElement('div');d.className='card';d.innerHTML='<a target="_blank" href="'+url+'">'+label+' — '+st+'</a>';wrap.appendChild(d);});};
+p('c_add').onclick=()=>{const name=p('c_name').value.trim(),url=p('c_url').value.trim();if(!name||!url)return;const d=document.createElement('div');d.className='card';d.innerHTML='<a target="_blank" href="'+url+'">'+name+'</a>';p('c_list').appendChild(d);p('c_name').value='';p('c_url').value='';};
+
+document.addEventListener('DOMContentLoaded', ()=>{renderImpactTable();sortDrop();renderTopStates();});
+</script>
+</body></html>
