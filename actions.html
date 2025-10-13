@@ -1,63 +1,318 @@
-<!-- actions.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Actions Guide • Like Charlie Network</title>
-  <link rel="stylesheet" href="styles.css"/>
-  <script defer src="script.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actions Guide — Like Charlie Network</title>
+<link rel="icon" href="data:,">
+<style>
+  :root{
+    --navy:#0b1733; --ink:#101828; --sky:#3b82f6; --amber:#f59e0b;
+    --red:#dc2626; --green:#16a34a; --slate:#cbd5e1; --bg:#0f172a;
+  }
+  html,body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:#eef3ff;}
+  .container{max-width:1100px; margin:0 auto; padding:20px;}
+  h1,h2{margin:10px 0 8px}
+  .muted{color:#cbd5e1}
+  .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  .card{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:14px 16px;}
+  .btn{display:inline-flex; gap:.5rem; align-items:center; padding:.65rem 1rem; border-radius:14px; border:1px solid transparent; text-decoration:none; font-weight:800; cursor:pointer}
+  .btn-blue{background:var(--sky); color:#fff;}
+  .btn-amber{background:var(--amber); color:#0b1733;}
+  .btn-white{background:#fff; color:#0b1733;}
+  .btn-red{background:var(--red); color:#fff;}
+  .btn-green{background:var(--green); color:#fff;}
+  select, input[type=text], textarea{
+    width:100%; background:#0e1b3a; color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:12px; padding:.7rem .9rem;
+  }
+  .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:12px;}
+  .col-6{grid-column:span 6;} .col-12{grid-column:span 12;}
+  @media(max-width:900px){ .col-6{grid-column:span 12;} }
+  .pill{display:inline-block; padding:.15rem .5rem; background:rgba(255,255,255,.12); border-radius:999px; font-size:.8rem;}
+  .adminbar{position:sticky; top:0; z-index:5; background:#0a1229; border-bottom:1px solid rgba(255,255,255,.12); padding:8px 16px; display:none;}
+  .adminbar.show{display:block;}
+  dialog::backdrop{background:rgba(3,7,18,.55);}
+  dialog{border:none; border-radius:16px; padding:0; overflow:hidden; max-width:780px; width:96%;}
+  .modal-head{padding:14px 16px; background:#0b1733; border-bottom:1px solid rgba(255,255,255,.1); font-weight:800;}
+  .modal-body{padding:16px; background:#0d1a3a}
+  .modal-foot{padding:12px 16px; background:#0b1733; display:flex; gap:8px; justify-content:flex-end;}
+  table{width:100%; border-collapse:collapse; font-size:.95rem;}
+  th,td{padding:8px 10px; border-bottom:1px solid rgba(255,255,255,.1); text-align:left;}
+  .kbd{background:#111827; border:1px solid #334155; padding:2px 6px; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.85em;}
+</style>
 </head>
-<body class="lc">
-  <header class="lc-nav">
-    <a href="index.html" class="brand">Like Charlie Network</a>
-    <nav>
-      <a href="index.html#how">How it works</a>
-      <a href="badges.html">Badges</a>
-      <a href="leaders.html">Leaderboards</a>
-      <a href="actions.html" aria-current="page">Actions Guide</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </header>
-
-  <main class="wrap">
-    <h1>Actions Guide</h1>
-    <p>Browse approved actions below. Have an idea? Propose a new action and we’ll review it.</p>
-
-    <div class="toolbar">
-      <button id="btnAddAction" class="btn btn-primary">+ Add Action</button>
-      <span class="hint">Admin? Append <code>?admin=1</code> to the URL to enable approvals.</span>
+<body>
+<header class="adminbar" id="adminbar">
+  <div class="row" style="justify-content:space-between;">
+    <div><strong>Admin</strong> · Pending actions: <span id="pending_count">0</span></div>
+    <div class="row">
+      <button class="btn btn-white" id="btn_review">Review / Approve</button>
+      <button class="btn btn-amber" id="btn_export_csv">Export CSV</button>
     </div>
+  </div>
+</header>
 
-    <section>
-      <h2>Approved Actions</h2>
-      <ul id="approvedActions" class="card-list"></ul>
-    </section>
+<div class="container">
+  <h1>Actions Guide</h1>
+  <p class="muted">Pick an action from the dropdown to use in your posts. Want something new? Tap <em>Add Action</em> to submit one for approval.</p>
 
-    <section>
-      <h2>Pending Approval</h2>
-      <ul id="pendingActions" class="card-list"></ul>
-    </section>
-  </main>
-
-  <!-- Modal -->
-  <dialog id="actionModal" class="modal">
-    <form method="dialog" id="actionForm" class="card">
-      <h3>Propose a New Action</h3>
-      <label>Title
-        <input id="actionTitle" required placeholder="e.g., Visit a nursing home"/>
-      </label>
-      <label>Description
-        <textarea id="actionDesc" rows="4" placeholder="Briefly explain what people should do."></textarea>
-      </label>
-      <label>Your name/handle (optional)
-        <input id="actionBy" placeholder="@yourhandle or name"/>
-      </label>
-      <div class="row end gap">
-        <button type="button" id="cancelAction" class="btn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Submit for Review</button>
+  <div class="card">
+    <div class="grid">
+      <div class="col-6">
+        <label><strong>Choose an action</strong></label>
+        <select id="action_select"></select>
       </div>
-    </form>
-  </dialog>
+      <div class="col-6">
+        <label>&nbsp;</label>
+        <div class="row">
+          <button class="btn btn-blue" id="btn_add">Add Action</button>
+          <button class="btn btn-white" id="btn_copy_slug">Copy slug</button>
+          <span class="pill" id="badge_count">0 approved</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Founders Counter</h2>
+  <div class="card">
+    <div class="row">
+      <div>Founders claimed: <strong id="founders_now">0</strong> / 1000</div>
+      <button class="btn btn-green" id="btn_claim_founder">Claim my Founder slot</button>
+    </div>
+    <p class="muted" style="margin:.5rem 0 0">This local demo locks at 1,000 per browser. For production, wire this to your Google Form or serverless function.</p>
+  </div>
+
+  <h2>Google Form (optional)</h2>
+  <div class="card">
+    <p class="muted">Paste your Google Form <span class="kbd">iframe</span> embed below (we save it locally).</p>
+    <textarea id="form_embed" rows="4" placeholder="&lt;iframe ...&gt;&lt;/iframe&gt;"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="btn btn-blue" id="btn_save_form">Save form embed</button>
+      <button class="btn btn-white" id="btn_clear_form">Clear</button>
+    </div>
+    <div id="form_preview" style="margin-top:12px"></div>
+  </div>
+
+  <p class="muted" style="margin-top:16px">Pro tip: open admin bar with <span class="kbd">?admin=1</span> in the URL.</p>
+</div>
+
+<!-- Add / Review modals -->
+<dialog id="dlg_add">
+  <div class="modal-head">Submit a new action</div>
+  <div class="modal-body">
+    <div class="grid">
+      <div class="col-6"><label>Title</label><input type="text" id="in_title" placeholder="e.g. Share Christ, Like Charlie"></div>
+      <div class="col-6"><label>Category</label>
+        <select id="in_cat">
+          <option>Faith</option><option>Family</option><option>Service</option><option>Courage</option><option>Leadership</option>
+        </select>
+      </div>
+      <div class="col-12"><label>Description</label><textarea id="in_desc" rows="4" placeholder="What do people do to earn this action?"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-white" onclick="dlg_add.close()">Cancel</button>
+    <button class="btn btn-blue" id="btn_submit_action">Submit</button>
+  </div>
+</dialog>
+
+<dialog id="dlg_review">
+  <div class="modal-head">Pending approvals</div>
+  <div class="modal-body">
+    <table id="tbl_pending">
+      <thead><tr><th>Title</th><th>Category</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-white" onclick="dlg_review.close()">Close</button>
+  </div>
+</dialog>
+
+<script>
+/* --- storage keys --- */
+const KEY_APPROVED = "lc_actions";
+const KEY_PENDING  = "lc_actions_pending";
+const KEY_FOUNDERS = "lc_founders";
+const KEY_FORM     = "lc_actions_form_embed";
+
+/* --- seed defaults --- */
+const SEED = [
+ {title:"Bible Badge", cat:"Faith", desc:"Read, memorize, or share a verse"},
+ {title:"Forgive Badge", cat:"Faith", desc:"Share a forgiveness story or testimony"},
+ {title:"Purity Badge", cat:"Faith", desc:"Commit to waiting until marriage, or share a testimony"},
+ {title:"Family Life Badge", cat:"Family", desc:"Post a family meal or intentional time together"},
+ {title:"Listening Badge", cat:"Service", desc:"Have a respectful conversation with someone you disagree with"},
+ {title:"Pay It Forward", cat:"Service", desc:"Donate, help financially, or do a generous act"},
+ {title:"Boldness Badge", cat:"Courage", desc:"Speak truth boldly or post a testimony"},
+ {title:"Fight! Fight! Fight!", cat:"Courage", desc:"Take a strong stand in debate or public setting"},
+ {title:"Inspire Badge", cat:"Leadership", desc:"Share what inspires you or mentor someone"},
+ {title:"Gold Standard", cat:"Leadership", desc:"Complete Faith + Family + Service + Courage + Leadership"}
+];
+
+/* --- util --- */
+const $ = id => document.getElementById(id);
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+function load(key, fallback){ try{ return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }catch(e){ return fallback; } }
+function save(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+
+/* --- approved actions dropdown --- */
+function ensureSeed(){
+  const cur = load(KEY_APPROVED, []);
+  if(cur.length===0){ save(KEY_APPROVED, SEED); }
+}
+function refreshDropdown(){
+  const arr = load(KEY_APPROVED, []);
+  const sel = $("action_select");
+  sel.innerHTML = ""; 
+  arr.forEach((it,i)=>{
+    const opt = document.createElement("option");
+    opt.value = slug(it.title);
+    opt.textContent = it.title + " — " + it.cat;
+    sel.appendChild(opt);
+  });
+  $("badge_count").textContent = arr.length + " approved";
+}
+
+function copySlug(){
+  const sel = $("action_select");
+  const txt = sel.value;
+  navigator.clipboard.writeText(txt);
+  $("badge_count").textContent = "slug copied!";
+  setTimeout(refreshDropdown, 800);
+}
+
+/* --- add new action (pending) --- */
+function openAdd(){ $("dlg_add").showModal(); }
+function submitAction(){
+  const t = $("in_title").value.trim();
+  const c = $("in_cat").value;
+  const d = $("in_desc").value.trim();
+  if(!t || !d){ alert("Please add a title and description."); return; }
+  const pending = load(KEY_PENDING, []);
+  pending.push({title:t, cat:c, desc:d, slug:slug(t), created:new Date().toISOString()});
+  save(KEY_PENDING, pending);
+  $("dlg_add").close();
+  updatePendingCount();
+}
+
+/* --- admin bar and moderation --- */
+function updatePendingCount(){
+  const n = load(KEY_PENDING, []).length;
+  $("pending_count").textContent = n;
+}
+function showAdminBarIfNeeded(){
+  const url = new URL(location.href);
+  if(url.searchParams.get("admin")==="1"){ $("adminbar").classList.add("show"); }
+}
+function openReview(){
+  const tbody = $("tbl_pending").querySelector("tbody");
+  tbody.innerHTML = "";
+  const arr = load(KEY_PENDING, []);
+  if(arr.length===0){
+    const tr=document.createElement("tr");
+    tr.innerHTML = '<td colspan="4" class="muted">No items pending.</td>';
+    tbody.appendChild(tr);
+  } else {
+    arr.forEach((it,idx)=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td>${it.title}</td><td>${it.cat}</td><td>${it.desc}</td>
+      <td>
+        <button class="btn btn-green" data-approve="${idx}">Approve</button>
+        <button class="btn btn-red" data-deny="${idx}">Deny</button>
+      </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  $("dlg_review").showModal();
+}
+function onReviewClick(e){
+  const iApprove = e.target.getAttribute("data-approve");
+  const iDeny    = e.target.getAttribute("data-deny");
+  if(iApprove!==null){ approve(+iApprove); }
+  if(iDeny!==null){ deny(+iDeny); }
+}
+function approve(i){
+  const pending = load(KEY_PENDING, []);
+  const it = pending.splice(i,1)[0];
+  save(KEY_PENDING, pending);
+  const approved = load(KEY_APPROVED, []);
+  approved.push(it);
+  save(KEY_APPROVED, approved);
+  updatePendingCount();
+  refreshDropdown();
+  openReview(); // refresh table
+}
+function deny(i){
+  const pending = load(KEY_PENDING, []);
+  pending.splice(i,1);
+  save(KEY_PENDING, pending);
+  updatePendingCount();
+  openReview(); // refresh table
+}
+
+/* --- CSV export --- */
+function exportCSV(){
+  const arr = load(KEY_APPROVED, []);
+  const head = ["title","slug","cat","desc","created"];
+  const rows = [head.join(",")];
+  arr.forEach(it=>{
+    const r = [it.title, it.slug||slug(it.title), it.cat, JSON.stringify(it.desc).replace(/"/g,'""'), it.created||""];
+    rows.push(r.join(","));
+  });
+  const blob = new Blob([rows.join("\n")], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "actions.csv";
+  a.click();
+}
+
+/* --- founders counter demo --- */
+function refreshFounders(){
+  const n = load(KEY_FOUNDERS, {count:0}).count;
+  $("founders_now").textContent = n;
+}
+function claimFounder(){
+  const o = load(KEY_FOUNDERS, {count:0});
+  if(o.count>=1000){ alert("Founders are full."); return; }
+  o.count += 1;
+  save(KEY_FOUNDERS, o);
+  refreshFounders();
+}
+
+/* --- form embed --- */
+function loadForm(){
+  const html = localStorage.getItem(KEY_FORM) || "";
+  $("form_embed").value = html;
+  $("form_preview").innerHTML = html;
+}
+function saveForm(){
+  localStorage.setItem(KEY_FORM, $("form_embed").value.trim());
+  loadForm();
+}
+function clearForm(){
+  localStorage.removeItem(KEY_FORM);
+  loadForm();
+}
+
+/* --- wire --- */
+ensureSeed();
+refreshDropdown();
+refreshFounders();
+loadForm();
+showAdminBarIfNeeded();
+updatePendingCount();
+
+$("btn_add").addEventListener("click", openAdd);
+$("btn_submit_action").addEventListener("click", submitAction);
+$("btn_review").addEventListener("click", openReview);
+$("tbl_pending").addEventListener("click", onReviewClick);
+$("btn_export_csv").addEventListener("click", exportCSV);
+$("btn_copy_slug").addEventListener("click", copySlug);
+$("btn_claim_founder").addEventListener("click", claimFounder);
+$("btn_save_form").addEventListener("click", saveForm);
+$("btn_clear_form").addEventListener("click", clearForm);
+</script>
 </body>
 </html>

@@ -1,27 +1,31 @@
 
-Like Charlie Network — Launch Kit (Static Site)
-==============================================
+# Actions Guide (Like Charlie Network)
 
-1) Deploy
-   - Drag this folder into Netlify *or* push to a GitHub repo and enable GitHub Pages.
-   - Your main page is: index.html
+This page includes:
+- Approved Actions dropdown (seeded with defaults)
+- "Add Action" button (modal) to submit a new action → goes to a pending queue
+- Hidden Admin bar (`?admin=1`) with Review/Approve/Deny
+- Export to CSV of approved actions
+- Founders counter demo (locks at 1000 in localStorage)
+- Optional Google Form embed (paste iframe; saved locally)
 
-2) Personalize
-   - Replace images in /assets with your final badge art.
-   - Open index.html and update any copy or links.
-   - Keep the disclaimer to remain friendly with CharlieChallenge.org/TPUSA.
+## Files
+- `actions.html` — the page (drop it into your site root / link from your nav)
 
-3) Start Counting
-   - The “Submit story” form saves a CSV locally for now (no backend required).
-   - Create a Google Form or Airtable with fields: handle, state, group, badge, link, ref, notes.
-   - Replace the form with your embed, and power leaderboards from that sheet.
+## How it stores data
+- Uses `localStorage` keys:
+  - `lc_actions` — approved actions
+  - `lc_actions_pending` — pending submissions
+  - `lc_founders` — demo counter
+  - `lc_actions_form_embed` — optional Google Form iframe
 
-4) First Post
-   - Use the caption in the “Launch caption” section.
-   - Add a badge overlay from assets/badge_pack.zip (square or story).
+## Admin
+- Open the page with `?admin=1` in the URL to reveal the admin bar.
+- Click **Review / Approve** to manage the queue.
 
-5) Donation Proofs
-   - See assets/receipt_redaction_checklist.png
-   - Overlays: receipt_verified_stamp.png and donation_confirmed_banner.png
+## Render / Deployment
+- If Render builds from a GitHub repo: commit `actions.html` and push to `main` (or your auto-deploy branch). Render will redeploy automatically.
+- If Render is a Static Site with "Publish Directory": ensure `actions.html` is inside that folder.
+- Manual redeploy: go to the Render dashboard → your service → **Manual Deploy** → **Clear build cache & deploy** (if assets seem cached).
+- For CDN caching: if you use a CDN in front of Render, you may need to purge the cache for updated files.
 
-Questions? You’re ready to post Day One. Add features (leaderboards, kits, merch) as momentum grows.
