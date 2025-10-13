@@ -1,31 +1,11 @@
 
-# Actions Guide (Like Charlie Network)
+# Like Charlie Network — One-Page Launch
+## Quick Deploy
+1) Drag the `site.zip` into https://app.netlify.com/drop or push the `site/` folder to any static host (GitHub Pages, Render Static, Vercel).
+2) In `index.html`, search for `formspree.io/f/your-id` and replace with your Formspree endpoint if you want email receipt uploads to notify you.
+3) To make the scoreboard global later, swap the localStorage store for a Google Sheet / Supabase backend.
 
-This page includes:
-- Approved Actions dropdown (seeded with defaults)
-- "Add Action" button (modal) to submit a new action → goes to a pending queue
-- Hidden Admin bar (`?admin=1`) with Review/Approve/Deny
-- Export to CSV of approved actions
-- Founders counter demo (locks at 1000 in localStorage)
-- Optional Google Form embed (paste iframe; saved locally)
-
-## Files
-- `actions.html` — the page (drop it into your site root / link from your nav)
-
-## How it stores data
-- Uses `localStorage` keys:
-  - `lc_actions` — approved actions
-  - `lc_actions_pending` — pending submissions
-  - `lc_founders` — demo counter
-  - `lc_actions_form_embed` — optional Google Form iframe
-
-## Admin
-- Open the page with `?admin=1` in the URL to reveal the admin bar.
-- Click **Review / Approve** to manage the queue.
-
-## Render / Deployment
-- If Render builds from a GitHub repo: commit `actions.html` and push to `main` (or your auto-deploy branch). Render will redeploy automatically.
-- If Render is a Static Site with "Publish Directory": ensure `actions.html` is inside that folder.
-- Manual redeploy: go to the Render dashboard → your service → **Manual Deploy** → **Clear build cache & deploy** (if assets seem cached).
-- For CDN caching: if you use a CDN in front of Render, you may need to purge the cache for updated files.
-
+## Test Flow (desktop or phone)
+- Open the site → Step 1 “Make my post” → choose an action, add email + state → click “Make and Count my post”.
+- Copy the generated text to X/Facebook/Instagram/TikTok.
+- Copy your Post URL back into Step 2 and click “Save & Count.” (Stores in this browser for now.)
