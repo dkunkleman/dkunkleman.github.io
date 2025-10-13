@@ -1,108 +1,63 @@
+<!-- actions.html -->
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Actions Guide — Like Charlie</title>
-<style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;color:#0a1227;line-height:1.45}
-h1{margin:0 0 12px} h2{margin:18px 0 8px}
-.card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0;background:#fff}
-.badge{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#eef2ff;color:#1e3a8a;font-weight:700;margin-right:8px}
-.small{color:#475569}
-</style>
-<body>
-<h1>Actions Guide</h1>
-<p class="small">Short plain-English explanations for each action, with examples you can do today.</p>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Actions Guide • Like Charlie Network</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script defer src="script.js"></script>
+</head>
+<body class="lc">
+  <header class="lc-nav">
+    <a href="index.html" class="brand">Like Charlie Network</a>
+    <nav>
+      <a href="index.html#how">How it works</a>
+      <a href="badges.html">Badges</a>
+      <a href="leaders.html">Leaderboards</a>
+      <a href="actions.html" aria-current="page">Actions Guide</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-<div class="card">
-  <span class="badge">Share a verse with a friend</span>
-  Send a Bible verse to one person (text/DM/photo) and a one-line encouragement. Example: “John 3:16 encouraged me today—thinking of you.”
-</div>
+  <main class="wrap">
+    <h1>Actions Guide</h1>
+    <p>Browse approved actions below. Have an idea? Propose a new action and we’ll review it.</p>
 
-<div class="card">
-  <span class="badge">Serve</span>
-  Help at church, a neighbor, a school or club. Example: stack chairs after youth group; mow a yard; bring a meal.
-</div>
+    <div class="toolbar">
+      <button id="btnAddAction" class="btn btn-primary">+ Add Action</button>
+      <span class="hint">Admin? Append <code>?admin=1</code> to the URL to enable approvals.</span>
+    </div>
 
-<div class="card">
-  <span class="badge">Forgive</span>
-  Choose forgiveness over bitterness. Share (briefly) what changed for you—no names needed.
-</div>
+    <section>
+      <h2>Approved Actions</h2>
+      <ul id="approvedActions" class="card-list"></ul>
+    </section>
 
-<div class="card">
-  <span class="badge">Family Life</span>
-  Do something intentional with your spouse/kids and say how it mattered (walk, game night, read a chapter).
-</div>
+    <section>
+      <h2>Pending Approval</h2>
+      <ul id="pendingActions" class="card-list"></ul>
+    </section>
+  </main>
 
-<div class="card">
-  <span class="badge">Stand & Speak (Podium)</span>
-  A respectful public stand: short talk, testimony, signboard, or video speaking calmly about truth.
-</div>
-
-<div class="card">
-  <span class="badge">Invite to Church</span>
-  Invite 3 people. Mark if anyone came this week.
-</div>
-
-<div class="card">
-  <span class="badge">Share Christ (Evangelism)</span>
-  Share the gospel with someone today. Keep it kind and short; offer prayer.
-</div>
-
-<div class="card">
-  <span class="badge">Bridge Builder (Note/Call/Visit)</span>
-  Write a thank-you, reconcile, call a grandparent, visit someone lonely, encourage a missionary.
-</div>
-
-<div class="card">
-  <span class="badge">Public Testimony (Online Post)</span>
-  Post your testimony online—why Jesus changed your life—nominate 3 friends.
-</div>
-
-<div class="card">
-  <span class="badge">Film Night Host</span>
-  Host a Christian film night; discuss & pray together; post a group photo.
-</div>
-
-<div class="card">
-  <span class="badge">Favorite Charlie Video</span>
-  Share a Charlie clip and why it mattered to you.
-</div>
-
-<div class="card">
-  <span class="badge">Hands-Free Driver</span>
-  Commit to no phone handling while driving; post the pledge.
-</div>
-
-<div class="card">
-  <span class="badge">Family Table Focus</span>
-  Phone-free family meal streak (7 or 30 days). Post a table photo once in a while.
-</div>
-
-<div class="card">
-  <span class="badge">Quiet Time Focus</span>
-  20+ minutes Bible/prayer streak (7 or 30 days). Share a brief insight.
-</div>
-
-<div class="card">
-  <span class="badge">Honor Service</span>
-  Thank a first responder, law enforcement, or military; pray for them. Post a thank-you.
-</div>
-
-<div class="card">
-  <span class="badge">Creator / YouTube Proceeds Donor</span>
-  Donate proceeds from a video/post/book/podcast; paste the donation receipt link when you Save & Count.
-</div>
-
-<div class="card">
-  <span class="badge">Phone Off at Church</span>
-  Put the phone away during worship; post the pledge.
-</div>
-
-<div class="card">
-  <span class="badge">Inspire</span>
-  Share a quote, story, or idea that pushed you to act today.
-</div>
-
+  <!-- Modal -->
+  <dialog id="actionModal" class="modal">
+    <form method="dialog" id="actionForm" class="card">
+      <h3>Propose a New Action</h3>
+      <label>Title
+        <input id="actionTitle" required placeholder="e.g., Visit a nursing home"/>
+      </label>
+      <label>Description
+        <textarea id="actionDesc" rows="4" placeholder="Briefly explain what people should do."></textarea>
+      </label>
+      <label>Your name/handle (optional)
+        <input id="actionBy" placeholder="@yourhandle or name"/>
+      </label>
+      <div class="row end gap">
+        <button type="button" id="cancelAction" class="btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit for Review</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>
