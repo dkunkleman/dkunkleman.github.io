@@ -1,4 +1,4 @@
-<a href="propose.html">Propose Action</a>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -97,7 +97,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;bor
       <label class="req">Choose an action
         <select id="p_action"></select>
       </label>
-
+      <a href="propose.html">Propose Action</a>
+      
       <!-- FRIENDS (optional) -->
       <label>Friends to invite (optional — just type names)
         <input id="p_friends" placeholder="John Smith, Jane Doe, Mike Brown">
@@ -194,11 +195,20 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;bor
       <label class="req">Post URL
         <input id="posturl" placeholder="https://...">
       </label>
-      <label>Proof/receipt link (optional — for Bake-Off)
-  <input id="proofurl" placeholder="Paste a link to your receipt or donation post (Drive/Dropbox/Imgur)">
-  <div class="helper small">Tip: after donating, copy the receipt link or upload a screenshot and paste its link here.</div>
+      <!-- Proof/receipt (drag & drop upload via Formspree) -->
+<label>Proof/receipt (optional — drag & drop a file)
+  <!-- TIP: Replace the action URL with your Formspree endpoint once you create it -->
+  <form action="https://formspree.io/f/your-id" method="POST" enctype="multipart/form-data" target="_blank" style="margin-top:8px">
+    <input type="file" name="receipt" accept="image/*,.pdf" style="width:100%;padding:.8rem;border:1px dashed #94a3b8;border-radius:12px;background:#0e1b3a;color:#fff">
+    <!-- Pass helpful context to your email -->
+    <input type="hidden" name="note" id="fs_note" value="">
+    <div class="helper small" style="margin-top:6px">
+      Drag a screenshot/PDF of your donation receipt here and click “Upload receipt”.
+      (Optional; your Save & Count entry still updates the scoreboard.)
+    </div>
+    <button class="btn btn-white small" type="submit" style="margin-top:8px">Upload receipt</button>
+  </form>
 </label>
-      <label>Referral code (optional)
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input id="ref" placeholder="lc-abc123" style="flex:1">
           <button class="btn btn-white small" id="copyRef" type="button">Copy my code</button>
@@ -230,14 +240,28 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;bor
 
   <div class="card" style="margin-top:14px">
     <div class="card" style="margin-top:14px">
+  <div class="card" style="margin-top:14px">
   <h2>Bake-Off</h2>
-  <p class="helper">Host bake/garage sales, podcast/book donations—give directly to TPUSA or your favorite charity. Then paste your post URL and amount in “Save & Count.” We total by State/Org from these entries.</p>
-
+  <p class="helper">
+    Host bake/garage sales or donate proceeds from a podcast/book—give directly to TPUSA or your favorite charity.
+    Then paste your Post URL and Amount in “Save & Count.” We total by State/Org from these entries.
+    You may donate to a charity of your choice. <b>The idea is to pay it forward like Charlie.</b>
+  </p>
   <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0">
     <a class="btn btn-white" target="_blank"
        href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to TPUSA</a>
     <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">TPUSA’s The Charlie Challenge</a>
   </div>
+  <details class="card" style="margin-top:10px">
+    <summary><b>How to donate + record it</b></summary>
+    <ol class="helper">
+      <li>Donate at the link above (or any charity site).</li>
+      <li>Back here, paste your <b>Post URL</b> and <b>Amount</b> in “Save & Count.”</li>
+      <li>(Optional) Drag & drop a screenshot of your receipt using the upload box above.</li>
+    </ol>
+  </details>
+</div>
+
 
   <details class="card" style="margin-top:10px">
     <summary><b>How to donate + record it</b></summary>
@@ -482,6 +506,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // load actions from /data if present (admin-approved)
   // (already loaded above)
 
+<script>
+// Build a helpful note for the Formspree upload
+function updateFsNote() {
+  const pending = JSON.parse(localStorage.getItem('lc_pending')||'{}');
+  const ref = pending.ref || localStorage.getItem('lc_myref') || '';
+  const st = (pending.state || (document.getElementById('p_state')?.value||'')).toUpperCase();
+  const amt = pending.amount || (document.getElementById('p_amount')?.value||'');
+  const url = (document.getElementById('posturl')?.value||'');
+  const n = `Ref:${ref} | State:${st} | Amount:${amt} | PostURL:${url}`;
+  const f = document.getElementById('fs_note'); if (f) f.value = n;
+}
+document.getElementById('posturl')?.addEventListener('input', updateFsNote);
+document.getElementById('p_amount')?.addEventListener('input', updateFsNote);
+document.addEventListener('DOMContentLoaded', updateFsNote);
+</script>
+
+  
   renderImpactTable();
   renderTopStates();
 });
