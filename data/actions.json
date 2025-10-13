@@ -2,7 +2,143 @@
   "actions": [
     "Share a photo/video or a favorite Charlie quote",
     "Pete & Bobby Challenge (Health)",
-    "Serve a neighbor and share the story",
-    "Write a thank-you note to a teacher or veteran"
+    "Share a verse with a friend",
+    "Family Life",
+    "Serve",
+    "Forgive",
+    "Invite to Church",
+    "Share Christ (Evangelism)",
+    "Bridge Builder (Note/Call/Visit)",
+    "Public Testimony (Online Post)",
+    "Film Night Host (Christian Film Night)",
+    "Favorite Charlie Video (Share + why)",
+    "Hands\u2011Free Driver (No phone while driving)",
+    "Family Table Focus (Streak)",
+    "Quiet Time Focus (Streak)",
+    "Honor Service (Thank a First Responder)",
+    "Creator Proceeds Donor",
+    "YouTube Proceeds Donor",
+    "Phone Off at Church",
+    "Inspire",
+    "BakeLikeCharlie (Bake & Sell)",
+    "Generations Badge (Family of 3+ generations)",
+    "Gold Standard \u2014 Doing It All"
+  ],
+  "details": [
+    {
+      "title": "Share a photo/video or a favorite Charlie quote",
+      "description": "Post a photo or video, or include a Charlie quote that inspires you. Tag 3 friends and invite them to act within 48 hours.",
+      "badge": "Quote Badge"
+    },
+    {
+      "title": "Pete & Bobby Challenge (Health)",
+      "description": "Honor Charlie\u2019s friends by choosing one healthy action today\u2014walk a mile, make a healthy meal with family, or schedule a checkup\u2014and share why health matters to your mission.",
+      "badge": "Health Badge"
+    },
+    {
+      "title": "Share a verse with a friend",
+      "description": "Pick a verse, include it in your caption, and tell why it matters right now.",
+      "badge": "Bible Badge"
+    },
+    {
+      "title": "Family Life",
+      "description": "Do something intentional with your family (meal, game night, bay walk). Post the moment and why family is your priority.",
+      "badge": "Family Badge"
+    },
+    {
+      "title": "Serve",
+      "description": "Help a neighbor, teacher, veteran, or first responder. Share the story and how others can repeat it this week.",
+      "badge": "Serve Badge"
+    },
+    {
+      "title": "Forgive",
+      "description": "Share a short forgiveness story (no private details needed) and encourage reconciliation.",
+      "badge": "Forgive Badge"
+    },
+    {
+      "title": "Invite to Church",
+      "description": "Personally invite someone and post a simple invite graphic or story.",
+      "badge": "Invite Badge"
+    },
+    {
+      "title": "Share Christ (Evangelism)",
+      "description": "Share a testimony or talk about what following Jesus means to you.",
+      "badge": "Share Christ Badge"
+    },
+    {
+      "title": "Bridge Builder (Note/Call/Visit)",
+      "description": "Write a thank\u2011you note, make a phone call, or visit someone who needs encouragement.",
+      "badge": "Care Badge"
+    },
+    {
+      "title": "Public Testimony (Online Post)",
+      "description": "State clearly what you believe and why\u2014with humility and courage.",
+      "badge": "Torchbearer Badge"
+    },
+    {
+      "title": "Film Night Host (Christian Film Night)",
+      "description": "Host a watch party and pray/discuss afterward. Post the group pic + takeaways.",
+      "badge": "Events Badge"
+    },
+    {
+      "title": "Favorite Charlie Video (Share + why)",
+      "description": "Share a clip, add your takeaway, and tag 3 friends to share theirs.",
+      "badge": "Charlie Media Badge"
+    },
+    {
+      "title": "Hands\u2011Free Driver (No phone while driving)",
+      "description": "Pledge to put the phone away while driving today. Share the reminder to protect families on the road.",
+      "badge": "Safety Badge"
+    },
+    {
+      "title": "Family Table Focus (Streak)",
+      "description": "Eat together without screens for 3+ nights. Post what changed.",
+      "badge": "Habits Badge"
+    },
+    {
+      "title": "Quiet Time Focus (Streak)",
+      "description": "Set a daily window for Scripture/prayer for 7 days. Share one insight.",
+      "badge": "Habits Badge"
+    },
+    {
+      "title": "Honor Service (Thank a First Responder)",
+      "description": "Deliver a thank\u2011you and a small gift. Post the story (with permission).",
+      "badge": "Honor Badge"
+    },
+    {
+      "title": "Creator Proceeds Donor",
+      "description": "Donate proceeds from your video/stream/book for the day. Post the receipt (blur private info).",
+      "badge": "Donor Badge"
+    },
+    {
+      "title": "YouTube Proceeds Donor",
+      "description": "Pledge one stream\u2019s ads/superchat to charity. Share the proof link or screenshot.",
+      "badge": "Donor Badge"
+    },
+    {
+      "title": "Phone Off at Church",
+      "description": "Go distraction\u2011free during worship. Post a simple graphic reminder.",
+      "badge": "Honor Badge"
+    },
+    {
+      "title": "Inspire",
+      "description": "Share an original encouragement for others choosing, like Charlie.",
+      "badge": "Inspire Badge"
+    },
+    {
+      "title": "BakeLikeCharlie (Bake & Sell)",
+      "description": "Host a bake sale with family or youth. Donate proceeds and post the story.",
+      "badge": "Bake/Sell Badge"
+    },
+    {
+      "title": "Generations Badge (Family of 3+ generations)",
+      "description": "Grandparent + parent + child complete an action together and share a photo/story.",
+      "badge": "Generations Badge"
+    },
+    {
+      "title": "Gold Standard \u2014 Doing It All",
+      "description": "Do at least one action in every category this month. Post your highlight reel.",
+      "badge": "Gold Standard"
+    }
   ]
 }
