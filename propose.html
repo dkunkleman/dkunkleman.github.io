@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propose an Action — Like Charlie</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;color:#0a1227;line-height:1.45;max-width:760px}
+  label{display:block;font-weight:700;margin:.7rem 0 .25rem}
+  input,textarea,select{width:100%;padding:.8rem;border:1px solid #d1d5db;border-radius:10px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{display:inline-flex;gap:.5rem;padding:.8rem 1.1rem;border-radius:12px;border:1px solid #1e3a8a;background:#1e3a8a;color:#fff;font-weight:900;cursor:pointer}
+  .muted{color:#475569}
+  .card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0;background:#fff}
+</style>
+<body>
+  <h1>Propose a New Action</h1>
+  <p class="muted">Suggest a short, clear action title. We’ll review & add approved ones to the list.</p>
+
+  <form action="https://formspree.io/f/your-id" method="POST" enctype="multipart/form-data">
+    <label>Action title</label>
+    <input name="title" placeholder="e.g., Pray with a coworker" required>
+
+    <label>Why it fits “Like Charlie”</label>
+    <textarea name="why" rows="5" placeholder="Keep it short and positive." required></textarea>
+
+    <label>Your email (for follow-up)</label>
+    <input name="email" type="email" placeholder="you@example.com" required>
+
+    <div class="card">
+      <h3>Optional: upload a proof image or PDF (receipt/instructions)</h3>
+      <p class="muted">If your action involves a donation or an event template, attach a sample or receipt here.</p>
+      <label>Upload file (image/pdf)</label>
+      <input type="file" name="attachment">
+    </div>
+
+    <button class="btn" type="submit">Send proposal</button>
+  </form>
+
+  <p class="muted">Admin note: approved actions are added to <code>/data/actions.json</code>.</p>
+</body>
+</html>
