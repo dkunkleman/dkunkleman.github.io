@@ -243,7 +243,7 @@ function gen(prefillOnly=false){
   const act=(p('p_action').value||'Action'), verse=p('p_verse').value||'', ver=p('p_version').value||'';
   const where=[p('p_state').value||'',p('p_city').value||'',p('p_org').value||''].filter(Boolean).join(' • ');
   const lines=[]; lines.push('Today I chose, like Charlie — '+act+'.'); if(verse) lines.push('Verse: '+verse+(ver?(' ('+ver+')'):''));
-  lines.push('I nominate '+(p('p_friends').value||'')+' to act within 48 hours.'); lines.push('Claim your badge: '+link); lines.push('#LikeCharlie #LikeCharlieNetwork');
+  lines.push('I nominate '+(p('p_friends').value||'')+' to act within 48 hours.'); lines.push('Claim your badge: '+link); lines.push('#LiveLikeCharlie #LikeCharlieChallenge');
   p('capText').value=lines.join('\n'); p('capOut').style.display='block';
   const f=p('storyForm'); f.elements['action'].value=act.replace('(Christian Film Night)','Badge').replace(' (Streak)',' — 7-Day').replace('Favorite Charlie Video (Share + why)','Favorite Charlie Video Badge');
   f.elements['state'].value=p('p_state').value||''; f.elements['city'].value=p('p_city').value||''; f.elements['org'].value=p('p_org').value||'';
