@@ -1,176 +1,181 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Like Charlie Network — Like Charlie, I live my faith, serve, build, and defend freedom.</title>
-<style>
-/* Top banner */
-.topbanner{position:sticky;top:0;z-index:70;background:#1e293b;color:#fff;border-bottom:1px solid rgba(255,255,255,.15)}
-.topbanner .inner{max-width:1220px;margin:0 auto;padding:8px 16px;display:flex;justify-content:center}
-.topbanner a{color:#fff;text-decoration:none;font-weight:900}
-
-/* Theme */
-:root{
-  --navy:#0a1227; --blue:#1e3a8a; --sky:#3b82f6; --red:#dc2626; --gold:#fbbf24; --white:#ffffff; --slate:#94a3b8;
-  --hero:url('./img/patriotism.jpeg'); --flag:url('./img/patriotism.jpeg');
-}
-html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#0a1227;color:#eef3ff}
-a{color:#9fd0ff;text-decoration:none}
-.container{max-width:1220px;margin:0 auto;padding:0 20px}
-
-/* Buttons */
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.1rem;border-radius:14px;border:1px solid rgba(255,255,255,.15);font-weight:900;cursor:pointer;transition:.2s;box-shadow:0 6px 20px rgba(17,24,39,.25) inset,0 1px 0 rgba(255,255,255,.08)}
-.btn:hover{transform:translateY(-1px)}
-.btn-blue{background:linear-gradient(180deg,#60a5fa,#1e3a8a);color:#fff;border-color:transparent}
-.btn-white{background:#fff;color:#0b1733}
-.small{font-size:.85rem}
-
-/* Header */
-header.nav{position:sticky;top:0;z-index:60;background:rgba(10,18,39,.85);border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
-header.nav .inner{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
-nav a{color:#e2e8f0;font-weight:800;margin:0 .6rem}
-nav a:hover{color:#fff}
-
-/* Hero */
-.hero{min-height:56vh;display:flex;align-items:center;text-align:center;background-image:linear-gradient(rgba(3,6,22,.55),rgba(3,6,22,.65)),var(--hero);background-size:cover;background-position:center}
-.hero h1{font-size:clamp(2rem,6vw,3.6rem);margin:0;font-weight:1000;letter-spacing:.02em;text-shadow:0 2px 18px rgba(0,0,0,.4)}
-.stars{height:10px;background:repeating-linear-gradient(90deg,transparent 0 28px,rgba(255,255,255,.18) 28px 30px);border-radius:999px;margin:18px auto;max-width:360px}
-.topstates{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .7rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;font-weight:800}
-
-/* Cards & layout */
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:18px 20px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 10px 24px rgba(0,0,0,.25)}
-.section{margin-top:30px}
-.flag-strap{background-image:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),var(--flag);background-size:cover;background-position:center;border-radius:14px;border:1px solid rgba(255,255,255,.2)}
-input,select,textarea{width:100%;background:#0e1b3a;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:.8rem 1rem}
-select{appearance:auto;-webkit-appearance:menulist;-moz-appearance:menulist}
-.grid{display:grid;gap:16px}.cols-2{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:repeat(3,1fr)}
-@media(max-width:900px){.cols-2,.cols-3{grid-template-columns:1fr}}
-.muted{color:#cbd5e1}
-.req::after{content:" *";color:#fca5a5;font-weight:900}
-.helper{font-size:.92rem;color:#cbd5e1}
-
-/* Tables */
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.12)}th{color:#fde68a;font-weight:900;letter-spacing:.01em}
-
-/* Hide until verse exists */
-.hidden{display:none}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-</style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Like Charlie Network — Show up boldly, every day.</title>
+<link rel="stylesheet" href="styles.css"/>
+<meta name="description" content="Daily action + digital badges. Pick an action, post your story with a Charlie quote, donate (default TPUSA), nominate 3 friends."/>
 </head>
 <body>
-
-<!-- Top banner -->
-<div class="topbanner">
-  <div class="inner"><a href="#save">⬇ Paste your post link here so it counts</a></div>
-</div>
-
-<header class="nav"><div class="container inner">
-  <div style="font-weight:1000">Like Charlie Network</div>
-  <nav>
-    <a href="#post">Post</a><a href="#save">Save & Count</a><a href="#impact">Impact</a>
-    <a href="#civic">Civic</a><a href="actions.html">Actions Guide</a><a href="propose.html">Propose Action</a><a href="proofs.html">Proofs (Press)</a>
-  </nav>
-</div></header>
-
-<!-- Hero -->
-<section class="hero"><div class="container">
-  <h1>Like Charlie, I live my faith, serve, build, and defend freedom.</h1>
-  <div class="stars"></div>
-  <div class="topstates" id="topStates"></div>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px">
-    <a class="btn btn-blue" href="#post">📣 Make and Count my post</a>
-    <a class="btn btn-white" href="#save">Save & Count</a>
-    <a class="btn btn-white" href="#impact">See Impact</a>
+<nav>
+  <div class="container inner">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-weight:900;font-size:18px">Like Charlie Network</span>
+      <span class="badge">Inspired by Charlie’s legacy • Independent</span>
+    </div>
+    <div class="links small">
+      <a href="#how">How it works</a>
+      <a href="#badges">Badges</a>
+      <a href="#post">Launch post</a>
+      <a href="#submit">Submit</a>
+      <a href="#donate">Donate</a>
+    </div>
   </div>
-</div></section>
+</nav>
 
-<!-- Step 1: Make my post -->
-<div class="container section" id="post">
-  <div class="card flag-strap">
-    <h2>Step 1 — Make my post</h2>
-    <p class="helper">We’ll create your post text and save your action so it counts and inspires others.</p>
-    <div class="grid cols-2">
+<header class="hero">
+  <div class="flag"></div>
+  <div class="container wrap">
+    <span class="kicker">Digital‑first • Family & Youth • Daily Action</span>
+    <h1>The Like Charlie Network</h1>
+    <p class="sub">Show up boldly, every day — inspired by Charlie Kirk. Turn values into action, earn digital badges, donate (default TPUSA), and challenge friends.</p>
+    <div class="pills">
+      <span class="badge">🇺🇸 Faith</span>
+      <span class="badge">🛡️ Courage</span>
+      <span class="badge">👨‍👩‍👧 Family</span>
+      <span class="badge">🤝 Service</span>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn" href="#post">Post your first challenge</a>
+      <a class="btn blue" href="#badges">Download badges</a>
+      <a class="btn white" href="#donate">Donate to TPUSA</a>
+    </div>
+  </div>
+</header>
 
-      <!-- ACTION (loaded from /data/actions.json if present) -->
-      <label class="req">Choose an action
-        <select id="p_action"></select>
-      </label>
+<section id="how" class="section">
+  <div class="container">
+    <div class="kicker">How it works</div>
+    <h2>Simple. Visible. Repeatable.</h2>
+    <div class="grid cols-2" style="margin-top:10px">
+      <div class="card"><h3>1) Choose how you showed up today</h3><p class="small">Bible • Forgive • Serve • Life • Boldness • Listen • Pay It Forward.</p></div>
+      <div class="card"><h3>2) Post + add a favorite Charlie quote</h3><p class="small">Make it personal. Specific beats generic. Keep it respectful.</p></div>
+      <div class="card"><h3>3) Layer a digital badge</h3><p class="small">Use our free square/story overlays to mark your action.</p></div>
+      <div class="card"><h3>4) Donate & Nominate</h3><p class="small">Default: TPUSA. Or donate to your charity of choice. Nominate 3 friends; 48‑hour window.</p></div>
+    </div>
+  </div>
+</section>
 
-      <!-- FRIENDS (optional) -->
-      <label>Friends to invite (optional — just type names)
-        <input id="p_friends" placeholder="John Smith, Jane Doe, Mike Brown">
-        <div class="helper">We don’t access your contacts; this just writes the names into your post.</div>
-      </label>
+<hr class="star"/>
 
-      <!-- STATE / CITY FOR SCOREBOARD -->
-      <label class="req">State (for scoreboard)
-        <select id="p_state" required>
-          <option value="">Choose your state…</option>
-          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NC</option><option>ND</option><option>NE</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NV</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-        </select>
-      </label>
+<section id="badges" class="section">
+  <div class="container">
+    <div class="kicker">Badge gallery</div>
+    <h2>Digital badges you can earn today</h2>
+    <p class="small">Square + story overlays included. Each badge lists the action required to earn it.</p>
+    <div class="badges" id="badgesGrid"></div>
+    <div style="margin-top:14px">
+      <a class="btn blue" href="assets/badge_pack.zip">Download full badge pack</a>
+    </div>
+  </div>
+</section>
 
-      <label>City (optional)
-        <select id="p_city">
-          <option value="">Pick a city or choose “Other”</option>
-          <option>Other…</option>
-        </select>
-        <input id="p_city_other" class="hidden" placeholder="Type your city">
-      </label>
+<section id="post" class="section">
+  <div class="container">
+    <div class="kicker">Launch caption</div>
+    <h2>Copy‑paste caption for your first post</h2>
+<pre style="white-space:pre-wrap;background:#0a1225;border:1px solid #1f2937;padding:14px;border-radius:12px">
+Today I’m starting the Charlie Kirk Challenge.
 
-      <!-- ORG (optional) -->
-      <label>Organization (optional)
-        <input id="p_org" placeholder="Grace Youth">
-      </label>
+Charlie showed up boldly every day — here’s how I showed up boldly today:
 
-      <!-- VERSE -->
-      <label>Verse (optional — e.g., John 3:16)
-        <input id="p_verse" placeholder="John 3:16">
-      </label>
-      <label id="p_version_row" class="hidden">Version
-        <select id="p_version">
-          <option value="kjv" selected>KJV</option>
-          <option value="web">WEB</option>
-          <option value="asv">ASV</option>
-          <option value="esv">ESV</option>
-          <option value="niv">NIV</option>
-          <option value="nkjv">NKJV</option>
-          <option value="csb">CSB</option>
-          <option value="nasb">NASB</option>
-          <option value="nlt">NLT</option>
-        </select>
-        <div class="helper small">Auto-text for KJV/WEB/ASV. Other versions show the reference with version label.</div>
-      </label>
+📖 I chose the Bible, like Charlie.
+I read Romans 8:28 — “And we know that all things work together for good to them that love God, to them who are the called according to his purpose.”
+I shared it as encouragement to you.
 
-      <!-- DONATION -->
-      <label>Donation (optional — add for Bake-Off totals)
-        <input id="p_amount" placeholder="$5">
-      </label>
+❤️ I chose to forgive, like Charlie.
+“To be a Christian means to forgive the inexcusable because God has forgiven the inexcusable in you.” — C.S. Lewis
 
-      <!-- EMAIL + REMEMBER -->
-      <label class="req">Your email (for saving & counting)
-        <input id="p_email" placeholder="you@example.com" required>
-      </label>
-      <div>
-        <label class="helper"><input type="checkbox" id="remember" checked> Remember my details on this device</label>
+👨‍👩‍👧 I chose life, like Charlie.
+I spent intentional time with my younger kids magnet fishing — reminding them they are my greatest gift.
+
+💵 I chose to pay it forward, like Charlie.
+I donated to Turning Point USA.
+
+🎤 I chose boldness, like Charlie.
+I had a real conversation with someone I don’t agree with politically.
+
+🌟 One of my favorite Charlie quotes:
+“The Constitution doesn’t grant rights — it protects God-given rights.”
+
+I challenge [@Friend1], [@Friend2], [@Friend3] to join me:
+Share how you chose, like Charlie. Post your story/photo. Add your favorite Charlie quote. Donate to TPUSA (or your charity of choice). Nominate 3 more people.
+
+“Be Bold. Be Family. Be Listening. Be Showing Up. Like Charlie did.”
+Let’s fight! fight! fight! like Charlie.
+
+#KirkChallenge #PayItForwardLikeCharlie #GoldStandardLikeCharlie
+</pre>
+  </div>
+</section>
+
+<section id="submit" class="section">
+  <div class="container">
+    <div class="kicker">Submit your badge story</div>
+    <h2>Help power the leaderboards</h2>
+    <p class="small">This simple form is your “official” record. It credits referrers and lets us tally states, groups, and families.</p>
+    <form id="storyForm" class="grid cols-2" onsubmit="return submitStory(event)">
+      <div class="card">
+        <h3>Your info</h3>
+        <label class="small">Handle / Name</label>
+        <input class="input" id="handle" placeholder="@yourhandle or name" required>
+        <label class="small">State • Group (optional)</label>
+        <input class="input" id="group" placeholder="Florida • Grace Youth">
+        <label class="small">Email (for confirmation, optional)</label>
+        <input class="input" id="email" placeholder="you@example.com">
       </div>
+      <div class="card">
+        <h3>Your action</h3>
+        <label class="small">Post link (TikTok/IG/X/YouTube)</label>
+        <input class="input" id="link" placeholder="https://..." required>
+        <label class="small">Badge earned</label>
+        <select class="input" id="badge" required>
+          <option value="">Choose…</option>
+        </select>
+        <label class="small">Referral code (auto)</label>
+        <input class="input" id="ref" readonly>
+        <label class="small">Notes (optional)</label>
+        <textarea class="input" id="notes" placeholder="Short description…"></textarea>
+      </div>
+      <div style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn">Submit story</button>
+        <span id="msg" class="small"></span>
+      </div>
+    </form>
+    <p class="small" style="margin-top:10px">Privacy: we only display public handles and aggregate counts. Keep posts respectful and safe.</p>
+  </div>
+</section>
+
+<section id="donate" class="section">
+  <div class="container">
+    <div class="kicker">Donate</div>
+    <h2>Default: Turning Point USA</h2>
+    <p class="small">Prefer another charity? That’s fine — the point is to pay it forward.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn blue" href="https://donate.tpusa.com/" target="_blank" rel="noopener">Donate to TPUSA</a>
+      <a class="btn white" href="assets/receipt_redaction_checklist.png" target="_blank">How to redact a receipt safely</a>
+      <a class="btn" href="assets/receipt_verified_stamp.png" download>Download [RECEIPT VERIFIED] overlay</a>
     </div>
+  </div>
+</section>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn btn-blue" type="button" id="oneClick">Make and Count my post</button>
-    </div>
+<section class="section">
+  <div class="container">
+    <div class="kicker">Leaderboards (preview)</div>
+    <h2>Top States • Churches/Youth • Families</h2>
+    <div class="grid cols-3" id="lbs"></div>
+    <p class="small" style="margin-top:10px">This section updates from submitted stories; hashtags are tracked separately for reach.</p>
+  </div>
+</section>
 
-    <!-- Generated post -->
-    <div id="capOut" class="card" style="display:none;margin-top:14px;background:rgba(12,18,35,.75)">
-      <h3>Copy this text, paste in your social post</h3>
-      <textarea id="capText" rows="6" style="width:100%"></textarea>
+<footer class="footer">
+  <div class="container small">
+    <p>Donations default to TPUSA. You may donate to a charity of your choice.</p>
+    <p>Respectfully inspired by Charlie’s public legacy • Not affiliated with charliechallenge.org.</p>
+  </div>
+</footer>
 
-      <!-- SOCIAL BUTTONS WITH ICONS -->
-      <div class="row" style="margin-top:8px">
-        <a id="toX" class="btn btn-white" target="_blank">
-          <img src="./img/x.svg" alt="X" style="width:20px;height:20px"> Post to X
-        </a>
-        <a class="btn btn-white" target="_blank" href="https://www.facebook.com/">
-          <img src="./img/facebook.svg" alt
+<script src="script.js"></script>
+</body>
+</html>
