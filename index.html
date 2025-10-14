@@ -10,70 +10,29 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cybermave.ai/">
 <style>
-  :root{
-    --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
-    --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --border:rgba(255,255,255,.12);
-    --hero-bg:url('/img/patriotism.jpeg');
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:#9ec5ff;text-decoration:none}
-  .wrap{max-width:1100px;margin:0 auto;padding:20px}
+  :root{--ink:#e6eefc;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--brand:#e11d48;--brand2:#2563eb;--border:rgba(255,255,255,.12);--hero-bg:url('/img/patriotism.jpeg')}
+  *{box-sizing:border-box} body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  a{color:#9ec5ff;text-decoration:none} .wrap{max-width:1100px;margin:0 auto;padding:20px}
   header{position:sticky;top:0;z-index:60;background:#0c1530cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
-  nav{display:flex;align-items:center;gap:14px;padding:10px 16px}
-  nav a{padding:6px 10px;border-radius:8px}
-  nav a:hover{background:#1a2750}
+  nav{display:flex;align-items:center;gap:14px;padding:10px 16px} nav a{padding:6px 10px;border-radius:8px} nav a:hover{background:#1a2750}
   .brand{font-weight:800;letter-spacing:.3px}
-
-  .hero{
-    margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
-    background:
-      linear-gradient(to bottom, rgba(5,12,28,.35), rgba(5,12,28,.70)),
-      var(--hero-bg), linear-gradient(135deg,#0c1b3a 0%, #b91c1c 100%);
-    background-size:cover; background-position:center;
-  }
-  .hero-inner{padding:46px 18px}
-  .hero h1{margin:0 0 10px 0;font-size:34px}
+  .hero{margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:linear-gradient(to bottom,rgba(5,12,28,.35),rgba(5,12,28,.70)),var(--hero-bg),linear-gradient(135deg,#0c1b3a 0%,#b91c1c 100%);background-size:cover;background-position:center}
+  .hero-inner{padding:46px 18px} .hero h1{margin:0 0 10px 0;font-size:34px}
   .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:980px;white-space:pre-line}
-
-  .grid{display:grid;gap:16px}
-  .two{grid-template-columns:1fr}
-  @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
-
-  .card{
-    background:
-      linear-gradient(to bottom, rgba(15,26,51,.92), rgba(15,26,51,.94)),
-      var(--hero-bg), linear-gradient(135deg,#0c1b3a 0%, #142446 100%);
-    background-size:cover; background-position:center;
-    border:1px solid var(--border); border-radius:16px; padding:16px
-  }
-
-  label{display:block;font-weight:600;margin:10px 0 6px}
-  select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
-  textarea{min-height:110px;resize:vertical}
-  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .grid{display:grid;gap:16px} .two{grid-template-columns:1fr} @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
+  .card{background:linear-gradient(to bottom,rgba(15,26,51,.92),rgba(15,26,51,.94)),var(--hero-bg),linear-gradient(135deg,#0c1b3a 0%,#142446 100%);background-size:cover;background-position:center;border:1px solid var(--border);border-radius:16px;padding:16px}
+  label{display:block;font-weight:600;margin:10px 0 6px} select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
+  textarea{min-height:110px;resize:vertical} .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
   .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:#fff;background:#162552;cursor:pointer}
-  .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))}
-  .muted{color:var(--muted)}
-  .mini{font-size:.9rem}
-
-  table{width:100%;border-collapse:collapse;margin-top:10px}
-  th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
+  .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))} .muted{color:var(--muted)} .mini{font-size:.9rem}
+  table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
   footer{margin:24px 0 8px}
-
-  /* Toast */
-  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);
-    background:#0f1a33; color:#e6eefc; border:1px solid rgba(255,255,255,.12);
-    padding:10px 14px; border-radius:10px; z-index:9999; opacity:0; pointer-events:none; transition:.25s}
-  .toast.show{opacity:1; pointer-events:auto}
-
-  /* Modal */
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f1a33;color:#e6eefc;border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;pointer-events:none;transition:.25s}
+  .toast.show{opacity:1;pointer-events:auto}
   .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9998}
   .modal{position:fixed;inset:0;display:none;place-items:center;z-index:9999}
-  .modal .panel{max-width:760px;width:92%;background:#0f1a33;border:1px solid rgba(255,255,255,.12);
-    border-radius:16px;padding:16px}
-  .modal h3{margin:0 0 8px}
-  .modal .close{float:right;border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:8px;background:#162552;color:#fff;text-decoration:none}
+  .modal .panel{max-width:760px;width:92%;background:#0f1a33;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+  .modal h3{margin:0 0 8px} .modal .close{float:right;border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:8px;background:#162552;color:#fff;text-decoration:none}
   .modal svg{max-width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.12)}
 </style>
 </head>
@@ -154,16 +113,24 @@
         <input id="yourEmail" placeholder="Email (optional)" style="flex:1;min-width:220px">
       </div>
 
-      <!-- Donation tracking (optional) -->
-      <div class="row" style="margin-top:10px">
-        <input id="donationOrg" placeholder="Donation organization (e.g., TPUSA)" style="flex:2;min-width:220px">
-        <input id="donationAmt" placeholder="Donation amount (e.g., 25.00)" style="flex:1;min-width:160px">
+      <!-- Donation attestation -->
+      <div class="row" style="margin-top:10px;align-items:center">
+        <label class="mini" style="display:flex;gap:8px;align-items:center">
+          <input type="checkbox" id="donatedChk"> I donated today
+        </label>
+      </div>
+      <div id="donationFields" style="display:none;margin-top:8px">
+        <div class="row">
+          <input id="donationOrg" placeholder="Donation organization (e.g., TPUSA)" style="flex:2;min-width:220px">
+          <input id="donationAmt" placeholder="Donation amount (e.g., 25.00)" style="flex:1;min-width:160px">
+        </div>
+        <input id="donationProof" placeholder="Receipt or proof URL (optional)" style="margin-top:8px">
+        <p class="mini muted" style="margin:6px 0 0">Note: Claimed donations are <b>unverified</b> until approved and won’t appear publicly until verified.</p>
       </div>
 
       <div class="row" style="margin-top:12px">
         <button id="saveBtn" class="btn brand">Save & Challenge</button>
       </div>
-      <p class="muted mini" style="margin-top:6px">Tip: If you donated, add the org and amount above (screenshot or receipt link in your post URL is great). We’ll count it in Impact.</p>
     </div>
   </section>
 
@@ -200,7 +167,6 @@
       <a href="#" class="close" id="fbClose">Close</a>
       <h3 id="fbHowTitle">Get your Facebook post link (permalink)</h3>
       <p class="muted mini">Click the <b>timestamp</b> under your name. That opens the post on its own page. Copy the URL.</p>
-      <!-- tiny inline “timestamp” picture -->
       <svg viewBox="0 0 880 420" xmlns="http://www.w3.org/2000/svg" style="background:#0c1630">
         <rect x="20" y="20" width="840" height="380" rx="12" fill="#0f1a33" stroke="rgba(255,255,255,.12)"/>
         <circle cx="76" cy="78" r="24" fill="#1d2a55"/>
@@ -211,25 +177,6 @@
         <text x="276" y="102" fill="#e6eefc" font-family="system-ui,Segoe UI,Roboto" font-size="14">← click the timestamp</text>
         <rect x="40" y="140" width="800" height="200" rx="8" fill="#0b1220" stroke="rgba(255,255,255,.06)"/>
       </svg>
-
-      <div style="margin-top:10px">
-        <h4>Desktop</h4>
-        <ol class="mini">
-          <li>Open your post → click the <b>timestamp</b> (“Just now”, “1m”, “Yesterday 7:14 PM”).</li>
-          <li>Copy the URL from the address bar (e.g. <code>https://www.facebook.com/your.name/posts/123…</code>).</li>
-          <li>Alternate: <b>⋯</b> → <b>Copy link</b>.</li>
-        </ol>
-        <h4>iPhone / Android</h4>
-        <ol class="mini">
-          <li>Open post → tap <b>Share</b> (or <b>⋯</b>) → <b>Copy link</b>. If missing: <b>More options</b> → <b>Copy link</b>.</li>
-        </ol>
-        <h4>Special cases</h4>
-        <ul class="mini">
-          <li><b>Photos/Reels:</b> open item → <b>⋯</b>/<b>Share</b> → <b>Copy link</b>.</li>
-          <li><b>Pages/Groups:</b> same steps. Private groups only work for members.</li>
-          <li>If “Copy link” is missing: set post privacy to <b>Public</b> (globe icon), then try again.</li>
-        </ul>
-      </div>
     </div>
   </div>
 </main>
@@ -265,16 +212,12 @@
   const q = new URLSearchParams(location.search);
   const deepAction   = q.get('action');
   const incomingDesc = q.get('desc');
-  const focusTarget  = q.get('focus'); // "post" to focus textarea
+  const focusTarget  = q.get('focus');
 
-  function tags(p){
-    const base="#LiveLikeCharlie #OneSmallGoodThing";
-    return (/instagram|tiktok/i.test(p||"")) ? base+" #Challenge" : base;
-  }
+  function tags(p){ const base="#LiveLikeCharlie #OneSmallGoodThing"; return (/instagram|tiktok/i.test(p||"")) ? base+" #Challenge" : base; }
   function writeCaption(desc, act){
     const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(act||"");
-    const caption = (desc? (desc+"\n\n") : "") +
-      `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(selPlatform?.value)}\n\nSee how it works: ${site}`;
+    const caption = (desc? (desc+"\n\n") : "") + `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(selPlatform?.value)}\n\nSee how it works: ${site}`;
     if (copyBox) copyBox.value = caption;
   }
   function updateUI(){
@@ -286,33 +229,15 @@
 
   selAction.addEventListener('change', updateUI);
   selPlatform && selPlatform.addEventListener('change', ()=>writeCaption(descEl.textContent, selAction.value));
-  copyBtn?.addEventListener('click', async ()=>{
-    try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1300); }
-    catch(e){ alert('Copy failed. Select the text and copy manually.'); }
-  });
+  copyBtn?.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1300);}catch(e){ alert('Copy failed. Select the text and copy manually.'); }});
 
   if (deepAction && ALL.some(x=>x.title===deepAction)) selAction.value = deepAction;
-  if (incomingDesc) { descEl.textContent = incomingDesc; writeCaption(incomingDesc, selAction.value); }
-  else { updateUI(); }
-
-  if (focusTarget==='post') {
-    setTimeout(()=>{ copyBox?.focus(); copyBox?.scrollIntoView({behavior:'smooth', block:'center'}); }, 60);
-  }
-
-  // Popularity sort (local history)
-  function loadLog(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch { return []; } }
-  const counts = {}; loadLog().forEach(r => { if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
-  const opts = Array.from(selAction.options).slice(1);
-  opts.sort((a,b)=>{
-    const ca = counts[a.value]||0, cb = counts[b.value]||0;
-    if (cb!==ca) return cb-ca;
-    return a.value.localeCompare(b.value);
-  });
-  const ph = selAction.options[0]; selAction.innerHTML=''; selAction.appendChild(ph); opts.forEach(o=>selAction.appendChild(o));
+  if (incomingDesc) { descEl.textContent = incomingDesc; writeCaption(incomingDesc, selAction.value); } else { updateUI(); }
+  if (focusTarget==='post'){ setTimeout(()=>{ copyBox?.focus(); copyBox?.scrollIntoView({behavior:'smooth', block:'center'}); }, 60); }
 })();
 </script>
 
-<!-- Save & Impact (Supabase global if keys present; local fallback otherwise) + Toast + Modal + URL checker -->
+<!-- Save & Impact (Supabase global if keys present; local fallback otherwise) + Toast + Modal + URL checker + donation gating -->
 <script>
 (function(){
   const actionEl = document.getElementById('actionSelect');
@@ -320,46 +245,28 @@
   const urlEl = document.getElementById('postUrl');
   const nameEl = document.getElementById('yourName');
   const emailEl = document.getElementById('yourEmail');
+  const donatedChk = document.getElementById('donatedChk');
+  const donationFields = document.getElementById('donationFields');
   const orgEl = document.getElementById('donationOrg');
   const amtEl = document.getElementById('donationAmt');
+  const proofEl = document.getElementById('donationProof');
   const saveBtn = document.getElementById('saveBtn');
   const lb = document.getElementById('leaderboard');
   const rc = document.getElementById('recent');
+  const helpLink = document.getElementById('helpLink'), modal=document.getElementById('fbModal'), backdrop=document.getElementById('fbModalBackdrop'), closeBtn=document.getElementById('fbClose');
+  function openModal(e){ e&&e.preventDefault(); backdrop.style.display='block'; modal.style.display='grid'; }
+  function closeModal(e){ e&&e.preventDefault(); backdrop.style.display='none'; modal.style.display='none'; }
+  helpLink?.addEventListener('click', openModal); closeBtn?.addEventListener('click', closeModal); backdrop?.addEventListener('click', closeModal); document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
 
-  /* Toast */
-  function toast(msg){
-    let t = document.querySelector('.toast');
-    if(!t){ t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
-    t.textContent = msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2200);
-  }
-  window.showSavedToast = function(){
-    toast("LiveLikeCharlie says: Saved! Now text this page to 3 friends and ask them to do one small good thing today.");
-  };
+  const urlHint = document.getElementById('urlHint');
+  function checkURL(){ const v=(urlEl.value||'').trim(); if(!v){ urlHint.textContent=''; return; } const good=/(facebook|fb\.watch|instagram|tiktok|twitter\.com|x\.com|youtube\.com|youtu\.be)/i.test(v); urlHint.textContent=good?'✅ Looks good.':'ℹ️ Paste the link that opens your single post (click its timestamp, then copy the URL).'; }
+  urlEl?.addEventListener('input', checkURL); checkURL();
 
-  /* Modal */
-  const helpLink = document.getElementById('helpLink');
-  const modal = document.getElementById('fbModal');
-  const backdrop = document.getElementById('fbModalBackdrop');
-  const closeBtn = document.getElementById('fbClose');
-  function openModal(e){ e && e.preventDefault(); backdrop.style.display='block'; modal.style.display='grid'; }
-  function closeModal(e){ e && e.preventDefault(); backdrop.style.display='none'; modal.style.display='none'; }
-  helpLink?.addEventListener('click', openModal);
-  closeBtn?.addEventListener('click', closeModal);
-  backdrop?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+  donatedChk.addEventListener('change', ()=>{ donationFields.style.display = donatedChk.checked ? 'block' : 'none'; });
 
-  /* URL checker */
-  const urlHint  = document.getElementById('urlHint');
-  function checkURL(){
-    const v = (urlEl.value||'').trim();
-    if(!v){ urlHint.textContent=''; return; }
-    const good = /(facebook|fb\.watch|instagram|tiktok|twitter\.com|x\.com|youtube\.com|youtu\.be)/i.test(v);
-    urlHint.textContent = good ? '✅ Looks good.' : 'ℹ️ Paste the link that opens your single post (click its timestamp, then copy the URL).';
-  }
-  urlEl?.addEventListener('input', checkURL);
-  checkURL();
+  function toast(msg){ let t=document.querySelector('.toast'); if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);} t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+  function savedToast(){ toast("LiveLikeCharlie says: Saved! Now text this page to 3 friends and ask them to do one small good thing today."); }
 
-  /* Supabase or local */
   const hasSupa = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   const supa = hasSupa ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
 
@@ -368,36 +275,16 @@
 
   async function renderImpact(){
     if (hasSupa){
-      const { data: recent } = await supa
-        .from('public_submissions')
-        .select('created_at, action, url, donation_org, donation_amt')
-        .eq('approved', true)
-        .order('created_at', { ascending:false })
-        .limit(10);
+      const { data: recent } = await supa.from('public_submissions').select('created_at, action, url, donation_org, donation_amt').eq('approved',true).order('created_at',{ascending:false}).limit(10);
       const { data: counts } = await supa.rpc('public_action_counts');
-
-      rc.innerHTML = (recent||[]).map(r=>{
-        const when = new Date(r.created_at).toLocaleString();
-        const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-        const donation = (r.donation_org||r.donation_amt) ? ` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
-        return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;
-      }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
-
-      lb.innerHTML = (counts||[]).map(r=>`<tr><td>${r.action}</td><td>${r.cnt}</td></tr>`).join('')
-        || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+      rc.innerHTML = (recent||[]).map(r=>{ const when=new Date(r.created_at).toLocaleString(); const link=r.url?`<a href="${r.url}" target="_blank" rel="noopener">open</a>`:''; const donation=(r.donation_org||r.donation_amt)?` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}`:''; return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;}).join('')||`<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
+      lb.innerHTML = (counts||[]).map(r=>`<tr><td>${r.action}</td><td>${r.cnt}</td></tr>`).join('')||`<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
       return;
     }
     const rows = loadLocal().slice().reverse();
-    rc.innerHTML = rows.slice(0,10).map(r=>{
-      const when = new Date(r.ts).toLocaleString();
-      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      const donation = (r.donation_org||r.donation_amt) ? ` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
-      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;
-    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
-
-    const counts={}; rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
-    const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('') || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+    rc.innerHTML = rows.slice(0,10).map(r=>{ const when=new Date(r.ts).toLocaleString(); const link=r.url?`<a href="${r.url}" target="_blank" rel="noopener">open</a>`:''; const donation=(r.donation_org||r.donation_amt)?` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}`:''; return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;}).join('')||`<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
+    const counts={}; rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; }); const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('')||`<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
   }
 
   saveBtn?.addEventListener('click', async ()=>{
@@ -408,19 +295,22 @@
       url: urlEl?.value||'',
       name: nameEl?.value||'',
       email: emailEl?.value||'',
+      donated: donatedChk.checked || false,
       donation_org: orgEl?.value||'',
-      donation_amt: amtEl?.value||''
+      donation_amt: amtEl?.value||'',
+      donation_evidence_url: proofEl?.value||'',
+      attested: donatedChk.checked || false
     };
     if (!row.action){ toast('Choose an action first.'); return; }
 
     if (hasSupa){
       const { error } = await supa.from('public_submissions').insert(row);
       if (error){ console.warn(error); toast('Online save failed; kept a local copy.'); }
-      else { urlEl.value=''; orgEl.value=''; amtEl.value=''; }
+      else { urlEl.value=''; orgEl.value=''; amtEl.value=''; proofEl.value=''; donatedChk.checked=false; donationFields.style.display='none'; }
     }
     const now = loadLocal(); now.push({ ...row, ts: row.ts_ms }); saveLocal(now);
     await renderImpact();
-    showSavedToast();
+    savedToast();
   });
 
   if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
