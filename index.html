@@ -1,1 +1,119 @@
-__HTML__
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Like Charlie — Do Good. Count It. Grow It.</title>
+  <meta name="description" content="Do one small good thing, make a quick post, paste your link here to encourage others, and invite 3 friends to choose an action also. Make doing one small good thing often a pattern, not a one-off." />
+  <meta property="og:title" content="Like Charlie — Do Good. Count It. Grow It." />
+  <meta property="og:description" content="Do one small good thing, make a quick post, paste your link here to encourage others, and invite 3 friends to choose an action also. Make doing one small good thing often a pattern, not a one-off." />
+  <meta property="og:type" content="website" /><meta property="og:url" content="https://www.cybermave.ai/" />
+  <meta property="og:image" content="https://www.cybermave.ai/og-likecharlie.jpg" />
+  <meta name="theme-color" content="#0b1220">
+  <style>
+    :root{--ink:#0b1220;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--brand:#e11d48;--brand2:#2563eb}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:#e8f1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    a{color:#9ec5ff}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    header{position:sticky;top:0;z-index:50;background:#0b1220cc;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.08)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+    .brand{font-weight:900;letter-spacing:.5px}
+    .nav a{margin-left:14px;text-decoration:none;color:#e8f1ff;opacity:.9}
+    .nav a:hover{opacity:1}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:28px 18px;background:linear-gradient(135deg,#0b1220,#10224a);border-bottom:1px solid rgba(255,255,255,.08)}
+    .flag{height:100%;min-height:220px;background:linear-gradient(180deg,#13294b,#0b1220);border-radius:18px;border:1px solid rgba(255,255,255,.08);padding:18px;display:flex;flex-direction:column;justify-content:center}
+    .flag h1{margin:0 0 6px 0;font-size:30px}
+    .flag p{margin:0;opacity:.92}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+    .label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8fb0e6;margin-bottom:6px}
+    select,input,button{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a1530;color:#e8f1ff}
+    button{background:var(--brand);border:none;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.6}
+    table{width:100%;border-collapse:collapse}
+    td,th{border-bottom:1px dashed rgba(255,255,255,.12);padding:10px 8px;text-align:left}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .muted{color:var(--muted)}
+    .ribbon{background:repeating-linear-gradient(45deg,#e11d48 0,#e11d48 10px,#ffffff 10px,#ffffff 20px,#2563eb 20px,#2563eb 30px);height:8px;border-radius:999px;margin:12px 0 0 0;opacity:.9}
+    .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
+    .badge{background:#0f1a33;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px}
+    .badge h4{margin:0 0 6px 0}
+    .descbox{margin-top:10px;font-size:14px;color:#cfe0ff;opacity:.95;min-height:1.2em}
+    @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav wrap">
+      <div class="brand">Like Charlie</div>
+      <nav>
+        <a href="#step1">Start</a>
+        <a href="/actions.html">Actions</a>
+        <a href="#impact">Impact</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="flag wrap">
+      <h1>Do Good. Count It. Grow It.</h1>
+      <p>Do one small good thing, make a quick post, paste your link here to encourage others, and invite 3 friends to choose an action also. Make doing one small good thing often a pattern, not a one-off.</p>
+      <div class="ribbon"></div>
+    </div>
+    <div class="wrap">
+      <div class="panel" id="stepper">
+        <div id="step1"></div>
+        <div class="label">Step 1 — Choose an action</div>
+        <select data-action-select aria-label="Choose an action">
+          <option value="">Select an action…</option>
+          <option>Raise the Flag</option><option>Publicly Thank Someone</option><option>Pick Up 10 Pieces</option><option>Pray for Someone</option><option>Read the Bible for 15</option><option>Help at Home</option><option>Be a Friend</option><option>Donate to TPUSA or a Charity</option><option>Volunteer 1 Hour</option><option>Write a Thank-You Note</option><option>Learn a New Skill</option><option>Call or Visit Family</option><option>Honor a Veteran or First Responder</option><option>Share a Favorite Charlie Quote</option><option>Join the Pete & Bobby Challenge</option><option>Choose a Verse & Share</option><option>Share a Forgiveness Story</option><option>Meet Your Spouse with a Hug</option><option>Intentional Family Time</option><option>Do a Chore Your Spouse Does</option><option>Listen Without Interrupting</option><option>Speak Truth with Humility</option><option>Invite 3 People to Church</option><option>Share Your Testimony</option><option>Host a Film Night</option><option>Hands-Free Driver</option><option>Family Table Focus (3+ nights)</option><option>Honor Service (Thank a First Responder)</option><option>Creator Proceeds Donor</option><option>Phone Off at Church</option><option>Host a Sale for Good</option><option>Generations: 3 Together</option><option>Register to Vote (or Verify)</option><option>Pray for Your Leaders (Name Them)</option><option>Bring a Teacher a Gift</option><option>Veteran Visit (Honor & Listen)</option><option>Meal Train Start</option><option>Coach or Mentor (Youth)</option><option>First Bible Give-Away</option><option>Scripture Memory Share</option><option>Pro-Life Serve Day</option><option>Pro-Life: Celebrate Your Children</option><option>Marriage Night</option><option>Apologetics Share</option><option>Read Aloud with Kids</option><option>Add Your Church</option><option>Host a Like-Charlie Meetup</option><option>Testimony Video (60–90s)</option><option>Worship Playlist Share (Top 10)</option>
+        </select>
+        <div class="descbox" data-action-desc></div>
+
+        <div class="label" style="margin-top:12px">Step 2 — Post it</div>
+        <select data-platform-select aria-label="Choose a platform">
+          <option>Facebook</option><option>X</option><option>Instagram</option><option>TikTok</option><option>Other</option>
+        </select>
+        <div class="muted" style="margin:8px 0 12px 0">Copy, paste and post to X/Facebook/Instagram/TikTok, then paste your social media URL into Step 2 to complete the challenge.</div>
+
+        <div id="step2"></div>
+        <div class="label">Step 3 — Paste your link so it counts</div>
+        <input data-post-url placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
+        <div class="two" style="margin-top:10px">
+          <input data-name placeholder="(optional) Your name" />
+          <input data-email placeholder="(optional) Email" />
+        </div>
+        <button data-save style="margin-top:12px">Save & Challenge</button>
+
+        <div class="tiers">
+          <div class="badge"><h4>Silver</h4><div>Do <b>1 action per week</b>. Keep the streak going.</div></div>
+          <div class="badge"><h4>Gold</h4><div>Do <b>1 action every day for 7 days</b>. Invite 3 friends.</div></div>
+          <div class="badge"><h4>Platinum</h4><div>Do <b>1 action every day for 30 days</b>. Help 3 friends earn Gold.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap" id="impact">
+    <div class="two">
+      <div class="panel">
+        <div class="label">Impact — Leaderboard</div>
+        <table>
+          <thead><tr><th>#</th><th>Action</th><th>Count</th></tr></thead>
+          <tbody data-leaderboard></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="label">Recent Submissions</div>
+        <table>
+          <thead><tr><th>When</th><th>Action</th><th>Platform</th><th>Link</th></tr></thead>
+          <tbody data-recent></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>window.SUPABASE_URL=""; window.SUPABASE_ANON_KEY="";</script>
+  <script src="likecharlie_app_v3.js"></script>
+</body>
+</html>
