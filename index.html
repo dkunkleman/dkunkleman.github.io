@@ -123,4 +123,181 @@
       </div>
 
       <div class="row" style="margin-top:12px">
-        <button id="saveBtn" class="btn brand">Save & Challeng
+        <button id="saveBtn" class="btn brand">Save & Challenge</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="impact" class="card" style="margin-top:14px">
+    <h2>Impact</h2>
+    <div class="grid two">
+      <div>
+        <h3 style="margin-top:0">Leaderboard (by action)</h3>
+        <table><thead><tr><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Recent</h3>
+        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section id="resources" class="card" style="margin-top:14px">
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to Turning Point USA</a></li>
+      <li><a href="https://tpusa.com/getinvolved/">Join TPUSA</a></li>
+      <li><a href="https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Shop TPUSA</a></li>
+      <li><a href="https://tpusa.com/events/">TPUSA Events</a></li>
+      <li><a href="https://tpusa.com/">Turning Point USA</a></li>
+      <li><a href="https://charliechallenge.org/">The Charlie Challenge</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="wrap" style="opacity:.8;font-size:.9rem">
+  <p>Not affiliated with charliechallenge.org.</p>
+</footer>
+
+<script>
+/* ---------- Build actions (25+) + description + caption; sort by frequency ---------- */
+(function () {
+  const ACTIONS = [
+    ["Raise the Flag","Post the picture and tell what it means to be an American."],
+    ["Publicly Thank Someone","Thank someone who helped you. You can quote JFK."],
+    ["Pick Up 10 Pieces","Pick up 10 pieces of trash; post before/after pics."],
+    ["Pray for Someone","Pray and encourage them in a comment or DM."],
+    ["Read the Bible for 15","Read for 15 minutes; share one takeaway."],
+    ["Help at Home","Do a task that blesses your family and share the moment."],
+    ["Be a Friend","Reach out intentionally and post what you learned."],
+    ["Volunteer 1 Hour","Serve locally for one hour and inspire a friend to join."],
+    ["Honor a Veteran","Thank a veteran; share a quote or photo (with permission)."],
+    ["Invite 3 to Church","Invite three friends; if they come, share what it meant."],
+    ["Write a Thank-You Note","Hand-write a note and post why they matter to you."],
+    ["Family Table Focus","Eat together, no screens; share one thing that changed."],
+    ["Hands-Free Driver","Pledge no phone while driving; remind others to join."],
+    ["Coach or Mentor (Youth)","Volunteer to coach or mentor; invite others too."],
+    ["First Bible Give-Away","Give someone their first Bible (with a note inside)."],
+    ["Register or Verify to Vote","Check registration; help a friend do the same."],
+    ["Pro-Life Serve Day","Support a local pregnancy center; share how to help."],
+    ["Apologetics Share","Share one reason for your hope—briefly, winsomely."],
+    ["Read Aloud with Kids","Read a chapter together; share a family photo."],
+    ["Add Your Church","Post your church link and invite locals to visit."],
+    ["Host a Film Night","Watch a faith film; post the group photo + takeaways."],
+    ["Creator Proceeds Donor","Donate today’s content proceeds; blur private info."],
+    ["Phone Off at Church","Go distraction-free; post a simple reminder graphic."],
+    ["Meal Train Start","Start or join a meal train; share the link."],
+    ["Generations Together","3+ generations do an action together; share a photo."]
+  ];
+
+  const selAction   = document.getElementById('actionSelect');
+  const selPlatform = document.getElementById('platformSelect');
+  const descEl      = document.getElementById('actionDesc');
+  const copyBox     = document.getElementById('copyText');
+
+  // Build dropdown
+  selAction.innerHTML = `<option value="">— Select an action —</option>` +
+    ACTIONS.map(([t,d])=>`<option value="${t}" title="${d}">${t}</option>`).join('');
+
+  // If navigated from actions.html, prefill caption from ?desc=
+  const q = new URLSearchParams(location.search);
+  const incomingDesc = q.get('desc');
+  const deepAction   = q.get('action');
+
+  function tags(p){
+    const base="#LiveLikeCharlie #OneSmallGoodThing";
+    return (/instagram|tiktok/i.test(p||"")) ? base+" #Challenge" : base;
+  }
+
+  function writeCaption(desc, act){
+    const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(act||"");
+    const caption = (desc? (desc+"\n\n") : "") +
+      `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(selPlatform?.value)}\n\nSee how it works: ${site}`;
+    if (copyBox) copyBox.value = caption;
+  }
+
+  // Show description + caption on selection changes
+  function updateUI(){
+    const act  = selAction.value;
+    const item = ACTIONS.find(([t])=>t===act);
+    descEl.textContent = item ? item[1] : "";
+    writeCaption(item?item[1]:"", act);
+  }
+
+  selAction.addEventListener('change', updateUI);
+  selPlatform && selPlatform.addEventListener('change', ()=>writeCaption(descEl.textContent, selAction.value));
+
+  // Preselect from deep link
+  if (deepAction && ACTIONS.some(([t])=>t===deepAction)) {
+    selAction.value = deepAction;
+  }
+  if (incomingDesc) {
+    descEl.textContent = incomingDesc;
+    writeCaption(incomingDesc, selAction.value);
+  } else {
+    updateUI();
+  }
+
+  // Sort dropdown by local frequency (most-used first)
+  function loadLog(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch { return []; } }
+  const counts = {};
+  loadLog().forEach(r => { if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+  const opts = Array.from(selAction.options).slice(1);
+  opts.sort((a,b)=>{
+    const ca = counts[a.value]||0, cb = counts[b.value]||0;
+    if (cb!==ca) return cb-ca;
+    return a.value.localeCompare(b.value);
+  });
+  const ph = selAction.options[0];
+  selAction.innerHTML=''; selAction.appendChild(ph); opts.forEach(o=>selAction.appendChild(o));
+})();
+</script>
+
+<script>
+/* ---------- Save & Challenge (local now; shows in Impact) ---------- */
+(function(){
+  const actionEl = document.getElementById('actionSelect');
+  const platformEl = document.getElementById('platformSelect');
+  const urlEl = document.getElementById('postUrl');
+  const nameEl = document.getElementById('yourName');
+  const emailEl = document.getElementById('yourEmail');
+  const saveBtn = document.getElementById('saveBtn');
+  const lb = document.getElementById('leaderboard');
+  const rc = document.getElementById('recent');
+
+  function loadLocal(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch{ return [] } }
+  function saveLocal(rows){ localStorage.setItem('lc_log', JSON.stringify(rows)); }
+
+  function render(){
+    const rows = loadLocal().slice().reverse();
+    rc.innerHTML = rows.slice(0,10).map(r=>{
+      const when = new Date(r.ts).toLocaleString();
+      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
+      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
+    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
+
+    const counts={}; rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+    const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('') || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+  }
+
+  saveBtn?.addEventListener('click', ()=>{
+    const row = {
+      ts: Date.now(),
+      action: actionEl?.value||'',
+      platform: platformEl?.value||'',
+      url: urlEl?.value||'',
+      name: nameEl?.value||'',
+      email: emailEl?.value||''
+    };
+    const now = loadLocal(); now.push(row); saveLocal(now);
+    render();
+    alert('Saved! Now text this page to 3 friends and ask them to do one small good thing today.');
+  });
+
+  if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
+  render();
+})();
+</script>
+</body>
+</html>
