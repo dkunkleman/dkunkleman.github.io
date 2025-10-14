@@ -1,21 +1,20 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Like Charlie — Admin</title>
 <style>
   body{margin:0;background:#0b1220;color:#e6eefc;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  .wrap{max-width:1100px;margin:0 auto;padding:20px}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px}
   h1{margin:0 0 12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse}
   th,td{border-bottom:1px solid rgba(255,255,255,.12);padding:8px 6px;text-align:left}
   input,select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#0c1630;color:#e6eefc}
   .btn{padding:8px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#162552;color:#fff;text-decoration:none;display:inline-block}
   .badge{padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12)}
-  .ok{background:#134e4a}
-  .no{background:#5b1d2a}
+  .ok{background:#134e4a}.no{background:#5b1d2a}.warn{background:#5a3b12}
+  .mini{font-size:.9rem;color:#9fb3d1}
 </style>
 </head>
 <body>
@@ -23,18 +22,15 @@
   <h1>Admin — Submissions</h1>
   <div class="row">
     <input id="filterText" placeholder="Search action/org/name/email…">
-    <select id="filterApproved">
-      <option value="all">All</option>
-      <option value="true">Approved</option>
-      <option value="false">Unapproved</option>
-    </select>
+    <select id="filterApproved"><option value="all">All</option><option value="true">Approved</option><option value="false">Unapproved</option></select>
+    <select id="filterDonation"><option value="all">All donations</option><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="rejected">Rejected</option><option value="none">No donation claimed</option></select>
     <a class="btn" href="/" target="_self">← Back to site</a>
   </div>
-  <div id="totals" style="margin-top:10px"></div>
+  <div id="totals" class="mini"></div>
   <table>
-    <thead>
-      <tr><th>When</th><th>Action</th><th>URL</th><th>Donation</th><th>Name/Email</th><th>Approved</th><th>Toggle</th></tr>
-    </thead>
+    <thead><tr>
+      <th>When</th><th>Action</th><th>URL</th><th>Donation</th><th>Status</th><th>Approved</th><th>Name/Email</th><th>Actions</th>
+    </tr></thead>
     <tbody id="rows"></tbody>
   </table>
 </main>
@@ -42,61 +38,71 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
 <script>
 (async function(){
-  // Reuse keys from index.html if present; otherwise paste here temporarily.
-  const URL  = window.SUPABASE_URL  || "";  // e.g. "https://YOURPROJECT.supabase.co"
-  const KEY  = window.SUPABASE_ANON_KEY || "";
-  if(!URL || !KEY){ alert('Missing SUPABASE_URL / SUPABASE_ANON_KEY'); return; }
+  const URL = window.SUPABASE_URL || "";       // reuses globals from index if served same origin
+  const KEY = window.SUPABASE_ANON_KEY || "";
+  if(!URL || !KEY){ alert('Missing SUPABASE_URL / SUPABASE_ANON_KEY in window. Add the same two <script> lines here or serve from the same page scope.'); return; }
   const db = window.supabase.createClient(URL, KEY);
 
-  const rowsEl   = document.getElementById('rows');
-  const totalsEl = document.getElementById('totals');
-  const fText    = document.getElementById('filterText');
-  const fApp     = document.getElementById('filterApproved');
+  const rowsEl=document.getElementById('rows'), totalsEl=document.getElementById('totals');
+  const fTxt=document.getElementById('filterText'), fApp=document.getElementById('filterApproved'), fDon=document.getElementById('filterDonation');
 
   async function load(){
-    let q = db.from('public_submissions').select('*').order('created_at',{ascending:false}).limit(500);
-    if (fApp.value==='true')  q=q.eq('approved',true);
-    if (fApp.value==='false') q=q.eq('approved',false);
+    let q = db.from('public_submissions').select('*').order('created_at',{ascending:false}).limit(1000);
+    if (fApp.value==='true')  q=q.eq('approved', true);
+    if (fApp.value==='false') q=q.eq('approved', false);
     const { data } = await q;
-    const text = (fText.value||'').toLowerCase();
-    const view = (data||[]).filter(r=>{
-      if(!text) return true;
-      return [r.action,r.name,r.email,r.donation_org,(r.url||'')].some(v=>(v||'').toLowerCase().includes(text));
+    const text=(fTxt.value||'').toLowerCase();
+    const filt = (data||[]).filter(r=>{
+      const matchesText = !text || [r.action,r.name,r.email,r.donation_org,(r.url||'')].some(v=>(v||'').toLowerCase().includes(text));
+      const matchesDon =
+        fDon.value==='all' ? true :
+        fDon.value==='none' ? !r.donated :
+        (r.donation_status===fDon.value);
+      return matchesText && matchesDon;
     });
 
-    // totals
-    const total = view.length;
-    const donated = view.reduce((s,r)=> s + (parseFloat(r.donation_amt)||0), 0);
-    totalsEl.innerHTML = `<span class="badge ok">Rows: ${total}</span> <span class="badge ok" style="margin-left:8px">Donations: $${donated.toFixed(2)}</span>`;
+    const donatedCount = filt.filter(r=>r.donated).length;
+    const donatedSum   = filt.reduce((s,r)=> s + (parseFloat(r.donation_amt)||0), 0);
+    totalsEl.innerHTML = `Rows: <b>${filt.length}</b> • Claimed donations: <b>${donatedCount}</b> • Sum (claimed): <b>$${donatedSum.toFixed(2)}</b>`;
 
-    // table
-    rowsEl.innerHTML = view.map(r=>{
-      const when = new Date(r.created_at).toLocaleString();
-      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      const don  = (r.donation_org||r.donation_amt) ? `${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
+    rowsEl.innerHTML = filt.map(r=>{
+      const when=new Date(r.created_at).toLocaleString();
+      const link=r.url?`<a href="${r.url}" target="_blank" rel="noopener">open</a>`:'';
+      const don=(r.donation_org||r.donation_amt)?`${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}${r.donation_evidence_url?(' • <a href="'+r.donation_evidence_url+'" target="_blank" rel="noopener">receipt</a>'):''}`:'';
+      const dBadge=r.donated ? (r.donation_status==='verified'?'<span class="badge ok">verified</span>': r.donation_status==='rejected'?'<span class="badge no">rejected</span>':'<span class="badge warn">unverified</span>') : '<span class="mini">n/a</span>';
+      const aBadge=r.approved?'<span class="badge ok">Yes</span>':'<span class="badge no">No</span>';
       return `<tr>
         <td>${when}</td>
         <td>${r.action||''}</td>
         <td>${link}</td>
         <td>${don||''}</td>
+        <td>${dBadge}</td>
+        <td>${aBadge}</td>
         <td>${(r.name||'')}${r.email?(' • '+r.email):''}</td>
-        <td>${r.approved?'<span class="badge ok">Yes</span>':'<span class="badge no">No</span>'}</td>
-        <td><a href="#" class="btn" data-id="${r.id}" data-approved="${r.approved?'true':'false'}">${r.approved?'Unapprove':'Approve'}</a></td>
+        <td>
+          ${r.donated?`
+            <a href="#" class="btn act" data-id="${r.id}" data-act="verify">Verify</a>
+            <a href="#" class="btn act" data-id="${r.id}" data-act="reject">Reject</a>`:''}
+          <a href="#" class="btn act" data-id="${r.id}" data-act="${r.approved?'unapprove':'approve'}">${r.approved?'Unapprove':'Approve'}</a>
+        </td>
       </tr>`;
-    }).join('') || `<tr><td colspan="7" class="muted">No rows.</td></tr>`;
+    }).join('') || `<tr><td colspan="8" class="mini">No rows.</td></tr>`;
   }
 
   rowsEl.addEventListener('click', async (e)=>{
-    const a = e.target.closest('a[data-id]'); if(!a) return e.preventDefault();
+    const a=e.target.closest('a.act'); if(!a){e.preventDefault();return;}
     e.preventDefault();
-    const id = a.getAttribute('data-id');
-    const isApproved = a.getAttribute('data-approved')==='true';
-    await db.from('public_submissions').update({approved: !isApproved}).eq('id', id);
+    const id=a.getAttribute('data-id'), act=a.getAttribute('data-act');
+    if (act==='verify')   await db.from('public_submissions').update({ donation_status:'verified', approved:true }).eq('id', id);
+    if (act==='reject')   await db.from('public_submissions').update({ donation_status:'rejected', approved:false }).eq('id', id);
+    if (act==='approve')  await db.from('public_submissions').update({ approved:true }).eq('id', id);
+    if (act==='unapprove')await db.from('public_submissions').update({ approved:false }).eq('id', id);
     load();
   });
 
-  fText.addEventListener('input', load);
+  fTxt.addEventListener('input', load);
   fApp.addEventListener('change', load);
+  fDon.addEventListener('change', load);
   load();
 })();
 </script>
