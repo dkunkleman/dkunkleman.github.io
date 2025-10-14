@@ -330,8 +330,7 @@
     }
     const now = loadLocal(); now.push({ ...row, ts: row.ts_ms }); saveLocal(now);
     await renderImpact();
-    alert('Saved! Now text this page to 3 friends and ask them to do one small good thing today.');
-  });
+    alert("LiveLikeCharlie says: Saved! Now text this page to 3 friends and ask them to do one small good thing today.");
 
   if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
   renderImpact();
