@@ -1,252 +1,40 @@
-
-/*
- LikeCharlie / CyberMave — Drop‑in JS to upgrade to a shared backend + deep‑link actions
- Usage:
-  1) Include this file after your HTML, right before </body>:
-        <script>
-          window.SUPABASE_URL = "https://YOURPROJECT.supabase.co";
-          window.SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
-        </script>
-        <script src="likecharlie_app.js"></script>
-  2) Add data attributes to your existing DOM (see comments below).
-  3) If SUPABASE_* are not set, the script gracefully falls back to localStorage.
-*/
-
+/* LikeCharlie / CyberMave — Drop-in JS v3 */
 (function(){
-  // ---------- Tiny helpers ----------
+  window.ACTION_CATALOG = {"Raise the Flag": "Hang or draw an American flag. Post a picture and say what being an American means to you.", "Publicly Thank Someone": "Thank someone who helps others; post why gratitude should be lived out.", "Pick Up 10 Pieces": "Pick up 10 pieces of trash. Post before and after pictures.", "Pray for Someone": "Say a short prayer for someone and share a kind message to encourage them.", "Read the Bible for 15": "Read for 15 minutes and post one sentence about how the passage helps you today.", "Help at Home": "Do a helpful job without being asked. Share a quick note about the experience.", "Be a Friend": "Include someone who’s left out. Share a kind sentence (no private details).", "Donate to TPUSA or a Charity": "Donate to TPUSA or a charity you love. Post why you appreciate that charity.", "Volunteer 1 Hour": "Give one hour to serve. Post why volunteering matters to you.", "Write a Thank-You Note": "Write a short note to someone who helped you. Post why you appreciate them.", "Learn a New Skill": "Learn or practice a real-life skill. Post about the experience or its significance.", "Call or Visit Family": "Call, visit, or video chat with family. Share a picture or story about why you appreciate them.", "Honor a Veteran or First Responder": "Thank a veteran or first responder. Post why you appreciate them.", "Share a Favorite Charlie Quote": "Share a favorite Charlie photo/video/quote and why it matters to you.", "Join the Pete & Bobby Challenge": "Take a step for your health. Post milestones or wins.", "Choose a Verse & Share": "Pick a verse and post what it means to you. Share it with 3 friends.", "Share a Forgiveness Story": "Share (no private details) how forgiving someone helped you.", "Meet Your Spouse with a Hug": "Greet your spouse with a hug and post why you appreciate them.", "Intentional Family Time": "Share pictures or stories of purposeful time with family.", "Do a Chore Your Spouse Does": "Take over a chore they usually do. Share the reaction or experience.", "Listen Without Interrupting": "Listen all the way through. Post what you learned.", "Speak Truth with Humility": "Share the truth with courage and kindness. Post what happened.", "Invite 3 People to Church": "Invite 3 people. If they come, share about the experience.", "Share Your Testimony": "Share what following Jesus means to you (in person or online).", "Host a Film Night": "Host a Christian film night; pray/discuss afterward. Post a group pic + takeaways.", "Hands-Free Driver": "No phone while driving today. Share the reminder to protect families.", "Family Table Focus (3+ nights)": "Eat together without screens for 3+ nights. Share what changed.", "Honor Service (Thank a First Responder)": "Deliver a thank-you and small gift (with permission). Share the story.", "Creator Proceeds Donor": "Donate a day’s proceeds from your content. Blur private info on your receipt.", "Phone Off at Church": "Go distraction-free during worship. Share a simple reminder graphic.", "Host a Sale for Good": "Run a bake/garage sale, donate proceeds, and share the story.", "Generations: 3 Together": "Grandparent + parent + child do an action together; share a photo/story.", "Register to Vote (or Verify)": "Check or register to vote. Share your confirmation and help a friend.", "Pray for Your Leaders (Name Them)": "Post a prayer for leaders by name and send them a note or text.", "Bring a Teacher a Gift": "Show appreciation to a teacher and share about the experience.", "Veteran Visit (Honor & Listen)": "Visit a veteran or VA home; listen to their story; thank and pray for them.", "Meal Train Start": "Start or join a meal train for a family in need. Share the link.", "Coach or Mentor (Youth)": "Volunteer to coach or mentor at church/school; invite others too.", "First Bible Give-Away": "Give someone their first Bible. Include a kind note in the front.", "Scripture Memory Share": "Share a verse you memorized and what it means to you.", "Pro-Life Serve Day": "Serve a local pregnancy center. Post how to help.", "Pro-Life: Celebrate Your Children": "Share how special your children are and why you chose life.", "Marriage Night": "Plan a distraction-free date night. Share one thing you're building together.", "Apologetics Share": "Share one reason for your hope in the Gospel—winsome and brief.", "Read Aloud with Kids": "Read a book aloud with kids. Post a family pic + title.", "Add Your Church": "Post your church’s link and invite others in your city to visit.", "Host a Like-Charlie Meetup": "Gather 5+ friends to do actions; post a group photo and plan.", "Testimony Video (60–90s)": "Record a short testimony video and post with #LiveLikeCharlie.", "Worship Playlist Share (Top 10)": "Share a top-10 worship playlist and why each song matters."};
   const $ = (sel, root=document)=>root.querySelector(sel);
   const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
   const sleep = (ms)=>new Promise(r=>setTimeout(r, ms));
-
-  // ---------- Config ----------
   const SUPABASE_URL = window.SUPABASE_URL || "";
   const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "";
   const HAS_SUPABASE = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
-
-  // ---------- Lightweight Supabase client (no external dep) ----------
   async function sbFetch(path, {method="GET", headers={}, body}={}){
     if(!HAS_SUPABASE) throw new Error("Supabase not configured");
-    const url = SUPABASE_URL.replace(/\/+$/,"") + "/rest/v1/" + path.replace(/^\/+/,"");
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Prefer": "return=representation",
-        ...headers,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    if(!res.ok){
-      const t = await res.text().catch(()=>res.statusText);
-      throw new Error(`Supabase error ${res.status}: ${t}`);
-    }
+    const url = SUPABASE_URL.replace(/\/+$/,"") + "/rest/v1/" + path.replace(/^\/+/, "");
+    const res = await fetch(url, { method, headers: {"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`,"Prefer":"return=representation",...headers}, body: body?JSON.stringify(body):undefined });
+    if(!res.ok){ const t = await res.text().catch(()=>res.statusText); throw new Error(`Supabase error ${res.status}: ${t}`); }
     return res.json();
   }
-
-  // ---------- Storage layer (Supabase first, fallback to local) ----------
-  const LS_KEY = "likecharlie_submissions_v2";
-  function localList(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch(_){ return []; } }
-  function localSave(rec){
-    const items = localList();
-    items.unshift(rec);
-    localStorage.setItem(LS_KEY, JSON.stringify(items.slice(0,500)));
-    return rec;
-  }
-
-  async function saveSubmission({action, platform, post_url, name, email, ref_code}){
-    const base = {
-      action, platform, post_url,
-      name: name||null, email: email||null,
-      ref_code: ref_code||null,
-      created_at: new Date().toISOString(),
-      ip_hint: null,
-      ua: navigator.userAgent,
-    };
-    if(HAS_SUPABASE){
-      try{
-        const out = await sbFetch("public_submissions", {method:"POST", body: base});
-        return out && out[0] ? out[0] : base;
-      }catch(e){
-        console.warn("Supabase save failed, falling back to local:", e.message);
-        return localSave(base);
-      }
-    }else{
-      return localSave(base);
-    }
-  }
-
-  async function listSubmissions({limit=50}={}){
-    if(HAS_SUPABASE){
-      try{
-        return await sbFetch(`public_submissions?select=*&order=created_at.desc&limit=${limit}`);
-      }catch(e){
-        console.warn("Supabase list failed, falling back to local:", e.message);
-        return localList().slice(0, limit);
-      }
-    }else{
-      return localList().slice(0, limit);
-    }
-  }
-
-  async function leaderboard({limit=100}={}){
-    if(HAS_SUPABASE){
-      try{
-        // group by action + count
-        const rows = await sbFetch(`rpc/public_action_counts`, {method:"POST", body:{}});
-        return rows.slice(0, limit);
-      }catch(e){
-        console.warn("Supabase leaderboard failed, building from local:", e.message);
-      }
-    }
-    // Build from local as fallback
-    const agg = {};
-    for(const r of localList()){
-      const k = (r.action||"").trim().toLowerCase();
-      agg[k] = (agg[k]||0)+1;
-    }
-    return Object.entries(agg).map(([action,count])=>({action, count})).sort((a,b)=>b.count-a.count).slice(0,limit);
-  }
-
-  // ---------- UI wiring ----------
-  // Required data- attributes in your HTML:
-  //  - data-action-select: <select> or <input> that holds the chosen action
-  //  - data-platform-select: <select> for "Facebook / X / Instagram / TikTok / Other"
-  //  - data-post-url: <input> where the user pastes their post link
-  //  - data-name, data-email: optional inputs
-  //  - data-save: button to trigger Save & Count
-  //  - data-leaderboard: <tbody> where leaderboard rows are rendered
-  //  - data-recent: <tbody> for recent submissions list
-  //  - data-actions-link: on Actions page, add data-action on each link to deep-link
-
-  function getVal(sel){ const el = $(sel); return el ? (el.value||el.textContent||"").trim() : ""; }
-  function setVal(sel, v){ const el = $(sel); if(el){ if("value" in el) el.value = v; else el.textContent = v; } }
-
-  function parseQuery(){
-    const p = new URLSearchParams(location.search);
-    return Object.fromEntries(p.entries());
-  }
-
-  function ensureHashStep1(){
-    if(location.hash !== "#step1"){
-      location.hash = "step1";
-    }
-  }
-
-  async function renderLeaderboard(){
-    const tbody = $('[data-leaderboard]');
-    if(!tbody) return;
-    const rows = await leaderboard({limit:100});
-    tbody.innerHTML = rows.map((r,i)=>`
-      <tr>
-        <td>${i+1}</td>
-        <td>${escapeHtml(titleCase(r.action||""))}</td>
-        <td>${r.count}</td>
-      </tr>`).join("");
-  }
-
-  async function renderRecent(){
-    const tbody = $('[data-recent]');
-    if(!tbody) return;
-    const rows = await listSubmissions({limit:25});
-    tbody.innerHTML = rows.map(r=>`
-      <tr>
-        <td>${new Date(r.created_at).toLocaleString()}</td>
-        <td>${escapeHtml(titleCase(r.action||""))}</td>
-        <td>${escapeHtml(r.platform||"")}</td>
-        <td><a href="${escapeAttr(r.post_url||"#")}" target="_blank" rel="noopener">view</a></td>
-      </tr>`).join("");
-  }
-
-  function titleCase(s){ return s.replace(/\w\S*/g, t=>t[0].toUpperCase()+t.slice(1).toLowerCase()); }
-  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m])); }
-  function escapeAttr(s){ return escapeHtml(s).replace(/"/g, "&quot;"); }
-
-  // Deep-linking: from Actions page click → homepage step1 prefilled
-  function wireActionDeepLinks(){
-    $$('[data-action]').forEach(el=>{
-      el.addEventListener('click', (e)=>{
-        // If it's a link, let it navigate; if not, do it manually
-        const action = el.getAttribute('data-action') || el.textContent.trim();
-        const url = new URL(location.origin + location.pathname.replace(/\/actions.*$/i,"/"));
-        url.searchParams.set("action", action);
-        url.hash = "step1";
-        location.href = url.toString();
-      });
-    });
-  }
-
-  // On load, prefill the chosen action from ?action=... and jump to step1
-  function prefillFromQuery(){
-    const q = parseQuery();
-    if(q.action){
-      setVal('[data-action-select]', q.action);
-      ensureHashStep1();
-    }
-    if(q.ref){
-      // store a referral code for later
-      sessionStorage.setItem("likecharlie_ref", q.ref);
-    }
-  }
-
-  // Save & Count handler
-  async function wireSave(){
-    const btn = $('[data-save]');
-    if(!btn) return;
-    btn.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      const action = getVal('[data-action-select]');
-      const platform = getVal('[data-platform-select]') || "Facebook";
-      const post_url = getVal('[data-post-url]');
-      const name = getVal('[data-name]');
-      const email = getVal('[data-email]');
-      const ref_code = sessionStorage.getItem("likecharlie_ref") || null;
-
-      if(!action || !post_url){
-        alert("Please choose an action and paste your post link.");
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = "Saving...";
-      try{
-        const rec = await saveSubmission({action, platform, post_url, name, email, ref_code});
-        await Promise.all([renderLeaderboard(), renderRecent()]);
-        btn.textContent = "Saved!";
-        await sleep(800);
-        btn.textContent = "Save & Count";
-      }catch(err){
-        console.error(err);
-        alert("Sorry, save failed. Please try again in a moment.");
-        btn.textContent = "Save & Count";
-      }finally{
-        btn.disabled = false;
-      }
-    });
-  }
-
-  // Autoadvance "stepper" UX if you use #step1 / #step2 / #step3 anchors
-  function wireStepper(){
-    // If your UI uses "Next" buttons with [data-next="#step2"], this wires them
-    $$('[data-next]').forEach(el=>{
-      el.addEventListener('click', (e)=>{
-        const target = el.getAttribute('data-next');
-        if(target) location.hash = target.replace(/^#?/,"#");
-      });
-    });
-  }
-
-  // Init
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    try{
-      prefillFromQuery();
-      wireActionDeepLinks();
-      wireSave();
-      wireStepper();
-      renderLeaderboard();
-      renderRecent();
-    }catch(e){
-      console.error("Init error:", e);
-    }
-  });
+  const LS_KEY = "likecharlie_submissions_v3";
+  function localList(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); }catch(_ ){ return []; } }
+  function localSave(rec){ const items = localList(); items.unshift(rec); localStorage.setItem(LS_KEY, JSON.stringify(items.slice(0,500))); return rec; }
+  async function saveSubmission({action, platform, post_url, name, email, ref_code}){ const base = {action,platform,post_url,name:name||null,email:email||null,ref_code:ref_code||null,created_at:new Date().toISOString(),ip_hint:null,ua:navigator.userAgent}; if(HAS_SUPABASE){ try{ const out=await sbFetch("public_submissions",{method:"POST",body:base}); return out&&out[0]?out[0]:base; }catch(e){ console.warn("Supabase save failed, falling back to local:", e.message); return localSave(base);} } else return localSave(base); }
+  async function listSubmissions({limit=50}={}){ if(HAS_SUPABASE){ try{ return await sbFetch(`public_submissions?select=*&order=created_at.desc&limit=${limit}`); }catch(e){ console.warn("Supabase list failed, falling back to local:", e.message); return localList().slice(0,limit);} } else return localList().slice(0,limit); }
+  async function leaderboard({limit=100}={}){ if(HAS_SUPABASE){ try{ const rows=await sbFetch(`rpc/public_action_counts`,{method:"POST",body:{}}); return rows.slice(0,limit);}catch(e){ console.warn("Supabase leaderboard failed, building from local:", e.message);} } const agg={}; for(const r of localList()){ const k=(r.action||"").trim().toLowerCase(); agg[k]=(agg[k]||0)+1; } return Object.entries(agg).map(([action,count])=>({action,count})).sort((a,b)=>b.count-a.count).slice(0,limit); }
+  function getVal(sel){ const el=$(sel); return el?(el.value||el.textContent||"").trim():""; }
+  function setVal(sel,v){ const el=$(sel); if(el){ if("value" in el) el.value=v; else el.textContent=v; } }
+  function parseQuery(){ const p=new URLSearchParams(location.search); return Object.fromEntries(p.entries()); }
+  function ensureHashStep1(){ if(location.hash!="#step1") location.hash="step1"; }
+  function setDescription(text){ const box=document.querySelector('[data-action-desc]'); if(box) box.textContent=text||""; }
+  function refreshDescription(){ const val=getVal('[data-action-select]'); const desc=(window.ACTION_CATALOG&&window.ACTION_CATALOG[val])||""; setDescription(desc); }
+  async function renderLeaderboard(){ const tbody=document.querySelector('[data-leaderboard]'); if(!tbody) return; const rows=await leaderboard({limit:100}); tbody.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(titleCase(r.action||""))}</td><td>${r.count}</td></tr>`).join(""); }
+  async function renderRecent(){ const tbody=document.querySelector('[data-recent]'); if(!tbody) return; const rows=await listSubmissions({limit:25}); tbody.innerHTML=rows.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString()}</td><td>${escapeHtml(titleCase(r.action||""))}</td><td>${escapeHtml(r.platform||"")}</td><td><a href="${escapeAttr(r.post_url||"#")}" target="_blank" rel="noopener">view</a></td></tr>`).join(""); }
+  function titleCase(s){ return s.replace(/\w\S*/g,t=>t[0].toUpperCase()+t.slice(1).toLowerCase()); }
+  function escapeHtml(s){ return (s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+  function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+  function wireActionDeepLinks(){ document.querySelectorAll('[data-action]').forEach(el=>{ const action=el.getAttribute('data-action')||el.textContent.trim(); const desc=(window.ACTION_CATALOG&&window.ACTION_CATALOG[action])||""; el.setAttribute('title',desc); el.addEventListener('click',()=>{ try{ sessionStorage.setItem("likecharlie_action_desc",desc); }catch(_ ){} }); }); }
+  function prefillFromQuery(){ const q=parseQuery(); if(q.action){ setVal('[data-action-select]', q.action); ensureHashStep1(); } const memo=sessionStorage.getItem("likecharlie_action_desc"); if(memo) setDescription(memo); if(q.ref) sessionStorage.setItem("likecharlie_ref", q.ref); refreshDescription(); }
+  async function onSaveClick(btn){ const action=getVal('[data-action-select]'); const platform=getVal('[data-platform-select]')||"Facebook"; const post_url=getVal('[data-post-url]'); const name=getVal('[data-name]'); const email=getVal('[data-email]'); const ref_code=sessionStorage.getItem("likecharlie_ref")||null; if(!action||!post_url){ alert("Please choose an action and paste your post link."); return; } btn.disabled=true; btn.textContent="Saving..."; try{ const rec=await saveSubmission({action,platform,post_url,name,email,ref_code}); await Promise.all([renderLeaderboard(),renderRecent()]); try{ window.dispatchEvent(new CustomEvent('lc:saved',{detail:rec})); }catch(_ ){} btn.textContent="Saved!"; await new Promise(r=>setTimeout(r,800)); btn.textContent="Save & Challenge"; }catch(err){ console.error(err); alert("Sorry, save failed. Please try again in a moment."); btn.textContent="Save & Challenge"; } finally{ btn.disabled=false; } }
+  function wireSave(){ const btn=document.querySelector('[data-save]'); if(!btn) return; btn.textContent="Save & Challenge"; btn.addEventListener('click',e=>{ e.preventDefault(); onSaveClick(btn); }); }
+  function wireStepper(){ document.querySelectorAll('[data-next]').forEach(el=>{ el.addEventListener('click',e=>{ const target=el.getAttribute('data-next'); if(target) location.hash=target.replace(/^#?/,"#"); }); }); }
+  document.addEventListener('DOMContentLoaded', async ()=>{ try{ wireActionDeepLinks(); prefillFromQuery(); wireSave(); wireStepper(); const sel=document.querySelector('[data-action-select]'); if(sel) sel.addEventListener('change', refreshDescription); renderLeaderboard(); renderRecent(); }catch(e){ console.error("Init error:", e); } });
 })();
