@@ -1,57 +1,202 @@
-
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Like Charlie — Do Good. Count It. Grow It.</title>
- <p class="hero-lead">
-  Do one small good thing like Charlie, make a quick post inviting 3 friends to choose an action like Charlie also, then paste your link here to complete the challenge. Make doing one small good thing often a pattern, not a one-off.
-</p>
-  <meta property="og:title" content="Like Charlie — Do Good. Count It. Grow It." />
-  <meta property="og:description" content="Do one small good thing, make a quick post, paste your link here to encourage others, and invite 3 friends to choose an action also. Like Charlie, make doing one small good thing often a pattern, not a one-off." />
-  <meta property="og:type" content="website" /><meta property="og:url" content="https://www.cybermave.ai/" />
-  <meta property="og:image" content="https://www.cybermave.ai/og-likecharlie.jpg" />
-  <meta name="theme-color" content="#0b1220">
-  <style>
-    :root{--ink:#0b1220;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--brand:#e11d48;--brand2:#2563eb}
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:#e8f1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    a{color:#9ec5ff}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px}
-    header{position:sticky;top:0;z-index:50;background:#0b1220cc;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.08)}
-    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
-    .brand{font-weight:900;letter-spacing:.5px}
-    .nav a{margin-left:14px;text-decoration:none;color:#e8f1ff;opacity:.9}
-    .nav a:hover{opacity:1}
-    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:28px 18px;background:linear-gradient(135deg,#0b1220,#10224a);border-bottom:1px solid rgba(255,255,255,.08)}
-    .flag{height:100%;min-height:220px;background:linear-gradient(180deg,#13294b,#0b1220);border-radius:18px;border:1px solid rgba(255,255,255,.08);padding:18px;display:flex;flex-direction:column;justify-content:center}
-    .flag h1{margin:0 0 6px 0;font-size:30px}
-    .flag p{margin:0;opacity:.92}
-    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
-    .label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8fb0e6;margin-bottom:6px}
-    select,input,button{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a1530;color:#e8f1ff}
-    button{background:var(--brand);border:none;font-weight:800;cursor:pointer}
-    button:disabled{opacity:.6}
-    table{width:100%;border-collapse:collapse}
-    td,th{border-bottom:1px dashed rgba(255,255,255,.12);padding:10px 8px;text-align:left}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    .muted{color:var(--muted)}
-    .ribbon{background:repeating-linear-gradient(45deg,#e11d48 0,#e11d48 10px,#ffffff 10px,#ffffff 20px,#2563eb 20px,#2563eb 30px);height:8px;border-radius:999px;margin:12px 0 0 0;opacity:.9}
-    .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:18px}
-    .badge{background:#0f1a33;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px}
-    .badge h4{margin:0 0 6px 0}
-    .descbox{margin-top:10px;font-size:14px;color:#cfe0ff;opacity:.95;min-height:1.2em}
-    @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Like Charlie — Do One Small Good Thing</title>
+<meta name="description" content="Do one small good thing like Charlie, invite 3 friends, and paste your post link to complete the challenge.">
+<meta property="og:title" content="Like Charlie — Do One Small Good Thing">
+<meta property="og:description" content="Pick an action, make a quick post, invite 3 friends, and paste your link to complete the challenge.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.cybermave.ai/">
+<style>
+  :root{
+    --ink:#0b1220; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
+    --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --border:rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0b1220,#0a1833 60%,#0b1220);color:#e6eefc;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  a{color:#9ec5ff} .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  header{position:sticky;top:0;z-index:50;background:#111a33cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
+  nav{display:flex;align-items:center;gap:14px;padding:10px 16px}
+  nav a{color:#e6eefc;text-decoration:none;padding:6px 10px;border-radius:8px}
+  nav a:hover{background:#1a2750}
+  .brand{font-weight:800;letter-spacing:.3px}
+  .hero{padding:28px 16px;border:1px solid var(--border);background:#0f1a33;border-radius:18px;margin:16px}
+  .hero h1{margin:0 0 8px 0;font-size:28px}
+  .hero-lead{margin:8px 0 0 0;color:#cfe0ff}
+  .grid{display:grid;gap:14px}
+  .two{grid-template-columns:1fr;}.card{background:#0f1a33;border:1px solid var(--border);border-radius:16px;padding:16px}
+  @media(min-width:880px){.two{grid-template-columns:1fr 1fr}}
+  label{display:block;font-weight:600;margin:10px 0 6px}
+  select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:#e6eefc}
+  textarea{min-height:110px;resize:vertical}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:#fff;background:#162552}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .share-bar a{background:#132457}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
+  footer{margin:24px 0 8px}
+  .muted{color:#9fb3d1}
+</style>
 </head>
-  <script>
+<body>
+<header>
+  <nav class="wrap">
+    <a class="brand" href="/">Like Charlie</a>
+    <span style="flex:1"></span>
+    <a href="/actions.html">Actions</a>
+    <a href="#impact">Impact</a>
+    <a href="#resources">Resources</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>One Small Good Thing</h1>
+    <p class="hero-lead">
+      Do one small good thing like Charlie, make a quick post inviting 3 friends to choose an action like Charlie also, then paste your link here to complete the challenge. Make doing one small good thing often a pattern, not a one-off.
+    </p>
+  </section>
+
+  <section class="grid two">
+    <!-- STEP 1 -->
+    <div id="step1" class="card">
+      <h2>Step 1 — Choose & prepare your post</h2>
+      <label>Choose an action <span class="muted">(click “Actions” in the top menu for ideas)</span></label>
+      <select data-action-select id="actionSelect">
+        <option value="">— Choose —</option>
+        <option>Raise the Flag</option>
+        <option>Publicly Thank Someone</option>
+        <option>Pick Up 10 Pieces</option>
+        <option>Pray for Someone</option>
+        <option>Read the Bible for 15</option>
+        <option>Help at Home</option>
+        <option>Be a Friend</option>
+      </select>
+
+      <label>Platform</label>
+      <select data-platform-select id="platformSelect">
+        <option>Facebook</option><option>X</option><option>Instagram</option>
+        <option>TikTok</option><option>LinkedIn</option><option>YouTube</option>
+        <option>Truth Social</option><option>Telegram</option><option>Other</option>
+      </select>
+
+      <label>Your caption (editable)</label>
+      <textarea id="copyText" placeholder="Your caption appears here…"></textarea>
+
+      <div class="row" style="margin-top:8px">
+        <a id="renderImageLink" class="btn">Render share image</a>
+      </div>
+
+      <div class="share-bar row" style="margin-top:10px">
+        <a href="#" data-share="x" class="btn">Open X</a>
+        <a href="#" data-share="facebook" class="btn">Open Facebook</a>
+        <a href="#" data-share="instagram" class="btn">Open Instagram</a>
+        <a href="#" data-share="tiktok" class="btn">Open TikTok</a>
+        <a href="#" data-share="truth" class="btn">Open Truth Social</a>
+        <a href="#" data-share="youtube" class="btn">Open YouTube</a>
+        <a href="#" data-share="telegram" class="btn">Open Telegram</a>
+        <a href="#" data-share="linkedin" class="btn">Open LinkedIn</a>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="card">
+      <h2>Step 2 — Save & Challenge</h2>
+      <p class="muted">Copy, paste and post to X/Facebook/Instagram/TikTok, then paste your social media URL into Step 2 to complete the challenge.</p>
+
+      <label>Paste your post URL</label>
+      <input id="postUrl" placeholder="https://… (your post link)">
+
+      <div class="row" style="margin-top:10px">
+        <input id="yourName" placeholder="Your name (optional)" style="flex:1;min-width:200px">
+        <input id="yourEmail" placeholder="Email (optional)" style="flex:1;min-width:200px">
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <button id="saveBtn" class="btn brand">Save & Challenge</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="impact" class="card" style="margin-top:14px">
+    <h2>Impact</h2>
+    <div class="grid two">
+      <div>
+        <h3 style="margin-top:0">Leaderboard (by action)</h3>
+        <table><thead><tr><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Recent</h3>
+        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section id="resources" class="card" style="margin-top:14px">
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to Turning Point USA</a></li>
+      <li><a href="https://tpusa.com/getinvolved/">Join TPUSA</a></li>
+      <li><a href="https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Shop TPUSA</a></li>
+      <li><a href="https://tpusa.com/events/">TPUSA Events</a></li>
+      <li><a href="https://tpusa.com/">Turning Point USA</a></li>
+      <li><a href="https://charliechallenge.org/">The Charlie Challenge</a></li>
+    </ul>
+  </section>
+
+  <section class="card" style="margin-top:14px">
+    <h2>Civic Concierge — 50-State Quick Links</h2>
+    <label for="civState">State</label>
+    <select id="civState">
+      <option value="">Select</option>
+      <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+      <option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+      <option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+      <option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+      <option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+      <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+      <option>WI</option><option>WY</option>
+    </select>
+    <div id="civLinks" style="margin-top:8px"></div>
+  </section>
+</main>
+
+<footer class="wrap legal-note" style="opacity:.8;font-size:.9rem;margin-top:24px">
+  <p>Not affiliated with charliechallenge.org.</p>
+</footer>
+
+<!-- Optional: set Supabase keys for GLOBAL counting (leave blank for local only) -->
+<script>
+  window.SUPABASE_URL = "";        // e.g., "https://YOURPROJECT.supabase.co"
+  window.SUPABASE_ANON_KEY = "";   // e.g., "YOUR_PUBLIC_ANON_KEY"
+</script>
+
+<script>
+/* -------- Civic Concierge -------- */
+(function(){
+  const s=document.getElementById('civState'), out=document.getElementById('civLinks');
+  if(!s||!out) return;
+  s.addEventListener('change', ()=>{
+    const st=s.value; if(!st){out.innerHTML='';return;}
+    const gov=`https://www.google.com/search?q=${encodeURIComponent(st+' Governor contact official site')}`;
+    const leg=`https://www.google.com/search?q=${encodeURIComponent(st+' State legislature contact official site')}`;
+    out.innerHTML = `<a class="btn" href="${gov}" target="_blank" rel="noopener">Governor contact</a>
+                     <a class="btn" href="${leg}" target="_blank" rel="noopener">State Legislature contact</a>`;
+  });
+})();
+</script>
+
+<script>
+/* -------- Auto-draft caption + share-image deep link -------- */
 (function () {
   const selAction = document.querySelector('[data-action-select]');
   const selPlatform = document.querySelector('[data-platform-select]');
-  const postBox   = document.querySelector('#copyText, [data-copy-text]');
-  const renderBtn = document.querySelector('#renderImageLink, [data-render-link]');
+  const postBox   = document.querySelector('#copyText');
+  const renderBtn = document.querySelector('#renderImageLink');
 
-  // Short captions per action (edit anytime)
   const ACTION_LINES = {
     "Raise the Flag": "I raised the flag today 🇺🇸",
     "Publicly Thank Someone": "Stopping to thank someone who made my day",
@@ -62,114 +207,121 @@
     "Be a Friend": "Choosing to be a friend on purpose"
   };
 
-  function buildHashtags(platform) {
-    // keep short, platform-friendly
-    const base = "#LiveLikeCharlie #OneSmallGoodThing";
-    if (!platform) return base;
-    if (/instagram|tiktok/i.test(platform)) return base + " #Challenge";
-    return base;
+  function buildTags(p){
+    const base="#LiveLikeCharlie #OneSmallGoodThing";
+    return (/instagram|tiktok/i.test(p||""))? base+" #Challenge" : base;
   }
 
-  function updateDraft() {
-    if (!postBox || !selAction) return;
-    const action = selAction.value || "";
-    const platform = selPlatform ? selPlatform.value : "";
-    const line = ACTION_LINES[action] || `Doing: ${action}`;
+  function updateDraft(){
+    const action = selAction?.value || "";
+    const platform = selPlatform?.value || "";
+    const line = ACTION_LINES[action] || (action ? `Doing: ${action}` : "Doing one small good thing");
     const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action);
-    const copy = `${line}. Join me: pick an action and do one small good thing like Charlie. ${buildHashtags(platform)}\n\nSee how it works: ${site}`;
-    postBox.value = copy;
-
-    // prep share-image deep link (user can edit on that page)
-    if (renderBtn) {
+    const copy = `${line}. Join me: pick an action and do one small good thing like Charlie. ${buildTags(platform)}\n\nSee how it works: ${site}`;
+    if(postBox) postBox.value = copy;
+    if(renderBtn){
       const title = action || "One Small Good Thing";
       const subtitle = "Join me + invite 3 friends";
       const footer = "Like Charlie • #LiveLikeCharlie";
       const url = `/share.html?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(subtitle)}&footer=${encodeURIComponent(footer)}&text=${encodeURIComponent(copy)}`;
-      renderBtn.setAttribute('href', url);
+      renderBtn.href = url;
     }
   }
-
-  (selAction  ? selAction.addEventListener('change', updateDraft)  : 0);
-  (selPlatform? selPlatform.addEventListener('change', updateDraft): 0);
-
-  // initialize once on load
+  selAction && selAction.addEventListener('change', updateDraft);
+  selPlatform && selPlatform.addEventListener('change', updateDraft);
   updateDraft();
 })();
 </script>
 
-<body>
-  <header>
-    <div class="nav wrap">
-      <div class="brand">Like Charlie</div>
-      <nav>
-        <a id="renderImageLink" class="btn">Render share image</a>
-        <a href="#step1">Start</a>
-        <a href="/actions.html">Actions</a>
-        <a href="#impact">Impact</a>
-      </nav>
-    </div>
-  </header>
+<script>
+/* -------- Share buttons (web intents where available) -------- */
+(function(){
+  function getCopy(){return document.getElementById('copyText')?.value||''}
+  function getUrl(){return location.origin}
+  function openU(u){window.open(u,'_blank','noopener,noreferrer')}
+  function enc(s){return encodeURIComponent(s||'')}
 
-  <section class="hero">
-    <div class="flag wrap">
-      <h1>Do Good. Count It. Grow It.</h1>
-      <p>Do one small good thing, make a quick post, paste your link here to encourage others, and invite 3 friends to choose an action also. Make doing one small good thing often a pattern, not a one-off.</p>
-      <div class="ribbon"></div>
-    </div>
-    <div class="wrap">
-      <div class="panel" id="stepper">
-        <div id="step1"></div>
-        <div class="label">Step 1 — Choose an action</div>
-        <select data-action-select aria-label="Choose an action">
-          <option value="">Select an action…</option>
-          <option>Raise the Flag</option><option>Publicly Thank Someone</option><option>Pick Up 10 Pieces</option><option>Pray for Someone</option><option>Read the Bible for 15</option><option>Help at Home</option><option>Be a Friend</option><option>Donate to TPUSA or a Charity</option><option>Volunteer 1 Hour</option><option>Write a Thank-You Note</option><option>Learn a New Skill</option><option>Call or Visit Family</option><option>Honor a Veteran or First Responder</option><option>Share a Favorite Charlie Quote</option><option>Join the Pete & Bobby Challenge</option><option>Choose a Verse & Share</option><option>Share a Forgiveness Story</option><option>Meet Your Spouse with a Hug</option><option>Intentional Family Time</option><option>Do a Chore Your Spouse Does</option><option>Listen Without Interrupting</option><option>Speak Truth with Humility</option><option>Invite 3 People to Church</option><option>Share Your Testimony</option><option>Host a Film Night</option><option>Hands-Free Driver</option><option>Family Table Focus (3+ nights)</option><option>Honor Service (Thank a First Responder)</option><option>Creator Proceeds Donor</option><option>Phone Off at Church</option><option>Host a Sale for Good</option><option>Generations: 3 Together</option><option>Register to Vote (or Verify)</option><option>Pray for Your Leaders (Name Them)</option><option>Bring a Teacher a Gift</option><option>Veteran Visit (Honor & Listen)</option><option>Meal Train Start</option><option>Coach or Mentor (Youth)</option><option>First Bible Give-Away</option><option>Scripture Memory Share</option><option>Pro-Life Serve Day</option><option>Pro-Life: Celebrate Your Children</option><option>Marriage Night</option><option>Apologetics Share</option><option>Read Aloud with Kids</option><option>Add Your Church</option><option>Host a Like-Charlie Meetup</option><option>Testimony Video (60–90s)</option><option>Worship Playlist Share (Top 10)</option>
-        </select>
-        <div class="descbox" data-action-desc></div>
+  const binds = [
+    ['[data-share="x"]',       ()=>openU(`https://twitter.com/intent/tweet?text=${enc(getCopy())}&url=${enc(getUrl())}`)],
+    ['[data-share="facebook"]',()=>openU(`https://www.facebook.com/sharer/sharer.php?u=${enc(getUrl())}&quote=${enc(getCopy())}`)],
+    ['[data-share="linkedin"]',()=>openU(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(getUrl())}`)],
+    ['[data-share="telegram"]',()=>openU(`https://t.me/share/url?url=${enc(getUrl())}&text=${enc(getCopy())}`)],
+    ['[data-share="instagram"]',()=>openU('https://www.instagram.com/')],
+    ['[data-share="tiktok"]',   ()=>openU('https://www.tiktok.com/')],
+    ['[data-share="truth"]',    ()=>openU('https://truthsocial.com/')],
+    ['[data-share="youtube"]',  ()=>openU('https://www.youtube.com/upload')],
+  ];
+  binds.forEach(([sel,fn]) => document.querySelectorAll(sel).forEach(b=>b.addEventListener('click',e=>{e.preventDefault();fn();})));
+})();
+</script>
 
-        <div class="label" style="margin-top:12px">Step 2 — Post it</div>
-        <select data-platform-select aria-label="Choose a platform">
-          <option>Facebook</option><option>X</option><option>Instagram</option><option>TikTok</option><option>Other</option>
-        </select>
-        <div class="muted" style="margin:8px 0 12px 0">Copy, paste and post to X/Facebook/Instagram/TikTok, then paste your social media URL into Step 2 to complete the challenge.</div>
+<script>
+/* -------- Save & Challenge (localStorage now; Supabase optional) -------- */
+(function(){
+  const supaUrl = (window.SUPABASE_URL||'').trim();
+  const supaKey = (window.SUPABASE_ANON_KEY||'').trim();
+  const hasSupa = !!(supaUrl && supaKey); // placeholder hook — add Supabase client if you want
 
-        <div id="step2"></div>
-        <div class="label">Step 3 — Paste your link so it counts</div>
-        <input data-post-url placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
-        <div class="two" style="margin-top:10px">
-          <input data-name placeholder="(optional) Your name" />
-          <input data-email placeholder="(optional) Email" />
-        </div>
-        <button data-save style="margin-top:12px">Save & Challenge</button>
+  const actionEl = document.getElementById('actionSelect');
+  const platformEl = document.getElementById('platformSelect');
+  const urlEl = document.getElementById('postUrl');
+  const nameEl = document.getElementById('yourName');
+  const emailEl = document.getElementById('yourEmail');
+  const saveBtn = document.getElementById('saveBtn');
+  const lb = document.getElementById('leaderboard');
+  const rc = document.getElementById('recent');
 
-        <div class="tiers">
-          <div class="badge"><h4>Silver</h4><div>Do <b>1 action per week</b>. Keep the streak going.</div></div>
-          <div class="badge"><h4>Gold</h4><div>Do <b>1 action every day for 7 days</b>. Invite 3 friends.</div></div>
-          <div class="badge"><h4>Platinum</h4><div>Do <b>1 action every day for 30 days</b>. Help 3 friends earn Gold.</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  function loadLocal(){
+    try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch{ return [] }
+  }
+  function saveLocal(rows){
+    localStorage.setItem('lc_log', JSON.stringify(rows));
+  }
 
-  <main class="wrap" id="impact">
-    <div class="two">
-      <div class="panel">
-        <div class="label">Impact — Leaderboard</div>
-        <table>
-          <thead><tr><th>#</th><th>Action</th><th>Count</th></tr></thead>
-          <tbody data-leaderboard></tbody>
-        </table>
-      </div>
-      <div class="panel">
-        <div class="label">Recent Submissions</div>
-        <table>
-          <thead><tr><th>When</th><th>Action</th><th>Platform</th><th>Link</th></tr></thead>
-          <tbody data-recent></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
+  function render(){
+    const rows = loadLocal().slice().reverse();
+    // recent
+    rc.innerHTML = rows.slice(0,10).map(r=>{
+      const when = new Date(r.ts).toLocaleString();
+      const action = r.action || '';
+      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
+      return `<tr><td>${when}</td><td>${action}</td><td>${link}</td></tr>`;
+    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
 
-  <script>window.SUPABASE_URL=""; window.SUPABASE_ANON_KEY="";</script>
-  <script src="likecharlie_app_v3.js"></script>
+    // leaderboard
+    const counts = {};
+    rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+    const list = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('') || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+  }
+
+  saveBtn?.addEventListener('click', async ()=>{
+    const row = {
+      ts: Date.now(),
+      action: actionEl?.value||'',
+      platform: platformEl?.value||'',
+      url: urlEl?.value||'',
+      name: nameEl?.value||'',
+      email: emailEl?.value||''
+    };
+
+    // Local first
+    const now = loadLocal(); now.push(row); saveLocal(now);
+
+    // Hook for Supabase write if you wire it later
+    // if(hasSupa){ ... }
+
+    render();
+    alert('Saved! Now text this page to 3 friends and ask them to do one small good thing today.');
+  });
+
+  // Deep-link prefill: /?action=Raise%20the%20Flag#step1
+  const q = new URLSearchParams(location.search);
+  const deep = q.get('action'); if(deep && actionEl){ actionEl.value = deep; actionEl.dispatchEvent(new Event('change')); }
+  if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
+
+  render();
+})();
+</script>
 </body>
 </html>
