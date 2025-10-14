@@ -3,53 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Like Charlie — One Small Good Thing</title>
-<meta name="description" content="Do one small good thing like Charlie, invite 3 friends, and paste your post link to complete the challenge.">
-<meta property="og:title" content="Like Charlie — One Small Good Thing">
-<meta property="og:description" content="Pick an action, make a quick post, invite 3 friends, and paste your link to complete the challenge.">
+<title>Like Charlie — Do Good. Count It. Grow Influence.</title>
+<meta name="description" content="Do Good. Count It. Grow Influence, like Charlie. Pick an action, post it, invite 3 friends, and paste your link to complete the challenge.">
+<meta property="og:title" content="Do Good. Count It. Grow Influence — Like Charlie">
+<meta property="og:description" content="Do one small good action like Charlie, invite 3 friends, and paste your link to complete the challenge.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cybermave.ai/">
 <style>
   :root{
     --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
     --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --border:rgba(255,255,255,.12);
-    /* uses your existing file /img/patriotism.jpeg */
-    --hero-bg:url('/img/patriotism.jpeg');
+    --hero-bg:url('/img/patriotism.jpeg'); /* uses your existing file */
   }
   *{box-sizing:border-box}
-  body{margin:0;background:linear-gradient(180deg,#071022,#0a1734 60%,#071022);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:#9ec5ff}
-  .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  a{color:#9ec5ff;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px}
   header{position:sticky;top:0;z-index:60;background:#0c1530cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
   nav{display:flex;align-items:center;gap:14px;padding:10px 16px}
-  nav a{color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:8px}
+  nav a{padding:6px 10px;border-radius:8px}
   nav a:hover{background:#1a2750}
   .brand{font-weight:800;letter-spacing:.3px}
 
-  /* HERO (flag + gradient fallback) */
+  /* Hero */
   .hero{
-    position:relative;margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
+    margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
     background:
-      linear-gradient(to bottom, rgba(5,12,28,.35), rgba(5,12,28,.62)),
+      linear-gradient(to bottom, rgba(5,12,28,.35), rgba(5,12,28,.70)),
       var(--hero-bg), linear-gradient(135deg,#0c1b3a 0%, #b91c1c 100%);
     background-size:cover; background-position:center;
   }
-  .hero-inner{padding:48px 16px}
-  .hero h1{margin:0 0 8px 0;font-size:32px}
-  .hero-lead{margin:8px 0 0 0;color:#d9e8ff;font-size:18px}
+  .hero-inner{padding:46px 18px}
+  .hero h1{margin:0 0 6px 0;font-size:34px}
+  .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:900px}
 
-  .grid{display:grid;gap:14px}
+  .grid{display:grid;gap:16px}
   .two{grid-template-columns:1fr}
-  @media(min-width:880px){.two{grid-template-columns:1fr 1fr}}
+  @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
 
-  /* STEP CARDS (subtle photo through dark overlay) */
-  #step1,#step2,.card{
+  /* Cards */
+  .card{
     background:
       linear-gradient(to bottom, rgba(15,26,51,.92), rgba(15,26,51,.94)),
       var(--hero-bg), linear-gradient(135deg,#0c1b3a 0%, #142446 100%);
     background-size:cover; background-position:center;
-    border:1px solid var(--border);
-    border-radius:16px; padding:16px;
+    border:1px solid var(--border); border-radius:16px; padding:16px
   }
 
   label{display:block;font-weight:600;margin:10px 0 6px}
@@ -61,7 +59,6 @@
   .btn:hover{filter:brightness(1.08)}
   .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))}
   .muted{color:var(--muted)}
-  .icon{width:18px;height:18px;display:inline-block;vertical-align:middle}
 
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
@@ -73,7 +70,7 @@
   <nav class="wrap">
     <a class="brand" href="/">Like Charlie</a>
     <span style="flex:1"></span>
-    <a href="/actions.html">Actions</a>
+    <a href="/actions.html">Actions</a>   <!-- fixed to point to /actions.html -->
     <a href="#impact">Impact</a>
     <a href="#resources">Resources</a>
   </nav>
@@ -82,16 +79,16 @@
 <main class="wrap">
   <section class="hero">
     <div class="hero-inner">
-      <h1>One Small Good Thing</h1>
+      <h1>Do Good. Count It. Grow Influence, like Charlie</h1>
       <p class="hero-lead">
-        Do one small good thing like Charlie, make a quick post inviting 3 friends to choose an action like Charlie also, then paste your link here to complete the challenge. Make doing one small good thing often a pattern, not a one-off.
+        Do one small good action like Charlie, make a quick post inviting 3 friends to choose to do a good action like Charlie also, then paste your link here to complete the challenge. Make doing one small good thing often a pattern, not a one-off.
       </p>
     </div>
   </section>
 
   <section class="grid two">
     <!-- STEP 1 -->
-    <div id="step1">
+    <div id="step1" class="card">
       <h2>Step 1 — Choose & prepare your post</h2>
 
       <label>Choose an action</label>
@@ -107,49 +104,12 @@
 
       <label style="margin-top:10px">Your caption (editable)</label>
       <textarea id="copyText" placeholder="Your caption appears here…"></textarea>
-
-      <div class="row" style="margin-top:8px">
-        <a id="renderImageLink" class="btn" title="Create a square/portrait/landscape image with your caption">
-          <!-- tiny camera icon -->
-          <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M7 7l1.5-2h7L17 7h2a3 3 0 013 3v7a3 3 0 01-3 3H5a3 3 0 01-3-3v-7a3 3 0 013-3h2z" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="14" r="3.5" stroke="#fff" stroke-width="1.5"/></svg>
-          Render share image
-        </a>
-      </div>
-
-      <!-- Share bar with logo icons -->
-      <div class="row" style="margin-top:10px">
-        <a href="#" data-share="x" class="btn" title="Post to X">
-          <img alt="X" src="https://cdn.simpleicons.org/x/ffffff" style="height:18px;vertical-align:middle"> X
-        </a>
-        <a href="#" data-share="facebook" class="btn" title="Share to Facebook">
-          <img alt="Facebook" src="https://cdn.simpleicons.org/facebook/ffffff" style="height:18px;vertical-align:middle"> Facebook
-        </a>
-        <a href="#" data-share="instagram" class="btn" title="Open Instagram">
-          <img alt="Instagram" src="https://cdn.simpleicons.org/instagram/ffffff" style="height:18px;vertical-align:middle"> Instagram
-        </a>
-        <a href="#" data-share="tiktok" class="btn" title="Open TikTok">
-          <img alt="TikTok" src="https://cdn.simpleicons.org/tiktok/ffffff" style="height:18px;vertical-align:middle"> TikTok
-        </a>
-        <a href="#" data-share="truth" class="btn" title="Open Truth Social">
-          <img alt="Truth" src="https://cdn.simpleicons.org/truthsocial/ffffff" style="height:18px;vertical-align:middle"> Truth
-        </a>
-        <a href="#" data-share="youtube" class="btn" title="Open YouTube Upload">
-          <img alt="YouTube" src="https://cdn.simpleicons.org/youtube/ffffff" style="height:18px;vertical-align:middle"> YouTube
-        </a>
-        <a href="#" data-share="telegram" class="btn" title="Share to Telegram">
-          <img alt="Telegram" src="https://cdn.simpleicons.org/telegram/ffffff" style="height:18px;vertical-align:middle"> Telegram
-        </a>
-        <a href="#" data-share="linkedin" class="btn" title="Share to LinkedIn">
-          <img alt="LinkedIn" src="https://cdn.simpleicons.org/linkedin/ffffff" style="height:18px;vertical-align:middle"> LinkedIn
-        </a>
-      </div>
     </div>
 
     <!-- STEP 2 -->
-    <div id="step2">
+    <div id="step2" class="card">
       <h2>Step 2 — Save & Challenge</h2>
-      <p class="muted">Copy, paste and post to your platform. Then paste your <b>post’s URL</b> below to complete the challenge.</p>
-
+      <p class="muted">Post on your platform. Then paste your <b>post’s URL</b> below to complete the challenge.</p>
       <details style="margin:6px 0"><summary class="muted">How to get your post link (quick)</summary>
         <ul class="muted" style="margin:8px 0 0 0;padding-left:18px">
           <li>Open your post → tap <b>Share</b> → <b>Copy link</b>.</li>
@@ -203,7 +163,7 @@
 </footer>
 
 <script>
-/* ---------- Actions (25+) + description + caption + image deep-link ---------- */
+/* ---------- Build actions (25+) + description + caption ---------- */
 (function () {
   const ACTIONS = [
     ["Raise the Flag","Post the picture and tell what it means to be an American."],
@@ -237,9 +197,8 @@
   const selPlatform = document.getElementById('platformSelect');
   const descEl      = document.getElementById('actionDesc');
   const postBox     = document.getElementById('copyText');
-  const renderBtn   = document.getElementById('renderImageLink');
 
-  selAction.innerHTML = `<option value="">— Choose —</option>` +
+  selAction.innerHTML = `<option value="">— Select an action —</option>` +
     ACTIONS.map(([t,d])=>`<option value="${t}" title="${d}">${t}</option>`).join('');
 
   function tags(p){
@@ -256,13 +215,6 @@
     const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action||"");
     const caption = `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(platform)}\n\nSee how it works: ${site}`;
     if (postBox) postBox.value = caption;
-
-    if (renderBtn){
-      const title = action || "One Small Good Thing";
-      const subtitle = "Join me + invite 3 friends";
-      const footer = "Like Charlie • #LiveLikeCharlie";
-      renderBtn.href = `/share.html?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(subtitle)}&footer=${encodeURIComponent(footer)}&text=${encodeURIComponent(caption)}`;
-    }
   }
 
   selAction.addEventListener('change', updateUI);
@@ -273,28 +225,6 @@
   if (deep && ACTIONS.some(([t])=>t===deep)) selAction.value = deep;
 
   updateUI();
-})();
-</script>
-
-<script>
-/* ---------- Share buttons (open official composers) ---------- */
-(function(){
-  function caption(){return document.getElementById('copyText')?.value||''}
-  function pageUrl(){return location.origin}
-  function go(u){window.open(u,'_blank','noopener,noreferrer')}
-  const enc = encodeURIComponent;
-
-  const binds = [
-    ['[data-share="x"]',       ()=>go(`https://twitter.com/intent/tweet?text=${enc(caption())}&url=${enc(pageUrl())}`)],
-    ['[data-share="facebook"]',()=>go(`https://www.facebook.com/sharer/sharer.php?u=${enc(pageUrl())}&quote=${enc(caption())}`)],
-    ['[data-share="linkedin"]',()=>go(`https://www.linkedin.com/sharing/share-offsite/?url=${enc(pageUrl())}`)],
-    ['[data-share="telegram"]',()=>go(`https://t.me/share/url?url=${enc(pageUrl())}&text=${enc(caption())}`)],
-    ['[data-share="instagram"]',()=>go('https://www.instagram.com/')],
-    ['[data-share="tiktok"]',   ()=>go('https://www.tiktok.com/')],
-    ['[data-share="truth"]',    ()=>go('https://truthsocial.com/')],
-    ['[data-share="youtube"]',  ()=>go('https://www.youtube.com/upload')],
-  ];
-  binds.forEach(([s,fn])=>document.querySelectorAll(s).forEach(el=>el.addEventListener('click',e=>{e.preventDefault();fn();})));
 })();
 </script>
 
@@ -344,6 +274,5 @@
   render();
 })();
 </script>
-
 </body>
 </html>
