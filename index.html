@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Like Charlie — Do Good. Count It. Grow Influence.</title>
 <meta name="description" content="Do Good. Count It. Grow Influence, like Charlie. Pick an action, post it, invite 3 friends, and paste your link to complete the challenge.">
 <meta property="og:title" content="Do Good. Count It. Grow Influence — Like Charlie">
@@ -24,6 +24,7 @@
   nav a{padding:6px 10px;border-radius:8px}
   nav a:hover{background:#1a2750}
   .brand{font-weight:800;letter-spacing:.3px}
+
   .hero{
     margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
     background:
@@ -34,9 +35,11 @@
   .hero-inner{padding:46px 18px}
   .hero h1{margin:0 0 10px 0;font-size:34px}
   .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:980px;white-space:pre-line}
+
   .grid{display:grid;gap:16px}
   .two{grid-template-columns:1fr}
   @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
+
   .card{
     background:
       linear-gradient(to bottom, rgba(15,26,51,.92), rgba(15,26,51,.94)),
@@ -44,17 +47,19 @@
     background-size:cover; background-position:center;
     border:1px solid var(--border); border-radius:16px; padding:16px
   }
+
   label{display:block;font-weight:600;margin:10px 0 6px}
   select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
   textarea{min-height:110px;resize:vertical}
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:#fff;background:#162552}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:#fff;background:#162552;cursor:pointer}
   .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))}
   .muted{color:var(--muted)}
+  .mini{font-size:.9rem}
+
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
   footer{margin:24px 0 8px}
-  .mini{font-size:.9rem}
 </style>
 </head>
 <body>
@@ -92,7 +97,7 @@
         </div>
         <div>
           <label style="visibility:hidden">.</label>
-          <a class="btn" href="/actions.html" title="See explanations and ideas for each action">Explanations of Actions</a>
+          <a class="btn" href="/actions.html" title="See explanations and ideas for each action" target="_self" rel="noopener">Explanations of Actions</a>
         </div>
       </div>
 
@@ -159,12 +164,12 @@
   <section id="resources" class="card" style="margin-top:14px">
     <h2>Resources</h2>
     <ul>
-      <li><a href="https://donate.tpusa.com/">Donate to Turning Point USA</a></li>
-      <li><a href="https://tpusa.com/getinvolved/">Join TPUSA</a></li>
-      <li><a href="https://tpusamerch.com/">Shop TPUSA</a></li>
-      <li><a href="https://tpusa.com/events/">TPUSA Events</a></li>
-      <li><a href="https://tpusa.com/">Turning Point USA</a></li>
-      <li><a href="https://charliechallenge.org/">The Charlie Challenge</a></li>
+      <li><a href="https://donate.tpusa.com/" target="_blank" rel="noopener">Donate to Turning Point USA</a></li>
+      <li><a href="https://tpusa.com/getinvolved/" target="_blank" rel="noopener">Join TPUSA</a></li>
+      <li><a href="https://tpusamerch.com/" target="_blank" rel="noopener">Shop TPUSA</a></li>
+      <li><a href="https://tpusa.com/events/" target="_blank" rel="noopener">TPUSA Events</a></li>
+      <li><a href="https://tpusa.com/" target="_blank" rel="noopener">Turning Point USA</a></li>
+      <li><a href="https://charliechallenge.org/" target="_blank" rel="noopener">The Charlie Challenge</a></li>
     </ul>
   </section>
 </main>
@@ -173,7 +178,16 @@
   <p>Not affiliated with charliechallenge.org.</p>
 </footer>
 
-<!-- Shared list + dropdown + caption (pulls from /data/actions.json) -->
+<!-- Supabase client (IIFE build exposes window.supabase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
+
+<!-- Your project keys (fill in for global; leave blank for local fallback) -->
+<script>
+  window.SUPABASE_URL = "";        // e.g., "https://YOURPROJECTID.supabase.co"
+  window.SUPABASE_ANON_KEY = "";   // e.g., "YOUR_PUBLIC_ANON_KEY"
+</script>
+
+<!-- Actions + caption logic (loads from /data/actions.json; respects ?action=&desc=&focus=post) -->
 <script>
 (async function () {
   const data = await fetch('/data/actions.json').then(r=>r.json()).catch(()=>({items:[]}));
@@ -189,9 +203,9 @@
     ALL.map(it=>`<option value="${it.title}" title="${it.desc}">${it.title}</option>`).join('');
 
   const q = new URLSearchParams(location.search);
-  const deepAction = q.get('action');
+  const deepAction   = q.get('action');
   const incomingDesc = q.get('desc');
-  const focusTarget = q.get('focus'); // "post" from actions page
+  const focusTarget  = q.get('focus'); // "post" to focus textarea
 
   function tags(p){
     const base="#LiveLikeCharlie #OneSmallGoodThing";
@@ -213,19 +227,19 @@
   selAction.addEventListener('change', updateUI);
   selPlatform && selPlatform.addEventListener('change', ()=>writeCaption(descEl.textContent, selAction.value));
   copyBtn?.addEventListener('click', async ()=>{
-    try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1300); }catch(e){ alert('Copy failed. Select the text and copy manually.'); }
+    try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1300); }
+    catch(e){ alert('Copy failed. Select the text and copy manually.'); }
   });
 
-  // Preselect + focus behavior
   if (deepAction && ALL.some(x=>x.title===deepAction)) selAction.value = deepAction;
   if (incomingDesc) { descEl.textContent = incomingDesc; writeCaption(incomingDesc, selAction.value); }
   else { updateUI(); }
 
   if (focusTarget==='post') {
-    setTimeout(()=>{ copyBox?.focus(); copyBox?.scrollIntoView({behavior:'smooth', block:'center'}); }, 50);
+    setTimeout(()=>{ copyBox?.focus(); copyBox?.scrollIntoView({behavior:'smooth', block:'center'}); }, 60);
   }
 
-  // Sort dropdown by local popularity
+  // Popularity sort (local history)
   function loadLog(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch { return []; } }
   const counts = {}; loadLog().forEach(r => { if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
   const opts = Array.from(selAction.options).slice(1);
@@ -238,7 +252,7 @@
 })();
 </script>
 
-<!-- Save & Challenge (local for now) including donation fields; Supabase next -->
+<!-- Save & Impact (Supabase global if keys present; local fallback otherwise) -->
 <script>
 (function(){
   const actionEl = document.getElementById('actionSelect');
@@ -252,10 +266,37 @@
   const lb = document.getElementById('leaderboard');
   const rc = document.getElementById('recent');
 
+  // Local fallback helpers
   function loadLocal(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch{ return [] } }
   function saveLocal(rows){ localStorage.setItem('lc_log', JSON.stringify(rows)); }
 
-  function render(){
+  const hasSupa = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  const supa = hasSupa ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+
+  async function renderImpact(){
+    if (hasSupa){
+      const { data: recent } = await supa
+        .from('public_submissions')
+        .select('created_at, action, url, donation_org, donation_amt')
+        .eq('approved', true)
+        .order('created_at', { ascending:false })
+        .limit(10);
+
+      const { data: counts } = await supa.rpc('public_action_counts');
+
+      rc.innerHTML = (recent||[]).map(r=>{
+        const when = new Date(r.created_at).toLocaleString();
+        const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
+        const donation = (r.donation_org||r.donation_amt) ? ` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
+        return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;
+      }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
+
+      lb.innerHTML = (counts||[]).map(r=>`<tr><td>${r.action}</td><td>${r.cnt}</td></tr>`).join('')
+        || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+      return;
+    }
+
+    // Local fallback
     const rows = loadLocal().slice().reverse();
     rc.innerHTML = rows.slice(0,10).map(r=>{
       const when = new Date(r.ts).toLocaleString();
@@ -269,9 +310,9 @@
     lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('') || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
   }
 
-  saveBtn?.addEventListener('click', ()=>{
+  saveBtn?.addEventListener('click', async ()=>{
     const row = {
-      ts: Date.now(),
+      ts_ms: Date.now(),
       action: actionEl?.value||'',
       platform: platformEl?.value||'',
       url: urlEl?.value||'',
@@ -280,13 +321,20 @@
       donation_org: orgEl?.value||'',
       donation_amt: amtEl?.value||''
     };
-    const now = loadLocal(); now.push(row); saveLocal(now);
-    render();
+    if (!row.action){ alert('Please choose an action first.'); return; }
+
+    if (hasSupa){
+      const { error } = await supa.from('public_submissions').insert(row);
+      if (error){ console.warn(error); alert('Online save failed; keeping a local copy.'); }
+      else { urlEl.value=''; orgEl.value=''; amtEl.value=''; }
+    }
+    const now = loadLocal(); now.push({ ...row, ts: row.ts_ms }); saveLocal(now);
+    await renderImpact();
     alert('Saved! Now text this page to 3 friends and ask them to do one small good thing today.');
   });
 
   if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
-  render();
+  renderImpact();
 })();
 </script>
 </body>
