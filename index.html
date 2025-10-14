@@ -13,7 +13,7 @@
   :root{
     --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
     --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --border:rgba(255,255,255,.12);
-    --hero-bg:url('/img/patriotism.jpeg'); /* uses your existing file */
+    --hero-bg:url('/img/patriotism.jpeg'); /* uses your existing image */
   }
   *{box-sizing:border-box}
   body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
@@ -34,14 +34,13 @@
     background-size:cover; background-position:center;
   }
   .hero-inner{padding:46px 18px}
-  .hero h1{margin:0 0 6px 0;font-size:34px}
-  .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:900px}
+  .hero h1{margin:0 0 10px 0;font-size:34px}
+  .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:980px;white-space:pre-line}
 
   .grid{display:grid;gap:16px}
   .two{grid-template-columns:1fr}
   @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
 
-  /* Cards */
   .card{
     background:
       linear-gradient(to bottom, rgba(15,26,51,.92), rgba(15,26,51,.94)),
@@ -54,12 +53,9 @@
   select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
   textarea{min-height:110px;resize:vertical}
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-
   .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:#fff;background:#162552}
-  .btn:hover{filter:brightness(1.08)}
   .btn.brand{background:linear-gradient(90deg,var(--brand),var(--brand2))}
   .muted{color:var(--muted)}
-
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
   footer{margin:24px 0 8px}
@@ -70,7 +66,7 @@
   <nav class="wrap">
     <a class="brand" href="/">Like Charlie</a>
     <span style="flex:1"></span>
-    <a href="/actions.html">Actions</a>   <!-- fixed to point to /actions.html -->
+    <a href="/actions.html">Actions</a>
     <a href="#impact">Impact</a>
     <a href="#resources">Resources</a>
   </nav>
@@ -80,9 +76,10 @@
   <section class="hero">
     <div class="hero-inner">
       <h1>Do Good. Count It. Grow Influence, like Charlie</h1>
-      <p class="hero-lead">
-        Do one small good action like Charlie, make a quick post inviting 3 friends to choose to do a good action like Charlie also, then paste your link here to complete the challenge. Make doing one small good thing often a pattern, not a one-off.
-      </p>
+      <p class="hero-lead">1. Do one small good action like Charlie - pick from the list in Step one
+2. make a quick post about what you did and invite 3 friends to choose to do a good action like Charlie also, 
+3. paste your link from your social media post here to complete the challenge. 
+"Make doing one small good thing often a pattern, not a one-off."</p>
     </div>
   </section>
 
@@ -108,12 +105,12 @@
 
     <!-- STEP 2 -->
     <div id="step2" class="card">
-      <h2>Step 2 — Cmplete Challenge</h2>
+      <h2>Step 2 — Save & Challenge</h2>
       <p class="muted">Post on your platform. Then paste your <b>post’s URL</b> below to complete the challenge.</p>
       <details style="margin:6px 0"><summary class="muted">How to get your post link (quick)</summary>
         <ul class="muted" style="margin:8px 0 0 0;padding-left:18px">
           <li>Open your post → tap <b>Share</b> → <b>Copy link</b>.</li>
-          <li>Come back here and paste that link in the box below.</li>
+          <li>Come back here and paste that link below.</li>
         </ul>
       </details>
 
@@ -126,153 +123,4 @@
       </div>
 
       <div class="row" style="margin-top:12px">
-        <button id="saveBtn" class="btn brand">Save & Challenge</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="impact" class="card" style="margin-top:14px">
-    <h2>Impact</h2>
-    <div class="grid two">
-      <div>
-        <h3 style="margin-top:0">Leaderboard (by action)</h3>
-        <table><thead><tr><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
-      </div>
-      <div>
-        <h3 style="margin-top:0">Recent</h3>
-        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
-      </div>
-    </div>
-  </section>
-
-  <section id="resources" class="card" style="margin-top:14px">
-    <h2>Resources</h2>
-    <ul>
-      <li><a href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to Turning Point USA</a></li>
-      <li><a href="https://tpusa.com/getinvolved/">Join TPUSA</a></li>
-      <li><a href="https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Shop TPUSA</a></li>
-      <li><a href="https://tpusa.com/events/">TPUSA Events</a></li>
-      <li><a href="https://tpusa.com/">Turning Point USA</a></li>
-      <li><a href="https://charliechallenge.org/">TPUSA's The Charlie Challenge</a></li>
-    </ul>
-  </section>
-</main>
-
-<footer class="wrap" style="opacity:.8;font-size:.9rem">
-  <p>Not affiliated with charliechallenge.org.</p>
-</footer>
-
-<script>
-/* ---------- Build actions (25+) + description + caption ---------- */
-(function () {
-  const ACTIONS = [
-    ["Raise the Flag","Post the picture and tell what it means to be an American."],
-    ["Publicly Thank Someone","Thank someone who helped you. You can quote JFK."],
-    ["Pick Up 10 Pieces","Pick up 10 pieces of trash; post before/after pics."],
-    ["Pray for Someone","Pray and encourage them in a comment or DM."],
-    ["Read the Bible for 15","Read for 15 minutes; share one takeaway."],
-    ["Help at Home","Do a task that blesses your family and share the moment."],
-    ["Be a Friend","Reach out intentionally and post what you learned."],
-    ["Volunteer 1 Hour","Serve locally for one hour and inspire a friend to join."],
-    ["Honor a Veteran","Thank a veteran; share a quote or photo (with permission)."],
-    ["Invite 3 to Church","Invite three friends; if they come, share what it meant."],
-    ["Write a Thank-You Note","Hand-write a note and post why they matter to you."],
-    ["Family Table Focus","Eat together, no screens; share one thing that changed."],
-    ["Hands-Free Driver","Pledge no phone while driving; remind others to join."],
-    ["Coach or Mentor (Youth)","Volunteer to coach or mentor; invite others too."],
-    ["First Bible Give-Away","Give someone their first Bible (with a note inside)."],
-    ["Register or Verify to Vote","Check registration; help a friend do the same."],
-    ["Pro-Life Serve Day","Support a local pregnancy center; share how to help."],
-    ["Apologetics Share","Share one reason for your hope—briefly, winsomely."],
-    ["Read Aloud with Kids","Read a chapter together; share a family photo."],
-    ["Add Your Church","Post your church link and invite locals to visit."],
-    ["Host a Film Night","Watch a faith film; post the group photo + takeaways."],
-    ["Creator Proceeds Donor","Donate today’s content proceeds; blur private info."],
-    ["Phone Off at Church","Go distraction-free; post a simple reminder graphic."],
-    ["Meal Train Start","Start or join a meal train; share the link."],
-    ["Generations Together","3+ generations do an action together; share a photo."]
-  ];
-
-  const selAction   = document.getElementById('actionSelect');
-  const selPlatform = document.getElementById('platformSelect');
-  const descEl      = document.getElementById('actionDesc');
-  const postBox     = document.getElementById('copyText');
-
-  selAction.innerHTML = `<option value="">— Select an action —</option>` +
-    ACTIONS.map(([t,d])=>`<option value="${t}" title="${d}">${t}</option>`).join('');
-
-  function tags(p){
-    const base = "#LiveLikeCharlie #OneSmallGoodThing";
-    return (/instagram|tiktok/i.test(p||"")) ? base + " #Challenge" : base;
-  }
-
-  function updateUI(){
-    const action   = selAction.value;
-    const platform = selPlatform ? selPlatform.value : "";
-    const found    = ACTIONS.find(([t])=>t===action);
-    descEl.textContent = found ? found[1] : "";
-
-    const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action||"");
-    const caption = `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(platform)}\n\nSee how it works: ${site}`;
-    if (postBox) postBox.value = caption;
-  }
-
-  selAction.addEventListener('change', updateUI);
-  selPlatform && selPlatform.addEventListener('change', updateUI);
-
-  const q = new URLSearchParams(location.search);
-  const deep = q.get('action');
-  if (deep && ACTIONS.some(([t])=>t===deep)) selAction.value = deep;
-
-  updateUI();
-})();
-</script>
-
-<script>
-/* ---------- Save & Challenge (local now; shows in Impact) ---------- */
-(function(){
-  const actionEl = document.getElementById('actionSelect');
-  const platformEl = document.getElementById('platformSelect');
-  const urlEl = document.getElementById('postUrl');
-  const nameEl = document.getElementById('yourName');
-  const emailEl = document.getElementById('yourEmail');
-  const saveBtn = document.getElementById('saveBtn');
-  const lb = document.getElementById('leaderboard');
-  const rc = document.getElementById('recent');
-
-  function loadLocal(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch{ return [] } }
-  function saveLocal(rows){ localStorage.setItem('lc_log', JSON.stringify(rows)); }
-
-  function render(){
-    const rows = loadLocal().slice().reverse();
-    rc.innerHTML = rows.slice(0,10).map(r=>{
-      const when = new Date(r.ts).toLocaleString();
-      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
-    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
-
-    const counts={}; rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
-    const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    lb.innerHTML = list.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('') || `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
-  }
-
-  saveBtn?.addEventListener('click', ()=>{
-    const row = {
-      ts: Date.now(),
-      action: actionEl?.value||'',
-      platform: platformEl?.value||'',
-      url: urlEl?.value||'',
-      name: nameEl?.value||'',
-      email: emailEl?.value||''
-    };
-    const now = loadLocal(); now.push(row); saveLocal(now);
-    render();
-    alert('Saved! Now text this page to 3 friends and ask them to do one small good thing today.');
-  });
-
-  if(location.hash==='#step1'){ document.getElementById('step1')?.scrollIntoView({behavior:'smooth'}); }
-  render();
-})();
-</script>
-</body>
-</html>
+        <button id="saveBtn" class="btn brand">Save & Challeng
