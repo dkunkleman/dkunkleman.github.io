@@ -13,7 +13,7 @@
   nav a:hover{background:#1a2750}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
   .actions-hero{border:1px solid var(--border);border-radius:16px;background:#0f1a33;padding:16px;margin-bottom:14px}
-  .muted{color:var(--muted)}
+  .muted{color:#9fb3d1}
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
   .chip{padding:6px 10px;border:1px solid var(--border);border-radius:999px;cursor:pointer}
   .chip.active{background:#162552}
@@ -60,13 +60,13 @@
   const data = await fetch('/data/actions.json').then(r=>r.json()).catch(()=>({items:[]}));
   const items = data.items||[];
 
-  // Build category list from items
+  // categories from data
   const cats = [...new Set(items.map(i=>i.category||'Other'))];
   const chips = document.getElementById('chips');
   const search = document.getElementById('search');
   const root = document.getElementById('actions');
 
-  // Chips
+  // build chips
   const all = document.createElement('span'); all.className='chip active'; all.textContent='All'; all.dataset.cat='All'; chips.appendChild(all);
   cats.forEach(c=>{ const s=document.createElement('span'); s.className='chip'; s.textContent=c; s.dataset.cat=c; chips.appendChild(s); });
 
@@ -83,17 +83,32 @@
   function render(filter='All', q=''){
     root.innerHTML='';
     const query = (q||'').toLowerCase();
-    cats.concat('Other').forEach(cat=>{
-      const list = items.filter(i=>{
-        const inCat = (filter==='All' ? true : (i.category===filter));
-        const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
-        return inCat && match;
-      });
-      if(!list.length) return;
-      const sec = document.createElement('section'); sec.className='section';
-      sec.innerHTML = `<h2>${cat}</h2><div class="grid">${list.map(card).join('')}</div>`;
-      root.appendChild(sec);
+    const byCat = (c)=>items.filter(i=>{
+      const inCat = (filter==='All' ? true : (i.category===c));
+      const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
+      return (filter==='All' ? true : i.category===filter) && match;
     });
+
+    // All or specific
+    if(filter==='All'){
+      cats.concat('Other').forEach(cat=>{
+        const list = items.filter(i=>{
+          const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
+          return (i.category===cat) && match;
+        });
+        if(!list.length) return;
+        const sec = document.createElement('section'); sec.className='section';
+        sec.innerHTML = `<h2>${cat}</h2><div class="grid">${list.map(card).join('')}</div>`;
+        root.appendChild(sec);
+      });
+    } else {
+      const list = byCat(filter);
+      if(list.length){
+        const sec = document.createElement('section'); sec.className='section';
+        sec.innerHTML = `<h2>${filter}</h2><div class="grid">${list.map(card).join('')}</div>`;
+        root.appendChild(sec);
+      }
+    }
   }
 
   chips.addEventListener('click', e=>{
