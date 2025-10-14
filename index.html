@@ -62,6 +62,57 @@
   footer{margin:24px 0 8px}
 </style>
 </head>
+  <script>
+(function(){
+  const sms  = document.getElementById('shareSMS');
+  const wa   = document.getElementById('shareWA');
+  const cpy  = document.getElementById('shareCopy');
+
+  // Message friends will receive
+  function inviteText(){
+    const url = location.origin + location.pathname; // current page
+    return "Join me to do one small good thing like Charlie. Pick an action, post it, and paste your link to complete the challenge: " + url;
+  }
+
+  // Use Web Share API when available (mobile-friendly)
+  async function webShare(){
+    if (navigator.share){
+      try { await navigator.share({ text: inviteText() }); } catch(e){}
+      return true;
+    }
+    return false;
+  }
+
+  sms?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    if (await webShare()) return;
+    // Fallback: SMS link (varies by device; this works broadly)
+    const body = encodeURIComponent(inviteText());
+    // iOS accepts sms:&body= ; many Androids accept sms:?body=
+    const link = navigator.userAgent.match(/iPhone|iPad|Macintosh/i) ? `sms:&body=${body}` : `sms:?body=${body}`;
+    location.href = link;
+  });
+
+  wa?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    if (await webShare()) return;
+    const text = encodeURIComponent(inviteText());
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");
+  });
+
+  cpy?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(inviteText());
+      cpy.textContent = "Copied!";
+      setTimeout(()=>cpy.textContent="Copy Page Link", 1200);
+    } catch {
+      alert("Copy failed. Press Ctrl+C / Cmd+C to copy.");
+    }
+  });
+})();
+</script>
+
 <body>
 <header>
   <nav class="wrap">
@@ -142,6 +193,13 @@
 
       <div class="row" style="margin-top:12px">
         <button id="saveBtn" class="btn brand">Save & Challenge</button>
+        <div class="row" style="margin-top:10px">
+  <a id="shareSMS" class="btn" href="#">Text (SMS)</a>
+  <a id="shareWA"  class="btn" href="#">WhatsApp</a>
+  <a id="shareCopy" class="btn" href="#">Copy Page Link</a>
+</div>
+<p class="muted mini">Tip: Use SMS or WhatsApp to invite 3 friends now. They’ll land on this page and can complete the challenge.</p>
+
       </div>
       <p class="muted mini" style="margin-top:6px">Tip: If you donated, add the org and amount above (screenshot or receipt link in your post URL is great). We’ll count it in Impact.</p>
     </div>
