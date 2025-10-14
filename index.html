@@ -44,11 +44,65 @@
     @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
   </style>
 </head>
+  <script>
+(function () {
+  const selAction = document.querySelector('[data-action-select]');
+  const selPlatform = document.querySelector('[data-platform-select]');
+  const postBox   = document.querySelector('#copyText, [data-copy-text]');
+  const renderBtn = document.querySelector('#renderImageLink, [data-render-link]');
+
+  // Short captions per action (edit anytime)
+  const ACTION_LINES = {
+    "Raise the Flag": "I raised the flag today 🇺🇸",
+    "Publicly Thank Someone": "Stopping to thank someone who made my day",
+    "Pick Up 10 Pieces": "Picked up 10 pieces of trash to keep our city clean",
+    "Pray for Someone": "Praying for a friend today 🙏",
+    "Read the Bible for 15": "Reading Scripture for 15 minutes",
+    "Help at Home": "Helping at home—small acts matter",
+    "Be a Friend": "Choosing to be a friend on purpose"
+  };
+
+  function buildHashtags(platform) {
+    // keep short, platform-friendly
+    const base = "#LiveLikeCharlie #OneSmallGoodThing";
+    if (!platform) return base;
+    if (/instagram|tiktok/i.test(platform)) return base + " #Challenge";
+    return base;
+  }
+
+  function updateDraft() {
+    if (!postBox || !selAction) return;
+    const action = selAction.value || "";
+    const platform = selPlatform ? selPlatform.value : "";
+    const line = ACTION_LINES[action] || `Doing: ${action}`;
+    const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action);
+    const copy = `${line}. Join me: pick an action and do one small good thing like Charlie. ${buildHashtags(platform)}\n\nSee how it works: ${site}`;
+    postBox.value = copy;
+
+    // prep share-image deep link (user can edit on that page)
+    if (renderBtn) {
+      const title = action || "One Small Good Thing";
+      const subtitle = "Join me + invite 3 friends";
+      const footer = "Like Charlie • #LiveLikeCharlie";
+      const url = `/share.html?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(subtitle)}&footer=${encodeURIComponent(footer)}&text=${encodeURIComponent(copy)}`;
+      renderBtn.setAttribute('href', url);
+    }
+  }
+
+  (selAction  ? selAction.addEventListener('change', updateDraft)  : 0);
+  (selPlatform? selPlatform.addEventListener('change', updateDraft): 0);
+
+  // initialize once on load
+  updateDraft();
+})();
+</script>
+
 <body>
   <header>
     <div class="nav wrap">
       <div class="brand">Like Charlie</div>
       <nav>
+        <a id="renderImageLink" class="btn">Render share image</a>
         <a href="#step1">Start</a>
         <a href="/actions.html">Actions</a>
         <a href="#impact">Impact</a>
