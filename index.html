@@ -13,7 +13,7 @@
   :root{
     --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
     --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --border:rgba(255,255,255,.12);
-    --hero-bg:url('/img/patriotism.jpeg'); /* uses your existing image */
+    --hero-bg:url('/img/patriotism.jpeg');
   }
   *{box-sizing:border-box}
   body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
@@ -24,8 +24,6 @@
   nav a{padding:6px 10px;border-radius:8px}
   nav a:hover{background:#1a2750}
   .brand{font-weight:800;letter-spacing:.3px}
-
-  /* Hero */
   .hero{
     margin:16px;border-radius:18px;overflow:hidden;border:1px solid var(--border);
     background:
@@ -36,11 +34,9 @@
   .hero-inner{padding:46px 18px}
   .hero h1{margin:0 0 10px 0;font-size:34px}
   .hero-lead{margin:10px 0 0 0;color:#d9e8ff;font-size:18px;max-width:980px;white-space:pre-line}
-
   .grid{display:grid;gap:16px}
   .two{grid-template-columns:1fr}
   @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
-
   .card{
     background:
       linear-gradient(to bottom, rgba(15,26,51,.92), rgba(15,26,51,.94)),
@@ -48,7 +44,6 @@
     background-size:cover; background-position:center;
     border:1px solid var(--border); border-radius:16px; padding:16px
   }
-
   label{display:block;font-weight:600;margin:10px 0 6px}
   select,input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
   textarea{min-height:110px;resize:vertical}
@@ -59,6 +54,7 @@
   table{width:100%;border-collapse:collapse;margin-top:10px}
   th,td{border-bottom:1px solid var(--border);padding:8px 6px;text-align:left;color:#d9e8ff}
   footer{margin:24px 0 8px}
+  .mini{font-size:.9rem}
 </style>
 </head>
 <body>
@@ -88,9 +84,17 @@
     <div id="step1" class="card">
       <h2>Step 1 — Choose & prepare your post</h2>
 
-      <label>Choose an action</label>
-      <select id="actionSelect"></select>
-      <p id="actionDesc" class="muted" style="margin-top:6px"></p>
+      <div class="row">
+        <div style="flex:1;min-width:260px">
+          <label>Choose an action</label>
+          <select id="actionSelect"></select>
+          <p id="actionDesc" class="muted mini" style="margin-top:6px"></p>
+        </div>
+        <div>
+          <label style="visibility:hidden">.</label>
+          <a class="btn" href="/actions.html" title="See explanations and ideas for each action">Explanations of Actions</a>
+        </div>
+      </div>
 
       <label style="margin-top:10px">Platform</label>
       <select id="platformSelect">
@@ -99,8 +103,11 @@
         <option>Truth Social</option><option>Telegram</option><option>Other</option>
       </select>
 
-      <label style="margin-top:10px">Your caption (editable)</label>
-      <textarea id="copyText" placeholder="Your caption appears here…"></textarea>
+      <div class="row" style="margin-top:10px">
+        <label style="flex:1">Your post (editable)</label>
+        <button id="copyPost" class="btn" type="button">Copy Post</button>
+      </div>
+      <textarea id="copyText" placeholder="Your post appears here…"></textarea>
     </div>
 
     <!-- STEP 2 -->
@@ -122,9 +129,16 @@
         <input id="yourEmail" placeholder="Email (optional)" style="flex:1;min-width:220px">
       </div>
 
+      <!-- Donation tracking (optional) -->
+      <div class="row" style="margin-top:10px">
+        <input id="donationOrg" placeholder="Donation organization (e.g., TPUSA)" style="flex:2;min-width:220px">
+        <input id="donationAmt" placeholder="Donation amount (e.g., 25.00)" style="flex:1;min-width:160px">
+      </div>
+
       <div class="row" style="margin-top:12px">
         <button id="saveBtn" class="btn brand">Save & Challenge</button>
       </div>
+      <p class="muted mini" style="margin-top:6px">Tip: If you donated, add the org and amount above (screenshot or receipt link in your post URL is great). We’ll count it in Impact.</p>
     </div>
   </section>
 
@@ -137,7 +151,7 @@
       </div>
       <div>
         <h3 style="margin-top:0">Recent</h3>
-        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
+        <table><thead><tr><th>When</th><th>Action</th><th>Link / Donation</th></tr></thead><tbody id="recent"></tbody></table>
       </div>
     </div>
   </section>
@@ -145,9 +159,9 @@
   <section id="resources" class="card" style="margin-top:14px">
     <h2>Resources</h2>
     <ul>
-      <li><a href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to Turning Point USA</a></li>
+      <li><a href="https://donate.tpusa.com/">Donate to Turning Point USA</a></li>
       <li><a href="https://tpusa.com/getinvolved/">Join TPUSA</a></li>
-      <li><a href="https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Shop TPUSA</a></li>
+      <li><a href="https://tpusamerch.com/">Shop TPUSA</a></li>
       <li><a href="https://tpusa.com/events/">TPUSA Events</a></li>
       <li><a href="https://tpusa.com/">Turning Point USA</a></li>
       <li><a href="https://charliechallenge.org/">The Charlie Challenge</a></li>
@@ -159,108 +173,81 @@
   <p>Not affiliated with charliechallenge.org.</p>
 </footer>
 
+<!-- Shared list + dropdown + caption (pulls from /data/actions.json) -->
 <script>
-/* ---------- Build actions (25+) + description + caption; sort by frequency ---------- */
-(function () {
-  const ACTIONS = [
-    ["Raise the Flag","Post the picture and tell what it means to be an American."],
-    ["Publicly Thank Someone","Thank someone who helped you. You can quote JFK."],
-    ["Pick Up 10 Pieces","Pick up 10 pieces of trash; post before/after pics."],
-    ["Pray for Someone","Pray and encourage them in a comment or DM."],
-    ["Read the Bible for 15","Read for 15 minutes; share one takeaway."],
-    ["Help at Home","Do a task that blesses your family and share the moment."],
-    ["Be a Friend","Reach out intentionally and post what you learned."],
-    ["Volunteer 1 Hour","Serve locally for one hour and inspire a friend to join."],
-    ["Honor a Veteran","Thank a veteran; share a quote or photo (with permission)."],
-    ["Invite 3 to Church","Invite three friends; if they come, share what it meant."],
-    ["Write a Thank-You Note","Hand-write a note and post why they matter to you."],
-    ["Family Table Focus","Eat together, no screens; share one thing that changed."],
-    ["Hands-Free Driver","Pledge no phone while driving; remind others to join."],
-    ["Coach or Mentor (Youth)","Volunteer to coach or mentor; invite others too."],
-    ["First Bible Give-Away","Give someone their first Bible (with a note inside)."],
-    ["Register or Verify to Vote","Check registration; help a friend do the same."],
-    ["Pro-Life Serve Day","Support a local pregnancy center; share how to help."],
-    ["Apologetics Share","Share one reason for your hope—briefly, winsomely."],
-    ["Read Aloud with Kids","Read a chapter together; share a family photo."],
-    ["Add Your Church","Post your church link and invite locals to visit."],
-    ["Host a Film Night","Watch a faith film; post the group photo + takeaways."],
-    ["Creator Proceeds Donor","Donate today’s content proceeds; blur private info."],
-    ["Phone Off at Church","Go distraction-free; post a simple reminder graphic."],
-    ["Meal Train Start","Start or join a meal train; share the link."],
-    ["Generations Together","3+ generations do an action together; share a photo."]
-  ];
+(async function () {
+  const data = await fetch('/data/actions.json').then(r=>r.json()).catch(()=>({items:[]}));
+  const ALL = data.items || [];
 
   const selAction   = document.getElementById('actionSelect');
   const selPlatform = document.getElementById('platformSelect');
   const descEl      = document.getElementById('actionDesc');
   const copyBox     = document.getElementById('copyText');
+  const copyBtn     = document.getElementById('copyPost');
 
-  // Build dropdown
   selAction.innerHTML = `<option value="">— Select an action —</option>` +
-    ACTIONS.map(([t,d])=>`<option value="${t}" title="${d}">${t}</option>`).join('');
+    ALL.map(it=>`<option value="${it.title}" title="${it.desc}">${it.title}</option>`).join('');
 
-  // If navigated from actions.html, prefill caption from ?desc=
   const q = new URLSearchParams(location.search);
+  const deepAction = q.get('action');
   const incomingDesc = q.get('desc');
-  const deepAction   = q.get('action');
+  const focusTarget = q.get('focus'); // "post" from actions page
 
   function tags(p){
     const base="#LiveLikeCharlie #OneSmallGoodThing";
     return (/instagram|tiktok/i.test(p||"")) ? base+" #Challenge" : base;
   }
-
   function writeCaption(desc, act){
     const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(act||"");
     const caption = (desc? (desc+"\n\n") : "") +
       `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(selPlatform?.value)}\n\nSee how it works: ${site}`;
     if (copyBox) copyBox.value = caption;
   }
-
-  // Show description + caption on selection changes
   function updateUI(){
-    const act  = selAction.value;
-    const item = ACTIONS.find(([t])=>t===act);
-    descEl.textContent = item ? item[1] : "";
-    writeCaption(item?item[1]:"", act);
+    const act = selAction.value;
+    const item = ALL.find(x=>x.title===act);
+    descEl.textContent = item ? item.desc : "";
+    writeCaption(item?item.desc:"", act);
   }
 
   selAction.addEventListener('change', updateUI);
   selPlatform && selPlatform.addEventListener('change', ()=>writeCaption(descEl.textContent, selAction.value));
+  copyBtn?.addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1300); }catch(e){ alert('Copy failed. Select the text and copy manually.'); }
+  });
 
-  // Preselect from deep link
-  if (deepAction && ACTIONS.some(([t])=>t===deepAction)) {
-    selAction.value = deepAction;
-  }
-  if (incomingDesc) {
-    descEl.textContent = incomingDesc;
-    writeCaption(incomingDesc, selAction.value);
-  } else {
-    updateUI();
+  // Preselect + focus behavior
+  if (deepAction && ALL.some(x=>x.title===deepAction)) selAction.value = deepAction;
+  if (incomingDesc) { descEl.textContent = incomingDesc; writeCaption(incomingDesc, selAction.value); }
+  else { updateUI(); }
+
+  if (focusTarget==='post') {
+    setTimeout(()=>{ copyBox?.focus(); copyBox?.scrollIntoView({behavior:'smooth', block:'center'}); }, 50);
   }
 
-  // Sort dropdown by local frequency (most-used first)
+  // Sort dropdown by local popularity
   function loadLog(){ try { return JSON.parse(localStorage.getItem('lc_log')||'[]'); } catch { return []; } }
-  const counts = {};
-  loadLog().forEach(r => { if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+  const counts = {}; loadLog().forEach(r => { if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
   const opts = Array.from(selAction.options).slice(1);
   opts.sort((a,b)=>{
     const ca = counts[a.value]||0, cb = counts[b.value]||0;
     if (cb!==ca) return cb-ca;
     return a.value.localeCompare(b.value);
   });
-  const ph = selAction.options[0];
-  selAction.innerHTML=''; selAction.appendChild(ph); opts.forEach(o=>selAction.appendChild(o));
+  const ph = selAction.options[0]; selAction.innerHTML=''; selAction.appendChild(ph); opts.forEach(o=>selAction.appendChild(o));
 })();
 </script>
 
+<!-- Save & Challenge (local for now) including donation fields; Supabase next -->
 <script>
-/* ---------- Save & Challenge (local now; shows in Impact) ---------- */
 (function(){
   const actionEl = document.getElementById('actionSelect');
   const platformEl = document.getElementById('platformSelect');
   const urlEl = document.getElementById('postUrl');
   const nameEl = document.getElementById('yourName');
   const emailEl = document.getElementById('yourEmail');
+  const orgEl = document.getElementById('donationOrg');
+  const amtEl = document.getElementById('donationAmt');
   const saveBtn = document.getElementById('saveBtn');
   const lb = document.getElementById('leaderboard');
   const rc = document.getElementById('recent');
@@ -273,7 +260,8 @@
     rc.innerHTML = rows.slice(0,10).map(r=>{
       const when = new Date(r.ts).toLocaleString();
       const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
+      const donation = (r.donation_org||r.donation_amt) ? ` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
+      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;
     }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
 
     const counts={}; rows.forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
@@ -288,7 +276,9 @@
       platform: platformEl?.value||'',
       url: urlEl?.value||'',
       name: nameEl?.value||'',
-      email: emailEl?.value||''
+      email: emailEl?.value||'',
+      donation_org: orgEl?.value||'',
+      donation_amt: amtEl?.value||''
     };
     const now = loadLocal(); now.push(row); saveLocal(now);
     render();
