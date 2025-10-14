@@ -5,19 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Like Charlie — Actions</title>
 <style>
-  :root{--border:rgba(255,255,255,.12)}
-  body{margin:0;background:#0b1220;color:#e6eefc;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  :root{--border:rgba(255,255,255,.12);--ink:#e6eefc;--muted:#9fb3d1;}
+  body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
   header{position:sticky;top:0;background:#0c1530cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
   nav{display:flex;gap:14px;align-items:center;padding:10px 16px}
-  nav a{color:#e6eefc;text-decoration:none;padding:6px 10px;border-radius:8px}
+  nav a{color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:8px}
   nav a:hover{background:#1a2750}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
-  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-  .card{border:1px solid var(--border);border-radius:16px;padding:14px;background:#0f1a33}
-  .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;color:#fff;text-decoration:none;background:#162552}
-  footer{opacity:.8;font-size:.9rem;margin-top:24px}
-  .muted{color:#9fb3d1}
   .actions-hero{border:1px solid var(--border);border-radius:16px;background:#0f1a33;padding:16px;margin-bottom:14px}
+  .muted{color:var(--muted)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .chip{padding:6px 10px;border:1px solid var(--border);border-radius:999px;cursor:pointer}
+  .chip.active{background:#162552}
+  .section{margin:12px 0 18px}
+  .section h2{margin:0 0 8px 0;font-size:18px}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .card{border:1px solid var(--border);border-radius:14px;padding:12px;background:#0f1a33}
+  .card h3{margin:0 0 6px 0;font-size:16px}
+  .btn{display:inline-block;margin-top:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;color:#fff;text-decoration:none;background:#162552}
+  footer{opacity:.8;font-size:.9rem;margin-top:24px}
+  .srch{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -37,37 +44,11 @@
 2. make a quick post about what you did and invite 3 friends to choose to do a good action like Charlie also, 
 3. paste your link from your social media post on the homepage to complete the challenge. 
 "Make doing one small good thing often a pattern, not a one-off."</p>
+    <input id="search" class="srch" placeholder="Search actions…">
+    <div id="chips" class="toolbar"></div>
   </section>
 
-  <section class="grid actions-grid">
-    <!-- Repeat this pattern; data-action is required; description is the <p> text -->
-    <div class="card"><h3>Raise the Flag</h3><p>Post the picture and tell what it means to be an American.</p><a href="#" class="btn do-this" data-action="Raise the Flag">Do this</a></div>
-    <div class="card"><h3>Publicly Thank Someone</h3><p>Thank someone who helped you. You can quote JFK.</p><a href="#" class="btn do-this" data-action="Publicly Thank Someone">Do this</a></div>
-    <div class="card"><h3>Pick Up 10 Pieces</h3><p>Pick up 10 pieces of trash; post before/after pics.</p><a href="#" class="btn do-this" data-action="Pick Up 10 Pieces">Do this</a></div>
-    <div class="card"><h3>Pray for Someone</h3><p>Pray and encourage them in a comment or DM.</p><a href="#" class="btn do-this" data-action="Pray for Someone">Do this</a></div>
-    <div class="card"><h3>Read the Bible for 15</h3><p>Read for 15 minutes; share one takeaway.</p><a href="#" class="btn do-this" data-action="Read the Bible for 15">Do this</a></div>
-    <div class="card"><h3>Help at Home</h3><p>Do a task that blesses your family and share the moment.</p><a href="#" class="btn do-this" data-action="Help at Home">Do this</a></div>
-    <div class="card"><h3>Be a Friend</h3><p>Reach out intentionally and post what you learned.</p><a href="#" class="btn do-this" data-action="Be a Friend">Do this</a></div>
-
-    <div class="card"><h3>Volunteer 1 Hour</h3><p>Serve locally for one hour and inspire a friend to join.</p><a href="#" class="btn do-this" data-action="Volunteer 1 Hour">Do this</a></div>
-    <div class="card"><h3>Honor a Veteran</h3><p>Thank a veteran; share a quote or photo (with permission).</p><a href="#" class="btn do-this" data-action="Honor a Veteran">Do this</a></div>
-    <div class="card"><h3>Invite 3 to Church</h3><p>Invite three friends; if they come, share what it meant.</p><a href="#" class="btn do-this" data-action="Invite 3 to Church">Do this</a></div>
-    <div class="card"><h3>Write a Thank-You Note</h3><p>Hand-write a note and post why they matter to you.</p><a href="#" class="btn do-this" data-action="Write a Thank-You Note">Do this</a></div>
-    <div class="card"><h3>Family Table Focus</h3><p>Eat together, no screens; share one thing that changed.</p><a href="#" class="btn do-this" data-action="Family Table Focus">Do this</a></div>
-    <div class="card"><h3>Hands-Free Driver</h3><p>Pledge no phone while driving; remind others to join.</p><a href="#" class="btn do-this" data-action="Hands-Free Driver">Do this</a></div>
-    <div class="card"><h3>Coach or Mentor (Youth)</h3><p>Volunteer to coach or mentor; invite others too.</p><a href="#" class="btn do-this" data-action="Coach or Mentor (Youth)">Do this</a></div>
-    <div class="card"><h3>First Bible Give-Away</h3><p>Give someone their first Bible (with a note inside).</p><a href="#" class="btn do-this" data-action="First Bible Give-Away">Do this</a></div>
-    <div class="card"><h3>Register or Verify to Vote</h3><p>Check registration; help a friend do the same.</p><a href="#" class="btn do-this" data-action="Register or Verify to Vote">Do this</a></div>
-    <div class="card"><h3>Pro-Life Serve Day</h3><p>Support a local pregnancy center; share how to help.</p><a href="#" class="btn do-this" data-action="Pro-Life Serve Day">Do this</a></div>
-    <div class="card"><h3>Apologetics Share</h3><p>Share one reason for your hope—briefly, winsomely.</p><a href="#" class="btn do-this" data-action="Apologetics Share">Do this</a></div>
-    <div class="card"><h3>Read Aloud with Kids</h3><p>Read a chapter together; share a family photo.</p><a href="#" class="btn do-this" data-action="Read Aloud with Kids">Do this</a></div>
-    <div class="card"><h3>Add Your Church</h3><p>Post your church link and invite locals to visit.</p><a href="#" class="btn do-this" data-action="Add Your Church">Do this</a></div>
-    <div class="card"><h3>Host a Film Night</h3><p>Watch a faith film; post the group photo + takeaways.</p><a href="#" class="btn do-this" data-action="Host a Film Night">Do this</a></div>
-    <div class="card"><h3>Creator Proceeds Donor</h3><p>Donate today’s content proceeds; blur private info.</p><a href="#" class="btn do-this" data-action="Creator Proceeds Donor">Do this</a></div>
-    <div class="card"><h3>Phone Off at Church</h3><p>Go distraction-free; post a simple reminder graphic.</p><a href="#" class="btn do-this" data-action="Phone Off at Church">Do this</a></div>
-    <div class="card"><h3>Meal Train Start</h3><p>Start or join a meal train; share the link.</p><a href="#" class="btn do-this" data-action="Meal Train Start">Do this</a></div>
-    <div class="card"><h3>Generations Together</h3><p>3+ generations do an action together; share a photo.</p><a href="#" class="btn do-this" data-action="Generations Together">Do this</a></div>
-  </section>
+  <div id="actions"></div>
 </main>
 
 <footer class="wrap">
@@ -75,18 +56,71 @@
 </footer>
 
 <script>
-  // Make each "Do this" navigate to home Step 1 with action + description
-  document.querySelectorAll('.actions-grid .card .do-this').forEach(a=>{
-    a.addEventListener('click', e=>{
-      e.preventDefault();
-      const card = a.closest('.card');
-      const action = a.getAttribute('data-action');
-      const desc = (card.querySelector('p')?.textContent || '').trim();
-      const url = '/?action=' + encodeURIComponent(action) +
-                  '&desc=' + encodeURIComponent(desc) + '#step1';
-      location.href = url;
-    });
+(async function(){
+  // Load shared actions data
+  const data = await fetch('/data/actions.json').then(r=>r.json()).catch(()=>({categories:[]}));
+  const actionsRoot = document.getElementById('actions');
+  const chips = document.getElementById('chips');
+  const search = document.getElementById('search');
+
+  // Build category chips
+  const allChip = document.createElement('span');
+  allChip.textContent = 'All';
+  allChip.className = 'chip active';
+  allChip.dataset.cat = 'All';
+  chips.appendChild(allChip);
+
+  data.categories.forEach(c=>{
+    const s = document.createElement('span');
+    s.textContent = c.name;
+    s.className = 'chip';
+    s.dataset.cat = c.name;
+    chips.appendChild(s);
   });
+
+  function cardHTML(item){
+    const enc = encodeURIComponent;
+    // Do this → pass action + desc to home Step 1
+    const link = `/?action=${enc(item.title)}&desc=${enc(item.desc)}#step1`;
+    return `<div class="card">
+      <h3>${item.title}</h3>
+      <p class="muted">${item.desc}</p>
+      <a href="${link}" class="btn">Do this</a>
+    </div>`;
+  }
+
+  // Render all grouped (default)
+  function render(filterCat='All', query=''){
+    actionsRoot.innerHTML = '';
+    const q = query.trim().toLowerCase();
+    (data.categories||[]).forEach(cat=>{
+      const items = (cat.items||[]).filter(it=>{
+        const inCat = (filterCat==='All' || filterCat===cat.name);
+        const inSearch = !q || it.title.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q);
+        return inCat && inSearch;
+      });
+      if(!items.length) return;
+      const sec = document.createElement('section');
+      sec.className = 'section';
+      sec.innerHTML = `<h2>${cat.name}</h2><div class="grid">${items.map(cardHTML).join('')}</div>`;
+      actionsRoot.appendChild(sec);
+    });
+  }
+
+  // Interactions
+  chips.addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    render(chip.dataset.cat, search.value);
+  });
+  search.addEventListener('input', ()=> {
+    const active = chips.querySelector('.chip.active')?.dataset.cat || 'All';
+    render(active, search.value);
+  });
+
+  render(); // first paint
+})();
 </script>
 </body>
 </html>
