@@ -1,563 +1,515 @@
-
-
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Like Charlie Network — Like Charlie, I live my faith, serve, build, and defend freedom.</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Like Charlie Network — Make a Post • Save & Count • See Our Impact</title>
+<meta name="description" content="Make your public post, paste the link so it counts, and watch the impact leaderboard update by state and org." />
+<!-- OpenGraph -->
+<meta property="og:title" content="Like Charlie — I live my faith, serve, build, and defend freedom." />
+<meta property="og:description" content="Make a post, invite friends, save & count your action, and watch impact grow." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.cybermave.ai/" />
 <style>
-/* Top banner */
-.topbanner{position:sticky;top:0;z-index:70;background:#1e293b;color:#fff;border-bottom:1px solid rgba(255,255,255,.15)}
-.topbanner .inner{max-width:1220px;margin:0 auto;padding:8px 16px;display:flex;justify-content:center}
-.topbanner a{color:#fff;text-decoration:none;font-weight:900}
-
-/* Theme */
-:root{
-  --navy:#0a1227; --blue:#1e3a8a; --sky:#3b82f6; --red:#dc2626; --gold:#fbbf24; --white:#ffffff; --slate:#94a3b8;
-  --hero:url('./img/patriotism.jpeg'); --flag:url('./img/patriotism.jpeg');
-}
-html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#0a1227;color:#eef3ff}
-a{color:#9fd0ff;text-decoration:none}
-.container{max-width:1220px;margin:0 auto;padding:0 20px}
-
-/* Buttons */
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.1rem;border-radius:14px;border:1px solid rgba(255,255,255,.15);font-weight:900;cursor:pointer;transition:.2s;box-shadow:0 6px 20px rgba(17,24,39,.25) inset,0 1px 0 rgba(255,255,255,.08)}
-.btn:hover{transform:translateY(-1px)}
-.btn-blue{background:linear-gradient(180deg,#60a5fa,#1e3a8a);color:#fff;border-color:transparent}
-.btn-white{background:#fff;color:#0b1733}
-.small{font-size:.85rem}
-
-/* Header */
-header.nav{position:sticky;top:0;z-index:60;background:rgba(10,18,39,.85);border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
-header.nav .inner{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
-nav a{color:#e2e8f0;font-weight:800;margin:0 .6rem}
-nav a:hover{color:#fff}
-
-/* Hero */
-.hero{min-height:56vh;display:flex;align-items:center;text-align:center;background-image:linear-gradient(rgba(3,6,22,.55),rgba(3,6,22,.65)),var(--hero);background-size:cover;background-position:center}
-.hero h1{font-size:clamp(2rem,6vw,3.6rem);margin:0;font-weight:1000;letter-spacing:.02em;text-shadow:0 2px 18px rgba(0,0,0,.4)}
-.stars{height:10px;background:repeating-linear-gradient(90deg,transparent 0 28px,rgba(255,255,255,.18) 28px 30px);border-radius:999px;margin:18px auto;max-width:360px}
-.topstates{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.4rem .7rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;font-weight:800}
-
-/* Cards & layout */
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:18px 20px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 10px 24px rgba(0,0,0,.25)}
-.section{margin-top:30px}
-.flag-strap{background-image:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)),var(--flag);background-size:cover;background-position:center;border-radius:14px;border:1px solid rgba(255,255,255,.2)}
-input,select,textarea{width:100%;background:#0e1b3a;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:.8rem 1rem}
-select{appearance:auto;-webkit-appearance:menulist;-moz-appearance:menulist}
-.grid{display:grid;gap:16px}.cols-2{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:repeat(3,1fr)}
-@media(max-width:900px){.cols-2,.cols-3{grid-template-columns:1fr}}
-.muted{color:#cbd5e1}
-.req::after{content:" *";color:#fca5a5;font-weight:900}
-.helper{font-size:.92rem;color:#cbd5e1}
-
-/* Tables */
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.12)}th{color:#fde68a;font-weight:900;letter-spacing:.01em}
-
-/* Hide until verse exists */
-.hidden{display:none}
+  :root{
+    --ink:#0b1220; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --ok:#16a34a; --warn:#ca8a04; --ring:#60a5fa;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:#e5eeff;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  a{color:#9ecbff}
+  .container{max-width:1120px;margin:0 auto;padding:20px}
+  .top{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0b1220,#0b1220f0 70%,#0b122000);border-bottom:1px solid #1f2a44}
+  .nav{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:10px 20px}
+  .brand{display:flex;gap:12px;align-items:center;font-weight:900;letter-spacing:.5px}
+  .flag{width:28px;height:18px;background:linear-gradient(#b91c1c 33%,#fff 33% 66%,#1d4ed8 0);border-radius:2px;box-shadow:0 0 0 2px #0b1220,0 0 12px #111827}
+  .menu{display:flex;gap:10px;flex-wrap:wrap}
+  .menu a, .menu button{appearance:none;border:1px solid #273655;background:#0f1a33;color:#dbe7ff;padding:8px 12px;border-radius:999px;cursor:pointer}
+  .menu a:hover, .menu button:hover{border-color:#3b82f6;box-shadow:0 0 0 2px #1f2a44}
+  /* Swappable hero backgrounds + thumbnails */
+  .hero{padding:48px 20px;text-align:center;background:
+    linear-gradient(180deg,rgba(11,18,32,.25),rgba(11,18,32,.85)),
+    var(--hero-img, url('/img/patriotism.jpeg'));
+    background-size:cover;background-position:center}
+  .hero h1{font-size:clamp(28px,4vw,44px);margin:.2em 0}
+  .hero p{margin:.5em auto;max-width:820px;color:#c7d7ee}
+  .bgpicker{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+  .bgpicker button{border:2px solid #233251;background:#0b152b;border-radius:10px;cursor:pointer;padding:0}
+  .bgpicker img{display:block;width:96px;height:60px;object-fit:cover;border-radius:8px}
+  .small{font-size:.9rem;color:#bcd1f2}
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .card{background:#0f1a33;border:1px solid #223150;border-radius:18px;padding:16px;box-shadow:0 10px 30px #00000044}
+  .card h3{margin:4px 0 8px 0}
+  label{display:block;margin:12px 0 6px 0;color:#cfe0ff}
+  input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #2b3e63;background:#0b152b;color:#e6f0ff}
+  textarea{min-height:110px}
+  .row{display:flex;gap:10px;align-items:center}
+  .chip{padding:6px 10px;border:1px dashed #3b4f78;border-radius:999px;color:#9fb3d1;font-size:.9rem}
+  .btn{appearance:none;border:1px solid #2b3e63;background:linear-gradient(180deg,#1a2b4f,#0f1a33);color:#e8f0ff;padding:10px 14px;border-radius:12px;cursor:pointer}
+  .btn.primary{border-color:#3b82f6;background:linear-gradient(180deg,#2563eb,#1e40af)}
+  .btn.danger{border-color:#7f1d1d;background:linear-gradient(180deg,#ef4444,#991b1b)}
+  .btn.ok{border-color:#14532d;background:linear-gradient(180deg,#22c55e,#14532d)}
+  .muted{color:#9fb3d1}
+  .subtle{font-size:.95rem;color:#b6c7e6}
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{border-bottom:1px solid #233251;padding:10px;text-align:left}
+  .right{text-align:right}
+  .footer{padding:50px 20px;text-align:center;color:#9fb3d1}
+  .success{color:#86efac}
+  .warning{color:#fde68a}
+  .divider{height:1px;background:#223150;margin:18px 0}
 </style>
 </head>
 <body>
-
-<!-- Top banner -->
-<div class="topbanner">
-  <div class="inner"><a href="#save">⬇ Paste your post link here so it counts</a></div>
-</div>
-
-<header class="nav"><div class="container inner">
-  <div style="font-weight:1000">Like Charlie Network</div>
-  <nav>
-    <a href="#post">Post</a><a href="#save">Save & Count</a><a href="#impact">Impact</a>
-    <a href="#civic">Civic</a><a href="actions.html">Actions Guide</a><a href="proofs.html">Proofs (Press)</a>
+<header class="top">
+  <nav class="nav">
+    <div class="brand"><span class="flag" aria-hidden="true"></span> Like Charlie Network</div>
+    <div class="menu">
+      <a href="#make">Post</a>
+      <a href="#save">Save & Count</a>
+      <a href="#impact">Impact</a>
+      <a href="/actions.html">Actions Guide</a>
+      <a href="/proofs.html">Proofs</a>
+      <button id="adminBtn" title="Admin" onclick="toggleAdmin()">Admin</button>
+    </div>
   </nav>
-</div></header>
+</header>
 
-<!-- Hero -->
-<section class="hero"><div class="container">
-  <h1>Like Charlie, I live my faith, serve, build, and defend freedom.</h1>
-  <div class="stars"></div>
-  <div class="topstates" id="topStates"></div>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px">
-    <a class="btn btn-blue" href="#post">📣 Make and Count my post</a>
-    <a class="btn btn-white" href="#save">Save & Count</a>
-    <a class="btn btn-white" href="#impact">See Impact</a>
+<section class="hero">
+  <div class="container">
+    <p class="chip">Fast path: Make a post → paste link → you’re counted.</p>
+    <h1>Like Charlie, I desire to live my faith, serve, build, and defend freedom.</h1>
+    <p>Use the builder to generate your social media post text (with optional verse & invites). Publish to X/Facebook/Instagram/TikTok, then paste your social media URL so it counts. Your state’s leaderboard updates instantly on this device and can be exported for proof.</p>
+    <div class="row" style="justify-content:center;gap:12px;margin-top:10px">
+      <a class="btn primary" href="#make">Make my post</a>
+      <a class="btn" href="#save">Paste social media link here to count your impact</a>
+      <a class="btn" href="#impact">See Our Impact</a>
+    </div>
+    <div class="bgpicker small">
+      <span class="muted">Backgrounds:</span>
+      <button onclick="setHero('/img/patriotism.jpeg')"><img src="/img/patriotism.jpeg" alt="Patriotic flag"/></button>
+      <button onclick="setHero('/img/istockphoto-2211801215-612x612.jpg')"><img src="/img/istockphoto-2211801215-612x612.jpg" alt="Flag grunge"/></button>
+      <button onclick="setHero('/img/istockphoto-145152803-612x612.jpg')"><img src="/img/istockphoto-145152803-612x612.jpg" alt="Constitution"/></button>
+      <button onclick="setHero('/img/istockphoto-2190110933-612x612.jpg')"><img src="/img/istockphoto-2190110933-612x612.jpg" alt="Stars"/></button>
+      <button onclick="setHero('/img/istockphoto-1502557306-612x612.jpg')"><img src="/img/istockphoto-1502557306-612x612.jpg" alt="Field Flag"/></button>
+      <button class="btn" style="padding:6px 10px" onclick="customHero()">Use my image…</button>
+      <input type="file" id="heroUpload" accept="image/*" style="display:none"/>
+    </div>
   </div>
-</div></section>
+</section>
 
-<!-- Step 1: Make my post -->
-<div class="container section" id="post">
-  <div class="card flag-strap">
-    <h2>Step 1 — Make my post</h2>
-    <p class="helper">We’ll create your post text and save your action so it counts and inspires others.</p>
-    <div class="grid cols-2">
+<div class="container grid">
+  <!-- MAKE -->
+  <div id="make" class="card">
+    <h3>Step 1 — Make my post</h3>
+    <p class="subtle">We’ll produce clean, copy-ready text. Share it, then come back to save & count.</p>
 
-      <!-- ACTION -->
-      <label class="req">Choose an action
-        <select id="p_action"></select>
-      </label>
-      <a href="propose.html">Propose Action</a>
-      
-      <!-- FRIENDS (optional) -->
-      <label>Friends to invite (optional — just type names)
-        <input id="p_friends" placeholder="John Smith, Jane Doe, Mike Brown">
-        <div class="helper">We don’t access your contacts; this just writes the names into your post.</div>
-      </label>
+    <div class="row" style="justify-content:space-between;align-items:baseline">
+      <label>Choose an action</label>
+      <a class="small" href="/actions.html" target="_blank">Need ideas? Actions Guide</a>
+    </div>
+    <div class="row" style="gap:8px">
+      <select id="action" style="flex:1">
+        <option value="SERVE">Serve</option>
+        <option value="FORGIVE">Forgive</option>
+        <option value="FAMILY">Family Life</option>
+        <option value="STAND">Stand & Speak</option>
+        <option value="INVITE">Invite to Church</option>
+        <option value="EVANGELISM">Share Christ</option>
+        <option value="BRIDGE">Bridge Builder</option>
+        <option value="TESTIMONY">Public Testimony</option>
+        <option value="FILM">Film Night Host</option>
+        <option value="CHARLIE_CLIP">Favorite Charlie Video</option>
+        <option value="SHARE_VERSE_3">Share a Bible verse with 3 friends</option>
+        <option value="FUNDRAISER">Bake/Garage Sale for Charity</option>
+        <option value="JOIN_TPUSA">Join TPUSA (badge)</option>
+        <option value="SHOP_TPUSA">Shop TPUSA Apparel (badge)</option>
+        <option value="TPUSA_EVENTS">Sign up for TPUSA Events</option>
+        <option value="ERIKA_ENCOURAGE">Send Miss Erika encouragement</option>
+        <option value="HANDS_FREE">Hands-Free Driver</option>
+        <option value="FAMILY_TABLE">Family Table Focus</option>
+        <option value="QUIET_TIME">Quiet Time Focus</option>
+        <option value="HONOR_SERVICE">Honor Service</option>
+        <option value="CREATOR_DONOR">Creator / Proceeds Donor</option>
+        <option value="PHONE_OFF_CHURCH">Phone Off at Church</option>
+        <option value="INSPIRE">Inspire</option>
+      </select>
+      <button class="btn" onclick="showPropose()">Propose action</button>
+    </div>
 
-      <!-- STATE / CITY FOR SCOREBOARD -->
-      <label class="req">State (for scoreboard)
-        <select id="p_state" required>
-          <option value="">Choose your state…</option>
-          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NC</option><option>ND</option><option>NE</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NV</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-        </select>
-      </label>
+    <div class="row"><div style="flex:1">
+      <label>Friends to invite (comma-separated)</label>
+      <input id="friends" placeholder="Add up to 3 names…" />
+    </div><div style="flex:1">
+      <label>State (for scoreboard)</label>
+      <select id="state"></select>
+    </div></div>
 
-      <label>City (optional)
-        <select id="p_city">
-          <option value="">Pick a city or choose “Other”</option>
-          <option>Other…</option>
-        </select>
-        <input id="p_city_other" class="hidden" placeholder="Type your city">
-      </label>
+    <div class="row"><div style="flex:1">
+      <label>City (pick or type new)</label>
+      <input id="city" list="citylist" placeholder="Pensacola" />
+      <datalist id="citylist"></datalist>
+    </div><div style="flex:1">
+      <label>Organization (optional)</label>
+      <input id="org" placeholder="Church/School/Club" />
+    </div></div>
 
-      <!-- ORG (optional) -->
-      <label>Organization (optional)
-        <input id="p_org" placeholder="Grace Youth">
-      </label>
+    <div class="row"><div style="flex:1">
+      <label>Verse (optional, e.g., John 3:16)</label>
+      <input id="verse" placeholder="John 3:16" />
+    </div><div style="flex:1">
+      <label>Version</label>
+      <select id="version">
+        <option selected>KJV</option><option>WEB</option><option>ASV</option><option>ESV</option>
+        <option>NIV</option><option>NKJV</option><option>CSB</option><option>NASB</option><option>NLT</option>
+      </select>
+    </div></div>
+    <div id="verseTextBox" class="small muted" style="margin-top:-6px"></div>
 
-      <!-- VERSE -->
-      <label>Verse (optional — e.g., John 3:16)
-        <input id="p_verse" placeholder="John 3:16">
-      </label>
-      <label id="p_version_row" class="hidden">Version
-        <select id="p_version">
-          <option value="kjv" selected>KJV</option>
-          <option value="web">WEB</option>
-          <option value="asv">ASV</option>
-          <option value="esv">ESV</option>
-          <option value="niv">NIV</option>
-          <option value="nkjv">NKJV</option>
-          <option value="csb">CSB</option>
-          <option value="nasb">NASB</option>
-          <option value="nlt">NLT</option>
-        </select>
-        <div class="helper small">Auto-text for KJV/WEB/ASV. Other versions show the reference with version label.</div>
-      </label>
+    <div class="row"><div style="flex:1">
+      <label>Donation (optional) — <a href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE." target="_blank" rel="noreferrer">Donate to TPUSA</a></label>
+      <input id="donation_step1" type="number" min="0" step="1" placeholder="25" />
+    </div><div style="flex:1">
+      <label>Preferred charity link (optional)</label>
+      <input id="charity_step1" placeholder="https://… (TPUSA or your org)" />
+    </div></div>
 
-      <!-- DONATION -->
-      <label>Donation (optional — add for Bake-Off totals)
-        <input id="p_amount" placeholder="$5">
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <label class="chip">Referral code: <span id="refChip">—</span>
+        <button class="btn" style="margin-left:8px" onclick="copyRef()">Copy</button>
       </label>
+      <label class="chip">Need ideas? <a href="/actions.html" target="_blank">Actions Guide</a></label>
+      <a class="btn" href="https://tpusa.com/getinvolved/" target="_blank" rel="noreferrer">Join TPUSA</a>
+      <a class="btn" href="https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE." target="_blank" rel="noreferrer">Shop TPUSA</a>
+      <a class="btn" href="https://tpusa.com/events/" target="_blank" rel="noreferrer">TPUSA Events</a>
+    </div>
 
-      <!-- EMAIL + REMEMBER -->
-      <label class="req">Your email (for saving & counting)
-        <input id="p_email" placeholder="you@example.com" required>
-      </label>
-      <div>
-        <label class="helper"><input type="checkbox" id="remember" checked> Remember my details on this device</label>
+    <button class="btn primary" onclick="makePost()">Make and preview text</button>
+    <div class="divider"></div>
+    <label>Copy this text to your social post</label>
+    <textarea id="postOut" readonly></textarea>
+    <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">
+      <button class="btn" onclick="copyText('postOut')">Copy text</button>
+      <a class="btn" href="https://x.com/intent/tweet" target="_blank" rel="noreferrer">Open X</a>
+      <a class="btn" href="https://www.facebook.com/" target="_blank" rel="noreferrer">Open Facebook</a>
+      <a class="btn" href="https://www.instagram.com/" target="_blank" rel="noreferrer">Open Instagram</a>
+      <a class="btn" href="https://www.tiktok.com/" target="_blank" rel="noreferrer">Open TikTok</a>
+      <a class="btn" href="https://truthsocial.com/" target="_blank" rel="noreferrer">Open Truth Social</a>
+      <a class="btn" href="https://www.youtube.com/" target="_blank" rel="noreferrer">Open YouTube</a>
+      <a class="btn" href="https://t.me/" target="_blank" rel="noreferrer">Open Telegram</a>
+      <a class="btn" href="https://www.linkedin.com/" target="_blank" rel="noreferrer">Open LinkedIn</a>
+      <button class="btn" onclick="renderShareImage()">Render share image</button>
+    </div>
+  </div>
+
+  <!-- SAVE & COUNT -->
+  <div id="save" class="card">
+    <h3>Step 2 — Paste your social media link to count your impact</h3>
+    <p class="subtle">After posting, copy your post URL and paste it here. Optional: donation & receipt.</p>
+
+    <div class="row" style="justify-content:space-between;align-items:baseline"><label>Post URL</label><button class="btn" type="button" onclick="toggleHowTo()">How to copy your post URL</button></div>
+    <input id="postUrl" placeholder="https://x.com/... or https://www.facebook.com/..." />
+    <div id="howto" class="small muted" style="display:none;margin:6px 0 10px">
+      <div style="display:grid;gap:6px">
+        <div>• <strong>X (Twitter):</strong> open your post → tap <em>Share</em> → <em>Copy link</em>.</div>
+        <div>• <strong>Facebook:</strong> open your post → <em>⋯</em> menu → <em>Copy link</em>.</div>
+        <div>• <strong>Instagram:</strong> open your post → <em>⋯</em> → <em>Link</em>.</div>
+        <div>• <strong>TikTok:</strong> open your video → <em>Share</em> → <em>Copy link</em>.</div>
       </div>
+      <svg width="320" height="90" viewBox="0 0 320 90" role="img" aria-label="Copy URL illustration" style="margin-top:6px">
+        <rect x="0" y="0" width="320" height="90" fill="#0f1a33" stroke="#223150"/>
+        <rect x="12" y="22" width="296" height="24" rx="6" fill="#0b152b" stroke="#2b3e63"/>
+        <text x="18" y="39" fill="#9fb3d1" font-size="12" font-family="system-ui,Segoe UI,Arial">https://social.com/your-post...</text>
+        <rect x="240" y="54" width="68" height="24" rx="6" fill="#1e40af" stroke="#3b82f6"/>
+        <text x="247" y="70" fill="#e6f0ff" font-size="12" font-family="system-ui,Segoe UI,Arial">Copy link</text>
+      </svg>
     </div>
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn btn-blue" type="button" id="oneClick">Make and Count my post</button>
+    <div class="row"><div style="flex:1">
+      <label>Donation (optional)</label>
+      <input id="amount" type="number" min="0" step="1" placeholder="25" />
+    </div><div style="flex:1">
+      <label>Proof/receipt link (optional)</label>
+      <input id="receiptUrl" placeholder="https://... (Drive/Dropbox/receipt)" />
+    </div></div>
+
+    <label>Your email (for saving & counting on this device)</label>
+    <input id="email" placeholder="you@example.com" />
+    <label><input id="remember" type="checkbox" checked /> Remember my details on this device</label>
+
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn ok" onclick="saveAndCount()">Save & Count</button>
+      <span id="saveMsg" class="muted"></span>
     </div>
 
-    <!-- Generated post -->
-    <div id="capOut" class="card" style="display:none;margin-top:14px;background:rgba(12,18,35,.75)">
-      <h3>Copy this text, paste in your social post</h3>
-      <textarea id="capText" rows="6" style="width:100%"></textarea>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
-        <a id="toX" class="btn btn-white" target="_blank">Open X</a>
-        <a class="btn btn-white" target="_blank" href="https://www.facebook.com/">Open Facebook</a>
-        <a class="btn btn-white" target="_blank" href="https://www.instagram.com/">Open Instagram</a>
-        <a class="btn btn-white" target="_blank" href="https://www.tiktok.com/">Open TikTok</a>
-        <a id="toAll" class="btn btn-white" target="_blank">Copy text</a>
-      </div>
-      <p class="muted" style="margin-top:8px">After you copy and paste your post on your social media account, copy your post’s link and paste it below so it counts.</p>
+    <div class="divider"></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="exportLog()">Export transparency_log.json</button>
+      <input type="file" id="importFile" style="display:none" accept="application/json" />
+      <button class="btn" onclick="document.getElementById('importFile').click()">Import log</button>
+      <button class="btn danger" onclick="clearLog()">Clear log (this device)</button>
     </div>
   </div>
-</div>
 
-<!-- Step 2: Save & count -->
-<div class="container section" id="save">
-  <div class="card">
-    <h2>Step 2 — Paste your link so it counts</h2>
-    <p class="helper">Where do I get my post URL?</p>
-    <div class="grid cols-2" style="margin-bottom:12px">
-      <div><p><b>X (Twitter)</b></p><img src="./img/guide-x.png" alt="X copy link" style="width:100%;max-width:420px;border-radius:10px"><p class="helper small">Open your post → Share → Copy link to post</p></div>
-      <div><p><b>Facebook</b></p><img src="./img/guide-fb.png" alt="Facebook copy link" style="width:100%;max-width:420px;border-radius:10px"><p class="helper small">Open your post → ⋯ → Copy link</p></div>
-      <div><p><b>Instagram</b></p><img src="./img/guide-ig.png" alt="Instagram copy link" style="width:100%;max-width:420px;border-radius:10px"><p class="helper small">Open your post → ⋯ → Link</p></div>
-      <div><p><b>TikTok</b></p><img src="./img/guide-tt.png" alt="TikTok copy link" style="width:100%;max-width:420px;border-radius:10px"><p class="helper small">Open video → Share → Copy link</p></div>
-    </div>
-
-    <div class="grid cols-2">
-      <label class="req">Post URL
-        <input id="posturl" placeholder="https://...">
+  <!-- IMPACT -->
+  <div id="impact" class="card">
+    <h3>Impact — State Score • Posts • $</h3>
+    <p class="subtle">Leaderboard from entries saved on this device (and anything you import). Use Export to share publicly on Proofs.</p>
+    <div class="row" style="gap:10px;flex-wrap:wrap;margin:6px 0 10px">
+      <label class="chip">View:
+        <select id="viewMode" onchange="renderTable()"><option value="raw">Raw</option><option value="percapita">Per Capita</option></select>
       </label>
-      <!-- Proof/receipt (drag & drop upload via Formspree) -->
-<label>Proof/receipt (optional — drag & drop a file)
-  <!-- TIP: Replace the action URL with your Formspree endpoint once you create it -->
-  <form action="https://formspree.io/f/your-id" method="POST" enctype="multipart/form-data" target="_blank" style="margin-top:8px">
-    <input type="file" name="receipt" accept="image/*,.pdf" style="width:100%;padding:.8rem;border:1px dashed #94a3b8;border-radius:12px;background:#0e1b3a;color:#fff">
-    <!-- Pass helpful context to your email -->
-    <input type="hidden" name="note" id="fs_note" value="">
-    <div class="helper small" style="margin-top:6px">
-      Drag a screenshot/PDF of your donation receipt here and click “Upload receipt”.
-      (Optional; your Save & Count entry still updates the scoreboard.)
-    </div>
-    <button class="btn btn-white small" type="submit" style="margin-top:8px">Upload receipt</button>
-  </form>
-</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input id="ref" placeholder="lc-abc123" style="flex:1">
-          <button class="btn btn-white small" id="copyRef" type="button">Copy my code</button>
-        </div>
-        <div class="helper small">This gives you credit when friends Save & Count.</div>
+      <label class="chip">Sort by:
+        <select id="sortBy" onchange="renderTable()"><option value="score">Weighted Score</option><option value="posts">Posts</option><option value="amount">Donations $</option></select>
       </label>
     </div>
-    <div style="margin-top:10px">
-      <button class="btn btn-blue" id="submit">Save & Count</button>
-      <span id="submitStatus" class="chip" style="display:none;margin-left:8px">Saved</span>
-    </div>
-  </div>
-</div>
-
-<!-- Impact -->
-<div class="container section" id="impact">
-  <h2>Impact — State Score • Posts • $</h2>
-  <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
-    <span class="muted">View:</span>
-    <button class="btn btn-white" id="viewRaw">Raw</button>
-    <button class="btn btn-white" id="viewCapita">Per Capita</button>
-  </div>
-  <div class="card" style="overflow:auto">
-    <table id="impactTable">
-      <thead><tr><th>State</th><th>Weighted Score</th><th>Posts</th><th>Donations $</th></tr></thead>
+    <table class="table" id="impactTable">
+      <thead><tr><th>State</th><th class="right">Weighted Score</th><th class="right">Posts</th><th class="right">Donations $</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <div class="card" style="margin-top:14px">
-    <div class="card" style="margin-top:14px">
-  <div class="card" style="margin-top:14px">
-  <h2>Bake-Off</h2>
-  <p class="helper">
-    Host bake/garage sales or donate proceeds from a podcast/book—give directly to TPUSA or your favorite charity.
-    Then paste your Post URL and Amount in “Save & Count.” We total by State/Org from these entries.
-    You may donate to a charity of your choice. <b>The idea is to pay it forward like Charlie.</b>
-  </p>
-  <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0">
-    <a class="btn btn-white" target="_blank"
-       href="https://donate.tpusa.com/?_gl=1*4vjiu2*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.">Donate to TPUSA</a>
-    <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">TPUSA’s The Charlie Challenge</a>
-  </div>
-  <details class="card" style="margin-top:10px">
-    <summary><b>How to donate + record it</b></summary>
-    <ol class="helper">
-      <li>Donate at the link above (or any charity site).</li>
-      <li>Back here, paste your <b>Post URL</b> and <b>Amount</b> in “Save & Count.”</li>
-      <li>(Optional) Drag & drop a screenshot of your receipt using the upload box above.</li>
-    </ol>
-  </details>
-</div>
-
-
-  <details class="card" style="margin-top:10px">
-    <summary><b>How to donate + record it</b></summary>
-    <ol class="helper">
-      <li>Click “Donate to TPUSA” (or your charity) and complete your gift.</li>
-      <li>Copy the receipt link (or upload a screenshot to Drive/Dropbox and copy the share link).</li>
-      <li>Back on this site, paste your <b>Post URL</b> and <b>amount</b> in “Save & Count,” and paste your <b>receipt/proof link</b> in the field provided.</li>
-    </ol>
-  </details>
-</div>
-
-<!-- Civic Concierge -->
-<div class="container section" id="civic">
-  <h2>Civic Concierge — 50-State Quick Links</h2>
-  <div class="card flag-strap">
-    <p class="muted">Pick your state and we’ll surface quick links for Governor contact and State Legislature contact (search-based so they stay fresh).</p>
-    <div class="grid cols-3">
-      <label>State
-        <select id="stateSel">
-          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NC</option><option>ND</option><option>NE</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NV</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-        </select>
-      </label>
-      <div><button class="btn btn-white" id="civLoad">Load links</button></div>
+  <!-- ADMIN (hidden) -->
+  <div id="admin" class="card" style="display:none">
+    <h3>Admin — Queue & Tools</h3>
+    <p class="subtle">Quick moderation panel for imported logs. (This is a local preview tool; real multi-user requires a backend.)</p>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn" onclick="recompute()">Recompute stats</button>
+      <button class="btn" onclick="downloadCSV()">Download CSV</button>
     </div>
-    <div id="civLinks" class="grid cols-2" style="margin-top:8px"></div>
+    <div id="queue"></div>
   </div>
 </div>
 
-<!-- Resources -->
-<div class="container section">
-  <h2>Resources</h2>
-  <div class="card">
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn btn-white" target="_blank" href="https://tpusa.com/">Turning Point USA</a>
-      <a class="btn btn-white" target="_blank" href="https://charliechallenge.org/">TPUSA’s The Charlie Challenge</a>
-    </div>
-  </div>
-</div>
-
-
-<!-- Badges -->
-<div class="container section" id="badges">
-  <h2>Badges (add to your profile pics & posts)</h2>
-  <div class="card">
-    <p class="helper">
-      Facebook removed public <b>profile frames</b>, but you can still add badge overlays to your post images or Stories.
-      Download a badge below and layer it using your phone’s editor (or Canva). Then post with #LiveLikeCharlie.
-    </p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn btn-white" download href="./img/istockphoto-2211801215-612x612.jpg">Download Badge 1</a>
-      <a class="btn btn-white" download href="./img/istockphoto-1495316224-612x612.jpg">Download Badge 2</a>
-      <a class="btn btn-white" download href="./img/istockphoto-1502557306-612x612.jpg">Download Badge 3</a>
-    </div>
-    <details class="card" style="margin-top:10px">
-      <summary><b>How to add a badge on your phone</b></summary>
-      <ol class="helper">
-        <li>Save a badge image above to your phone.</li>
-        <li>Open your photo in your editor (iOS Photos → Edit → Markup, or Canva).</li>
-        <li>Add the badge as a second image layer. Resize & place.</li>
-        <li>Save and share to Facebook/Instagram/TikTok.</li>
-      </ol>
-    </details>
-  </div>
-</div>
-
-<footer class="nav"><div class="container inner" style="justify-content:space-between">
-  <div><div>Donations default to TPUSA • You may donate to a charity of your choice.</div>
-  <small class="muted">Inspired by Charlie’s public legacy • Not affiliated with charliechallenge.org.</small></div>
-</div></footer>
+<footer class="footer">
+  <p>Donations: TPUSA or your preferred verified charity • Not affiliated with charliechallenge.org.</p>
+</footer>
 
 <script>
-const p=id=>document.getElementById(id);
-
-/* Hero rotation */
-(function(){
-  const IMGSET=[
-    './img/patriotism.jpeg',
-    './img/istockphoto-1495316224-612x612.jpg',
-    './img/istockphoto-1502557306-612x612.jpg',
-    './img/istockphoto-2152081731-612x612.jpg',
-    './img/istockphoto-2190110933-612x612.jpg',
-    './img/istockphoto-2203271689-612x612.webp',
-    './img/istockphoto-2211801215-612x612.jpg',
-    './img/istockphoto-145152803-612x612.jpg',
-    './img/istockphoto-1333234668-612x612.webp',
-    './img/photo-1542037104857-ffbb0b9155fb.avif'
-  ];
-  const pick=IMGSET[Math.floor(Math.random()*IMGSET.length)];
-  document.documentElement.style.setProperty('--hero', `url('${pick}')`);
-  document.documentElement.style.setProperty('--flag', `url('${pick}')`);
-})();
-
-/* Load actions (you approve by editing /data/actions.json) */
-(async function () {
-  const sel = document.getElementById('p_action');
-  const base = [
-    "Share a verse with a friend","Serve","Forgive","Family Life","Stand & Speak (Podium)",
-    "Invite to Church","Share Christ (Evangelism)","Bridge Builder (Note/Call/Visit)",
-    "Public Testimony (Online Post)","Film Night Host (Christian Film Night)",
-    "Favorite Charlie Video (Share + why)","Hands-Free Driver (No phone while driving)",
-    "Family Table Focus (Streak)","Quiet Time Focus (Streak)","Honor Service (Thank a First Responder)",
-    "Creator Proceeds Donor","YouTube Proceeds Donor","Phone Off at Church","Inspire",
-    "Share a photo/video or a favorite Charlie quote",
-    "Pete & Bobby Challenge (Health)"];
-  try {
-    const r = await fetch('/data/actions.json', {cache:'no-store'});
-    const j = await r.json();
-    const actions = Array.from(new Set([...(j.actions||[]), ...base]));
-    sel.innerHTML = actions.map(a => `<option>${a}</option>`).join('');
-  } catch {
-    sel.innerHTML = base.map(a => `<option>${a}</option>`).join('');
-  }
-})();
-
-/* City “Other” */
-(function(){
-  const sc=p('p_city'), other=p('p_city_other');
-  sc.addEventListener('change',()=>{ (sc.value==='Other…') ? other.classList.remove('hidden') : other.classList.add('hidden'); });
-})();
-
-/* Verse: show version only when reference exists */
-(function(){
-  const v=p('p_verse'), row=p('p_version_row');
-  function t(){ row.classList.toggle('hidden', !(v.value||'').trim()); }
-  v.addEventListener('input', t); t();
-})();
-
-/* Top States */
-function weight(a){
-  const W={'SHARE_A_VERSE_WITH_A_FRIEND':1.0,'SERVE':1.6,'FORGIVE':1.4,'FAMILY_LIFE':1.4,'STAND_&_SPEAK_(PODIUM)':1.7,'INVITE_TO_CHURCH':1.5,'SHARE_CHRIST_(EVANGELISM)':1.8,'BRIDGE_BUILDER_(NOTE/CALL/VISIT)':1.5,'PUBLIC_TESTIMONY_(ONLINE_POST)':1.9,'FILM_NIGHT_HOST_(CHRISTIAN_FILM_NIGHT)':1.6,'FAVORITE_CHARLIE_VIDEO_(SHARE_+_WHY)':1.2,'HANDS-FREE_DRIVER_(NO_PHONE_WHILE_DRIVING)':1.3,'FAMILY_TABLE_FOCUS_(STREAK)':1.4,'QUIET_TIME_FOCUS_(STREAK)':1.4,'HONOR_SERVICE_(THANK_A_FIRST_RESPONDER)':1.2,'CREATOR_PROCEEDS_DONOR':1.7,'YOUTUBE_PROCEEDS_DONOR':1.7,'PHONE_OFF_AT_CHURCH':1.1,'INSPIRE':1.0};
-  return W[(a||'').toUpperCase().replace(/\s+/g,'_')]||1.0;
-}
-function dollars(s){if(!s)return 0;const m=String(s).replace(/,/g,'').match(/\$\s*(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):0;}
-function agg(){const c=JSON.parse(localStorage.getItem('lc_claims')||'[]'), m={};c.forEach(x=>{const st=(x.state||'').toUpperCase();if(!st)return;m[st]=m[st]||{score:0,posts:0,dollars:0};m[st].posts++;m[st].score+=weight(x.action||''); if((x.action||'').toLowerCase().includes('donor')) m[st].dollars+=dollars(x.amount||'');});return m;}
-function renderTopStates(){const a=agg();const top=Object.entries(a).sort((A,B)=>B[1].score-A[1].score).slice(0,3);const w=p('topStates');w.innerHTML='';top.forEach(([st,v])=>{const c=document.createElement('div');c.className='chip';c.innerHTML=`<span>${st}</span><span>•</span><span>${v.score.toFixed(1)}</span>`;w.appendChild(c);});}
-
-/* Action popularity bubble-up */
-function bump(action){const map=JSON.parse(localStorage.getItem('lc_action_counts')||'{}');const k=String(action||'').trim();if(!k)return;map[k]=(map[k]||0)+1;localStorage.setItem('lc_action_counts',JSON.stringify(map));sortDrop();}
-function sortDrop(){const sel=p('p_action');if(!sel)return;const map=JSON.parse(localStorage.getItem('lc_action_counts')||'{}');const opts=[...sel.options].map(o=>({t:o.text,v:o.value}));const head=opts.shift();opts.sort((a,b)=>(map[b.t]||0)-(map[a.t]||0));sel.innerHTML='';[head,...opts].forEach(o=>{const op=document.createElement('option');op.text=o.t;op.value=o.v;sel.appendChild(op);});}
-
-/* Verse fetch (KJV/WEB/ASV text; others show reference + version only) */
-async function fetchVerse(ref, trans){
-  const map={kjv:'kjv', web:'web', asv:'asv'}; const t=map[trans]||'kjv';
-  try{
-    const r=await fetch('https://bible-api.com/'+encodeURIComponent(ref)+'?translation='+t,{mode:'cors'});
-    if(!r.ok) return null; const j=await r.json(); return j.text ? j.text.trim().replace(/\s+/g,' ') : null;
-  }catch(e){ return null; }
-}
-
-/* Build post text */
-async function buildPost(){
-  const act=(p('p_action').value||'').trim();
-  const friends=(p('p_friends').value||'').trim();
-  const st=(p('p_state').value||'').trim();
-  const citySel=p('p_city').value;
-  const city = (citySel==='Other…') ? (p('p_city_other').value||'').trim() : (citySel||'').trim();
-  const org=(p('p_org').value||'').trim();
-  const verse=(p('p_verse').value||'').trim();
-  const ver=(p('p_version').value||'kjv').trim();
-  const donate=(p('p_amount').value||'').trim();
-  const email=(p('p_email').value||'').trim();
-
-  if(!email){ alert('Please enter your email so your action can be saved.'); return null; }
-  if(!st){ alert('Please pick your State (for the scoreboard).'); return null; }
-
-  if(p('remember').checked){
-    localStorage.setItem('lc_email', email);
-    localStorage.setItem('lc_state', st);
-    if(city) localStorage.setItem('lc_city', city);
-    if(org)  localStorage.setItem('lc_org', org);
-  }
-
-  const ref = localStorage.getItem('lc_myref') || ('lc-'+Math.random().toString(36).slice(2,8));
-  localStorage.setItem('lc_myref', ref);
-
-  // Friendly action line
-  let firstLine = 'Today I chose, like Charlie, to ';
-  if(act.toLowerCase().includes('share a verse')){
-    firstLine += 'share a verse with a friend — and I chose you.';
-  } else {
-    firstLine += act.toLowerCase() + '.';
-  }
-
-  const parts=[firstLine];
-  if(verse){
-    const text = await fetchVerse(verse, ver);
-    parts.push('Verse: '+verse+' ('+ver.toUpperCase()+')'+(text?(' — '+text):''));
-  }
-  if(city||st) parts.push('('+[city,st].filter(Boolean).join(', ')+')');
-  if(donate) parts.push('I also gave '+donate+' today.');
-  if(friends) parts.push('I nominate '+friends+' to act within 48 hours.');
-  parts.push('Save & count your action here → likecharlie.cybermave.ai/go?ref='+ref);
-  parts.push('#LiveLikeCharlie #LikeCharlieChallenge');
-
-  return { text: parts.join('\n'), ref, st, city, org, donate, act, email };
-}
-
-/* Make and Count my post (one button) */
-p('oneClick').onclick=async()=>{
-  const info=await buildPost(); if(!info) return;
-  p('capText').value=info.text; p('capOut').style.display='block';
-  bump(p('p_action').value);
-  localStorage.setItem('lc_pending', JSON.stringify({
-    ts: Date.now(), email:info.email, action:info.act, state:info.st, city:info.city, org:info.org, amount:info.donate, ref:info.ref
-  }));
-  document.getElementById('save').scrollIntoView({behavior:'smooth',block:'start'});
+'use strict';
+// ===== Utilities & State =====
+const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NC","ND","NE","NH","NJ","NM","NY","NV","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+const $ = (id)=>document.getElementById(id);
+const store = {
+  load(){ try{ return JSON.parse(localStorage.getItem('lc_log')||'[]'); }catch(e){ return [] } },
+  save(log){ localStorage.setItem('lc_log', JSON.stringify(log)); }
 };
+let LOG = store.load();
+window.VERSE_CACHE = window.VERSE_CACHE || {ref:"", version:"KJV", text:""};
 
-/* Copy helpers / X intent */
-p('toX').onclick=(e)=>{ e.preventDefault(); const t=encodeURIComponent(p('capText').value||''); window.open('https://x.com/intent/tweet?text='+t,'_blank'); };
-p('toAll').onclick=(e)=>{ e.preventDefault(); const ta=p('capText'); ta.select(); document.execCommand('copy'); };
-
-/* Save & Count submit */
-p('submit').onclick=()=>{
-  const url = (p('posturl').value||'').trim();
-  if(!url){ alert('Paste your post URL so it counts.'); return; }
-
-  const pending = JSON.parse(localStorage.getItem('lc_pending')||'{}');
-  const claims = JSON.parse(localStorage.getItem('lc_claims')||'[]');
-  const proof = (p('proofurl').value||'').trim();
-
-  claims.push({
-    ts: Date.now(),
-    email: pending.email || '',
-    action: pending.action || (p('p_action').value||''),
-    url,
-    state: pending.state || (p('p_state').value||'').toUpperCase(),
-    city:  pending.city  || (p('p_city').value==='Other…' ? (p('p_city_other').value||'') : (p('p_city').value||'')),
-    org:   pending.org   || (p('p_org').value||''),
-    amount: pending.amount || (p('p_amount').value||''),
-    ref:   (p('ref').value||pending.ref||localStorage.getItem('lc_myref')||''),
-    proof: proof
-  });
-  localStorage.setItem('lc_claims', JSON.stringify(claims));
-  p('submitStatus').style.display='inline-flex';
-  renderImpactTable();
-  setTimeout(()=>{ p('submitStatus').style.display='none'; }, 2000);
-};
-
-/* Impact (raw/per-capita) */
-const POP={AL:5098741,AK:733583,AZ:7359197,AR:3042017,CA:38965193,CO:5845526,CT:3605597,DE:1030000,FL:22389689,GA:11095453,HI:1440195,ID:1939033,IL:12582032,IN:6956056,IA:3200517,KS:2937150,KY:4512310,LA:4552219,ME:1395847,MD:6181645,MA:7093637,MI:10034113,MN:5797173,MS:2940057,MO:6168187,MT:1125755,NC:10698973,ND:812178,NE:1967923,NH:1395231,NJ:9267130,NM:2117522,NY:19431507,OH:11756058,OK:4023178,OR:4237256,PA:12964056,RI:1093734,SC:5328210,SD:919318,TN:7099997,TX:30029572,UT:3405121,VT:647064,VA:8638218,WA:7800592,WV:1766387,WI:5892539,WY:581381};
-let perCapita=false;
-function renderImpactTable(){
-  const tb=document.querySelector('#impactTable tbody'); if(!tb) return; tb.innerHTML='';
-  const c=JSON.parse(localStorage.getItem('lc_claims')||'[]'); const m={};
-  c.forEach(x=>{const st=(x.state||'').toUpperCase(); if(!st) return; m[st]=m[st]||{score:0,posts:0,dollars:0}; m[st].posts++; m[st].score+=weight(x.action||''); if((x.action||'').toLowerCase().includes('donor')) m[st].dollars+=dollars(x.amount||'');});
-  const rows=Object.entries(m).map(([st,v])=>{const norm=perCapita&&POP[st]?v.score/(POP[st]/1000000):v.score;return [st,v,norm];}).sort((a,b)=>b[2]-a[2]);
-  rows.forEach(([st,v])=>{const tr=document.createElement('tr'); tr.innerHTML='<td>'+st+'</td><td>'+(perCapita?(v.score/(POP[st]/1000000)).toFixed(2)+' /M':v.score.toFixed(1))+'</td><td>'+v.posts+'</td><td>$'+v.dollars.toFixed(2)+'</td>'; tb.appendChild(tr);});
-  renderTopStates();
+function genRef(){
+  let ref = localStorage.getItem('lc_ref');
+  if(!ref){ ref = Math.random().toString(36).slice(2,8).toUpperCase(); localStorage.setItem('lc_ref', ref); }
+  return ref;
 }
-p('viewRaw').onclick=()=>{ perCapita=false; renderImpactTable(); };
-p('viewCapita').onclick=()=>{ perCapita=true; renderImpactTable(); };
 
-/* Civic quick links */
-p('civLoad').onclick=()=>{ const st=p('stateSel').value; const wrap=p('civLinks'); wrap.innerHTML='';
-  const gov='https://www.google.com/search?q=Contact+Governor+'+st;
-  const leg='https://www.google.com/search?q='+st+' state legislature contact';
-  [['Governor contact',gov],['State legislature',leg]].forEach(([label,url])=>{ const d=document.createElement('div'); d.className='card'; d.innerHTML='<a target="_blank" href="'+url+'">'+label+' — '+st+'</a>'; wrap.appendChild(d); });
-};
+(function init(){
+  // Populate states
+  const s = $("state"); STATES.forEach(x=>{ const o=document.createElement('option'); o.value=o.textContent=x; s.appendChild(o); });
+  // Saved profile
+  const saved=JSON.parse(localStorage.getItem('lc_saved')||'{}');
+  if(saved.email){ $('email').value=saved.email; }
+  if(saved.state){ $('state').value=saved.state; }
+  if(saved.city){ $('city').value=saved.city; }
+  if(saved.org){ $('org').value=saved.org; }
+  if(saved.friends){ $('friends').value=saved.friends; }
+  if(saved.donation_step1){ $('donation_step1').value=saved.donation_step1; }
+  if(saved.charity_step1){ $('charity_step1').value=saved.charity_step1; }
+  $('refChip').textContent = genRef();
+  // Restore hero choice
+  const heroSaved = localStorage.getItem('lc_hero'); if(heroSaved){ document.querySelector('.hero').style.setProperty('--hero-img', `url('${heroSaved}')`); }
+  refreshCityList(($('state').value)||'FL');
+  renderTable(); renderQueue();
+  if($('verse').value) fetchVerse();
+})();
 
-/* Restore remembered fields & init */
-document.addEventListener('DOMContentLoaded', ()=>{
-  const savedEmail=localStorage.getItem('lc_email'), savedState=localStorage.getItem('lc_state'), savedCity=localStorage.getItem('lc_city'), savedOrg=localStorage.getItem('lc_org');
-  if(savedEmail) p('p_email').value=savedEmail;
-  if(savedState) p('p_state').value=savedState;
-  if(savedCity){ p('p_city').value='Other…'; p('p_city_other').classList.remove('hidden'); p('p_city_other').value=savedCity; }
-  if(savedOrg) p('p_org').value=savedOrg;
-
-  // load actions from /data if present (admin-approved)
-  // (already loaded above)
-
-
-// Build a helpful note for the Formspree upload
-function updateFsNote() {
-  const pending = JSON.parse(localStorage.getItem('lc_pending')||'{}');
-  const ref = pending.ref || localStorage.getItem('lc_myref') || '';
-  const st = (pending.state || (document.getElementById('p_state')?.value||'')).toUpperCase();
-  const amt = pending.amount || (document.getElementById('p_amount')?.value||'');
-  const url = (document.getElementById('posturl')?.value||'');
-  const n = `Ref:${ref} | State:${st} | Amount:${amt} | PostURL:${url}`;
-  const f = document.getElementById('fs_note'); if (f) f.value = n;
+function persistProfile(){
+  const payload={
+    email:$('email').value.trim(),
+    state:$('state').value,
+    city:$('city').value.trim(),
+    org:$('org').value.trim(),
+    friends:$('friends').value.trim(),
+    donation_step1:$('donation_step1').value,
+    charity_step1:$('charity_step1').value.trim()
+  };
+  localStorage.setItem('lc_saved', JSON.stringify(payload));
 }
-document.getElementById('posturl')?.addEventListener('input', updateFsNote);
-document.getElementById('p_amount')?.addEventListener('input', updateFsNote);
-document.addEventListener('DOMContentLoaded', updateFsNote);
-</script>
 
-  
-  renderImpactTable();
-  renderTopStates();
+['email','state','city','org','friends','donation_step1','charity_step1'].forEach(id=>{
+  document.addEventListener('change', (e)=>{ if(e.target && e.target.id===id){ persistProfile(); }});
 });
+
+function copyText(id){ const el=$(id); el.select(); document.execCommand('copy'); el.blur(); }
+function copyRef(){ navigator.clipboard.writeText(genRef()); }
+
+// Verse fetch — KJV default; changeable
+const VERSION_MAP = {KJV:'kjv', WEB:'web', ASV:'asv', ESV:'esv', NIV:'niv', NKJV:'nkjv', CSB:'csb', NASB:'nasb', NLT:'nlt'};
+async function fetchVerse(){
+  const vEl=$('verse'); const verEl=$('version'); if(!vEl||!verEl) return;
+  const ref=vEl.value.trim(); if(!ref){ window.VERSE_CACHE={ref:"",version:verEl.value,text:""}; const box=$('verseTextBox'); if(box) box.textContent=''; return; }
+  const v=verEl.value||'KJV'; const code=(VERSION_MAP[v]||'kjv');
+  try{
+    const r=await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=${encodeURIComponent(code)}`);
+    if(!r.ok) throw 0; const d=await r.json(); const t=(d.text||'').trim().replace(/\s+/g,' ');
+    window.VERSE_CACHE={ref,version:v,text:t}; const box=$('verseTextBox'); if(box) box.textContent=t||'';
+  }catch(_){ if(code!=='kjv'){ try{ const r2=await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=kjv`); const d2=await r2.json(); const t=(d2.text||'').trim().replace(/\s+/g,' '); window.VERSE_CACHE={ref,version:'KJV',text:t}; const box=$('verseTextBox'); if(box) box.textContent=t? t+" (KJV)":''; }catch(e){} } }
+}
+['verse','version'].forEach(id=> document.addEventListener('change', e=>{ if(e.target && e.target.id===id) fetchVerse(); }));
+
+async function makePost(){
+  const action=$('action').value; const friends=$('friends').value; const st=$('state').value; const city=$('city').value; const org=$('org').value; const verseRef=$('verse').value; const ver=$('version').value;
+  const donation = parseFloat($('donation_step1').value||'0')||0; const charity = $('charity_step1').value.trim();
+  let invites = friends? ` I nominate ${friends}.` : '';
+  const loc = st? (city? `${city}, ${st}`:`${st}`):'';
+  // ensure verse cache present if needed
+  if(verseRef && (!window.VERSE_CACHE.text || window.VERSE_CACHE.ref!==verseRef)){
+    await fetchVerse();
+  }
+  const refTag = `#LCN-${genRef()}`;
+  const coreTags = "#LiveLikeCharlie #LikeCharlie #ActServeBuildDefend";
+  const tags = `${coreTags} ${refTag}`;
+  const donationLine = donation>0 ? `\n\nDonated $${donation.toFixed(0)}${charity?` → ${charity}`:''}.` : '';
+  const ACTION_MAP = {
+    SERVE:"Today I chose to serve someone near me.",
+    FORGIVE:"Today I chose forgiveness over bitterness.",
+    FAMILY:"We invested in family time on purpose tonight.",
+    STAND:"I took a calm public stand for truth.",
+    INVITE:"I invited 3 people to church.",
+    EVANGELISM:"I shared the gospel kindly and offered prayer.",
+    BRIDGE:"I reached out to encourage and reconcile.",
+    TESTIMONY:"Sharing my testimony—Jesus changed my life.",
+    FILM:"Hosting a film night to inspire courage and hope.",
+    CHARLIE_CLIP:"Sharing a Charlie clip that encouraged me.",
+    SHARE_VERSE_3:"__SPECIAL__",
+    FUNDRAISER:"Hosting a bake sale/garage sale and donating proceeds to TPUSA or a favorite charity.",
+    JOIN_TPUSA:"I joined TPUSA to get involved. https://tpusa.com/getinvolved/",
+    SHOP_TPUSA:"I picked up TPUSA apparel to show support. https://tpusamerch.com/?_gl=1*88yitf*_gcl_au*NDk2MzUxNDQ3LjE3NjAyNzMyNzE.",
+    TPUSA_EVENTS:"I signed up for a TPUSA event near me. https://tpusa.com/events/",
+    ERIKA_ENCOURAGE:"Sending Miss Erika a word of encouragement today.",
+    HANDS_FREE:"I’m committing to phone-free driving.",
+    FAMILY_TABLE:"Phone-free family table time.",
+    QUIET_TIME:"Focused time in Scripture and prayer.",
+    HONOR_SERVICE:"Thanking those who serve and protect.",
+    CREATOR_DONOR:"Donating proceeds to pay it forward.",
+    PHONE_OFF_CHURCH:"Phone away during worship—fully present.",
+    INSPIRE:"Sharing a quote/story that pushed me to act."
+  };
+
+  let firstLine = "Here\'s how I am living my faith, serving, building, or defending freedom today, like Charlie.";
+  let bodyLine = ACTION_MAP[action] || "I acted today.";
+  if(action === 'SHARE_VERSE_3'){
+    const verseText = (window.VERSE_CACHE && window.VERSE_CACHE.text) ? `"${window.VERSE_CACHE.text}"` : '';
+    const refLabel = verseRef || '';
+    bodyLine = `${refLabel} says ${verseText} I hope this verse encourages or inspires you, like it did me.`;
+    if(friends){ invites = ` I nominate ${friends} to take action today with me, like Charlie.`; }
+  }
+  const locLine2 = loc? ` (${loc}${org? ' • '+org:''})` : (org? ` (${org})`: '');
+  const text = `${firstLine}\n\n${bodyLine}${locLine2}.${invites}${donationLine}\n\n${tags}`;
+  $('postOut').value = text;
+  persistProfile();
+}
+
+// Hash util for Merkle-ish IDs (simple SHA-256)
+async function sha256(str){ const enc=new TextEncoder(); const buf=await crypto.subtle.digest('SHA-256', enc.encode(str)); return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+
+async function saveAndCount(){
+  const url=$('postUrl').value.trim(); if(!/^https?:\/\//i.test(url)){ $('saveMsg').textContent='Enter a valid URL.'; $('saveMsg').className='warning'; return; }
+  const amount=parseFloat($('amount').value||$('donation_step1').value||'0')||0; const email=$('email').value.trim(); const st=$('state').value||''; const city=$('city').value||''; const org=$('org').value||''; const action=$('action').value||''; const receipt=$('receiptUrl').value.trim(); const ref=genRef();
+  persistProfile();
+  const entry = {url, amount, email, state:st, city, org, action, receipt, ref, ts:new Date().toISOString()};
+  entry.id = await sha256(JSON.stringify(entry));
+  LOG.unshift(entry); store.save(LOG);
+  $('saveMsg').textContent='Saved.'; $('saveMsg').className='success';
+  $('postUrl').value=''; $('amount').value=''; $('receiptUrl').value='';
+  renderTable(); renderQueue();
+}
+
+function clearLog(){ if(confirm('Clear all local entries?')){ LOG=[]; store.save(LOG); renderTable(); renderQueue(); }}
+
+function exportLog(){ const blob=new Blob([JSON.stringify(LOG,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='transparency_log.json'; a.click(); URL.revokeObjectURL(a.href); }
+
+document.getElementById('importFile').addEventListener('change', (e)=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ try{ const arr=JSON.parse(r.result); if(Array.isArray(arr)){ LOG=arr.concat(LOG); store.save(LOG); renderTable(); renderQueue(); } }catch(_){} }; r.readAsText(f);
+});
+
+function groupByState(){ const map={}; for(const e of LOG){ const s=e.state||'—'; if(!map[s]) map[s]={state:s, posts:0, amount:0, score:0}; map[s].posts++; map[s].amount+=e.amount||0; map[s].score = Math.round(map[s].posts*10 + map[s].amount); } return Object.values(map); }
+
+function renderTable(){ const data=groupByState(); const sortBy=$('sortBy').value; data.sort((a,b)=> (b[sortBy]-a[sortBy]) || a.state.localeCompare(b.state));
+  const tbody=document.querySelector('#impactTable tbody'); tbody.innerHTML='';
+  for(const r of data){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.state}</td><td class='right'>${r.score.toLocaleString()}</td><td class='right'>${r.posts}</td><td class='right'>$${r.amount.toFixed(2)}</td>`; tbody.appendChild(tr); }
+}
+
+function renderQueue(){ const box=$('queue'); if(!box) return; const rows = LOG.slice(0,25).map(e=>{
+  return `<div style="display:grid;grid-template-columns:1fr auto;gap:8px;border:1px solid #223150;border-radius:12px;padding:10px;margin-bottom:10px">
+    <div><div class=\"muted\">${new Date(e.ts).toLocaleString()} • ${e.state||'—'} ${e.city? '• '+e.city:''} ${e.org? '• '+e.org:''}</div>
+    <div style=\"overflow-wrap:anywhere\">${e.url}</div>
+    <div class=\"muted\">$${(e.amount||0).toFixed(2)} • action ${e.action||'—'} • ref ${e.ref}</div></div>
+    <div class=\"row\" style=\"gap:6px;align-items:flex-start\">
+      <button class=\"btn\" onclick='copyVal(${JSON.stringify(e.url)})'>Copy URL</button>
+      <button class=\"btn\" onclick='removeEntry(\"${e.id}\")'>Remove</button>
+    </div></div>`
+  }).join('');
+  box.innerHTML = rows || '<p class="muted">No entries yet.</p>';
+}
+
+function copyVal(val){ navigator.clipboard.writeText(val); }
+function removeEntry(id){ LOG = LOG.filter(e=>e.id!==id); store.save(LOG); renderTable(); renderQueue(); }
+
+function downloadCSV(){ const header=['ts','state','city','org','action','url','amount','receipt','email','ref'];
+  const rows=[header.join(',')].concat(LOG.map(e=> header.map(k=> JSON.stringify((e[k]??'').toString().replaceAll('\n',' '))).join(',')));
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='lc_entries.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function refreshCityList(st){ const dl=$('citylist'); if(!dl) return; dl.innerHTML=''; const CITIES={FL:["Pensacola","Tallahassee","Jacksonville","Orlando","Tampa","Miami","St. Petersburg","Gainesville"]}; (CITIES[st]||CITIES['FL']).forEach(c=>{ const o=document.createElement('option'); o.value=c; dl.appendChild(o); }); }
+
+// Background & image helpers
+function setHero(src){ document.querySelector('.hero').style.setProperty('--hero-img', `url('${src}')`); localStorage.setItem('lc_hero', src); }
+function customHero(){ const up=document.getElementById('heroUpload'); if(up) up.click(); }
+const upEl=document.getElementById('heroUpload'); if(upEl){ upEl.addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=> setHero(r.result); r.readAsDataURL(f); }); }
+
+function renderShareImage(){ const text=$('postOut').value||''; const c=document.createElement('canvas'); c.width=1080; c.height=1080; const ctx=c.getContext('2d');
+  const bg=new Image(); bg.crossOrigin='anonymous'; bg.onload=()=>{ ctx.drawImage(bg,0,0,c.width,c.height); ctx.fillStyle='rgba(11,18,32,0.55)'; ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#fff'; ctx.font='bold 48px system-ui,Segoe UI,Arial'; wrapText(ctx,'Like Charlie Network',60,120,960,56);
+    ctx.font='28px system-ui,Segoe UI,Arial'; wrapText(ctx,text,60,200,960,40);
+    const url=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='like-charlie-share.png'; a.click(); };
+  const bgVar=getComputedStyle(document.querySelector('.hero')).getPropertyValue('--hero-img');
+  bg.src= bgVar.replace(/url\(['\"]?|['\"]?\)/g,'');
+}
+function wrapText(ctx,str,x,y,maxWidth,lineHeight){ const words=str.split(' '); let line=''; for(let i=0;i<words.length;i++){ const test=line+words[i]+' '; if(ctx.measureText(test).width>maxWidth && i>0){ ctx.fillText(line,x,y); line=words[i]+' '; y+=lineHeight; } else { line=test; } } ctx.fillText(line,x,y); }
+
+// Admin & recompute
+function toggleAdmin(){ const el=$('admin'); if(!el) return; el.style.display = (el.style.display==='none' || !el.style.display)? 'block':'none'; }
+function recompute(){ renderTable(); renderQueue(); }
+
+// Propose action modal
+function showPropose(){ const m=document.getElementById('proposeModal'); if(m) m.style.display='block'; }
+function hidePropose(){ const m=document.getElementById('proposeModal'); if(m) m.style.display='none'; }
+function submitProposedAction(){ const t=document.getElementById('propTitle').value.trim(); const d=document.getElementById('propDesc').value.trim(); if(!t){ document.getElementById('propMsg').textContent='Please add a title.'; return; } const queue=JSON.parse(localStorage.getItem('lc_proposals')||'[]'); queue.unshift({title:t, desc:d, ts:new Date().toISOString()}); localStorage.setItem('lc_proposals', JSON.stringify(queue)); document.getElementById('propMsg').textContent='Thank you! Your proposal was saved on this device.'; document.getElementById('propTitle').value=''; document.getElementById('propDesc').value=''; }
+
+// Minimal test harness (runs only with ?test=1)
+(function runTests(){ if(!location.search.includes('test=1')) return; console.log('[LCN] Test mode on');
+  console.assert(typeof toggleAdmin==='function','toggleAdmin should exist');
+  // Seed one entry and test render
+  LOG.unshift({ts:new Date().toISOString(), state:'FL', city:'Pensacola', org:'TestOrg', action:'SERVE', url:'https://example.com', amount:5, receipt:'', email:'t@e.st', ref:'TEST'}); store.save(LOG); renderTable(); renderQueue();
+  // Verse fetch smoke test
+  $('verse').value='John 3:16'; fetchVerse().then(()=>{ console.log('Verse fetched KJV len=', (window.VERSE_CACHE.text||'').length); });
+})();
+function toggleHowTo(){ const h=document.getElementById('howto'); if(!h) return; h.style.display = (h.style.display==='none'||!h.style.display)?'block':'none'; }
 </script>
+
+<!-- Propose Action Modal -->
+<div id="proposeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:80">
+  <div class="card" style="max-width:680px;margin:6% auto;background:#0f1a33;border:1px solid #223150;border-radius:14px;padding:16px">
+    <h3>Propose a new action</h3>
+    <p class="subtle">Describe the action (title + one-line description). We’ll review and add it to the list.</p>
+    <input id="propTitle" placeholder="Action title (e.g., Pray for a friend)" />
+    <textarea id="propDesc" placeholder="One-line description" style="margin-top:8px;min-height:90px"></textarea>
+    <div class="row" style="gap:8px;margin-top:10px">
+      <button class="btn ok" onclick="submitProposedAction()">Send</button>
+      <button class="btn" onclick="hidePropose()">Close</button>
+    </div>
+    <div id="propMsg" class="muted" style="margin-top:8px"></div>
+  </div>
+</div>
 </body>
 </html>
-
-how do people get badges to their facebook, etc. pages like a frame or something around their picture...?
-
-can we add i took the "Pete & Bobby Challenge" for those into health. i know charlied liked both of them...
