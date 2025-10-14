@@ -1,0 +1,92 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Render Share Image — Like Charlie</title>
+  <style>
+    :root{--ink:#0b1220;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--brand:#e11d48;--brand2:#2563eb}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:#e8f1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    a{color:#9ec5ff;text-decoration:none}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+    header{position:sticky;top:0;z-index:10;background:#0b1220cc;border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+    .brand{font-weight:900}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+    label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8fb0e6}
+    input,select,button{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a1530;color:#e8f1ff}
+    button{background:var(--brand);border:none;font-weight:800;cursor:pointer}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    canvas{width:100%;height:auto;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:#0a1530}
+    @media (max-width:860px){.two{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav wrap">
+      <a href="/" class="brand">← Back to Home</a>
+      <div>Render Share Image</div>
+      <a href="/actions.html">Actions</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="panel">
+      <div class="two">
+        <div>
+          <label>Size</label>
+          <select id="ratioSelect">
+            <option value="square-1080">Square 1:1 (1080×1080)</option>
+            <option value="portrait-1080x1350">Portrait 4:5 (1080×1350)</option>
+            <option value="landscape-1920x1080">Landscape 16:9 (1920×1080)</option>
+          </select>
+
+          <div class="controls">
+            <div>
+              <label>Background preset</label>
+              <select id="bgPreset">
+                <option value="patriotic">Patriotic</option>
+                <option value="sunset">Sunset</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            <div>
+              <label>Or upload background</label>
+              <input type="file" id="bgUpload" accept="image/*" />
+            </div>
+          </div>
+
+          <div class="controls">
+            <div>
+              <label>Title / Action</label>
+              <input id="titleInput" placeholder="Raise the Flag" />
+            </div>
+            <div>
+              <label>Subtitle</label>
+              <input id="subtitleInput" placeholder="Tell what it means to be an American." />
+            </div>
+          </div>
+
+          <div>
+            <label>Footer (e.g., hashtag / site)</label>
+            <input id="footerInput" value="#LiveLikeCharlie" />
+          </div>
+
+          <div class="controls">
+            <button id="renderBtn">Render</button>
+            <button id="downloadBtn">Download PNG</button>
+          </div>
+        </div>
+
+        <div>
+          <canvas id="shareCanvas" width="1080" height="1080"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="share_image.js"></script>
+</body>
+</html>
