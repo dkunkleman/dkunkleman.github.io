@@ -151,5 +151,119 @@ Join me: pick an action and do one small good thing like Charlie too. #LiveLikeC
   renderImpact();
 })();
 </script>
+  <!-- ========== DIAGNOSTICS (temporary) ========== -->
+<style>
+  #diag{position:fixed;right:12px;bottom:12px;background:#0f1a33;color:#e6eefc;
+    border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 12px;
+    font:12px/1.35 system-ui,Segoe UI,Roboto,Arial;z-index:9999;max-width:320px}
+  #diag b{color:#9fe29f} #diag .bad{color:#ffb4b4}
+  #diag button{margin-top:6px;border:1px solid rgba(255,255,255,.2);background:#162552;
+    color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+</style>
+<div id="diag">
+  <div>Supabase status: <span id="d-status">checking…</span></div>
+  <div id="d-msg" style="margin-top:6px;color:#9fb3d1"></div>
+  <button id="d-run">Run test</button>
+</div>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const db = (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY)
+    ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+
+  async function check(){
+    if(!db){ $('d-status').innerHTML='<span class="bad">no client/keys</span>'; $('d-msg').textContent='Check you pasted sb_publishable… key & the script tag.'; return; }
+    $('d-status').textContent='connecting…';
+    try{
+      // quick read (ok if empty)
+      const { data:recent, error:rErr } = await db.from('public_submissions')
+        .select('id').eq('approved', true).limit(1);
+      if(rErr) throw rErr;
+      $('d-status').innerHTML='<b>connected ✓</b>';
+      $('d-msg').textContent='Read OK. Click "Run test" to try a write.';
+    }catch(e){
+      $('d-status').innerHTML='<span class="bad">read error</span>';
+      $('d-msg').textContent=(e && e.message) ? e.message : String(e);
+    }
+  }
+
+  async function runWrite(){
+    if(!db) return;
+    $('d-status').textContent='writing…';
+    try{
+      const { error:wErr } = await db.from('public_submissions').insert({
+        ts_ms: Date.now(), action:'DIAG write test', platform:'web', url:'',
+        name:'', email:'', donated:false, donation_org:'', donation_amt:'',
+        donation_evidence_url:'', attested:false
+      });
+      if(wErr) throw wErr;
+      $('d-status').innerHTML='<b>write OK ✓</b>';
+      $('d-msg').textContent='A DIAG row was inserted. You can delete it later.';
+    }catch(e){
+      $('d-status').innerHTML='<span class="bad">write error</span>';
+      $('d-msg').textContent=(e && e.message) ? e.message : String(e);
+    }
+  }
+
+ <script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  const actionEl=$('actionSelect'), urlEl=$('postUrl'), saveBtn=$('saveBtn');
+  const recentT=$('recent'), lbT=$('leaderboard');
+
+  function toast(msg){
+    let t=document.querySelector('.toast'); if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}
+    t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  async function renderImpact(){
+    const { data: recent, error: rErr } = await db.from('public_submissions')
+      .select('created_at, action, url').eq('approved', true)
+      .order('created_at',{ascending:false}).limit(200);
+    if(rErr){ toast('Read error: '+rErr.message); return; }
+
+    // recent
+    recentT.innerHTML = (recent||[]).slice(0,10).map(r=>{
+      const when=new Date(r.created_at).toLocaleString();
+      const link=r.url?`<a href="${r.url}" target="_blank" rel="noopener">open</a>`:'';
+      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
+    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
+
+    // leaderboard
+    const counts={}; (recent||[]).forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+    const rows=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    lbT.innerHTML = rows.length ? rows.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('')
+                                : `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+  }
+
+  saveBtn.addEventListener('click', async ()=>{
+    const action = (actionEl.value||'').trim();
+    const url = (urlEl.value||'').trim();
+    if(!action){ toast('Choose an action first'); return; }
+
+    const { error } = await db.from('public_submissions').insert({
+      ts_ms: Date.now(), action, platform:'web', url,
+      name:'', email:'', donated:false, donation_org:'', donation_amt:'',
+      donation_evidence_url:'', attested:false
+    });
+
+    if(error){
+      toast('Save error: '+error.message);
+      console.warn('Supabase insert failed:', error);
+      return;
+    }
+    urlEl.value=''; toast('Saved!');
+    renderImpact();
+  });
+
+  renderImpact();
+})();
+</script>
+
+  check();
+})();
+</script>
+<!-- ========== /DIAGNOSTICS ========== -->
 </body>
 </html>
