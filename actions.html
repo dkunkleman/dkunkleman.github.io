@@ -3,114 +3,92 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Like Charlie — Actions</title>
-
+<title>Like Charlie Actions</title>
+<meta name="description" content="Do one small good thing, paste your link so it counts, and invite 3 friends.">
+<link rel="canonical" href="https://www.cybermave.ai/actions.html">
 <style>
-  :root{--ink:#e6eefc;--bg:#0b1220;--muted:#9fb3d1;--border:rgba(255,255,255,.14);--panel:#0f1a33;--brand:#e11d48;--brand2:#2563eb;--chip:#1b2b66;--chipTxt:#e9f0ff}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  header{position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-  nav{display:flex;gap:10px;align-items:center;padding:10px 16px}
-  nav a{color:var(--ink);text-decoration:none;padding:8px 12px;border-radius:10px}
-  nav a:hover{background:rgba(255,255,255,.06)}
+  :root{ --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14) }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  a{color:#b3d4ff;text-decoration:none}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
-  .actions-hero{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:18px;margin-bottom:16px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  nav{display:flex;align-items:center;gap:10px;padding:10px 16px}
+  nav a{padding:8px 12px;border-radius:10px}
+  nav a:hover{background:rgba(255,255,255,.06)}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+  .tile{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer;align-self:flex-start}
   .muted{color:var(--muted)}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
-  .chip{padding:8px 12px;border:0;border-radius:999px;background:var(--chip);color:var(--chipTxt);cursor:pointer}
-  .chip.active{outline:2px solid rgba(255,255,255,.35)}
-  .section{margin:14px 0 20px}
-  .section h2{margin:0 0 8px 0;font-size:18px}
-  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-  .card{border:1px solid var(--border);border-radius:16px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.00)),var(--panel)}
-  .card h3{margin:0 0 6px 0;font-size:16px}
-  .btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);color:#fff;text-decoration:none;background:linear-gradient(90deg,var(--brand),var(--brand2))}
-  footer{opacity:.8;font-size:.9rem;margin-top:24px}
-  .srch{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ink)}
 </style>
 </head>
 <body>
 <header>
   <nav class="wrap">
-    <a href="/" class="brand">← Back to Home</a>
+    <a href="/" style="font-weight:800">← Back to Home</a>
     <span style="flex:1"></span>
-    <a href="/">Home</a>
     <a href="/actions.html">Actions</a>
   </nav>
 </header>
 
 <main class="wrap">
-  <section class="actions-hero">
-    <h1>Do Good. Count It. Grow Influence, like Charlie</h1>
-    <p class="muted" style="white-space:pre-line">1. Do one small good action like Charlie - pick from the list below
-2. make a quick post about what you did and invite 3 friends to choose to do a good action like Charlie also, 
-3. paste your link from your social media post on the homepage to complete the challenge. 
-"Make doing one small good thing often a pattern, not a one-off."</p>
-    <input id="search" class="srch" placeholder="Search actions…">
-    <div id="chips" class="toolbar"></div>
+  <section class="card">
+    <h1 style="margin:0 0 8px">Like Charlie Actions</h1>
+    <p class="muted" style="margin:0">Do one small good thing, paste your link so it counts, and invite 3 friends. Make doing good a pattern, not a one-off.</p>
   </section>
 
-  <div id="actions"></div>
+  <!-- Starters -->
+  <section class="card">
+    <h2 style="margin:0 0 8px">Starters</h2>
+    <div class="grid">
+      <article class="tile">
+        <h3>Raise the Flag</h3>
+        <p class="muted">Hang or draw an American flag. Say what being an American means to you.</p>
+        <a class="btn" href="/?action=Raise%20the%20Flag&focus=post">Do this</a>
+      </article>
+      <article class="tile">
+        <h3>Publicly Thank Someone</h3>
+        <p class="muted">Thank a person who helps others; tag them if you want.</p>
+        <a class="btn" href="/?action=Publicly%20Thank%20Someone&focus=post">Do this</a>
+      </article>
+      <article class="tile">
+        <h3>Pick Up 10 Pieces</h3>
+        <p class="muted">Pick up 10 pieces of trash. Before/after if you can.</p>
+        <a class="btn" href="/?action=Pick%20Up%2010%20Pieces&focus=post">Do this</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- Faith & Home -->
+  <section class="card">
+    <h2 style="margin:0 0 8px">Faith & Home</h2>
+    <div class="grid">
+      <article class="tile">
+        <h3>Pray for Someone</h3>
+        <p class="muted">Say a short prayer and a kind message.</p>
+        <a class="btn" href="/?action=Pray%20for%20Someone&focus=post">Do this</a>
+      </article>
+      <article class="tile">
+        <h3>Read the Bible for 15</h3>
+        <p class="muted">Read 15 minutes and post a sentence about it.</p>
+        <a class="btn" href="/?action=Read%20the%20Bible%20for%2015&focus=post">Do this</a>
+      </article>
+      <article class="tile">
+        <h3>Help at Home</h3>
+        <p class="muted">Do a helpful job without being asked.</p>
+        <a class="btn" href="/?action=Help%20at%20Home&focus=post">Do this</a>
+      </article>
+      <article class="tile">
+        <h3>Be a Friend</h3>
+        <p class="muted">Include someone who’s left out; say something kind.</p>
+        <a class="btn" href="/?action=Be%20a%20Friend&focus=post">Do this</a>
+      </article>
+    </div>
+  </section>
 </main>
 
-<footer class="wrap">
-  <p>Not affiliated with charliechallenge.org.</p>
+<footer class="wrap" style="color:#9fb3d1">
+  <p><a href="/">Home</a> • <a href="/privacy.html">Privacy</a> • <a href="/terms.html">Terms</a></p>
 </footer>
-
-<script>
-(async function(){
-  const data = await fetch('/data/actions.json').then(r=>r.json()).catch(()=>({items:[]}));
-  const items = data.items||[];
-
-  // categories from data
-  const cats = [...new Set(items.map(i=>i.category||'Other'))];
-  const chips = document.getElementById('chips');
-  const search = document.getElementById('search');
-  const root = document.getElementById('actions');
-
-  // build chips
-  const all = document.createElement('span'); all.className='chip active'; all.textContent='All'; all.dataset.cat='All'; chips.appendChild(all);
-  cats.forEach(c=>{ const s=document.createElement('span'); s.className='chip'; s.textContent=c; s.dataset.cat=c; chips.appendChild(s); });
-
-  function card(it){
-    const enc = encodeURIComponent;
-    const link = `/?action=${enc(it.title)}&desc=${enc(it.desc)}&focus=post#step1`;
-    return `<div class="card">
-      <h3>${it.title}</h3>
-      <p class="muted">${it.desc}</p>
-      <a href="${link}" class="btn">Do this</a>
-    </div>`;
-  }
-
-  function render(filter='All', q=''){
-    root.innerHTML='';
-    const query = (q||'').toLowerCase();
-    const catList = filter==='All' ? cats.concat('Other') : [filter];
-
-    catList.forEach(cat=>{
-      const list = items.filter(i=>{
-        const inCat = (filter==='All' ? true : i.category===cat);
-        const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
-        return inCat && (filter==='All' ? i.category===cat : true) && match;
-      });
-      if(!list.length) return;
-      const sec = document.createElement('section'); sec.className='section';
-      sec.innerHTML = `<h2>${cat}</h2><div class="grid">${list.map(card).join('')}</div>`;
-      root.appendChild(sec);
-    });
-  }
-
-  chips.addEventListener('click', e=>{
-    const c=e.target.closest('.chip'); if(!c) return;
-    chips.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active');
-    render(c.dataset.cat, search.value);
-  });
-  search.addEventListener('input', ()=> {
-    const active = chips.querySelector('.chip.active')?.dataset.cat || 'All';
-    render(active, search.value);
-  });
-
-  render();
-})();
-</script>
 </body>
 </html>
