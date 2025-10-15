@@ -1,1 +1,153 @@
+<!-- actions_partial_v3.html — Like Charlie / CyberMave Actions list (expanded) -->
+<section class="actions-wrap">
+  <style>
+    .actions-wrap{max-width:1100px;margin:0 auto;padding:24px}
+    .actions-hero{background:linear-gradient(135deg,#0b1220,#10224a);color:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(255,255,255,.08)}
+    .actions-hero h1{margin:0 0 8px 0;font-size:28px;letter-spacing:.2px}
+    .actions-hero p{margin:0;opacity:.9}
+    .actions-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:10px 0 16px 0}
+    .backhome{display:inline-block;background:#0a1530;border:1px solid rgba(255,255,255,.25);padding:8px 12px;border-radius:10px;text-decoration:none;color:#e8f1ff}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,.35);color:#e8f1ff;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .actions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .card{background:#0f1a33;color:#cfe0ff;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;transition:.2s transform,.2s box-shadow}
+    .card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
+    .card h3{margin:0 0 6px 0;font-size:18px;color:#fff}
+    .card p{margin:0 0 8px 0;font-size:14px;opacity:.9;line-height:1.45}
+    .card a[data-action]{display:inline-block;margin-top:6px;font-weight:700;text-decoration:none;padding:8px 10px;border-radius:10px;background:#e11d48;color:#fff}
+    blockquote{margin:8px 0 0 0;padding-left:12px;border-left:3px solid rgba(255,255,255,.25);opacity:.9;font-size:13px}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal .box{max-width:560px;width:100%;background:#0f1a33;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px}
+    .x{float:right;cursor:pointer;font-weight:900}
+  </style>
 
+  <div class="actions-hero">
+    <div class="actions-bar">
+      <a class="backhome" href="/">← Back to Home</a>
+      <button class="ghost" id="proposeOpen">Propose a Like Charlie Action to add to our list</button>
+    </div>
+    <h1>Like Charlie Actions</h1>
+    <p>Do one small good thing, post it, paste your link so it counts, and invite 3 friends. Make doing good a pattern, not a one-off.</p>
+  </div>
+
+  <div class="actions-grid">
+    <!-- Core set -->
+    <div class="card"><h3>Raise the Flag</h3><p>Hang or draw an American flag. Post a picture and say what being an American means to you.</p><a data-action="Raise the Flag" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Publicly Thank Someone</h3><p>Thank a person who helps others on your social media.</p><blockquote>“As we express our gratitude, we must never forget that the highest appreciation is not to utter words, but to live by them.” — John F. Kennedy</blockquote><a data-action="Publicly Thank Someone" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Pick Up 10 Pieces</h3><p>Pick up 10 pieces of trash. Post before and after pictures.</p><a data-action="Pick Up 10 Pieces" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Pray for Someone</h3><p>Say a short prayer and post a kind message to encourage them.</p><a data-action="Pray for Someone" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Read the Bible for 15</h3><p>Read for 15 minutes. Post a sentence about how the passage helps you today.</p><a data-action="Read the Bible for 15" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Help at Home</h3><p>Do a helpful job without being asked. Post a quick note about the experience.</p><a data-action="Help at Home" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Be a Friend</h3><p>Include someone who’s left out. Share a kind sentence (no private details).</p><a data-action="Be a Friend" href="javascript:void(0)">Do this</a></div>
+
+    <!-- Expanded set based on your list -->
+    <div class="card"><h3>Donate to TPUSA or a Charity</h3><p>Give to TPUSA or a charity you love. Post why you appreciate that charity.</p><a data-action="Donate to TPUSA or a Charity" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Volunteer 1 Hour</h3><p>Give one hour to serve. Post why volunteering matters to you.</p><a data-action="Volunteer 1 Hour" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Write a Thank-You Note</h3><p>Write a short note to someone who helped you. Post why you appreciate them.</p><a data-action="Write a Thank-You Note" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Learn a New Skill</h3><p>Learn or practice a real-life skill. Post about the experience or its significance.</p><a data-action="Learn a New Skill" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Call or Visit Family</h3><p>Call, visit, or video chat with family. Share a picture or story about why you appreciate them.</p><a data-action="Call or Visit Family" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Honor a Veteran or First Responder</h3><p>Thank a veteran or first responder. Post why you appreciate them.</p><a data-action="Honor a Veteran or First Responder" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Share a Favorite Charlie Quote</h3><p>Share your favorite photo, video, or quote from Charlie and why it’s important to you.</p><a data-action="Share a Favorite Charlie Quote" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Join the Pete & Bobby Challenge</h3><p>Take a step for your health. <a href="https://peteandbobbychallenge.com/" target="_blank" rel="noopener">peteandbobbychallenge.com</a>. Post milestones or wins.</p><a data-action="Join the Pete & Bobby Challenge" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Choose a Verse & Share</h3><p>Pick a verse and post what it means to you. Share it with 3 friends.</p><a data-action="Choose a Verse & Share" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Share a Forgiveness Story</h3><p>Share (no private details) how forgiving someone helped you.</p><a data-action="Share a Forgiveness Story" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Meet Your Spouse with a Hug</h3><p>Greet your spouse with a hug. Post why you appreciate them.</p><a data-action="Meet Your Spouse with a Hug" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Intentional Family Time</h3><p>Share pictures/stories from time together on purpose.</p><a data-action="Intentional Family Time" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Do a Chore Your Spouse Does</h3><p>Take over a chore they usually do. Share the reaction or experience.</p><a data-action="Do a Chore Your Spouse Does" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Listen Without Interrupting</h3><p>Listen all the way through. Post what you learned.</p><a data-action="Listen Without Interrupting" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Speak Truth with Humility</h3><p>Share the truth with courage and kindness. Post what happened.</p><a data-action="Speak Truth with Humility" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Invite 3 People to Church</h3><p>Invite 3 people. If they come, share about the experience.</p><a data-action="Invite 3 People to Church" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Share Your Testimony</h3><p>Share what following Jesus means to you (in person or online).</p><a data-action="Share Your Testimony" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Host a Film Night</h3><p>Host a Christian film night; pray/discuss afterward. Post a group pic + takeaways.</p><a data-action="Host a Film Night" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Hands-Free Driver</h3><p>Pledge no phone while driving today. Share the reminder to protect families.</p><a data-action="Hands-Free Driver" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Family Table Focus (3+ nights)</h3><p>Eat together without screens for 3+ nights. Share what changed.</p><a data-action="Family Table Focus (3+ nights)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Honor Service (Thank a First Responder)</h3><p>Deliver a thank‑you and small gift (with permission). Share the story.</p><a data-action="Honor Service (Thank a First Responder)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Creator Proceeds Donor</h3><p>Donate a day’s proceeds from your content. Post the receipt (blur private info).</p><a data-action="Creator Proceeds Donor" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Phone Off at Church</h3><p>Go distraction‑free at worship. Post a simple reminder graphic.</p><a data-action="Phone Off at Church" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Host a Sale for Good</h3><p>Run a bake/garage sale. Donate proceeds. Share the story.</p><a data-action="Host a Sale for Good" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Generations: 3 Together</h3><p>Grandparent + parent + child complete an action; share a photo/story.</p><a data-action="Generations: 3 Together" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Register to Vote (or Verify)</h3><p>Check or register. Share your confirmation; help a friend do the same.</p><a data-action="Register to Vote (or Verify)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Pray for Your Leaders (Name Them)</h3><p>Post a prayer for leaders by name (national, state, local, church). Send them a note/text.</p><a data-action="Pray for Your Leaders (Name Them)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Bring a Teacher a Gift</h3><p>Show appreciation to a teacher. Share about the experience.</p><a data-action="Bring a Teacher a Gift" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Veteran Visit (Honor & Listen)</h3><p>Visit a veteran/VA home; listen to their story; thank and pray for them.</p><a data-action="Veteran Visit (Honor & Listen)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Meal Train Start</h3><p>Start/join a meal train for a family in need. Share the link.</p><a data-action="Meal Train Start" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Coach or Mentor (Youth)</h3><p>Volunteer to coach or mentor at church/school; invite others to join.</p><a data-action="Coach or Mentor (Youth)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>First Bible Give-Away</h3><p>Give someone their first Bible. Include a welcoming note inside.</p><a data-action="First Bible Give-Away" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Scripture Memory Share</h3><p>Share a verse you memorized and what it means to you.</p><a data-action="Scripture Memory Share" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Pro-Life Serve Day</h3><p>Serve a local pregnancy center (donations, prayer, volunteering). Post how to help.</p><a data-action="Pro-Life Serve Day" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Pro-Life: Celebrate Your Children</h3><p>Share how special your children are and why you’re glad you chose life.</p><a data-action="Pro-Life: Celebrate Your Children" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Marriage Night</h3><p>Plan a distraction‑free date night. Share one thing you’re building together.</p><a data-action="Marriage Night" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Apologetics Share</h3><p>Share one reason for your hope in the Gospel—winsome and brief.</p><a data-action="Apologetics Share" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Read Aloud with Kids</h3><p>Pick a book and read aloud nightly. Post a family pic + title.</p><a data-action="Read Aloud with Kids" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Add Your Church</h3><p>Post your church’s link and invite others in your city to visit.</p><a data-action="Add Your Church" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Host a Like-Charlie Meetup</h3><p>Gather 5+ friends to do actions together; share a group photo and plan.</p><a data-action="Host a Like-Charlie Meetup" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Testimony Video (60–90s)</h3><p>Record a short testimony video and post with #LiveLikeCharlie.</p><a data-action="Testimony Video (60–90s)" href="javascript:void(0)">Do this</a></div>
+    <div class="card"><h3>Worship Playlist Share (Top 10)</h3><p>Share your top‑10 worship playlist and why each song matters.</p><a data-action="Worship Playlist Share (Top 10)" href="javascript:void(0)">Do this</a></div>
+  </div>
+
+  <!-- Propose Action Modal -->
+  <div class="modal" id="proposeModal" aria-hidden="true">
+    <div class="box">
+      <span class="x" id="proposeClose">✕</span>
+      <h3>Propose a Like Charlie Action</h3>
+      <p class="muted" style="margin-top:0">Tell us your idea. Short and simple wins.</p>
+      <div class="two">
+        <input id="propTitle" placeholder="Action title (e.g., Serve a Neighbor)" />
+        <input id="propLink" placeholder="(optional) Helpful link" />
+      </div>
+      <textarea id="propDesc" rows="4" placeholder="One‑line description (what to do + what to post)"></textarea>
+      <button id="propSubmit" style="margin-top:10px">Submit Action Proposal</button>
+      <div id="propStatus" class="muted" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const pm = document.getElementById('proposeModal');
+      const openBtn = document.getElementById('proposeOpen');
+      const closeBtn = document.getElementById('proposeClose');
+      const body = document.body;
+      function openModal(){ pm.style.display='flex'; body.style.overflow='hidden'; }
+      function closeModal(){ pm.style.display='none'; body.style.overflow=''; }
+      openBtn?.addEventListener('click', openModal);
+      closeBtn?.addEventListener('click', closeModal);
+      pm?.addEventListener('click', (e)=>{ if(e.target===pm) closeModal(); });
+
+      async function submitProposal(){
+        const title = document.getElementById('propTitle').value.trim();
+        const desc  = document.getElementById('propDesc').value.trim();
+        const link  = document.getElementById('propLink').value.trim();
+        const status = document.getElementById('propStatus');
+        if(!title || !desc){ status.textContent = "Please add a title and a short description."; return; }
+        status.textContent = "Submitting…";
+        const URL = (window.SUPABASE_URL||"").replace(/\/+$/,"");
+        const KEY = window.SUPABASE_ANON_KEY||"";
+        if(URL && KEY){
+          try{
+            const res = await fetch(URL + "/rest/v1/action_proposals", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": KEY,
+                "Authorization": `Bearer ${KEY}`,
+                "Prefer": "return=representation"
+              },
+              body: JSON.stringify({ title, description: desc, link: link||null, ua: navigator.userAgent })
+            });
+            if(!res.ok){ throw new Error(await res.text());}
+            status.textContent = "Thanks! We received your idea.";
+            setTimeout(closeModal, 900);
+          }catch(err){
+            status.textContent = "Submit failed. Please try again later.";
+            console.error(err);
+          }
+        }else{
+          const mail = `mailto:?subject=Like Charlie Action Proposal&body=Title: ${encodeURIComponent(title)}%0A%0ADescription:%0A${encodeURIComponent(desc)}%0A%0ALink:%0A${encodeURIComponent(link)}`;
+          window.location.href = mail;
+          status.textContent = "Opening your mail app…";
+          setTimeout(closeModal, 900);
+        }
+      }
+      document.getElementById('propSubmit')?.addEventListener('click', submitProposal);
+    })();
+  </script>
+</section>
