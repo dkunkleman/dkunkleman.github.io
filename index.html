@@ -6,48 +6,39 @@
 <title>Like Charlie — Do Good. Count It. Grow Influence.</title>
 <meta name="description" content="Do one small good thing, paste your link so it counts, and invite 3 friends.">
 <link rel="canonical" href="https://www.cybermave.ai/">
-<!-- Open Graph -->
 <meta property="og:title" content="Do Good. Count It. Grow Influence — Like Charlie">
-<meta property="og:description" content="Pick an action, make a quick post, paste your link here so it counts, and invite 3 friends.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://www.cybermave.ai/">
+<meta property="og:description" content="Pick an action, make a quick post, paste your link so it counts, and invite 3 friends.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://www.cybermave.ai/">
 <style>
-  :root{
-    --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1;
-    --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14);
-  }
+  :root{ --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14); }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
   a{color:#b3d4ff;text-decoration:none}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
   header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
   nav{display:flex;align-items:center;gap:10px;padding:10px 16px}
-  nav a{padding:8px 12px;border-radius:10px}
-  nav a:hover{background:rgba(255,255,255,.06)}
+  nav a{padding:8px 12px;border-radius:10px} nav a:hover{background:rgba(255,255,255,.06)}
   .brand{font-weight:800;letter-spacing:.3px}
 
-  /* HERO with flag background (put /img/flag-hero-1.jpg there) */
-  .hero{margin:16px;border-radius:22px;overflow:hidden;border:1px solid var(--border);position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  .hero::before{content:"";position:absolute;inset:0;background:
-    linear-gradient(to bottom, rgba(5,12,28,.10), rgba(5,12,28,.65));z-index:1}
-  .hero-bg{position:absolute;inset:0;background:
-    url("/img/flag-hero-1.jpg") center/cover no-repeat;filter:saturate(1.1) contrast(1.02);}
+  /* HERO with rotating patriotic images (uses files already in /img) */
+  .hero{margin:16px;border-radius:22px;overflow:hidden;border:1px solid var(--border);position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35);min-height:320px}
+  .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(5,12,28,.15), rgba(5,12,28,.70));z-index:1}
+  .hero-bg{
+    position:absolute;inset:0;background: url("/img/patriotism.jpeg") center/cover no-repeat;
+    filter:saturate(1.12) contrast(1.05);transition:opacity .6s ease;opacity:1
+  }
   .hero-inner{position:relative;z-index:2;padding:40px 22px}
-  .hero h1{margin:0 0 10px 0;font-size:36px}
-  .hero p{margin:6px 0 0 0;color:#e9f2ff;max-width:920px}
+  .hero h1{margin:0 0 10px;font-size:36px}
+  .hero p{margin:6px 0 0;color:#e9f2ff;max-width:920px}
   .ribbon{height:6px;border-radius:999px;background:linear-gradient(90deg,#e11d48,#ffffff,#2563eb);box-shadow:0 4px 12px rgba(0,0,0,.35);margin-top:14px}
 
-  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),var(--panel);
-    border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}
   label{display:block;font-weight:700;margin:10px 0 6px}
   select,input,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ink)}
   textarea{min-height:120px;resize:vertical}
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:12px;
-    border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer}
-  .btn.ghost{background:transparent;border-color:rgba(255,255,255,.25)}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;color:#e6f0ff}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer}
+  table{width:100%;border-collapse:collapse;margin-top:12px} th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;color:#e6f0ff}
   .muted{color:var(--muted)} .mini{font-size:.9rem}
   footer{margin:26px 0 10px;color:var(--muted)}
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f1a33;color:#e6eefc;border:1px solid var(--border);padding:10px 14px;border-radius:12px;z-index:9999;opacity:0;pointer-events:none;transition:.25s}
@@ -59,15 +50,14 @@
   <nav class="wrap">
     <a class="brand" href="/">Like Charlie</a>
     <span style="flex:1"></span>
-    <a href="/actions.html">Actions</a>
-    <a href="#impact">Impact</a>
+    <a href="/actions.html">Actions</a><a href="#impact">Impact</a>
   </nav>
 </header>
 
 <main class="wrap">
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-bg"></div>
+    <div class="hero-bg" id="heroBg"></div>
     <div class="hero-inner">
       <h1>Do Good. Count It. Grow Influence.</h1>
       <p>Do one small good thing, make a quick post, paste your link here so it counts, and invite 3 friends. Make doing one small good thing a pattern, not a one-off.</p>
@@ -78,26 +68,17 @@
   <!-- STEP 1 -->
   <section id="step1" class="card">
     <h2>Step 1 — Choose & prepare your post</h2>
-
     <div class="row">
       <div style="flex:1;min-width:260px">
         <label>Choose an action</label>
         <select id="actionSelect">
           <option value="">— Select —</option>
-          <option>Raise the Flag</option>
-          <option>Publicly Thank Someone</option>
-          <option>Pick Up 10 Pieces</option>
-          <option>Pray for Someone</option>
-          <option>Read the Bible for 15</option>
-          <option>Help at Home</option>
-          <option>Be a Friend</option>
+          <option>Raise the Flag</option><option>Publicly Thank Someone</option><option>Pick Up 10 Pieces</option>
+          <option>Pray for Someone</option><option>Read the Bible for 15</option><option>Help at Home</option><option>Be a Friend</option>
         </select>
         <p id="actionDesc" class="muted mini" style="margin-top:6px"></p>
       </div>
-      <div>
-        <label style="visibility:hidden">.</label>
-        <a class="btn ghost" href="/actions.html">See all actions & ideas</a>
-      </div>
+      <div><label style="visibility:hidden">.</label><a class="btn" href="/actions.html">See all actions & ideas</a></div>
     </div>
 
     <label style="margin-top:10px">Your post (editable)</label>
@@ -114,9 +95,7 @@
       <input id="yourName" placeholder="(optional) Your name" style="flex:1;min-width:220px">
       <input id="yourEmail" placeholder="(optional) Email" style="flex:1;min-width:220px">
     </div>
-    <div class="row" style="margin-top:12px">
-      <button id="saveBtn" class="btn">Save & Count</button>
-    </div>
+    <div class="row" style="margin-top:12px"><button id="saveBtn" class="btn">Save & Count</button></div>
     <p class="mini muted" style="margin-top:8px">Tip: On Facebook, click the <b>timestamp</b> on your post → copy the link → paste above.</p>
   </section>
 
@@ -146,7 +125,6 @@
 <!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
 <script>
-  // GLOBAL (shared) — your project
   const SUPA_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
   const SUPA_KEY = "sb_publishable_7BO_7z8Z3yTdmxfBL457qg_qnfCMv34";
   const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -155,37 +133,50 @@
 <script>
 (function(){
   const $=id=>document.getElementById(id);
+
+  /* === ROTATING BACKGROUNDS — NO HEAD CHECKS === */
+  const heroBg=$('heroBg');
+  const imgs=[
+    '/img/istockphoto-145152803-612x612.jpg',
+    '/img/istockphoto-1333234668-612x612.webp',
+    '/img/istockphoto-1495316224-612x612.jpg',
+    '/img/istockphoto-1502557306-612x612.jpg',
+    '/img/istockphoto-2152081731-612x612.jpg',
+    '/img/istockphoto-2203271689-612x612.webp',
+    '/img/istockphoto-2211801215-612x612.jpg',
+    '/img/patriotism.jpeg',
+    '/img/photo-1542037104857-ffbb0b9155fb.avif'
+  ];
+  let idx = Math.floor(Math.random()*imgs.length);
+  function setBg(){
+    const src = imgs[idx]; idx=(idx+1)%imgs.length;
+    heroBg.style.backgroundImage = `url('${src}')`;  // just set it
+  }
+  setBg(); setInterval(setBg, 15000);
+
+  /* === CAPTION + IMPACT (unchanged) === */
   const actionEl=$('actionSelect'), postEl=$('copyText'), urlEl=$('postUrl');
   const nameEl=$('yourName'), emailEl=$('yourEmail');
-  const lbT=$('leaderboard'), rcT=$('recent'), toast=$('toast');
-
-  // caption like your clean v2
+  const lbT=$('leaderboard'), rcT=$('recent');
   function caption(){
     const act = actionEl.value || 'One Small Good Thing';
     return `I'm doing one small good thing, like Charlie: ${act}.
 Join me: pick an action and do one small good thing like Charlie too. #LiveLikeCharlie #OneSmallGoodThing`;
   }
-  function msg(t){ toast.textContent=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1800); }
-
-  actionEl.addEventListener('change', ()=>{
-    postEl.value = caption();
-    const map={
-      "Raise the Flag":"Hang or draw an American flag. Say what being an American means to you.",
-      "Publicly Thank Someone":"Thank a person who helps others; tag them if you want.",
-      "Pick Up 10 Pieces":"Pick up 10 pieces of trash. Before/after if you can.",
-      "Pray for Someone":"Say a short prayer and a kind message.",
-      "Read the Bible for 15":"Read 15 minutes and post a sentence about it.",
-      "Help at Home":"Do a helpful job without being asked.",
-      "Be a Friend":"Include someone who’s left out; say something kind."
-    };
-    $('actionDesc').textContent = map[actionEl.value] || '';
-  });
+  function toast(t){ let el=document.querySelector('.toast'); if(!el){el=document.createElement('div');el.className='toast';document.body.appendChild(el);} el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
+  const descMap={
+    "Raise the Flag":"Hang or draw an American flag. Say what being an American means to you.",
+    "Publicly Thank Someone":"Thank a person who helps others; tag them if you want.",
+    "Pick Up 10 Pieces":"Pick up 10 pieces of trash. Before/after if you can.",
+    "Pray for Someone":"Say a short prayer and a kind message.",
+    "Read the Bible for 15":"Read 15 minutes and post a sentence.",
+    "Help at Home":"Do a helpful job without being asked.",
+    "Be a Friend":"Include someone who’s left out; be kind."
+  };
+  actionEl.addEventListener('change', ()=>{ postEl.value=caption(); $('actionDesc').textContent=descMap[actionEl.value]||''; });
   postEl.value = caption();
-  $('copyPost').addEventListener('click', async ()=>{
-    try{ await navigator.clipboard.writeText(postEl.value); msg('Post copied'); }catch(e){ msg('Copy failed'); }
-  });
+  $('copyPost').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(postEl.value); toast('Post copied'); }catch(e){ toast('Copy failed'); } });
 
-  // render Impact (shared from Supabase)
   async function renderImpact(){
     const { data: recent } = await db.from('public_submissions')
       .select('created_at, action, url').eq('approved', true)
@@ -203,23 +194,20 @@ Join me: pick an action and do one small good thing like Charlie too. #LiveLikeC
                                 : `<tr><td colspan="3" class="muted">No data yet.</td></tr>`;
   }
 
-  // save
   $('saveBtn').addEventListener('click', async ()=>{
     const action=(actionEl.value||'').trim();
     const url=(urlEl.value||'').trim();
     const name=(nameEl.value||'').trim();
     const email=(emailEl.value||'').trim();
-    if(!action){ msg('Choose an action'); return; }
-
+    if(!action){ toast('Choose an action'); return; }
     const { error } = await db.from('public_submissions').insert({
       ts_ms: Date.now(), action, platform:'web', url, name, email,
       donated:false, donation_org:'', donation_amt:'', donation_evidence_url:'', attested:false
     });
-    if(error){ console.warn(error); msg('Save failed'); return; }
-    urlEl.value=''; msg('Saved!'); renderImpact();
+    if(error){ console.warn(error); toast('Save failed'); return; }
+    urlEl.value=''; toast('Saved!'); renderImpact();
   });
 
-  // deep link from Actions page: ?action=Raise%20the%20Flag&focus=post
   const q=new URLSearchParams(location.search);
   const deep=q.get('action'), focus=q.get('focus');
   if(deep){ for(const o of actionEl.options){ if(o.value===deep){ actionEl.value=deep; actionEl.dispatchEvent(new Event('change')); break; } } }
