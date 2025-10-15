@@ -59,6 +59,73 @@
   .stepcard svg{width:48px;height:48px;display:block;margin-bottom:8px}
 </style>
 </head>
+  <script type="module">
+  // 1) Supabase init
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  const SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpYWpsYnhlemxkZGh4dGVidGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTcwNTYsImV4cCI6MjA3NjAzMzA1Nn0.szBJhvyDcV6oDn-NgVUUxF_MZdHC60xXBe0AgDDQbbU";
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // 2) Helpers: tiny renderer
+  function td(v){return `<td style="border-top:1px solid rgba(255,255,255,.12);padding:8px">${v??""}</td>`;}
+  function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));}
+
+  // 3) Write handler
+  async function completeChallenge(){
+    const action = document.querySelector("#action")?.value?.trim();
+    const platform = document.querySelector("#platform")?.value?.trim();
+    const link = document.querySelector("#link")?.value?.trim();
+    const name = document.querySelector("#name")?.value?.trim() || null;
+    if(!action || !platform || !link){ alert("Please select action, platform, and paste your public link."); return; }
+
+    const { error } = await sb.from("submissions").insert([{ action, platform, link, name }]);
+    if(error){ console.error(error); alert("Save failed: " + error.message); return; }
+
+    const toast = document.querySelector("#toast"); if(toast){ toast.style.display="block"; setTimeout(()=>toast.style.display="none", 1500); }
+    document.querySelector("#link").value = "";
+    await Promise.all([loadRecent(), loadLeaders()]);
+  }
+
+  // 4) Read handlers
+  async function loadRecent(){
+    const { data, error } = await sb
+      .from("submissions")
+      .select("created_at, action, platform, link, name")
+      .order("created_at", { ascending:false })
+      .limit(25);
+    if(error){ console.error(error); return; }
+    const rows = (data||[]).map(r=>{
+      const when = new Date(r.created_at).toLocaleString();
+      const link = `<a href="${escapeHtml(r.link)}" target="_blank" rel="noopener">Open</a>`;
+      return `<tr>${td(when)}${td(escapeHtml(r.action))}${td(escapeHtml(r.platform))}${td(link)}${td(escapeHtml(r.name||""))}</tr>`;
+    });
+    document.querySelector("#recent").innerHTML =
+      `<tr><th style="text-align:left;padding:8px">When</th><th>Action</th><th>Platform</th><th>Link</th><th>Name</th></tr>` + rows.join("");
+  }
+
+  async function loadLeaders(){
+    // group by action, count
+    const { data, error } = await sb
+      .from("submissions")
+      .select("action, count:action", { count: "exact", head: false })
+      .group("action")
+      .order("count", { ascending:false });
+    if(error){ console.error(error); return; }
+    const agg = {};
+    (data||[]).forEach(r=>{ agg[r.action] = (agg[r.action]||0)+1; });
+    const rows = Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([action,count])=>{
+      return `<tr>${td(escapeHtml(action))}${td(count)}</tr>`;
+    });
+    document.querySelector("#leaders").innerHTML =
+      `<tr><th style="text-align:left;padding:8px">#</th><th>Action</th><th>Count</th></tr>` +
+      rows.map((r,i)=>r.replace("<tr>",`<tr>${td(i+1)}`)).join("");
+  }
+
+  // 5) Wire button + initial loads
+  document.querySelector("#completeBtn")?.addEventListener("click", completeChallenge);
+  loadRecent(); loadLeaders();
+</script>
+
 <body>
 <header>
   <div class="nav wrap">
@@ -107,6 +174,52 @@ Make a daily habit of doing at least one small good thing. "Live Like Charlie"</
 <section class="wrap" id="step3">
   <div class="panel">
     <div class="label">Share your post to our site</div>
+    <section id="lc-form" class="panel" style="margin:16px 0;padding:16px;border:1px solid rgba(255,255,255,.15);border-radius:12px;">
+  <div style="display:grid;gap:12px;">
+    <label>Action
+      <select id="action" required>
+        <option value="">Select an action…</option>
+        <option>Donate food to a pantry</option>
+        <option>Help a neighbor</option>
+        <option>Thank a veteran</option>
+        <option>Clean a public space</option>
+      </select>
+    </label>
+
+    <label>Platform
+      <select id="platform" required>
+        <option value="">Select a platform…</option>
+        <option>X</option>
+        <option>Facebook</option>
+        <option>Instagram</option>
+        <option>TikTok</option>
+        <option>Other</option>
+      </select>
+    </label>
+
+    <label>Link to your post (public URL)
+      <input id="link" type="url" placeholder="https://x.com/you/status/..." required />
+    </label>
+
+    <label>Your name (optional)
+      <input id="name" type="text" placeholder="First name or alias" />
+    </label>
+
+    <button id="completeBtn" type="button">Complete Challenge</button>
+    <div id="toast" style="display:none;padding:8px;border-radius:8px;background:#0b142a;border:1px solid rgba(255,255,255,.15)">Saved! Refreshing lists…</div>
+  </div>
+</section>
+
+<!-- Recent & Leaderboard tables (if not already on page) -->
+<section id="recentWrap" style="margin:24px 0">
+  <h3>Recent Submissions</h3>
+  <table id="recent" style="width:100%;border-collapse:collapse"></table>
+</section>
+
+<section id="leadersWrap" style="margin:24px 0">
+  <h3>Impact — Leaderboard</h3>
+  <table id="leaders" style="width:100%;border-collapse:collapse"></table>
+</section>
     <div class="help" style="margin:6px 0 12px">After you publish, share your post to us so it counts on the leaderboard.</div>
     <input id="postUrl" placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
     <div class="stack" style="margin-top:10px">
