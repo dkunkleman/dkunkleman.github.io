@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Like Charlie — Save & Challenge</title>
-<meta name="description" content="Do one small good thing, make a quick post, paste your link, and invite 3 friends." />
+<meta name="description" content="Do one small good thing, make a quick post, share it to our site, and invite 3 friends." />
 <style>
   :root{ --ink:#fff; --bg:#0a0f1c; --panel:#0b142a; --brand:#e11d48; --accent:#2563eb; --ok:#16a34a; --warn:#f59e0b; }
   *{box-sizing:border-box}
@@ -24,16 +24,16 @@
   .hero-inner{position:relative;z-index:1;padding:44px 18px}
   .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
   @media (max-width:980px){ .hero-grid{grid-template-columns:1fr} }
-  .flagcard{background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.35);border-radius:18px;padding:26px;
+  .flagcard{background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.4);border-radius:18px;padding:26px;
             box-shadow:0 10px 30px rgba(0,0,0,.55)}
-  .flagcard h1{margin:0 0 8px 0;font-size:40px;line-height:1.2;text-shadow:0 2px 6px rgba(0,0,0,.8)}
-  .subtitle{color:#e5eeff;font-size:18px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.75)}
+  .flagcard h1{margin:0 0 8px 0;font-size:36px;line-height:1.2;text-shadow:0 2px 6px rgba(0,0,0,.9)}
+  .subtitle{color:#f1f6ff;font-size:18px;font-weight:800;text-shadow:0 2px 6px rgba(0,0,0,.85)}
   .ribbon{height:10px;background:repeating-linear-gradient(45deg,#e11d48 0,#e11d48 10px,#ffffff 10px,#ffffff 20px,#2563eb 20px,#2563eb 30px);border-radius:999px;margin-top:14px}
   .panel{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(12,20,40,.98),rgba(10,18,36,.98));
-          border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:16px;box-shadow:0 10px 20px rgba(0,0,0,.35)}
+          border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:16px;box-shadow:0 10px 20px rgba(0,0,0,.35)}
   .label{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:#fff;font-weight:900}
-  select,input,button{width:100%;padding:12px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:#0a1530;color:#fff;font-weight:900}
-  input::placeholder{color:#cfe0ff}
+  select,input,button,textarea{width:100%;padding:12px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.45);background:#0a1530;color:#fff;font-weight:900}
+  input::placeholder, textarea::placeholder{color:#cfe0ff}
   button.primary{background:var(--brand);border-color:#000;color:#fff;box-shadow:0 8px 18px rgba(225,29,72,.45)}
   button.secondary{background:#11244b;border-color:#000;color:#fff}
   .help{color:#e8f1ff;font-size:14px;opacity:.98}
@@ -43,6 +43,20 @@
   th,td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.2)}
   th{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#cfe0ff;background:#0f1c3b}
   .pill{display:inline-block;padding:.25rem .6rem;border-radius:999px;background:#0f1c3b;border:1px solid rgba(255,255,255,.4)}
+  /* Modal */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.65);z-index:100}
+  .modal.show{display:flex}
+  .sheet{width:min(720px,92%);background:#0b142a;border:2px solid rgba(255,255,255,.5);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.6);padding:16px}
+  .sheet h3{margin:0 0 8px 0}
+  .sheet textarea{height:160px;resize:vertical}
+  .sheet .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+  .sheet .grid button{padding:10px 8px}
+  .sheet .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+  .closex{background:#301117;border:2px solid #000;color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+  /* Picture instructions */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+  .stepcard{background:#0b142a;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:12px}
+  .stepcard svg{width:48px;height:48px;display:block;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -52,7 +66,7 @@
     <nav>
       <a href="#impact">Impact</a>
       <a href="#recent">Recent</a>
-      <a href="#step3" class="button">Finish (Step 3)</a>
+      <a href="#step3" class="button">Finish</a>
     </nav>
   </div>
 </header>
@@ -62,8 +76,8 @@
     <div class="hero-grid">
       <!-- Left: Do Good box -->
       <div class="flagcard">
-        <h1>Do Good. Save &amp; Challenge. Grow It.</h1>
-        <div class="subtitle">Pick an action, make your post, paste the link, and invite 3 friends. Clear, bold, readable — always.</div>
+        <h1>Take Action. Build Boldly and Consistently. Be an Influence for Good.</h1>
+        <div class="subtitle">Pick an action, make your post, share it to our site below, and invite 3 friends. Ultra-high contrast for maximum readability.</div>
         <div class="ribbon"></div>
       </div>
 
@@ -78,10 +92,8 @@
         </div>
         <div class="panel">
           <div class="label">Step 2 — Post it</div>
-          <select id="platformSelect" aria-label="Choose a platform">
-            <option>Facebook</option><option>X</option><option>Instagram</option><option>TikTok</option><option>Other</option>
-          </select>
-          <div class="help" style="margin-top:8px">Copy, paste and post to X/Facebook/Instagram/TikTok, then paste your social link into Step 3 to complete the challenge.</div>
+          <div class="help" style="margin-bottom:8px">We’ll pop up suggested text you can edit. Choose a platform and we’ll open it for you and copy your message.</div>
+          <button id="openCompose" class="secondary">Compose post</button>
         </div>
       </div>
     </div>
@@ -91,7 +103,8 @@
 <!-- Step 3 under both columns -->
 <section class="wrap" id="step3">
   <div class="panel">
-    <div class="label">Step 3 — Paste your link so it counts</div>
+    <div class="label">Share your post to our site</div>
+    <div class="help" style="margin:6px 0 12px">After you publish, share your post to us so it counts on the leaderboard.</div>
     <input id="postUrl" placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
     <div class="stack" style="margin-top:10px">
       <input id="personName" placeholder="(optional) Your name" />
@@ -99,10 +112,26 @@
       <input id="personState" placeholder="(optional) State (e.g., FL)" />
     </div>
     <div class="two" style="margin-top:10px">
-      <button id="saveBtn" class="primary">Save &amp; Challenge</button>
+      <button id="saveBtn" class="primary">Complete Challenge</button>
       <button class="secondary" id="copyMsg">Copy a suggested message</button>
     </div>
     <div id="saveStatus" class="help" style="margin-top:8px"></div>
+
+    <div class="label" style="margin-top:14px">How to get your link (picture instructions)</div>
+    <div class="steps">
+      <div class="stepcard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg>
+        <b>1) Open your post</b><div class="help">Tap your post you just made on X/Facebook/Instagram/TikTok.</div>
+      </div>
+      <div class="stepcard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h16"/><path d="M12 4l8 8-8 8"/></svg>
+        <b>2) Share / Copy link</b><div class="help">Tap <i>Share</i> then <i>Copy link</i>. On desktop, right‑click the timestamp and copy link.</div>
+      </div>
+      <div class="stepcard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+        <b>3) Paste here</b><div class="help">Paste the link above and press <i>Complete Challenge</i>. Boom—counted.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -124,8 +153,29 @@
   </div>
 </main>
 
+<!-- Compose Modal -->
+<div class="modal" id="compose">
+  <div class="sheet">
+    <div class="bar">
+      <div><h3 style="margin:0">Compose your post</h3><div class="help">Edit freely. We’ll also copy this to your clipboard.</div></div>
+      <button class="closex" id="closeCompose">Close</button>
+    </div>
+    <textarea id="composeText" placeholder="Your post text…"></textarea>
+    <div class="grid">
+      <button class="primary" data-platform="x">Post on X</button>
+      <button class="primary" data-platform="facebook">Post on Facebook</button>
+      <button class="secondary" data-platform="instagram">Open Instagram</button>
+      <button class="secondary" data-platform="tiktok">Open TikTok</button>
+    </div>
+    <div class="help" style="margin-top:8px">
+      Note: browsers don’t allow auto‑pasting into other sites, but we <b>copy to your clipboard</b> and open the platform for you.
+      On Facebook, we’ll open a share dialog with your message in the “quote”. On X, we’ll open a prefilled Tweet.
+    </div>
+  </div>
+</div>
+
 <footer class="wrap" style="opacity:.95;margin-top:18px">
-  Built for community impact. Save &amp; Challenge a friend today.
+  Built for community impact. Complete a challenge and invite a friend.
 </footer>
 
 <script>
@@ -137,7 +187,7 @@ function setHero(i){ heroEl.style.backgroundImage = "url(" + heroImgs[i] + ")"; 
 setHero(heroIndex);
 setInterval(()=>{ heroIndex = (heroIndex+1)%heroImgs.length; setHero(heroIndex); }, 8000);
 
-// Full action set
+// Actions
 const ACTIONS = [
   ["Raise the Flag","Hang or fly a U.S. flag today. Share a photo and why it matters to you."],
   ["Publicly Thank Someone","Thank a person who helps others; post a note of appreciation."],
@@ -194,16 +244,45 @@ ACTIONS.forEach(([label])=>{ const o=document.createElement('option'); o.textCon
 const actionDesc = document.getElementById('actionDesc');
 actionSelect.addEventListener('change',()=>{ const f=ACTIONS.find(a=>a[0]===actionSelect.value); actionDesc.textContent=f?f[1]:""; });
 
-// Deep-link preselect
-const params = new URLSearchParams(location.search);
-const presetAction = params.get('action'); if(presetAction){ actionSelect.value=presetAction; actionSelect.dispatchEvent(new Event('change')); }
-const platformSelect = document.getElementById('platformSelect');
-const presetPlat = params.get('platform'); if(presetPlat) platformSelect.value=presetPlat;
+// Compose modal logic
+const compose = document.getElementById('compose');
+const openCompose = document.getElementById('openCompose');
+const closeCompose = document.getElementById('closeCompose');
+const composeText = document.getElementById('composeText');
 
-// Copy message
+openCompose.addEventListener('click', ()=>{ 
+  const action = actionSelect.value || "Do one small good thing";
+  const template = "I just completed “" + action + "” for #LikeCharlie — make a quick post, share it to our site, and invite 3 friends to do the same. " + location.origin + location.pathname;
+  composeText.value = template;
+  compose.classList.add('show');
+  navigator.clipboard.writeText(template).catch(()=>{});
+});
+closeCompose.addEventListener('click', ()=> compose.classList.remove('show'));
+
+// Platform handlers
+compose.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-platform]'); if(!btn) return;
+  const txt = encodeURIComponent(composeText.value || "");
+  if(btn.dataset.platform === 'x') {
+    const url = "https://twitter.com/intent/tweet?text=" + txt;
+    window.open(url, "_blank");
+  } else if(btn.dataset.platform === 'facebook') {
+    const shareUrl = encodeURIComponent(location.origin + location.pathname);
+    const url = "https://www.facebook.com/sharer/sharer.php?u=" + shareUrl + "&quote=" + txt;
+    window.open(url, "_blank");
+  } else if(btn.dataset.platform === 'instagram') {
+    window.open("https://www.instagram.com/", "_blank");
+    alert("Instagram doesn’t support prefilled text from the web. We copied your text. Paste it into the caption.");
+  } else if(btn.dataset.platform === 'tiktok') {
+    window.open("https://www.tiktok.com/creator-center/upload?lang=en", "_blank");
+    alert("TikTok doesn’t allow prefilled captions from the web. We copied your text. Paste it into the caption.");
+  }
+});
+
+// Suggested message on Step 3
 document.getElementById('copyMsg').addEventListener('click', async () => {
   const action = actionSelect.value || "Do one small good thing";
-  const msg = "I just completed “" + action + "” for #LikeCharlie — make a quick post, paste your link, and invite 3 friends. Join me: " + location.origin + location.pathname;
+  const msg = "I just completed “" + action + "” for #LikeCharlie — make a quick post, share it to our site, and invite 3 friends: " + location.origin + location.pathname;
   try { await navigator.clipboard.writeText(msg); toast("Copied a suggested message.", "ok"); }
   catch(e){ toast("Select and copy manually: " + msg, "warn"); }
 });
@@ -237,9 +316,9 @@ async function maybeSupabaseInsert(row){
 
 saveBtn.addEventListener('click', async ()=>{
   const action = actionSelect.value;
-  const platform = platformSelect.value;
+  const platform = document.getElementById('platformSelect')?.value || "";
   const link = urlEl.value.trim();
-  if(!action) return toast("Pick an action first.", "warn");
+  if(!action) return toast("Pick an action first (Step 1).", "warn");
   if(!validURL(link)) return toast("Paste a valid post link (https://…)", "warn");
 
   const row = { ts:new Date().toISOString(), action, platform, link, name:nameEl.value.trim(), email:emailEl.value.trim(), state:stateEl.value.trim() };
@@ -248,8 +327,8 @@ saveBtn.addEventListener('click', async ()=>{
   urlEl.value=""; nameEl.value=""; emailEl.value=""; stateEl.value="";
   toast("Saved locally. Attempting cloud sync…","ok");
   const cloud = await maybeSupabaseInsert(row);
-  if(cloud.skipped) toast("Cloud not configured — local save complete.","warn");
-  else if(cloud.ok) toast("Saved to cloud. Thanks!","ok"); else toast("Cloud save failed (kept locally).","warn");
+  if(cloud.skipped) toast("Cloud not configured — local share complete.","warn");
+  else if(cloud.ok) toast("Shared to site. Thanks!","ok"); else toast("Cloud save failed (kept locally).","warn");
 });
 
 function toast(msg, kind="ok"){ statusEl.textContent=msg; statusEl.style.color = (kind==="ok" ? "#9cffb0" : "#ffd47a"); }
