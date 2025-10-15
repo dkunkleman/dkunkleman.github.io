@@ -4,27 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Like Charlie — Actions</title>
+
 <style>
-  :root{--border:rgba(255,255,255,.12);--ink:#e6eefc;--muted:#9fb3d1;}
-  body{margin:0;background:#0b1220;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  header{position:sticky;top:0;background:#0c1530cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--border)}
-  nav{display:flex;gap:14px;align-items:center;padding:10px 16px}
-  nav a{color:var(--ink);text-decoration:none;padding:6px 10px;border-radius:8px}
-  nav a:hover{background:#1a2750}
+  :root{--ink:#e6eefc;--bg:#0b1220;--muted:#9fb3d1;--border:rgba(255,255,255,.14);--panel:#0f1a33;--brand:#e11d48;--brand2:#2563eb;--chip:#1b2b66;--chipTxt:#e9f0ff}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  header{position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+  nav{display:flex;gap:10px;align-items:center;padding:10px 16px}
+  nav a{color:var(--ink);text-decoration:none;padding:8px 12px;border-radius:10px}
+  nav a:hover{background:rgba(255,255,255,.06)}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
-  .actions-hero{border:1px solid var(--border);border-radius:16px;background:#0f1a33;padding:16px;margin-bottom:14px}
-  .muted{color:#9fb3d1}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-  .chip{padding:6px 10px;border:1px solid var(--border);border-radius:999px;cursor:pointer}
-  .chip.active{background:#162552}
-  .section{margin:12px 0 18px}
+  .actions-hero{border:1px solid var(--border);border-radius:18px;background:var(--panel);padding:18px;margin-bottom:16px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+  .muted{color:var(--muted)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+  .chip{padding:8px 12px;border:0;border-radius:999px;background:var(--chip);color:var(--chipTxt);cursor:pointer}
+  .chip.active{outline:2px solid rgba(255,255,255,.35)}
+  .section{margin:14px 0 20px}
   .section h2{margin:0 0 8px 0;font-size:18px}
-  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-  .card{border:1px solid var(--border);border-radius:14px;padding:12px;background:#0f1a33}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .card{border:1px solid var(--border);border-radius:16px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.00)),var(--panel)}
   .card h3{margin:0 0 6px 0;font-size:16px}
-  .btn{display:inline-block;margin-top:8px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;color:#fff;text-decoration:none;background:#162552}
+  .btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);color:#fff;text-decoration:none;background:linear-gradient(90deg,var(--brand),var(--brand2))}
   footer{opacity:.8;font-size:.9rem;margin-top:24px}
-  .srch{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:#0c1630;color:var(--ink)}
+  .srch{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -83,32 +84,19 @@
   function render(filter='All', q=''){
     root.innerHTML='';
     const query = (q||'').toLowerCase();
-    const byCat = (c)=>items.filter(i=>{
-      const inCat = (filter==='All' ? true : (i.category===c));
-      const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
-      return (filter==='All' ? true : i.category===filter) && match;
-    });
+    const catList = filter==='All' ? cats.concat('Other') : [filter];
 
-    // All or specific
-    if(filter==='All'){
-      cats.concat('Other').forEach(cat=>{
-        const list = items.filter(i=>{
-          const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
-          return (i.category===cat) && match;
-        });
-        if(!list.length) return;
-        const sec = document.createElement('section'); sec.className='section';
-        sec.innerHTML = `<h2>${cat}</h2><div class="grid">${list.map(card).join('')}</div>`;
-        root.appendChild(sec);
+    catList.forEach(cat=>{
+      const list = items.filter(i=>{
+        const inCat = (filter==='All' ? true : i.category===cat);
+        const match = !query || i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query);
+        return inCat && (filter==='All' ? i.category===cat : true) && match;
       });
-    } else {
-      const list = byCat(filter);
-      if(list.length){
-        const sec = document.createElement('section'); sec.className='section';
-        sec.innerHTML = `<h2>${filter}</h2><div class="grid">${list.map(card).join('')}</div>`;
-        root.appendChild(sec);
-      }
-    }
+      if(!list.length) return;
+      const sec = document.createElement('section'); sec.className='section';
+      sec.innerHTML = `<h2>${cat}</h2><div class="grid">${list.map(card).join('')}</div>`;
+      root.appendChild(sec);
+    });
   }
 
   chips.addEventListener('click', e=>{
