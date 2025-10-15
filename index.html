@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Like Charlie — Save & Challenge</title>
+<title>Live Like Charlie</title>
 <meta name="description" content="Do one small good thing, make a quick post, share it to our site, and invite 3 friends." />
 <style>
   :root{ --ink:#fff; --bg:#0a0f1c; --panel:#0b142a; --brand:#e11d48; --accent:#2563eb; --ok:#16a34a; --warn:#f59e0b; }
@@ -76,8 +76,11 @@
     <div class="hero-grid">
       <!-- Left: Do Good box -->
       <div class="flagcard">
-        <h1>Take Action. Build Boldly and Consistently. Be an Influence for Good.</h1>
-        <div class="subtitle">Pick an action, make your post, share it to our site below, and invite 3 friends. Ultra-high contrast for maximum readability.</div>
+        <h1>Take Action. Be Bold. Be Consistent. Build for Good.</h1>
+        <div class="subtitle">1. Choose an action and complete it. Be bold and build, Like Charlie 
+2. Share about it on social media and Invite 3 friends to "Live Like Charlie" 
+3. Paste your link here to complete the challenge 
+Make a daily habit of doing at least one small good thing. "Live Like Charlie"</div>
         <div class="ribbon"></div>
       </div>
 
@@ -282,7 +285,7 @@ compose.addEventListener('click', (e)=>{
 // Suggested message on Step 3
 document.getElementById('copyMsg').addEventListener('click', async () => {
   const action = actionSelect.value || "Do one small good thing";
-  const msg = "I just completed “" + action + "” for #LikeCharlie — make a quick post, share it to our site, and invite 3 friends: " + location.origin + location.pathname;
+  const msg = "Like Charlie, I wanted to share a verse with you as encouragement or inspiration. (Paste your verse here. Maybe tell them what this verse means to you.) #LiveLikeCharlie  " + location.origin + location.pathname;
   try { await navigator.clipboard.writeText(msg); toast("Copied a suggested message.", "ok"); }
   catch(e){ toast("Select and copy manually: " + msg, "warn"); }
 });
