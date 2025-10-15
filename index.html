@@ -220,6 +220,14 @@
       <li><a href="https://tpusa.com/" target="_blank" rel="noopener">Turning Point USA</a></li>
       <li><a href="https://charliechallenge.org/" target="_blank" rel="noopener">The Charlie Challenge</a></li>
     </ul>
+    <script>
+  // Link every "Do this" button to Step 1 with the action pre-selected
+  document.querySelectorAll('a[data-action]').forEach(a=>{
+    const t = a.getAttribute('data-action');
+    a.setAttribute('href', '/?action=' + encodeURIComponent(t) + '#step1');
+  });
+</script>
+
   </section>
 
   <!-- Facebook "How to copy link" modal -->
@@ -361,5 +369,15 @@
   renderImpact();
 })();
 </script>
+  <footer class="wrap" style="opacity:.85;margin-top:24px">
+  <p>
+    <a href="/about.html">About</a> •
+    <a href="/privacy.html">Privacy</a> •
+    <a href="/terms.html">Terms</a> •
+    <a href="/actions.html">Actions</a>
+  </p>
+  <p class="muted">Not affiliated with charliechallenge.org.</p>
+</footer>
+
 </body>
 </html>
