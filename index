@@ -1,53 +1,45 @@
 <!doctype html>
-<html lang="en" data-theme="patriotic">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Like Charlie — Do Good. Count It. Grow Influence.</title>
-<meta name="description" content="Pick an action, make a quick post inviting 3 friends, paste your post URL so it counts. Make doing one small good thing often a pattern, not a one-off.">
+<meta name="description" content="Do one small good thing, paste your link so it counts, and invite 3 friends.">
+<link rel="canonical" href="https://www.cybermave.ai/">
 <meta property="og:title" content="Do Good. Count It. Grow Influence — Like Charlie">
-<meta property="og:description" content="Do one small good action like Charlie, invite 3 friends, and paste your link to complete the challenge.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://www.cybermave.ai/">
+<meta property="og:description" content="Pick an action, make a quick post, paste your link so it counts, and invite 3 friends.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://www.cybermave.ai/">
 <style>
-  :root{ --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14); --glow:0 0 0 2px rgba(255,255,255,.06), 0 12px 32px rgba(0,0,0,.35); --hero:url('/img/patriotism.jpeg'); }
+  :root{ --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14); }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
   a{color:#b3d4ff;text-decoration:none}
   .wrap{max-width:1100px;margin:0 auto;padding:20px}
   header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
   nav{display:flex;align-items:center;gap:10px;padding:10px 16px}
-  nav a{padding:8px 12px;border-radius:10px}
-  nav a:hover{background:rgba(255,255,255,.06)}
+  nav a{padding:8px 12px;border-radius:10px} nav a:hover{background:rgba(255,255,255,.06)}
   .brand{font-weight:800;letter-spacing:.3px}
-  .hero{margin:16px;border-radius:22px;overflow:hidden;border:1px solid var(--border);
-    background:linear-gradient(to bottom, rgba(5,12,28,.25), rgba(5,12,28,.65)), var(--hero), linear-gradient(135deg,var(--brand2),var(--brand));
-    background-size:cover;background-position:center;box-shadow:var(--glow)}
-  .hero-inner{padding:48px 22px}
-  .hero h1{margin:0 0 8px 0;font-size:36px}
-  .hero-lead{margin:10px 0 0 0;color:#e9f2ff;font-size:18px;max-width:980px;white-space:pre-line}
-  .grid{display:grid;gap:18px}
-  .two{grid-template-columns:1fr}
-  @media(min-width:920px){.two{grid-template-columns:1fr 1fr}}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.00)), var(--panel);
-    border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--glow)}
+
+  /* HERO with rotating patriotic images (uses files already in /img) */
+  .hero{margin:16px;border-radius:22px;overflow:hidden;border:1px solid var(--border);position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(5,12,28,.15), rgba(5,12,28,.70));z-index:1}
+  .hero-bg{position:absolute;inset:0;background:#0b1220 center/cover no-repeat;filter:saturate(1.12) contrast(1.05);transition:opacity .6s ease;opacity:1}
+  .hero-inner{position:relative;z-index:2;padding:40px 22px}
+  .hero h1{margin:0 0 10px;font-size:36px}
+  .hero p{margin:6px 0 0;color:#e9f2ff;max-width:920px}
+  .ribbon{height:6px;border-radius:999px;background:linear-gradient(90deg,#e11d48,#ffffff,#2563eb);box-shadow:0 4px 12px rgba(0,0,0,.35);margin-top:14px}
+
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}
   label{display:block;font-weight:700;margin:10px 0 6px}
   select,input,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ink)}
   textarea{min-height:120px;resize:vertical}
   .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25)}
-  .btn.ghost{background:transparent;border-color:rgba(255,255,255,.25)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer}
+  table{width:100%;border-collapse:collapse;margin-top:12px} th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;color:#e6f0ff}
   .muted{color:var(--muted)} .mini{font-size:.9rem}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;color:#e6f0ff}
   footer{margin:26px 0 10px;color:var(--muted)}
-  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--panel);color:var(--ink);border:1px solid var(--border);padding:10px 14px;border-radius:12px;z-index:9999;opacity:0;pointer-events:none;transition:.25s}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f1a33;color:#e6eefc;border:1px solid var(--border);padding:10px 14px;border-radius:12px;z-index:9999;opacity:0;pointer-events:none;transition:.25s}
   .toast.show{opacity:1;pointer-events:auto}
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:9998}
-  .modal{position:fixed;inset:0;display:none;place-items:center;z-index:9999}
-  .modal .panel{max-width:760px;width:92%;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--glow)}
-  .modal .close{float:right;border:1px solid var(--border);padding:6px 10px;border-radius:10px;background:transparent;color:var(--ink);text-decoration:none}
-  .modal svg{max-width:100%;border-radius:12px;border:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -55,142 +47,68 @@
   <nav class="wrap">
     <a class="brand" href="/">Like Charlie</a>
     <span style="flex:1"></span>
-    <a href="/actions.html">Actions</a>
-    <a href="#impact">Impact</a>
-    <a href="#resources">Resources</a>
+    <a href="/actions.html">Actions</a><a href="#impact">Impact</a>
   </nav>
 </header>
 
 <main class="wrap">
+  <!-- HERO -->
   <section class="hero">
+    <div class="hero-bg" id="heroBg"></div>
     <div class="hero-inner">
-      <h1>Do Good. Count It. Grow Influence, like Charlie</h1>
-      <p class="hero-lead">1) Pick one small good action in Step 1. 2) Make a quick post inviting 3 friends. 3) Paste your post URL here to complete the challenge. “Make doing one small good thing often a pattern, not a one-off.”</p>
+      <h1>Do Good. Count It. Grow Influence.</h1>
+      <p>Do one small good thing, make a quick post, paste your link here so it counts, and invite 3 friends. Make doing one small good thing a pattern, not a one-off.</p>
+      <div class="ribbon"></div>
     </div>
   </section>
 
-  <section class="grid two">
-    <!-- STEP 1 -->
-    <div id="step1" class="card">
-      <h2>Step 1 — Choose & prepare your post</h2>
-
-      <div class="row">
-        <div style="flex:1;min-width:260px">
-          <label>Choose an action</label>
-          <select id="actionSelect"></select>
-          <p id="actionDesc" class="muted mini" style="margin-top:6px"></p>
-        </div>
-        <div>
-          <label style="visibility:hidden">.</label>
-          <a class="btn ghost" href="/actions.html" title="See explanations and ideas for each action">Explanations of Actions</a>
-        </div>
+  <!-- STEP 1 -->
+  <section id="step1" class="card">
+    <h2>Step 1 — Choose & prepare your post</h2>
+    <div class="row">
+      <div style="flex:1;min-width:260px">
+        <label>Choose an action</label>
+        <select id="actionSelect">
+          <option value="">— Select —</option>
+          <option>Raise the Flag</option><option>Publicly Thank Someone</option><option>Pick Up 10 Pieces</option>
+          <option>Pray for Someone</option><option>Read the Bible for 15</option><option>Help at Home</option><option>Be a Friend</option>
+        </select>
+        <p id="actionDesc" class="muted mini" style="margin-top:6px"></p>
       </div>
-
-      <label style="margin-top:10px">Platform</label>
-      <select id="platformSelect">
-        <option>Facebook</option><option>X</option><option>Instagram</option>
-        <option>TikTok</option><option>LinkedIn</option><option>YouTube</option>
-        <option>Truth Social</option><option>Telegram</option><option>Other</option>
-      </select>
-
-      <div class="row" style="margin-top:10px">
-        <label style="flex:1">Your post (editable)</label>
-        <button id="copyPost" class="btn" type="button">Copy Post</button>
-      </div>
-      <textarea id="copyText" placeholder="Your post appears here…"></textarea>
-
-      <!-- Invite bar -->
-      <div class="row" style="margin-top:10px">
-        <a id="shareSMS" class="btn" href="#">Text (SMS)</a>
-        <a id="shareWA"  class="btn" href="#">WhatsApp</a>
-        <a id="shareCopy" class="btn" href="#">Copy Page Link</a>
-      </div>
-      <p class="muted mini">Tip: Invite 3 friends now—they’ll land here and can complete the challenge.</p>
+      <div><label style="visibility:hidden">.</label><a class="btn" href="/actions.html">See all actions & ideas</a></div>
     </div>
 
-    <!-- STEP 2 -->
-    <div id="step2" class="card">
-      <h2>Step 2 — Save & Challenge</h2>
-      <p class="muted">Post on your platform. Then paste your <b>post’s URL</b> below to complete the challenge.</p>
-
-      <label style="display:flex;align-items:center;gap:10px">
-        Paste your post URL
-        <a id="helpLink" href="#" class="btn ghost" style="padding:6px 10px">How do I get my Facebook link?</a>
-      </label>
-      <input id="postUrl" placeholder="https://… (your post link)">
-      <small id="urlHint" class="muted mini"></small>
-
-      <details style="margin:6px 0"><summary class="muted">Quick tips</summary>
-        <ul class="muted" style="margin:8px 0 0 0;padding-left:18px">
-          <li>Open your post → tap/click <b>Share</b> or the <b>timestamp</b> → <b>Copy link</b>.</li>
-          <li>If “Copy link” is missing: set the post to <b>Public</b> (globe icon), then copy again.</li>
-        </ul>
-      </details>
-
-      <div class="row" style="margin-top:10px">
-        <input id="yourName" placeholder="Your name (optional)" style="flex:1;min-width:220px">
-        <input id="yourEmail" placeholder="Email (optional)" style="flex:1;min-width:220px">
-      </div>
-
-      <!-- Donation attestation (optional) -->
-      <div class="row" style="margin-top:10px;align-items:center">
-        <label class="mini" style="display:flex;gap:8px;align-items:center">
-          <input type="checkbox" id="donatedChk"> I donated today
-        </label>
-      </div>
-      <div id="donationFields" style="display:none;margin-top:8px">
-        <div class="row">
-          <input id="donationOrg" placeholder="Donation organization (e.g., TPUSA)" style="flex:2;min-width:220px">
-          <input id="donationAmt" placeholder="Donation amount (e.g., 25.00)" style="flex:1;min-width:160px">
-        </div>
-        <input id="donationProof" placeholder="Receipt or proof URL (optional)" style="margin-top:8px">
-        <p class="mini muted" style="margin:6px 0 0">Note: Claimed donations are <b>unverified</b> until approved and won’t appear publicly until verified.</p>
-      </div>
-
-      <!-- Donate strip -->
-      <div class="row" style="margin-top:10px; align-items:center">
-        <a id="donateTpusa" class="btn" target="_blank" rel="noopener"
-           href="https://donate.tpusa.com/?utm_source=LiveLikeCharlie&utm_medium=site&utm_campaign=challenge">
-          Donate to TPUSA
-        </a>
-        <a id="donateOther" class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=donate">
-          Donate to another charity
-        </a>
-        <small class="muted mini" style="margin-left:8px">
-          Opens in a new tab. Add the org/amount above before you Save &amp; Challenge.
-        </small>
-      </div>
-
-      <div class="row" style="margin-top:12px">
-        <button id="saveBtn" class="btn">Save & Challenge</button>
-      </div>
-    </div>
+    <label style="margin-top:10px">Your post (editable)</label>
+    <textarea id="copyText" placeholder="Your post appears here…"></textarea>
+    <div class="row"><button id="copyPost" class="btn" type="button">Copy Post</button></div>
   </section>
 
-  <section id="impact" class="card" style="margin-top:14px">
+  <!-- STEP 2 -->
+  <section id="step2" class="card">
+    <h2>Step 2 — Save & Count</h2>
+    <label>Paste your post URL</label>
+    <input id="postUrl" placeholder="https://… (your post link)">
+    <div class="row" style="margin-top:12px">
+      <input id="yourName" placeholder="(optional) Your name" style="flex:1;min-width:220px">
+      <input id="yourEmail" placeholder="(optional) Email" style="flex:1;min-width:220px">
+    </div>
+    <div class="row" style="margin-top:12px"><button id="saveBtn" class="btn">Save & Count</button></div>
+    <p class="mini muted" style="margin-top:8px">Tip: On Facebook, click the <b>timestamp</b> on your post → copy the link → paste above.</p>
+  </section>
+
+  <!-- IMPACT -->
+  <section id="impact" class="card">
     <h2>Impact</h2>
-    <div class="grid two">
-      <div>
-        <h3 style="margin-top:0">Leaderboard (by action)</h3>
-        <table><thead><tr><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
+    <div class="row" style="gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:280px">
+        <h3 style="margin:0 0 6px">Leaderboard</h3>
+        <table><thead><tr><th>#</th><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
       </div>
-      <div>
-        <h3 style="margin-top:0">Recent</h3>
-        <table><thead><tr><th>When</th><th>Action</th><th>Link / Donation</th></tr></thead><tbody id="recent"></tbody></table>
+      <div style="flex:1;min-width:280px">
+        <h3 style="margin:0 0 6px">Recent</h3>
+        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
       </div>
     </div>
-  </section>
-
-  <section id="resources" class="card" style="margin-top:14px">
-    <h2>Resources</h2>
-    <ul>
-      <li><a href="https://donate.tpusa.com/" target="_blank" rel="noopener">Donate to Turning Point USA</a></li>
-      <li><a href="https://tpusa.com/getinvolved/" target="_blank" rel="noopener">Join TPUSA</a></li>
-      <li><a href="https://tpusamerch.com/" target="_blank" rel="noopener">Shop TPUSA</a></li>
-      <li><a href="https://tpusa.com/events/" target="_blank" rel="noopener">TPUSA Events</a></li>
-      <li><a href="https://tpusa.com/" target="_blank" rel="noopener">Turning Point USA</a></li>
-      <li><a href="https://charliechallenge.org/" target="_blank" rel="noopener">The Charlie Challenge</a></li>
-    </ul>
   </section>
 </main>
 
@@ -199,162 +117,109 @@
   <p class="muted">Not affiliated with charliechallenge.org.</p>
 </footer>
 
+<div class="toast" id="toast"></div>
+
 <!-- Supabase client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
-
-<!-- GLOBAL Supabase (publishable anon) -->
 <script>
-  window.SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
-  window.SUPABASE_ANON_KEY = "sb_publishable_7BO_7z8Z3yTdmxfBL457qg_qnfCMv34";
+  // Shared Supabase — works across devices
+  const SUPA_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
+  const SUPA_KEY = "sb_publishable_7BO_7z8Z3yTdmxfBL457qg_qnfCMv34";
+  const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 </script>
 
-<!-- Build dropdown from /data/actions.json; caption + helpers -->
-<script>
-(async function () {
-  const selAction=document.getElementById('actionSelect');
-  const selPlatform=document.getElementById('platformSelect');
-  const descEl=document.getElementById('actionDesc');
-  const copyBox=document.getElementById('copyText');
-  const copyBtn=document.getElementById('copyPost');
-
-  let ALL=[];
-  try{ ALL=(await fetch('/data/actions.json').then(r=>r.json())).items||[]; }catch(e){ ALL=[]; }
-  selAction.innerHTML = `<option value="">— Select an action —</option>` +
-    (ALL.length ? ALL.map(it=>`<option value="${it.title}" title="${it.desc}">${it.title}</option>`).join('')
-                : ['Raise the Flag','Publicly Thank Someone','Pick Up 10 Pieces','Pray for Someone','Read the Bible for 15','Help at Home','Be a Friend'].map(t=>`<option>${t}</option>`).join(''));
-
-  const q=new URLSearchParams(location.search);
-  const deep=q.get('action'), incomingDesc=q.get('desc'), focusTarget=q.get('focus');
-
-  function tags(p){ const base="#LiveLikeCharlie #OneSmallGoodThing"; return (/instagram|tiktok/i.test(p||"")) ? base+" #Challenge" : base; }
-  function writeCaption(desc,act){
-    const site=(location.origin||"https://www.cybermave.ai")+"/?action="+encodeURIComponent(act||"");
-    const txt=(desc?desc+"\n\n":"")+`I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(selPlatform?.value)}\n\nSee how it works: ${site}`;
-    copyBox.value=txt;
-  }
-  function updateUI(){
-    const act=selAction.value;
-    const item=ALL.find(x=>x.title===act);
-    descEl.textContent = item ? item.desc : "";
-    writeCaption(item?item.desc:"", act);
-  }
-
-  selAction.addEventListener('change', updateUI);
-  selPlatform.addEventListener('change', ()=>writeCaption(descEl.textContent, selAction.value));
-  copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(copyBox.value||''); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy Post',1200);}catch(e){ alert('Copy failed. Select text & copy.'); }});
-
-  if (ALL.length && deep && ALL.some(x=>x.title===deep)) selAction.value=deep;
-  if (incomingDesc){ descEl.textContent=incomingDesc; writeCaption(incomingDesc, selAction.value); } else { updateUI(); }
-  if (focusTarget==='post'){ setTimeout(()=>{ copyBox.focus(); copyBox.scrollIntoView({behavior:'smooth', block:'center'}); }, 60); }
-
-  // URL hint
-  const urlEl=document.getElementById('postUrl'), urlHint=document.getElementById('urlHint');
-  function checkURL(){ const v=(urlEl.value||'').trim(); if(!v){ urlHint.textContent=''; return; } const ok=/(facebook|fb\.watch|instagram|tiktok|twitter\.com|x\.com|youtube\.com|youtu\.be)/i.test(v); urlHint.textContent=ok?'✅ Looks good.':'ℹ️ Paste the link that opens your single post (click its timestamp, then copy the URL).'; }
-  urlEl.addEventListener('input', checkURL); checkURL();
-
-  // Donation show/hide + UTM helper
-  const donatedChk=document.getElementById('donatedChk'), donationFields=document.getElementById('donationFields');
-  donatedChk.addEventListener('change', ()=>{ donationFields.style.display = donatedChk.checked ? 'block' : 'none'; });
-  const amt=document.getElementById('donationAmt'), tpusaBtn=document.getElementById('donateTpusa');
-  function updateTpusaLink(){ try{ const base=new URL("https://donate.tpusa.com/"); base.searchParams.set("utm_source","LiveLikeCharlie"); base.searchParams.set("utm_medium","site"); base.searchParams.set("utm_campaign","challenge"); const v=(amt?.value||"").trim(); if(v) base.searchParams.set("utm_content","amt_"+v); tpusaBtn.href=base.toString(); }catch(e){} }
-  amt?.addEventListener('input', updateTpusaLink); updateTpusaLink();
-})();
-</script>
-
-<!-- Save & Impact (global via Supabase; client-side leaderboard) + toast + modal + invites -->
 <script>
 (function(){
-  const el=(id)=>document.getElementById(id);
-  const actionEl=el('actionSelect'), platformEl=el('platformSelect'), urlEl=el('postUrl');
-  const nameEl=el('yourName'), emailEl=el('yourEmail');
-  const donatedEl=el('donatedChk'), orgEl=el('donationOrg'), amtEl=el('donationAmt'), proofEl=el('donationProof');
-  const saveBtn=el('saveBtn'), recentT=el('recent'), lbT=el('leaderboard');
+  const $=id=>document.getElementById(id);
+  const heroBg=$('heroBg');
 
-  function toast(msg){ let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2200); }
+  // === ROTATING BACKGROUNDS USING YOUR ACTUAL FILENAMES IN /img ===
+  const imgs=[
+    '/img/istockphoto-145152803-612x612.jpg',
+    '/img/istockphoto-1333234668-612x612.webp',
+    '/img/istockphoto-1495316224-612x612.jpg',
+    '/img/istockphoto-1502557306-612x612.jpg',
+    '/img/istockphoto-2152081731-612x612.jpg',
+    '/img/istockphoto-2203271689-612x612.webp',
+    '/img/istockphoto-2211801215-612x612.jpg',
+    '/img/patriotism.jpeg',
+    '/img/photo-1542037104857-ffbb0b9155fb.avif'
+  ];
 
-  // FB “how to” modal
-  const helpLink=el('helpLink'), modal=document.createElement('div'); modal.className='modal'; modal.id='fbModal'; modal.style.display='none';
-  const backdrop=document.createElement('div'); backdrop.className='modal-backdrop'; backdrop.id='fbModalBackdrop';
-  modal.innerHTML=`<div class="panel">
-    <a href="#" class="close" id="fbClose">Close</a>
-    <h3 id="fbHowTitle">Get your Facebook post link (permalink)</h3>
-    <p class="muted mini">Click the <b>timestamp</b> under your name. That opens the post on its own page. Copy the URL.</p>
-    <svg viewBox="0 0 880 420" xmlns="http://www.w3.org/2000/svg" style="background:#0c1630">
-      <rect x="20" y="20" width="840" height="380" rx="12" fill="#0f1a33" stroke="rgba(255,255,255,.12)"/>
-      <circle cx="76" cy="78" r="24" fill="#1d2a55"/>
-      <rect x="116" y="60" width="240" height="18" fill="#9fb3d1"/>
-      <rect x="116" y="88" width="120" height="14" fill="#6ea8fe"/>
-      <rect x="116" y="88" width="120" height="14" fill="none" stroke="#e11d48" stroke-width="2"/>
-      <polygon points="246,82 266,82 266,108 246,108" fill="#e11d48"/>
-      <text x="276" y="102" fill="#e6eefc" font-family="system-ui,Segoe UI,Roboto" font-size="14">← click the timestamp</text>
-      <rect x="40" y="140" width="800" height="200" rx="8" fill="#0b1220" stroke="rgba(255,255,255,.06)"/>
-    </svg>
-  </div>`;
-  document.body.appendChild(backdrop); document.body.appendChild(modal);
-  const closeBtn = modal.querySelector('#fbClose');
-  function openModal(e){ e&&e.preventDefault(); backdrop.style.display='block'; modal.style.display='grid'; }
-  function closeModal(e){ e&&e.preventDefault(); backdrop.style.display='none'; modal.style.display='none'; }
-  helpLink?.addEventListener('click', openModal); closeBtn?.addEventListener('click', closeModal); backdrop?.addEventListener('click', closeModal); document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+  let idx = Math.floor(Math.random()*imgs.length);
+  async function setBg(){
+    const src = imgs[idx]; idx=(idx+1)%imgs.length;
+    try{
+      const ok = await fetch(src,{method:'HEAD'}).then(r=>r.ok).catch(()=>false);
+      heroBg.style.backgroundImage = ok ? `url('${src}')` : `linear-gradient(135deg,#2563eb,#e11d48)`;
+    }catch(_){ heroBg.style.backgroundImage=`linear-gradient(135deg,#2563eb,#e11d48)`; }
+  }
+  setBg(); setInterval(setBg, 15000); // change every 15s
 
-  // Invite bar behavior (SMS/WA/Copy)
-  function inviteText(){ const url = location.origin + location.pathname; return "Join me to do one small good thing like Charlie. Pick an action, post it, and paste your link to complete the challenge: " + url; }
-  async function webShare(){ if(navigator.share){ try{ await navigator.share({text:inviteText()}); }catch(e){} return true; } return false; }
-  document.getElementById('shareSMS')?.addEventListener('click', async (e)=>{ e.preventDefault(); if(await webShare()) return; const body=encodeURIComponent(inviteText()); const link=/iPhone|iPad|Macintosh/i.test(navigator.userAgent)?`sms:&body=${body}`:`sms:?body=${body}`; location.href=link; });
-  document.getElementById('shareWA')?.addEventListener('click', async (e)=>{ e.preventDefault(); if(await webShare()) return; const text=encodeURIComponent(inviteText()); window.open(`https://wa.me/?text=${text}`,'_blank','noopener'); });
-  document.getElementById('shareCopy')?.addEventListener('click', async (e)=>{ e.preventDefault(); try{ await navigator.clipboard.writeText(inviteText()); e.target.textContent='Copied!'; setTimeout(()=>e.target.textContent='Copy Page Link',1200);}catch{ alert('Copy failed. Press Ctrl/Cmd+C.'); } });
+  // === SIMPLE CAPTION (like your clean_v2) ===
+  const actionEl=$('actionSelect'), postEl=$('copyText'), urlEl=$('postUrl');
+  const nameEl=$('yourName'), emailEl=$('yourEmail');
+  const lbT=$('leaderboard'), rcT=$('recent'), toast=$('toast');
 
-  // Supabase
-  const db = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  function caption(){
+    const act = actionEl.value || 'One Small Good Thing';
+    return `I'm doing one small good thing, like Charlie: ${act}.
+Join me: pick an action and do one small good thing like Charlie too. #LiveLikeCharlie #OneSmallGoodThing`;
+  }
+  function msg(t){ toast.textContent=t; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1800); }
 
+  const descMap={
+    "Raise the Flag":"Hang or draw an American flag. Say what being an American means to you.",
+    "Publicly Thank Someone":"Thank a person who helps others; tag them if you want.",
+    "Pick Up 10 Pieces":"Pick up 10 pieces of trash. Before/after if you can.",
+    "Pray for Someone":"Say a short prayer and a kind message.",
+    "Read the Bible for 15":"Read 15 minutes and post a sentence.",
+    "Help at Home":"Do a helpful job without being asked.",
+    "Be a Friend":"Include someone who’s left out; be kind."
+  };
+
+  actionEl.addEventListener('change', ()=>{ postEl.value=caption(); $('actionDesc').textContent=descMap[actionEl.value]||''; });
+  postEl.value = caption();
+  $('copyPost').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(postEl.value); msg('Post copied'); }catch(e){ msg('Copy failed'); } });
+
+  // === IMPACT (shared via Supabase) ===
   async function renderImpact(){
-    const { data: recent } = await db
-      .from('public_submissions')
-      .select('created_at, action, url, donation_org, donation_amt')
-      .eq('approved', true)
-      .order('created_at', { ascending:false })
-      .limit(500);
+    const { data: recent } = await db.from('public_submissions')
+      .select('created_at, action, url').eq('approved', true)
+      .order('created_at',{ascending:false}).limit(200);
 
-    recentT.innerHTML = (recent||[]).slice(0,10).map(r=>{
+    rcT.innerHTML = (recent||[]).slice(0,10).map((r)=>{
       const when = new Date(r.created_at).toLocaleString();
       const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      const donation = (r.donation_org||r.donation_amt) ? ` • ${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}` : '';
-      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}${donation}</td></tr>`;
+      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
     }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
 
-    // client-side leaderboard (no RPC required)
-    const counts = {};
-    (recent||[]).forEach(r => { if (r.action) counts[r.action] = (counts[r.action]||0) + 1; });
-    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    lbT.innerHTML = sorted.length ? sorted.map(([a,c])=>`<tr><td>${a}</td><td>${c}</td></tr>`).join('')
-                                  : `<tr><td colspan="2" class="muted">No data yet.</td></tr>`;
+    const counts={}; (recent||[]).forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
+    const rows = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    lbT.innerHTML = rows.length ? rows.map(([a,c],i)=>`<tr><td>${i+1}</td><td>${a}</td><td>${c}</td></tr>`).join('')
+                                : `<tr><td colspan="3" class="muted">No data yet.</td></tr>`;
   }
 
-  async function saveGlobal(){
-    const row = {
-      ts_ms: Date.now(),
-      action: actionEl?.value || '',
-      platform: platformEl?.value || '',
-      url: urlEl?.value || '',
-      name: nameEl?.value || '',
-      email: emailEl?.value || '',
-      donated: donatedEl?.checked || false,
-      donation_org: orgEl?.value || '',
-      donation_amt: amtEl?.value || '',
-      donation_evidence_url: proofEl?.value || '',
-      attested: donatedEl?.checked || false
-    };
-    if(!row.action){ toast('Choose an action first.'); return; }
+  $('saveBtn').addEventListener('click', async ()=>{
+    const action=(actionEl.value||'').trim();
+    const url=(urlEl.value||'').trim();
+    const name=(nameEl.value||'').trim();
+    const email=(emailEl.value||'').trim();
+    if(!action){ msg('Choose an action'); return; }
+    const { error } = await db.from('public_submissions').insert({
+      ts_ms: Date.now(), action, platform:'web', url, name, email,
+      donated:false, donation_org:'', donation_amt:'', donation_evidence_url:'', attested:false
+    });
+    if(error){ console.warn(error); msg('Save failed'); return; }
+    urlEl.value=''; msg('Saved!'); renderImpact();
+  });
 
-    const { error } = await db.from('public_submissions').insert(row);
-    if(error){ console.warn(error); toast('Online save failed. Try again.'); return; }
+  // Deep-link support: /?action=Raise%20the%20Flag&focus=post
+  const q=new URLSearchParams(location.search);
+  const deep=q.get('action'), focus=q.get('focus');
+  if(deep){ for(const o of actionEl.options){ if(o.value===deep){ actionEl.value=deep; actionEl.dispatchEvent(new Event('change')); break; } } }
+  if(focus==='post'){ setTimeout(()=>{ postEl.focus(); postEl.scrollIntoView({behavior:'smooth',block:'center'}); }, 120); }
 
-    // clear optionals
-    if(urlEl) urlEl.value=''; if(orgEl) orgEl.value=''; if(amtEl) amtEl.value=''; if(proofEl) proofEl.value=''; if(donatedEl) donatedEl.checked=false;
-    await renderImpact();
-    toast('LiveLikeCharlie says: Saved! Now text this page to 3 friends.');
-  }
-
-  saveBtn.addEventListener('click', saveGlobal);
   renderImpact();
 })();
 </script>
