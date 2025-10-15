@@ -1,220 +1,121 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Like Charlie — Do Good. Count It. Grow Influence.</title>
-<meta name="description" content="Do one small good thing, paste your link so it counts, and invite 3 friends.">
-<link rel="canonical" href="https://www.cybermave.ai/">
-<meta property="og:title" content="Do Good. Count It. Grow Influence — Like Charlie">
-<meta property="og:description" content="Pick an action, make a quick post, paste your link so it counts, and invite 3 friends.">
-<meta property="og:type" content="website"><meta property="og:url" content="https://www.cybermave.ai/">
-<style>
-  :root{ --ink:#e6eefc; --bg:#0b1220; --panel:#0f1a33; --muted:#9fb3d1; --brand:#e11d48; --brand2:#2563eb; --border:rgba(255,255,255,.14); }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:#b3d4ff;text-decoration:none}
-  .wrap{max-width:1100px;margin:0 auto;padding:20px}
-  header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-  nav{display:flex;align-items:center;gap:10px;padding:10px 16px}
-  nav a{padding:8px 12px;border-radius:10px} nav a:hover{background:rgba(255,255,255,.06)}
-  .brand{font-weight:800;letter-spacing:.3px}
-
-  /* HERO with rotating patriotic images (uses files already in /img) */
-  .hero{margin:16px;border-radius:22px;overflow:hidden;border:1px solid var(--border);position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35);min-height:320px}
-  .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(5,12,28,.15), rgba(5,12,28,.70));z-index:1}
-  .hero-bg{
-    position:absolute;inset:0;background: url("/img/patriotism.jpeg") center/cover no-repeat;
-    filter:saturate(1.12) contrast(1.05);transition:opacity .6s ease;opacity:1
-  }
-  .hero-inner{position:relative;z-index:2;padding:40px 22px}
-  .hero h1{margin:0 0 10px;font-size:36px}
-  .hero p{margin:6px 0 0;color:#e9f2ff;max-width:920px}
-  .ribbon{height:6px;border-radius:999px;background:linear-gradient(90deg,#e11d48,#ffffff,#2563eb);box-shadow:0 4px 12px rgba(0,0,0,.35);margin-top:14px}
-
-  .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}
-  label{display:block;font-weight:700;margin:10px 0 6px}
-  select,input,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ink)}
-  textarea{min-height:120px;resize:vertical}
-  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:12px;border:1px solid var(--border);text-decoration:none;color:#fff;background:linear-gradient(90deg,var(--brand),var(--brand2));cursor:pointer}
-  table{width:100%;border-collapse:collapse;margin-top:12px} th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left;color:#e6f0ff}
-  .muted{color:var(--muted)} .mini{font-size:.9rem}
-  footer{margin:26px 0 10px;color:var(--muted)}
-  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0f1a33;color:#e6eefc;border:1px solid var(--border);padding:10px 14px;border-radius:12px;z-index:9999;opacity:0;pointer-events:none;transition:.25s}
-  .toast.show{opacity:1;pointer-events:auto}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Like Charlie — Do Good. Count It. Grow It.</title>
+  <meta name="description" content="Do one small good thing, make a quick post, paste your link here so it counts, and invite 3 friends. Make doing one small good thing a pattern, not a one-off." />
+  <!-- OpenGraph -->
+  <meta property="og:title" content="Like Charlie — Do Good. Count It. Grow It." />
+  <meta property="og:description" content="Do one small good thing, make a quick post, paste your link here so it counts, and invite 3 friends. Make doing one small good thing a pattern, not a one-off." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.cybermave.ai/" />
+  <meta property="og:image" content="https://www.cybermave.ai/og-likecharlie.jpg" />
+  <meta name="theme-color" content="#0b1220">
+  <style>
+    :root{--ink:#0b1220;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--brand:#e11d48;--brand2:#2563eb}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);color:#e8f1ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    a{color:#9ec5ff}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    header{position:sticky;top:0;z-index:50;background:#0b1220cc;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.08)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px}
+    .brand{font-weight:900;letter-spacing:.5px}
+    .nav a{margin-left:14px;text-decoration:none;color:#e8f1ff;opacity:.9}
+    .nav a:hover{opacity:1}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:28px 18px;background:linear-gradient(135deg,#0b1220,#10224a);border-bottom:1px solid rgba(255,255,255,.08)}
+    .flag{height:100%;min-height:220px;background:linear-gradient(180deg,#13294b,#0b1220);border-radius:18px;border:1px solid rgba(255,255,255,.08);padding:18px;display:flex;flex-direction:column;justify-content:center}
+    .flag h1{margin:0 0 6px 0;font-size:30px}
+    .flag p{margin:0;opacity:.92}
+    .panel{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+    .label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8fb0e6;margin-bottom:6px}
+    select,input,button{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0a1530;color:#e8f1ff}
+    button{background:var(--brand);border:none;font-weight:800;cursor:pointer}
+    button:disabled{opacity:.6}
+    table{width:100%;border-collapse:collapse}
+    td,th{border-bottom:1px dashed rgba(255,255,255,.12);padding:10px 8px;text-align:left}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .muted{color:var(--muted)}
+    .ribbon{background:repeating-linear-gradient(45deg,#e11d48 0,#e11d48 10px,#ffffff 10px,#ffffff 20px,#2563eb 20px,#2563eb 30px);height:8px;border-radius:999px;margin:12px 0 0 0;opacity:.9}
+    @media (max-width:860px){.hero{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-<header>
-  <nav class="wrap">
-    <a class="brand" href="/">Like Charlie</a>
-    <span style="flex:1"></span>
-    <a href="/actions.html">Actions</a><a href="#impact">Impact</a>
-  </nav>
-</header>
+  <header>
+    <div class="nav wrap">
+      <div class="brand">Like Charlie</div>
+      <nav>
+        <a href="#step1">Start</a>
+        <a href="/actions.html">Actions</a>
+        <a href="#impact">Impact</a>
+      </nav>
+    </div>
+  </header>
 
-<main class="wrap">
-  <!-- HERO -->
   <section class="hero">
-    <div class="hero-bg" id="heroBg"></div>
-    <div class="hero-inner">
-      <h1>Do Good. Count It. Grow Influence.</h1>
+    <div class="flag wrap">
+      <h1>Do Good. Count It. Grow It.</h1>
       <p>Do one small good thing, make a quick post, paste your link here so it counts, and invite 3 friends. Make doing one small good thing a pattern, not a one-off.</p>
       <div class="ribbon"></div>
     </div>
-  </section>
-
-  <!-- STEP 1 -->
-  <section id="step1" class="card">
-    <h2>Step 1 — Choose & prepare your post</h2>
-    <div class="row">
-      <div style="flex:1;min-width:260px">
-        <label>Choose an action</label>
-        <select id="actionSelect">
-          <option value="">— Select —</option>
-          <option>Raise the Flag</option><option>Publicly Thank Someone</option><option>Pick Up 10 Pieces</option>
-          <option>Pray for Someone</option><option>Read the Bible for 15</option><option>Help at Home</option><option>Be a Friend</option>
+    <div class="wrap">
+      <div class="panel" id="stepper">
+        <div id="step1"></div>
+        <div class="label">Step 1 — Choose an action</div>
+        <select data-action-select aria-label="Choose an action">
+          <option value="">Select an action…</option>
+          <option>Raise the Flag</option>
+          <option>Publicly Thank Someone</option>
+          <option>Pick Up 10 Pieces</option>
+          <option>Pray for Someone</option>
+          <option>Read the Bible for 15</option>
+          <option>Help at Home</option>
+          <option>Be a Friend</option>
         </select>
-        <p id="actionDesc" class="muted mini" style="margin-top:6px"></p>
-      </div>
-      <div><label style="visibility:hidden">.</label><a class="btn" href="/actions.html">See all actions & ideas</a></div>
-    </div>
 
-    <label style="margin-top:10px">Your post (editable)</label>
-    <textarea id="copyText" placeholder="Your post appears here…"></textarea>
-    <div class="row"><button id="copyPost" class="btn" type="button">Copy Post</button></div>
-  </section>
+        <div class="label" style="margin-top:12px">Step 2 — Post it</div>
+        <select data-platform-select aria-label="Choose a platform">
+          <option>Facebook</option><option>X</option><option>Instagram</option><option>TikTok</option><option>Other</option>
+        </select>
+        <div class="muted" style="margin:8px 0 12px 0">Post a sentence or photo. You can tag friends if you want.</div>
 
-  <!-- STEP 2 -->
-  <section id="step2" class="card">
-    <h2>Step 2 — Save & Count</h2>
-    <label>Paste your post URL</label>
-    <input id="postUrl" placeholder="https://… (your post link)">
-    <div class="row" style="margin-top:12px">
-      <input id="yourName" placeholder="(optional) Your name" style="flex:1;min-width:220px">
-      <input id="yourEmail" placeholder="(optional) Email" style="flex:1;min-width:220px">
-    </div>
-    <div class="row" style="margin-top:12px"><button id="saveBtn" class="btn">Save & Count</button></div>
-    <p class="mini muted" style="margin-top:8px">Tip: On Facebook, click the <b>timestamp</b> on your post → copy the link → paste above.</p>
-  </section>
-
-  <!-- IMPACT -->
-  <section id="impact" class="card">
-    <h2>Impact</h2>
-    <div class="row" style="gap:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:280px">
-        <h3 style="margin:0 0 6px">Leaderboard</h3>
-        <table><thead><tr><th>#</th><th>Action</th><th>Count</th></tr></thead><tbody id="leaderboard"></tbody></table>
-      </div>
-      <div style="flex:1;min-width:280px">
-        <h3 style="margin:0 0 6px">Recent</h3>
-        <table><thead><tr><th>When</th><th>Action</th><th>Link</th></tr></thead><tbody id="recent"></tbody></table>
+        <div id="step2"></div>
+        <div class="label">Step 3 — Paste your link so it counts</div>
+        <input data-post-url placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
+        <div class="two" style="margin-top:10px">
+          <input data-name placeholder="(optional) Your name" />
+          <input data-email placeholder="(optional) Email" />
+        </div>
+        <button data-save style="margin-top:12px">Save & Count</button>
       </div>
     </div>
   </section>
-</main>
 
-<footer class="wrap">
-  <p><a href="/about.html">About</a> • <a href="/privacy.html">Privacy</a> • <a href="/terms.html">Terms</a> • <a href="/actions.html">Actions</a></p>
-  <p class="muted">Not affiliated with charliechallenge.org.</p>
-</footer>
+  <main class="wrap" id="impact">
+    <div class="two">
+      <div class="panel">
+        <div class="label">Impact — Leaderboard</div>
+        <table>
+          <thead><tr><th>#</th><th>Action</th><th>Count</th></tr></thead>
+          <tbody data-leaderboard></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="label">Recent Submissions</div>
+        <table>
+          <thead><tr><th>When</th><th>Action</th><th>Platform</th><th>Link</th></tr></thead>
+          <tbody data-recent></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 
-<div class="toast" id="toast"></div>
-
-<!-- Supabase client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
-<script>
-  const SUPA_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
-  const SUPA_KEY = "sb_publishable_7BO_7z8Z3yTdmxfBL457qg_qnfCMv34";
-  const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-</script>
-
-<script>
-(function(){
-  const $=id=>document.getElementById(id);
-
-  /* === ROTATING BACKGROUNDS — NO HEAD CHECKS === */
-  const heroBg=$('heroBg');
-  const imgs=[
-    '/img/istockphoto-145152803-612x612.jpg',
-    '/img/istockphoto-1333234668-612x612.webp',
-    '/img/istockphoto-1495316224-612x612.jpg',
-    '/img/istockphoto-1502557306-612x612.jpg',
-    '/img/istockphoto-2152081731-612x612.jpg',
-    '/img/istockphoto-2203271689-612x612.webp',
-    '/img/istockphoto-2211801215-612x612.jpg',
-    '/img/patriotism.jpeg',
-    '/img/photo-1542037104857-ffbb0b9155fb.avif'
-  ];
-  let idx = Math.floor(Math.random()*imgs.length);
-  function setBg(){
-    const src = imgs[idx]; idx=(idx+1)%imgs.length;
-    heroBg.style.backgroundImage = `url('${src}')`;  // just set it
-  }
-  setBg(); setInterval(setBg, 15000);
-
-  /* === CAPTION + IMPACT (unchanged) === */
-  const actionEl=$('actionSelect'), postEl=$('copyText'), urlEl=$('postUrl');
-  const nameEl=$('yourName'), emailEl=$('yourEmail');
-  const lbT=$('leaderboard'), rcT=$('recent');
-  function caption(){
-    const act = actionEl.value || 'One Small Good Thing';
-    return `I'm doing one small good thing, like Charlie: ${act}.
-Join me: pick an action and do one small good thing like Charlie too. #LiveLikeCharlie #OneSmallGoodThing`;
-  }
-  function toast(t){ let el=document.querySelector('.toast'); if(!el){el=document.createElement('div');el.className='toast';document.body.appendChild(el);} el.textContent=t; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1800); }
-  const descMap={
-    "Raise the Flag":"Hang or draw an American flag. Say what being an American means to you.",
-    "Publicly Thank Someone":"Thank a person who helps others; tag them if you want.",
-    "Pick Up 10 Pieces":"Pick up 10 pieces of trash. Before/after if you can.",
-    "Pray for Someone":"Say a short prayer and a kind message.",
-    "Read the Bible for 15":"Read 15 minutes and post a sentence.",
-    "Help at Home":"Do a helpful job without being asked.",
-    "Be a Friend":"Include someone who’s left out; be kind."
-  };
-  actionEl.addEventListener('change', ()=>{ postEl.value=caption(); $('actionDesc').textContent=descMap[actionEl.value]||''; });
-  postEl.value = caption();
-  $('copyPost').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(postEl.value); toast('Post copied'); }catch(e){ toast('Copy failed'); } });
-
-  async function renderImpact(){
-    const { data: recent } = await db.from('public_submissions')
-      .select('created_at, action, url').eq('approved', true)
-      .order('created_at',{ascending:false}).limit(200);
-
-    rcT.innerHTML = (recent||[]).slice(0,10).map((r)=>{
-      const when = new Date(r.created_at).toLocaleString();
-      const link = r.url ? `<a href="${r.url}" target="_blank" rel="noopener">open</a>` : '';
-      return `<tr><td>${when}</td><td>${r.action||''}</td><td>${link}</td></tr>`;
-    }).join('') || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
-
-    const counts={}; (recent||[]).forEach(r=>{ if(r.action) counts[r.action]=(counts[r.action]||0)+1; });
-    const rows = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    lbT.innerHTML = rows.length ? rows.map(([a,c],i)=>`<tr><td>${i+1}</td><td>${a}</td><td>${c}</td></tr>`).join('')
-                                : `<tr><td colspan="3" class="muted">No data yet.</td></tr>`;
-  }
-
-  $('saveBtn').addEventListener('click', async ()=>{
-    const action=(actionEl.value||'').trim();
-    const url=(urlEl.value||'').trim();
-    const name=(nameEl.value||'').trim();
-    const email=(emailEl.value||'').trim();
-    if(!action){ toast('Choose an action'); return; }
-    const { error } = await db.from('public_submissions').insert({
-      ts_ms: Date.now(), action, platform:'web', url, name, email,
-      donated:false, donation_org:'', donation_amt:'', donation_evidence_url:'', attested:false
-    });
-    if(error){ console.warn(error); toast('Save failed'); return; }
-    urlEl.value=''; toast('Saved!'); renderImpact();
-  });
-
-  const q=new URLSearchParams(location.search);
-  const deep=q.get('action'), focus=q.get('focus');
-  if(deep){ for(const o of actionEl.options){ if(o.value===deep){ actionEl.value=deep; actionEl.dispatchEvent(new Event('change')); break; } } }
-  if(focus==='post'){ setTimeout(()=>{ postEl.focus(); postEl.scrollIntoView({behavior:'smooth',block:'center'}); }, 120); }
-
-  renderImpact();
-})();
-</script>
+  <!-- Supabase config (optional). Leave blank for local-only fallback. -->
+  <script>
+    window.SUPABASE_URL = "";          // e.g., "https://YOURPROJECT.supabase.co"
+    window.SUPABASE_ANON_KEY = "";     // e.g., "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…"
+  </script>
+  <!-- The backend + deep-linking logic -->
+  <script src="likecharlie_app.js"></script>
 </body>
 </html>
