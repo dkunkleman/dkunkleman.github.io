@@ -1,60 +1,106 @@
+// Share Image generator for LiveLikeCharlieChallenge.org
 (function(){
-  const C = ()=>document.getElementById('c');
-  function sizeFrom(sel){
-    const [w,h]=sel.value.split('x').map(Number);
-    return {w,h};
-  }
-  function preset(ctx,w,h,type){
-    const g=ctx.createLinearGradient(0,0,w,h);
-    if(type==='sunset'){ g.addColorStop(0,'#ff7a59'); g.addColorStop(1,'#5b1fa6'); }
-    else if(type==='dark'){ g.addColorStop(0,'#051129'); g.addColorStop(1,'#0c1b3a'); }
-    else { g.addColorStop(0,'#152a52'); g.addColorStop(1,'#b91c1c'); } // patriotic
-    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-  }
-  function text(ctx,txt,x,y,size=48,weight='800',align='center'){
-    ctx.font=`${weight} ${size}px Inter,system-ui,Segoe UI,Roboto,Arial`;
-    ctx.fillStyle='#ffffff';
-    ctx.textAlign=align; ctx.textBaseline='middle';
-    ctx.fillText(txt,x,y);
-  }
-  async function draw(img){
-    const title=document.getElementById('title').value||'One Small Good Thing';
-    const subtitle=document.getElementById('subtitle').value||'Join me + invite 3 friends';
-    const footer=document.getElementById('footer').value||'Like Charlie • #LiveLikeCharlie';
-    const sz=sizeFrom(document.getElementById('size'));
-    const c=C(); c.width=sz.w; c.height=sz.h;
-    const ctx=c.getContext('2d');
+  const $ = (sel) => document.querySelector(sel);
 
-    preset(ctx,sz.w,sz.h,document.getElementById('bgPreset').value);
+  const state = {
+    theme: 'patriotic', // 'patriotic' | 'sunset' | 'dark'
+    message: 'I did one small good thing. Your turn in 24 hours. #LiveLikeCharlie',
+    handle: ''
+  };
 
-    if(img){
-      const ratio=Math.min(sz.w/img.width, sz.h/img.height);
-      const dw=img.width*ratio, dh=img.height*ratio;
-      ctx.globalAlpha=0.28;
-      ctx.drawImage(img, (sz.w-dw)/2, (sz.h-dh)/2, dw, dh);
-      ctx.globalAlpha=1;
+  function gradientForTheme(ctx, w, h, theme){
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    if(theme === 'dark'){
+      g.addColorStop(0, '#0b0f19');
+      g.addColorStop(1, '#1f2837');
+    } else if(theme === 'sunset'){
+      g.addColorStop(0, '#ff7e5f');
+      g.addColorStop(1, '#feb47b');
+    } else {
+      // patriotic
+      g.addColorStop(0, '#0b5ed7'); // blue
+      g.addColorStop(1, '#c1121f'); // red
     }
-
-    text(ctx,title, sz.w/2, sz.h*0.32, Math.round(sz.h*0.08));
-    text(ctx,subtitle, sz.w/2, sz.h*0.52, Math.round(sz.h*0.045), '700');
-    text(ctx,footer, sz.w/2, sz.h*0.86, Math.round(sz.h*0.04), '700');
+    return g;
   }
 
-  async function chooseBg(){
-    return new Promise(res=>{
-      const f=document.getElementById('bgFile');
-      if(!f.files || !f.files[0]) return res(null);
-      const r=new FileReader();
-      r.onload=()=>{const img=new Image(); img.onload=()=>res(img); img.src=r.result};
-      r.readAsDataURL(f.files[0]);
-    });
+  function render(){
+    const canvas = $('#preview');
+    if(!canvas){ return; }
+    const w = 1200, h = 630;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    // background
+    ctx.fillStyle = gradientForTheme(ctx, w, h, state.theme);
+    ctx.fillRect(0,0,w,h);
+
+    // white border
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.lineWidth = 12;
+    ctx.strokeRect(24,24,w-48,h-48);
+
+    // heading
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 72px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Live Like Charlie Challenge', 60, 70);
+
+    // message
+    wrapText(ctx, state.message, 60, 180, w - 120, 44);
+
+    // footer
+    ctx.font = 'bold 40px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.textAlign = 'left';
+    const handle = state.handle ? 'by @' + state.handle.replace(/^@/, '') : '';
+    ctx.fillText(handle, 60, h - 120);
+
+    ctx.textAlign = 'right';
+    ctx.fillText('livelikecharliechallenge.org', w - 60, h - 120);
   }
 
-  window.renderShareImage = async function(){
-    draw(await chooseBg());
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+    const words = text.split(' ');
+    let line = '';
+    for(let n=0; n<words.length; n++){
+      const testLine = line + words[n] + ' ';
+      const metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0){
+        ctx.font = '500 44px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+        ctx.fillText(line, x, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.font = '500 44px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillText(line, x, y);
   }
-  window.downloadShareImage = function(e){
-    const url=C().toDataURL('image/png');
-    e.currentTarget.href=url;
+
+  function download(){
+    const canvas = $('#preview');
+    const a = document.createElement('a');
+    a.download = 'livelikecharlie-share.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
   }
+
+  function bind(){
+    const themeSelect = $('#themeSelect');
+    const messageInput = $('#messageInput');
+    const handleInput = $('#handleInput');
+    const renderBtn = $('#renderBtn');
+    const downloadBtn = $('#downloadBtn');
+
+    themeSelect && themeSelect.addEventListener('change', (e) => { state.theme = e.target.value; render(); });
+    messageInput && messageInput.addEventListener('input', (e) => { state.message = e.target.value; render(); });
+    handleInput && handleInput.addEventListener('input', (e) => { state.handle = e.target.value; render(); });
+    renderBtn && renderBtn.addEventListener('click', render);
+    downloadBtn && downloadBtn.addEventListener('click', download);
+    render();
+  }
+
+  document.addEventListener('DOMContentLoaded', bind);
 })();
