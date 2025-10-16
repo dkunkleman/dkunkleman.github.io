@@ -59,87 +59,15 @@
   .stepcard svg{width:48px;height:48px;display:block;margin-bottom:8px}
 </style>
 </head>
-  <script type="module">
-  // 1) Supabase init
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-  const SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpYWpsYnhlemxkZGh4dGVidGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTcwNTYsImV4cCI6MjA3NjAzMzA1Nn0.szBJhvyDcV6oDn-NgVUUxF_MZdHC60xXBe0AgDDQbbU";
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // 2) Helpers: tiny renderer
-  function td(v){return `<td style="border-top:1px solid rgba(255,255,255,.12);padding:8px">${v??""}</td>`;}
-  function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));}
-
-  // 3) Write handler
-  async function completeChallenge(){
-    const action = document.querySelector("#action")?.value?.trim();
-    const platform = document.querySelector("#platform")?.value?.trim();
-    const link = document.querySelector("#link")?.value?.trim();
-    const name = document.querySelector("#name")?.value?.trim() || null;
-    if(!action || !platform || !link){ alert("Please select action, platform, and paste your public link."); return; }
-
-    const { error } = await sb.from("submissions").insert([{ action, platform, link, name }]);
-    if(error){ console.error(error); alert("Save failed: " + error.message); return; }
-
-    const toast = document.querySelector("#toast"); if(toast){ toast.style.display="block"; setTimeout(()=>toast.style.display="none", 1500); }
-    document.querySelector("#link").value = "";
-    await Promise.all([loadRecent(), loadLeaders()]);
-  }
-
-  // 4) Read handlers
-  async function loadRecent(){
-    const { data, error } = await sb
-      .from("submissions")
-      .select("created_at, action, platform, link, name")
-      .order("created_at", { ascending:false })
-      .limit(25);
-    if(error){ console.error(error); return; }
-    const rows = (data||[]).map(r=>{
-      const when = new Date(r.created_at).toLocaleString();
-      const link = `<a href="${escapeHtml(r.link)}" target="_blank" rel="noopener">Open</a>`;
-      return `<tr>${td(when)}${td(escapeHtml(r.action))}${td(escapeHtml(r.platform))}${td(link)}${td(escapeHtml(r.name||""))}</tr>`;
-    });
-    document.querySelector("#recent").innerHTML =
-      `<tr><th style="text-align:left;padding:8px">When</th><th>Action</th><th>Platform</th><th>Link</th><th>Name</th></tr>` + rows.join("");
-  }
-
-  async function loadLeaders(){
-    // group by action, count
-    const { data, error } = await sb
-      .from("submissions")
-      .select("action, count:action", { count: "exact", head: false })
-      .group("action")
-      .order("count", { ascending:false });
-    if(error){ console.error(error); return; }
-    const agg = {};
-    (data||[]).forEach(r=>{ agg[r.action] = (agg[r.action]||0)+1; });
-    const rows = Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([action,count])=>{
-      return `<tr>${td(escapeHtml(action))}${td(count)}</tr>`;
-    });
-    document.querySelector("#leaders").innerHTML =
-      `<tr><th style="text-align:left;padding:8px">#</th><th>Action</th><th>Count</th></tr>` +
-      rows.map((r,i)=>r.replace("<tr>",`<tr>${td(i+1)}`)).join("");
-  }
-
-  // 5) Wire button + initial loads
-  document.querySelector("#completeBtn")?.addEventListener("click", completedChallenge);
-  loadRecent(); loadLeaders();
-</script>
-
 <body>
 <header>
   <div class="nav wrap">
     <div class="brand">Like Charlie</div>
-<nav class="wrap">
-  <a class="brand" href="/">Like Charlie</a>
-  <span style="flex:1"></span>
-  <a href="/actions.html">Actions</a>
-  <a href="/about.html">About</a>
-  <a href="/privacy.html">Privacy</a>
-  <a href="/proofs.html">Proofs</a>
-  <a href="/admin.html">Admin</a>
-</nav>
-
+    <nav>
+      <a href="#impact">Impact</a>
+      <a href="#recent">Recent</a>
+      <a href="#step3" class="button">Finish</a>
+    </nav>
   </div>
 </header>
 
@@ -149,7 +77,7 @@
       <!-- Left: Do Good box -->
       <div class="flagcard">
         <h1>Take Action. Be Bold. Be Consistent. Build for Good.</h1>
-        <div class="subtitle">1. Choose an action and complete it. 
+        <div class="subtitle">1. Choose an action and complete it. Be bold and build, Like Charlie 
 2. Share about it on social media and Invite 3 friends to "Live Like Charlie" 
 3. Paste your link here to complete the challenge 
 Make a daily habit of doing at least one small good thing. "Live Like Charlie"</div>
@@ -179,52 +107,6 @@ Make a daily habit of doing at least one small good thing. "Live Like Charlie"</
 <section class="wrap" id="step3">
   <div class="panel">
     <div class="label">Share your post to our site</div>
-    <section id="lc-form" class="panel" style="margin:16px 0;padding:16px;border:1px solid rgba(255,255,255,.15);border-radius:12px;">
-  <div style="display:grid;gap:12px;">
-    <label>Action
-      <select id="action" required>
-        <option value="">Select an action…</option>
-        <option>Donate food to a pantry</option>
-        <option>Help a neighbor</option>
-        <option>Thank a veteran</option>
-        <option>Clean a public space</option>
-      </select>
-    </label>
-
-    <label>Platform
-      <select id="platform" required>
-        <option value="">Select a platform…</option>
-        <option>X</option>
-        <option>Facebook</option>
-        <option>Instagram</option>
-        <option>TikTok</option>
-        <option>Other</option>
-      </select>
-    </label>
-
-    <label>Link to your post (public URL)
-      <input id="link" type="url" placeholder="https://x.com/you/status/..." required />
-    </label>
-
-    <label>Your name (optional)
-      <input id="name" type="text" placeholder="First name or alias" />
-    </label>
-
-    <button id="completeBtn" type="button">Completed Challenge</button>
-    <div id="toast" style="display:none;padding:8px;border-radius:8px;background:#0b142a;border:1px solid rgba(255,255,255,.15)">Saved! Refreshing lists…</div>
-  </div>
-</section>
-
-<!-- Recent & Leaderboard tables (if not already on page) -->
-<section id="recentWrap" style="margin:24px 0">
-  <h3>Recent Submissions</h3>
-  <table id="recent" style="width:100%;border-collapse:collapse"></table>
-</section>
-
-<section id="leadersWrap" style="margin:24px 0">
-  <h3>Impact — Leaderboard</h3>
-  <table id="leaders" style="width:100%;border-collapse:collapse"></table>
-</section>
     <div class="help" style="margin:6px 0 12px">After you publish, share your post to us so it counts on the leaderboard.</div>
     <input id="postUrl" placeholder="Paste your post link (e.g., https://www.facebook.com/…)" />
     <div class="stack" style="margin-top:10px">
@@ -233,7 +115,7 @@ Make a daily habit of doing at least one small good thing. "Live Like Charlie"</
       <input id="personState" placeholder="(optional) State (e.g., FL)" />
     </div>
     <div class="two" style="margin-top:10px">
-      <button id="saveBtn" class="primary">Completed Challenge</button>
+      <button id="saveBtn" class="primary">Complete Challenge</button>
       <button class="secondary" id="copyMsg">Copy a suggested message</button>
     </div>
     <div id="saveStatus" class="help" style="margin-top:8px"></div>
@@ -250,7 +132,7 @@ Make a daily habit of doing at least one small good thing. "Live Like Charlie"</
       </div>
       <div class="stepcard">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12h6"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
-        <b>3) Paste here</b><div class="help">Paste the link above and press <i>Completed Challenge</i>. Boom—counted.</div>
+        <b>3) Paste here</b><div class="help">Paste the link above and press <i>Complete Challenge</i>. Boom—counted.</div>
       </div>
     </div>
   </div>
@@ -309,65 +191,57 @@ setHero(heroIndex);
 setInterval(()=>{ heroIndex = (heroIndex+1)%heroImgs.length; setHero(heroIndex); }, 8000);
 
 // Actions
-<script>
-/* ---------- Build actions from /actions.json + description + caption ---------- */
-(async function () {
-  const selAction   = document.getElementById('actionSelect');
-  const selPlatform = document.getElementById('platformSelect');
-  const descEl      = document.getElementById('actionDesc');
-  const postBox     = document.getElementById('copyText');
-
-  // Fetch once from your data file
-  let list = [];
-  try {
-    const res = await fetch('/actions.json', { cache: 'no-store' });
-    const data = await res.json();
-    // prefer the detailed "details" list if present; else fallback to "actions"
-    if (Array.isArray(data?.details) && data.details.length) {
-      list = data.details.map(d => [d.title, d.description || '']);
-    } else if (Array.isArray(data?.actions)) {
-      list = data.actions.map(t => [t, '']);
-    }
-  } catch (e) { console.error('Failed to load actions.json', e); }
-
-  selAction.innerHTML =
-    `<option value="">— Choose —</option>` +
-    list.map(([t,d]) => `<option value="${t}" title="${d||''}">${t}</option>`).join('');
-
-  function tags(p){
-    const base = "#LiveLikeCharlie #OneSmallGoodThing";
-    return (/instagram|tiktok/i.test(p||"")) ? base + " #Challenge" : base;
-  }
-
-  function updateUI(){
-    const action   = selAction.value;
-    const platform = selPlatform ? selPlatform.value : "";
-    const found    = list.find(([t]) => t === action);
-    if (descEl) descEl.textContent = found ? (found[1] || '') : '';
-    const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action||"");
-    const caption = `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(platform)}\n\nSee how it works: ${site}`;
-    if (postBox) postBox.value = caption;
-  }
-
-  selAction.addEventListener('change', updateUI);
-  selPlatform && selPlatform.addEventListener('change', updateUI);
-
-  // Deep-link: preselect ?action=
-  const q = new URLSearchParams(location.search);
-  const deep = q.get('action');
-  if (deep && list.some(([t]) => t === deep)) selAction.value = deep;
-
-  updateUI();
-})();
-</script>
-<script>
-  // Turn "Raised the Flag" buttons into deep links to index
-  document.querySelectorAll('a[data-action]').forEach(a => {
-    const title = a.getAttribute('data-action');
-    a.href = `/?action=${encodeURIComponent(title)}#step1`;
-  });
-</script>
-
+const ACTIONS = [
+  ["Raise the Flag","Hang or fly a U.S. flag today. Share a photo and why it matters to you."],
+  ["Publicly Thank Someone","Thank a person who helps others; post a note of appreciation."],
+  ["Pick Up 10 Pieces","Pick up 10 pieces of trash. Post before/after."],
+  ["Pray for Someone","Say a short prayer and post an encouraging line."],
+  ["Read the Bible for 15","Read for 15 minutes; share a verse that stood out."],
+  ["Help at Home","Do a helpful job without being asked; share a quick note."],
+  ["Be a Friend","Include someone who’s left out; post a kind sentence."],
+  ["Donate to TPUSA or a Charity","Give to TPUSA or a charity you love; say why."],
+  ["Volunteer 1 Hour","Give one hour to serve; share why it matters."],
+  ["Write a Thank-You Note","Write a short note to someone who helped you."],
+  ["Learn a New Skill","Learn/practice a real-life skill; share the experience."],
+  ["Call or Visit Family","Connect with family; share a picture or story."],
+  ["Honor a Veteran or First Responder","Thank them and share why you appreciate them."],
+  ["Share a Favorite Charlie Quote","Share a favorite quote/photo/video from Charlie."],
+  ["Join the Pete & Bobby Challenge","Take a health step; post a milestone."],
+  ["Choose a Verse & Share","Pick a verse and post what it means to you."],
+  ["Share a Forgiveness Story","Share how forgiving helped you (no private details)."],
+  ["Meet Your Spouse with a Hug","Greet your spouse with a hug and appreciation."],
+  ["Intentional Family Time","Share pics/stories from purposeful time together."],
+  ["Do a Chore Your Spouse Does","Take over a chore they usually do; share the reaction."],
+  ["Listen Without Interrupting","Listen fully; post what you learned."],
+  ["Speak Truth with Humility","Share truth with courage and kindness."],
+  ["Invite 3 People to Church","Invite three people; share about the experience."],
+  ["Share Your Testimony","Share what following Jesus means to you."],
+  ["Host a Film Night","Host a Christian film night; discuss and share a pic."],
+  ["Hands-Free Driver","No phone while driving today; share the reminder."],
+  ["Family Table Focus (3+ nights)","Eat together screen-free for 3+ nights; share what changed."],
+  ["Honor Service (Thank a First Responder)","Deliver a thank-you/gift (with permission)."],
+  ["Creator Proceeds Donor","Donate a day’s proceeds; share a redacted receipt."],
+  ["Phone Off at Church","Worship distraction-free; share a reminder graphic."],
+  ["Host a Sale for Good","Run a bake/garage sale; donate proceeds; share."],
+  ["Generations: 3 Together","Grandparent + parent + child complete an action; share."],
+  ["Register to Vote (or Verify)","Check or register; help a friend do the same."],
+  ["Pray for Your Leaders (Name Them)","Post a prayer for leaders by name."],
+  ["Bring a Teacher a Gift","Show appreciation to a teacher; share the moment."],
+  ["Veteran Visit (Honor & Listen)","Visit a veteran; thank, listen, and pray."],
+  ["Meal Train Start","Start/join a meal train; share the link."],
+  ["Coach or Mentor (Youth)","Volunteer to coach or mentor; invite others."],
+  ["First Bible Give-Away","Give someone their first Bible; include a note."],
+  ["Scripture Memory Share","Share a verse you memorized and its meaning."],
+  ["Pro-Life Serve Day","Serve a pregnancy center; post how to help."],
+  ["Pro-Life: Celebrate Your Children","Share how special your children are."],
+  ["Marriage Night","Plan a date night; share one thing you’re building."],
+  ["Apologetics Share","Give one reason for your hope in the Gospel."],
+  ["Read Aloud with Kids","Read aloud; post a family pic + title."],
+  ["Add Your Church","Post your church’s link; invite your city."],
+  ["Host a Like-Charlie Meetup","Gather 5+ friends to do actions together."],
+  ["Testimony Video (60–90s)","Record a short testimony with #LiveLikeCharlie."],
+  ["Worship Playlist Share (Top 10)","Share your top-10 worship playlist."]
+];
 const actionSelect = document.getElementById('actionSelect');
 ACTIONS.forEach(([label])=>{ const o=document.createElement('option'); o.textContent=label; o.value=label; actionSelect.appendChild(o); });
 const actionDesc = document.getElementById('actionDesc');
