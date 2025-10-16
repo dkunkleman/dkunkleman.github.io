@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta property="og:title" content="Live Like Charlie — Do one small good action."/>
+
+<link rel="canonical" href="https://www.cybermave.ai/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Live Like Charlie","url":"https://www.cybermave.ai/"}</script>
+   
+<meta property="og:title" content="Live Like Charlie — Do one small good action."/>
 <meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
 <meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -681,10 +685,58 @@ document.addEventListener('click',e=>{
   if(a && !a.rel) a.rel="noopener noreferrer";
 });
 </script>
+
+<script>
+async function fetchActions(){const r=await fetch('/actions.html',{cache:'no-store'});const h=await r.text();
+ const d=new DOMParser().parseFromString(h,'text/html');const s=new Set();return [...d.querySelectorAll('.card a[data-action], .card h3')].map(el=>(el.dataset?.action||el.textContent||'').trim()).filter(n=>n && !s.has(n.toLowerCase()) && s.add(n.toLowerCase()))}
+async function bubbleActions(sb){const sel=document.getElementById('action'); if(!sel) return;
+ const actions=await fetchActions(); const {data}=await sb.from('submissions').select('action'); const c={}; (data||[]).forEach(r=>c[r.action]=(c[r.action]||0)+1);
+ const pin=['Live your faith','Know your rights','Build and serve'].map(x=>x.toLowerCase());
+ const arr=actions.map((a,i)=>({a,i,p:pin.includes(a.toLowerCase()),n:c[a]||0})).sort((A,B)=>A.p!==B.p? (A.p?-1:1) : B.n-A.n || A.i-B.i);
+ const first=sel.options[0]; sel.innerHTML=''; sel.appendChild(first); arr.forEach(x=>{const o=document.createElement('option'); o.value=o.text=x.a; sel.appendChild(o);});
+}
+</script>
+
+<script>
+document.querySelector('.brand')?.addEventListener('click',async e=>{
+  e.preventDefault();
+  const url=location.origin, text="Join me: Do one small good action with #LiveLikeCharlie";
+  if(navigator.share){ await navigator.share({title:'Live Like Charlie', text, url}); }
+  else { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`,'_blank'); }
+});
+</script>
   
+<input id="shot" type="file" accept="image/*" capture="environment">
+<img id="shotPreview" alt="" style="display:none;max-width:220px;border-radius:10px;margin-top:8px">
+<script>
+const file=document.getElementById('shot'), prev=document.getElementById('shotPreview');
+file?.addEventListener('change',()=>{const f=file.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{prev.src=e.target.result;prev.style.display='block'}; r.readAsDataURL(f);});
+</script>
+
+<label class="muted">Filter</label>
+<select id="lbFilter"><option value="">All</option><option value="FL">Florida</option></select>
+<script>
+document.getElementById('lbFilter')?.addEventListener('change',()=>loadLeaders(document.getElementById('lbFilter').value));
+async function loadLeaders(filter){ /* modify your select('action, state') and tally by action with filter */ }
+</script>
+
+<script>
+let last=0; document.getElementById('completeBtn')?.addEventListener('click',()=>{const now=Date.now(); if(now-last<8000){ alert('Please wait a moment between submissions.'); throw new Error('rate'); } last=now;});
+</script>
+  
+<script>
+const base = (a)=>`I just did “${a}” with #LiveLikeCharlie — your turn. ${location.origin}`;
+document.getElementById('action')?.addEventListener('change',e=>{
+  const a=e.target.value; const box=document.getElementById('composeText')||document.getElementById('suggested');
+  if(box && a) box.value = base(a);
+});
+</script>
+
+
   
 </body>
 </html>
+
 
 
 
