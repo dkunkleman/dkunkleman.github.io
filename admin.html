@@ -1,205 +1,119 @@
 <!doctype html>
 <html lang="en">
-  <header>
-  <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
-    <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
-    <nav style="display:flex;gap:12px;align-items:center">
-      <a href="/actions.html">Actions</a>
-      <a href="/about.html">About</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/proofs.html">Proofs</a>
-      <a href="/admin.html">Admin</a>
-      <a href="/#impact" class="button" data-impact>Impact</a>
-    </nav>
-  </div>
-</header>
-
-</head>
-
-<!-- THEME (put in <head> on every page) -->
-<style>
-  :root{
-    --ink:#eaf2ff; --muted:#9fb3d1;
-    --brand:#e11d48; --accent:#2563eb;
-    --panel-bg: rgba(10,18,39,.58);
-    --panel-border: rgba(255,255,255,.16);
-    --glow: 0 10px 30px rgba(0,0,0,.45);
-  }
-  body.has-photo{color:var(--ink); background:#0b1220; margin:0}
-  #page-bg{position:fixed; inset:0; z-index:-2; background:#0b1220 center/cover no-repeat; transition:opacity .6s ease}
-  #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9));}
-  .panel,.card{background:var(--panel-bg)!important;border:1px solid var(--panel-border)!important;border-radius:16px;box-shadow:var(--glow);}
-  header{backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
-  .break{height:10px;border-radius:999px;margin:18px 0;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px);opacity:.9}
-  a{color:#b3d4ff;text-decoration:none}
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
-  input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
-  button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
-</style>
-
-  
-<meta property="og:title" content="Live Like Charlie — Do one small good action."/>
-<meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
-<meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
-<meta name="twitter:card" content="summary_large_image"/>
-
-<style>
-  header nav a{padding:8px 12px;border-radius:10px;text-decoration:none;border:1px solid transparent}
-  header nav a:hover{background:rgba(255,255,255,.06)}
-  header nav a.active{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
-  header nav .button{background:var(--accent);color:#fff;border:none}
-</style>
-
-<script>
-(function(){
-  const impact = document.querySelector('a[data-impact]');
-  if (impact){
-    impact.addEventListener('click', (e)=>{
-      // if already on home, smooth-scroll; else go to /#impact
-      const onHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
-      if (onHome){
-        e.preventDefault();
-        document.getElementById('impact')?.scrollIntoView({behavior:'smooth'});
-      }
-    });
-  }
-  // Active link highlighting for the current page
-  const path = location.pathname.replace(/\/index\.html$/, '/');
-  document.querySelectorAll('header nav a[href]').forEach(a=>{
-    const href = a.getAttribute('href');
-    if (!href) return;
-    if (href === '/#impact') return; // anchor button handled separately
-    if (path.startsWith(href)) a.classList.add('active');
-  });
-})();
-</script>
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Like Charlie — Admin</title>
-<style>
-  body{margin:0;background:#0b1220;color:#e6eefc;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  .wrap{max-width:1200px;margin:0 auto;padding:20px}
-  h1{margin:0 0 12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid rgba(255,255,255,.12);padding:8px 6px;text-align:left}
-  input,select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#0c1630;color:#e6eefc}
-  .btn{padding:8px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#162552;color:#fff;text-decoration:none;display:inline-block}
-  .badge{padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.12)}
-  .ok{background:#134e4a}.no{background:#5b1d2a}.warn{background:#5a3b12}
-  .mini{font-size:.9rem;color:#9fb3d1}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Live Like Charlie</title>
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <style>
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 2rem; line-height:1.4}
+    header{display:flex; align-items:center; gap:1rem; margin-bottom:1rem}
+    .warn{background:#fff3cd; border:1px solid #ffe69c; padding:1rem; border-radius:8px; margin-bottom:1rem}
+    table{border-collapse: collapse; width:100%}
+    th, td{border:1px solid #ddd; padding:8px; vertical-align:top}
+    th{background:#f7f7f7}
+    button{padding:.4rem .7rem}
+    .approved{color:#0a7a28; font-weight:600}
+    .pending{color:#c1121f; font-weight:600}
+    .grid{display:grid; grid-template-columns: repeat(2,1fr); gap:2rem}
+    @media (max-width: 900px){ .grid{grid-template-columns: 1fr;} }
+  </style>
+  <script>
+    // ***** SECURITY NOTE *****
+    // This demo admin uses the public anon key from the browser.
+    // Protect this page with HTTP auth and use Supabase RLS to ensure
+    // only an "admin" role can update 'approved'. Ideally, move updates
+    // to a serverless function that checks a token server-side.
+    window.SUPABASE_URL = window.SUPABASE_URL || 'https://YOUR_PROJECT.supabase.co';
+    window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_PUBLIC_ANON_KEY';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-<!-- BACKGROUND (put right after <body> on every page) -->
-<div id="page-bg" aria-hidden="true"></div>
-<script>
-  document.body.classList.add('has-photo');
-  const bgImages=[
-    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
-  ];
-  const bg=document.getElementById('page-bg'); let i=0;
-  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
-  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
-</script>
-
-  
-<main class="wrap">
-  <h1>Admin — Submissions</h1>
-  <div class="row">
-    <input id="filterText" placeholder="Search action/org/name/email…">
-    <select id="filterApproved"><option value="all">All</option><option value="true">Approved</option><option value="false">Unapproved</option></select>
-    <select id="filterDonation"><option value="all">All donations</option><option value="unverified">Unverified</option><option value="verified">Verified</option><option value="rejected">Rejected</option><option value="none">No donation claimed</option></select>
-    <a class="btn" href="/" target="_self">← Back to site</a>
+  <header>
+    <h1>Admin · Submissions</h1>
+    <button id="refreshBtn">Refresh</button>
+  </header>
+  <div class="warn">
+    <strong>Warning:</strong> Browser-side admin is for demo only. Lock this page down and/or move writes to serverless functions. Ensure RLS denies updates to anon users.
   </div>
-  <div id="totals" class="mini"></div>
-  <table>
-    <thead><tr>
-      <th>When</th><th>Action</th><th>URL</th><th>Donation</th><th>Status</th><th>Approved</th><th>Name/Email</th><th>Actions</th>
-    </tr></thead>
-    <tbody id="rows"></tbody>
-  </table>
-</main>
-<script>
-  window.SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
-  window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpYWpsYnhlemxkZGh4dGVidGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTcwNTYsImV4cCI6MjA3NjAzMzA1Nn0.szBJhvyDcV6oDn-NgVUUxF_MZdHC60xXBe0AgDDQbbU";
-</script>
+  <div class="grid">
+    <section>
+      <h2>Pending</h2>
+      <table>
+        <thead><tr><th>When</th><th>User</th><th>Link</th><th>Action</th><th>Status</th></tr></thead>
+        <tbody id="pendingBody"></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Approved (latest 50)</h2>
+      <table>
+        <thead><tr><th>When</th><th>User</th><th>Link</th><th>Action</th><th>Status</th></tr></thead>
+        <tbody id="approvedBody"></tbody>
+      </table>
+    </section>
+  </div>
+  <script>
+    const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    const format = (iso) => new Date(iso).toLocaleString();
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.js"></script>
-<script>
-(async function(){
-  const URL = window.SUPABASE_URL || "";       // reuses globals from index if served same origin
-  const KEY = window.SUPABASE_ANON_KEY || "";
-  if(!URL || !KEY){ alert('Missing SUPABASE_URL / SUPABASE_ANON_KEY in window. Add the same two <script> lines here or serve from the same page scope.'); return; }
-  const db = window.supabase.createClient(URL, KEY);
+    async function load(){
+      // Pending
+      const { data: pending, error: ep } = await sb
+        .from('submissions')
+        .select('id, created_at, user_handle, link, action_label, approved')
+        .eq('approved', false)
+        .order('created_at', { ascending: false })
+        .limit(200);
 
-  const rowsEl=document.getElementById('rows'), totalsEl=document.getElementById('totals');
-  const fTxt=document.getElementById('filterText'), fApp=document.getElementById('filterApproved'), fDon=document.getElementById('filterDonation');
+      // Approved
+      const { data: approved, error: ea } = await sb
+        .from('submissions')
+        .select('id, created_at, user_handle, link, action_label, approved')
+        .eq('approved', true)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-  async function load(){
-    let q = db.from('public_submissions').select('*').order('created_at',{ascending:false}).limit(1000);
-    if (fApp.value==='true')  q=q.eq('approved', true);
-    if (fApp.value==='false') q=q.eq('approved', false);
-    const { data } = await q;
-    const text=(fTxt.value||'').toLowerCase();
-    const filt = (data||[]).filter(r=>{
-      const matchesText = !text || [r.action,r.name,r.email,r.donation_org,(r.url||'')].some(v=>(v||'').toLowerCase().includes(text));
-      const matchesDon =
-        fDon.value==='all' ? true :
-        fDon.value==='none' ? !r.donated :
-        (r.donation_status===fDon.value);
-      return matchesText && matchesDon;
-    });
+      if (ep) console.error(ep);
+      if (ea) console.error(ea);
+      renderTable('pendingBody', pending || [], false);
+      renderTable('approvedBody', approved || [], true);
+    }
 
-    const donatedCount = filt.filter(r=>r.donated).length;
-    const donatedSum   = filt.reduce((s,r)=> s + (parseFloat(r.donation_amt)||0), 0);
-    totalsEl.innerHTML = `Rows: <b>${filt.length}</b> • Claimed donations: <b>${donatedCount}</b> • Sum (claimed): <b>$${donatedSum.toFixed(2)}</b>`;
+    function renderTable(bodyId, rows, isApproved){
+      const tbody = document.getElementById(bodyId);
+      tbody.innerHTML = '';
+      for(const r of rows){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${format(r.created_at)}</td>
+          <td>${r.user_handle ? '@'+r.user_handle : ''}</td>
+          <td><a href="${r.link}" target="_blank" rel="noopener">open</a></td>
+          <td>${r.action_label || ''}</td>
+          <td>${r.approved ? '<span class="approved">approved</span>' : '<span class="pending">pending</span>'}
+            ${!r.approved ? '<button data-id="'+r.id+'" class="approveBtn">Approve</button>' : ''}
+            ${r.approved ? '<button data-id="'+r.id+'" class="unapproveBtn">Unapprove</button>' : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      tbody.querySelectorAll('.approveBtn').forEach(btn => btn.addEventListener('click', () => updateApproval(btn.dataset.id, true)));
+      tbody.querySelectorAll('.unapproveBtn').forEach(btn => btn.addEventListener('click', () => updateApproval(btn.dataset.id, false)));
+    }
 
-    rowsEl.innerHTML = filt.map(r=>{
-      const when=new Date(r.created_at).toLocaleString();
-      const link=r.url?`<a href="${r.url}" target="_blank" rel="noopener">open</a>`:'';
-      const don=(r.donation_org||r.donation_amt)?`${r.donation_org||''} ${r.donation_amt?('$'+r.donation_amt):''}${r.donation_evidence_url?(' • <a href="'+r.donation_evidence_url+'" target="_blank" rel="noopener">receipt</a>'):''}`:'';
-      const dBadge=r.donated ? (r.donation_status==='verified'?'<span class="badge ok">verified</span>': r.donation_status==='rejected'?'<span class="badge no">rejected</span>':'<span class="badge warn">unverified</span>') : '<span class="mini">n/a</span>';
-      const aBadge=r.approved?'<span class="badge ok">Yes</span>':'<span class="badge no">No</span>';
-      return `<tr>
-        <td>${when}</td>
-        <td>${r.action||''}</td>
-        <td>${link}</td>
-        <td>${don||''}</td>
-        <td>${dBadge}</td>
-        <td>${aBadge}</td>
-        <td>${(r.name||'')}${r.email?(' • '+r.email):''}</td>
-        <td>
-          ${r.donated?`
-            <a href="#" class="btn act" data-id="${r.id}" data-act="verify">Verify</a>
-            <a href="#" class="btn act" data-id="${r.id}" data-act="reject">Reject</a>`:''}
-          <a href="#" class="btn act" data-id="${r.id}" data-act="${r.approved?'unapprove':'approve'}">${r.approved?'Unapprove':'Approve'}</a>
-        </td>
-      </tr>`;
-    }).join('') || `<tr><td colspan="8" class="mini">No rows.</td></tr>`;
-  }
+    async function updateApproval(id, approved){
+      // This will only work if your RLS allows it for the current user/session.
+      const { error } = await sb.from('submissions').update({ approved }).eq('id', id);
+      if (error) {
+        alert('Update failed: ' + error.message);
+      } else {
+        await load();
+      }
+    }
 
-  rowsEl.addEventListener('click', async (e)=>{
-    const a=e.target.closest('a.act'); if(!a){e.preventDefault();return;}
-    e.preventDefault();
-    const id=a.getAttribute('data-id'), act=a.getAttribute('data-act');
-    if (act==='verify')   await db.from('public_submissions').update({ donation_status:'verified', approved:true }).eq('id', id);
-    if (act==='reject')   await db.from('public_submissions').update({ donation_status:'rejected', approved:false }).eq('id', id);
-    if (act==='approve')  await db.from('public_submissions').update({ approved:true }).eq('id', id);
-    if (act==='unapprove')await db.from('public_submissions').update({ approved:false }).eq('id', id);
+    document.getElementById('refreshBtn').addEventListener('click', load);
     load();
-  });
-
-  fTxt.addEventListener('input', load);
-  fApp.addEventListener('change', load);
-  fDon.addEventListener('change', load);
-  load();
-})();
-</script>
+  </script>
 </body>
 </html>

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "family_dinner",
+    "label": "Have a no-phones family dinner",
+    "category": "Family"
+  },
+  {
+    "id": "read_aloud",
+    "label": "Read aloud with a child for 15 minutes",
+    "category": "Family"
+  },
+  {
+    "id": "thank_teacher",
+    "label": "Write a thank-you note to a teacher",
+    "category": "Community"
+  },
+  {
+    "id": "trash_pickup",
+    "label": "Pick up 10 pieces of litter on your street",
+    "category": "Community"
+  },
+  {
+    "id": "thank_veteran",
+    "label": "Thank a veteran in person or by message",
+    "category": "Patriot"
+  },
+  {
+    "id": "raise_flag",
+    "label": "Raise or clean your American flag at home",
+    "category": "Patriot"
+  },
+  {
+    "id": "pray_leaders",
+    "label": "Pray for local leaders by name",
+    "category": "Faith"
+  },
+  {
+    "id": "invite_church",
+    "label": "Invite a friend to church or small group",
+    "category": "Faith"
+  },
+  {
+    "id": "call_grandparent",
+    "label": "Call a grandparent or elder just to listen",
+    "category": "Family"
+  },
+  {
+    "id": "meal_neighbor",
+    "label": "Bring a meal or dessert to a neighbor",
+    "category": "Community"
+  },
+  {
+    "id": "coach_thanks",
+    "label": "Thank a coach or mentor publicly",
+    "category": "Community"
+  },
+  {
+    "id": "donate_local",
+    "label": "Donate $5–$20 to a local food pantry",
+    "category": "Community"
+  },
+  {
+    "id": "library_card",
+    "label": "Get or renew a library card",
+    "category": "Family"
+  },
+  {
+    "id": "family_walk",
+    "label": "Go on a 20‑minute family walk",
+    "category": "Health"
+  },
+  {
+    "id": "write_service_member",
+    "label": "Write a note to a deployed service member",
+    "category": "Patriot"
+  },
+  {
+    "id": "hold_door",
+    "label": "Hold the door & greet 5 strangers today",
+    "category": "Kindness"
+  },
+  {
+    "id": "thank_first_responder",
+    "label": "Thank a first responder",
+    "category": "Patriot"
+  },
+  {
+    "id": "verse_share",
+    "label": "Share a favorite verse with why it helps you",
+    "category": "Faith"
+  },
+  {
+    "id": "small_business_review",
+    "label": "Leave a 5‑star review for a local small business",
+    "category": "Community"
+  },
+  {
+    "id": "cook_together",
+    "label": "Cook one meal together as a family",
+    "category": "Family"
+  },
+  {
+    "id": "visit_nursing_home",
+    "label": "Visit someone in a nursing home (call ahead)",
+    "category": "Community"
+  },
+  {
+    "id": "yard_help",
+    "label": "Help a neighbor with yard work",
+    "category": "Community"
+  },
+  {
+    "id": "apology_text",
+    "label": "Send an apology or reconciliation text you’ve put off",
+    "category": "Kindness"
+  },
+  {
+    "id": "teacher_supplies",
+    "label": "Buy one classroom supply from a teacher’s list",
+    "category": "Community"
+  },
+  {
+    "id": "blood_donation",
+    "label": "Schedule a blood donation",
+    "category": "Health"
+  },
+  {
+    "id": "family_game",
+    "label": "Play a board game with your family",
+    "category": "Family"
+  },
+  {
+    "id": "mentor_call",
+    "label": "Call a younger person and encourage them",
+    "category": "Kindness"
+  },
+  {
+    "id": "care_package",
+    "label": "Assemble a care package for someone in need",
+    "category": "Community"
+  },
+  {
+    "id": "pledge",
+    "label": "Say the Pledge of Allegiance with your family",
+    "category": "Patriot"
+  },
+  {
+    "id": "gratitude_video",
+    "label": "Record a 15‑sec gratitude video and tag 3 friends",
+    "category": "Kindness"
+  }
+]
