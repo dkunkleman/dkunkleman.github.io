@@ -17,6 +17,50 @@
 </head>
 
 <style>
+  /* 1) Safety net: slightly stronger text edges on photo areas */
+  .hero h1,
+  .hero .copy .muted,
+  .panel h1, .panel h2, .panel h3,
+  .panel p, .panel li {
+    text-shadow: 0 3px 22px rgba(0,0,0,.88), 0 1px 2px rgba(0,0,0,.72);
+  }
+
+  /* 2) Micro-overlay only behind text blocks (not the whole page) */
+  .read-plate{
+    background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.28));
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: 10px 12px;
+    backdrop-filter: blur(6px);
+  }
+  /* Apply to any tricky text: e.g., hero copy or small captions */
+  .hero .copy { max-width: 900px; }
+  .hero .copy > p { display: inline-block; }
+  .hero .copy > p.readable { /* add class="readable" to any paragraph you want plated */
+    background: rgba(0,0,0,.22);
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+
+  /* 3) Slightly less transparency on panels when system prefers higher contrast */
+  @media (prefers-contrast: more){
+    :root{ --panel-bg: rgba(10,18,39,.42); }
+  }
+
+  /* 4) If a specific panel sits on a very bright photo, give it a hair more fill */
+  .panel[data-critical="1"]{ background: rgba(10,18,39,.48) !important; }
+
+  /* 5) Print-friendly: plain white background and dark text for paper */
+  @media print{
+    body{ background:#fff !important; color:#111 !important }
+    #page-bg{ display:none !important }
+    .panel, .card{ background:#fff !important; border:1px solid #ddd !important; box-shadow:none !important }
+    a{ color:#0645ad !important; text-decoration:underline }
+  }
+</style>
+
+
+<style>
   /* Make the actions hero fully transparent */
   .actions-hero{
     background: transparent !important;
@@ -284,6 +328,7 @@
   </script>
 
 </section>
+
 
 
 
