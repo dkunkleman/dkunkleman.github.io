@@ -1,69 +1,19 @@
 <!doctype html>
-<html lang="en" data-theme="patriotic">
-
-  <header>
-  <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
-    <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
-    <nav style="display:flex;gap:12px;align-items:center">
-      <a href="/actions.html">Actions</a>
-      <a href="/about.html">About</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/proofs.html">Proofs</a>
-      <a href="/admin.html">Admin</a>
-      <a href="/#impact" class="button" data-impact>Impact</a>
-    </nav>
-  </div>
-</header>
-<meta property="og:title" content="Live Like Charlie — Do one small good action."/>
-<meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
-<meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
-<meta name="twitter:card" content="summary_large_image"/>
-
-<style>
-  header nav a{padding:8px 12px;border-radius:10px;text-decoration:none;border:1px solid transparent}
-  header nav a:hover{background:rgba(255,255,255,.06)}
-  header nav a.active{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
-  header nav .button{background:var(--accent);color:#fff;border:none}
-</style>
-
-<script>
-(function(){
-  const impact = document.querySelector('a[data-impact]');
-  if (impact){
-    impact.addEventListener('click', (e)=>{
-      // if already on home, smooth-scroll; else go to /#impact
-      const onHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
-      if (onHome){
-        e.preventDefault();
-        document.getElementById('impact')?.scrollIntoView({behavior:'smooth'});
-      }
-    });
-  }
-  // Active link highlighting for the current page
-  const path = location.pathname.replace(/\/index\.html$/, '/');
-  document.querySelectorAll('header nav a[href]').forEach(a=>{
-    const href = a.getAttribute('href');
-    if (!href) return;
-    if (href === '/#impact') return; // anchor button handled separately
-    if (path.startsWith(href)) a.classList.add('active');
-  });
-})();
-</script>
-<title>Privacy Policy • Like Charlie</title>
-<meta name="description" content="Privacy policy for Like Charlie.">
-<style>
-  :root{--ink:#e6eefc;--bg:#0b1220;--panel:#0f1a33;--muted:#9fb3d1;--border:rgba(255,255,255,.14)}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  a{color:#b3d4ff} .wrap{max-width:900px;margin:0 auto;padding:24px}
-  header{position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15));border-bottom:1px solid var(--border)}
-  nav{display:flex;gap:12px;align-items:center;padding:12px 16px}
-  nav a{padding:8px 12px;border-radius:10px} nav a:hover{background:rgba(255,255,255,.06)}
-  h1{margin:18px 0 10px} .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-top:14px}
-  footer{color:#9fb3d1;margin:26px 0 10px}
-</style>
-</head>
-
-<!-- THEME (put in <head> on every page) -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy • Live Like Charlie</title>
+<meta name="description" content="Privacy policy for Live Like Charlie — how we collect, use, and protect your information." />
+<link rel="canonical" href="https://www.cybermave.ai/privacy.html" />
+<meta property="og:title" content="Live Like Charlie • Privacy Policy" />
+<meta property="og:description" content="How we collect, use, and protect your information across our site and challenge." />
+<meta property="og:image" content="https://www.cybermave.ai/og.jpg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.cybermave.ai/privacy.html" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0b1220" />
 <style>
   :root{
     --ink:#eaf2ff; --muted:#9fb3d1;
@@ -72,75 +22,108 @@
     --panel-border: rgba(255,255,255,.16);
     --glow: 0 10px 30px rgba(0,0,0,.45);
   }
-  body.has-photo{color:var(--ink); background:#0b1220; margin:0}
+  *{box-sizing:border-box}
+  body.has-photo{color:var(--ink); background:#0b1220; margin:0; font-family:system-ui,Segoe UI,Roboto,Ubuntu,sans-serif; line-height:1.55}
+  a{color:#b3d4ff; text-decoration:none}
+  .wrap{max-width:1100px; margin:0 auto; padding:20px}
+  header{position:sticky; top:0; z-index:50; background:rgba(10,18,39,.42); backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
+  .nav{display:flex; align-items:center; justify-content:space-between; gap:16px}
+  .brand{font-weight:900; letter-spacing:.2px; cursor:pointer}
+  nav a{padding:8px 12px; border-radius:10px; border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.06)}
+  nav a.active{border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.08)}
+  nav .button{background:var(--accent); color:#fff; border:none}
   #page-bg{position:fixed; inset:0; z-index:-2; background:#0b1220 center/cover no-repeat; transition:opacity .6s ease}
-  #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9));}
-  .panel,.card{background:var(--panel-bg)!important;border:1px solid var(--panel-border)!important;border-radius:16px;box-shadow:var(--glow);}
-  header{backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
-  .break{height:10px;border-radius:999px;margin:18px 0;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px);opacity:.9}
-  a{color:#b3d4ff;text-decoration:none}
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
-  input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
-  button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
+  #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9))}
+  .panel{background:var(--panel-bg) !important; border:1px solid var(--panel-border) !important; border-radius:16px; box-shadow:var(--glow); padding:18px}
+  h1,h2{margin:10px 0 6px}
+  h1{font-size:30px}
+  h2{font-size:22px}
+  .muted{color:var(--muted)}
+  .break{height:10px; border-radius:999px; margin:18px 0; background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px); opacity:.9}
+  ul,ol{margin:8px 0 12px 20px}
+  footer{margin:30px 0 60px; color:var(--muted); font-size:13px; text-align:center}
 </style>
-
-  
-<meta property="og:title" content="Live Like Charlie — Do one small good action."/>
-<meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
-<meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
-<meta name="twitter:card" content="summary_large_image"/>
-
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">  
+</head>
 <body>
-
-<!-- BACKGROUND (put right after <body> on every page) -->
 <div id="page-bg" aria-hidden="true"></div>
-<script>
-  document.body.classList.add('has-photo');
-  const bgImages=[
-    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
-  ];
-  const bg=document.getElementById('page-bg'); let i=0;
-  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
-  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
-</script>
 
-  
-<header><nav class="wrap"><a href="/">← Home</a><span style="flex:1"></span><a href="/actions.html">Actions</a></nav></header>
-<main class="wrap">
-  <h1>Privacy Policy</h1>
-  <div class="card">
-    <p><b>What we collect</b></p>
-    <ul>
-      <li>Post URLs you paste, selected action, optional name/email, and optional donation details (org/amount/evidence link).</li>
-      <li>Basic technical logs (standard web analytics if enabled).</li>
-    </ul>
-    <p><b>How we use it</b></p>
-    <ul>
-      <li>To show “Recent” and “Leaderboard.”</li>
-      <li>To review claimed donations before public display.</li>
-    </ul>
-    <p><b>Sharing</b></p>
-    <ul>
-      <li>We don’t sell personal data. Public Impact shows action counts and links you provide.</li>
-    </ul>
-    <p><b>Your choice</b></p>
-    <ul>
-      <li>Don’t include private information in your social post.</li>
-      <li>Donation claims are optional and unverified until approved.</li>
-    </ul>
-    <p><b>Contact</b>: <a href="mailto:hello@cybermave.ai">hello@cybermave.ai</a></p>
+<header>
+  <div class="nav wrap">
+    <div class="brand">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
+    <nav>
+      <a href="/actions.html">Actions</a>
+      <a href="/about.html">About</a>
+      <a href="/privacy.html" class="active">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/proofs.html">Proofs</a>
+      <a href="/admin.html">Admin</a>
+      <a href="/#impact" class="button">Impact</a>
+    </nav>
   </div>
-</main>
-<footer class="wrap"><p>Not affiliated with charliechallenge.org.</p></footer>
-</body>
+</header>
 
-<!-- BACKGROUND (put right after <body> on every page) -->
-<div id="page-bg" aria-hidden="true"></div>
+<div class="wrap">
+  <section class="panel">
+    <h1>Privacy Policy</h1>
+    <p class="muted">Effective: October 16, 2025</p>
+    <p>We built Live Like Charlie to make doing one small good action simple, shareable, and inspiring. This page explains what we collect, why we collect it, and how you can control your information.</p>
+  </section>
+
+  <div class="break"></div>
+
+  <section class="panel">
+    <h2>What we collect</h2>
+    <ul>
+      <li><strong>Submission data:</strong> action name, platform, your post link, optional name/alias, optional screenshot URL, and timestamp.</li>
+      <li><strong>Usage data:</strong> basic analytics such as pages visited and device type, used in aggregate to improve the site.</li>
+      <li><strong>Local streaks:</strong> your streak badges are stored only on your device (browser localStorage).</li>
+    </ul>
+    <p class="muted">We do not sell your data. We use aggregated, de-identified trends to improve the challenge.</p>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>How submissions work</h2>
+    <p>When you paste your public post link or upload an optional screenshot, we store the submission in our database and the screenshot in our storage bucket. Public links are preferred and may appear in recent submissions or leaderboards.</p>
+    <ul>
+      <li><strong>Public links:</strong> count best and may be displayed as “Open”.</li>
+      <li><strong>Private links:</strong> may be anonymized or excluded from public lists.</li>
+      <li><strong>Screenshots:</strong> are optional and publicly accessible if you choose to upload.</li>
+    </ul>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Your choices & control</h2>
+    <ul>
+      <li><strong>Remove a submission:</strong> email us with your post link and the timestamp. We’ll remove or anonymize upon request.</li>
+      <li><strong>Do not upload screenshots:</strong> you can participate without uploading any images.</li>
+      <li><strong>Local streaks:</strong> you can clear your browser’s localStorage to reset your streak badges.</li>
+    </ul>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Security</h2>
+    <p>We protect data in transit with HTTPS and restrict database access by policy. While no system is perfectly secure, we apply least-privilege access and monitor for abuse.</p>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Children</h2>
+    <p>The site is not directed to children under 13. If you believe a child has submitted personal information, contact us to remove it.</p>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy to reflect improvements or legal requirements. When we do, we’ll update the “Effective” date at the top.</p>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Contact</h2>
+    <p>Questions or requests? Reach us via the <a href="/about.html">About</a> page or email: <a href="mailto:contact@cybermave.ai">contact@cybermave.ai</a>.</p>
+  </section>
+
+  <footer>Made with ❤️ for neighbors, veterans, and community. #LiveLikeCharlie</footer>
+</div>
+
 <script>
   document.body.classList.add('has-photo');
   const bgImages=[
@@ -154,5 +137,20 @@
   setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
 </script>
 
-  
+<script>
+  document.querySelectorAll('a[href^="#"], a[href="/#impact"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const href=a.getAttribute('href'); const id=href?.startsWith('/#')?href.slice(1):href;
+      const el=id?document.querySelector(id):null;
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+  document.querySelector('.brand')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const url=location.origin, text="Do one small good action. #LiveLikeCharlie";
+    if(navigator.share){ await navigator.share({title:"Live Like Charlie",text,url}); }
+    else{ window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(url),"__blank","noopener,noreferrer"); }
+  });
+</script>
+</body>
 </html>
