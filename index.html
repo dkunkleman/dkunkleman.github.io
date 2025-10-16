@@ -130,11 +130,16 @@
 <header>
   <div class="nav wrap">
     <div class="brand">Like Charlie</div>
-    <nav>
-      <a href="#impact">Impact</a>
-      <a href="#recent">Recent</a>
-      <a href="#step3" class="button">Finish</a>
-    </nav>
+<nav class="wrap">
+  <a class="brand" href="/">Like Charlie</a>
+  <span style="flex:1"></span>
+  <a href="/actions.html">Actions</a>
+  <a href="/about.html">About</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/proofs.html">Proofs</a>
+  <a href="/admin.html">Admin</a>
+</nav>
+
   </div>
 </header>
 
@@ -304,57 +309,65 @@ setHero(heroIndex);
 setInterval(()=>{ heroIndex = (heroIndex+1)%heroImgs.length; setHero(heroIndex); }, 8000);
 
 // Actions
-const ACTIONS = [
-  ["Raise the Flag","Hang or fly a U.S. flag today. Share a photo and why it matters to you."],
-  ["Publicly Thank Someone","Thank a person who helps others; post a note of appreciation."],
-  ["Pick Up 10 Pieces","Pick up 10 pieces of trash. Post before/after."],
-  ["Pray for Someone","Say a short prayer and post an encouraging line."],
-  ["Read the Bible for 15","Read for 15 minutes; share a verse that stood out."],
-  ["Help at Home","Do a helpful job without being asked; share a quick note."],
-  ["Be a Friend","Include someone who’s left out; post a kind sentence."],
-  ["Donate to TPUSA or a Charity","Give to TPUSA or a charity you love; say why."],
-  ["Volunteer 1 Hour","Give one hour to serve; share why it matters."],
-  ["Write a Thank-You Note","Write a short note to someone who helped you."],
-  ["Learn a New Skill","Learn/practice a real-life skill; share the experience."],
-  ["Call or Visit Family","Connect with family; share a picture or story."],
-  ["Honor a Veteran or First Responder","Thank them and share why you appreciate them."],
-  ["Share a Favorite Charlie Quote","Share a favorite quote/photo/video from Charlie."],
-  ["Join the Pete & Bobby Challenge","Take a health step; post a milestone."],
-  ["Choose a Verse & Share","Pick a verse and post what it means to you."],
-  ["Share a Forgiveness Story","Share how forgiving helped you (no private details)."],
-  ["Meet Your Spouse with a Hug","Greet your spouse with a hug and appreciation."],
-  ["Intentional Family Time","Share pics/stories from purposeful time together."],
-  ["Do a Chore Your Spouse Does","Take over a chore they usually do; share the reaction."],
-  ["Listen Without Interrupting","Listen fully; post what you learned."],
-  ["Speak Truth with Humility","Share truth with courage and kindness."],
-  ["Invite 3 People to Church","Invite three people; share about the experience."],
-  ["Share Your Testimony","Share what following Jesus means to you."],
-  ["Host a Film Night","Host a Christian film night; discuss and share a pic."],
-  ["Hands-Free Driver","No phone while driving today; share the reminder."],
-  ["Family Table Focus (3+ nights)","Eat together screen-free for 3+ nights; share what changed."],
-  ["Honor Service (Thank a First Responder)","Deliver a thank-you/gift (with permission)."],
-  ["Creator Proceeds Donor","Donate a day’s proceeds; share a redacted receipt."],
-  ["Phone Off at Church","Worship distraction-free; share a reminder graphic."],
-  ["Host a Sale for Good","Run a bake/garage sale; donate proceeds; share."],
-  ["Generations: 3 Together","Grandparent + parent + child complete an action; share."],
-  ["Register to Vote (or Verify)","Check or register; help a friend do the same."],
-  ["Pray for Your Leaders (Name Them)","Post a prayer for leaders by name."],
-  ["Bring a Teacher a Gift","Show appreciation to a teacher; share the moment."],
-  ["Veteran Visit (Honor & Listen)","Visit a veteran; thank, listen, and pray."],
-  ["Meal Train Start","Start/join a meal train; share the link."],
-  ["Coach or Mentor (Youth)","Volunteer to coach or mentor; invite others."],
-  ["First Bible Give-Away","Give someone their first Bible; include a note."],
-  ["Scripture Memory Share","Share a verse you memorized and its meaning."],
-  ["Pro-Life Serve Day","Serve a pregnancy center; post how to help."],
-  ["Pro-Life: Celebrate Your Children","Share how special your children are."],
-  ["Marriage Night","Plan a date night; share one thing you’re building."],
-  ["Apologetics Share","Give one reason for your hope in the Gospel."],
-  ["Read Aloud with Kids","Read aloud; post a family pic + title."],
-  ["Add Your Church","Post your church’s link; invite your city."],
-  ["Host a Like-Charlie Meetup","Gather 5+ friends to do actions together."],
-  ["Testimony Video (60–90s)","Record a short testimony with #LiveLikeCharlie."],
-  ["Worship Playlist Share (Top 10)","Share your top-10 worship playlist."]
-];
+<script>
+/* ---------- Build actions from /actions.json + description + caption ---------- */
+(async function () {
+  const selAction   = document.getElementById('actionSelect');
+  const selPlatform = document.getElementById('platformSelect');
+  const descEl      = document.getElementById('actionDesc');
+  const postBox     = document.getElementById('copyText');
+
+  // Fetch once from your data file
+  let list = [];
+  try {
+    const res = await fetch('/actions.json', { cache: 'no-store' });
+    const data = await res.json();
+    // prefer the detailed "details" list if present; else fallback to "actions"
+    if (Array.isArray(data?.details) && data.details.length) {
+      list = data.details.map(d => [d.title, d.description || '']);
+    } else if (Array.isArray(data?.actions)) {
+      list = data.actions.map(t => [t, '']);
+    }
+  } catch (e) { console.error('Failed to load actions.json', e); }
+
+  selAction.innerHTML =
+    `<option value="">— Choose —</option>` +
+    list.map(([t,d]) => `<option value="${t}" title="${d||''}">${t}</option>`).join('');
+
+  function tags(p){
+    const base = "#LiveLikeCharlie #OneSmallGoodThing";
+    return (/instagram|tiktok/i.test(p||"")) ? base + " #Challenge" : base;
+  }
+
+  function updateUI(){
+    const action   = selAction.value;
+    const platform = selPlatform ? selPlatform.value : "";
+    const found    = list.find(([t]) => t === action);
+    if (descEl) descEl.textContent = found ? (found[1] || '') : '';
+    const site = (location.origin || "https://www.cybermave.ai") + "/?action=" + encodeURIComponent(action||"");
+    const caption = `I'm doing one small good thing, like Charlie. Join me: pick an action and do one small good thing like Charlie too. ${tags(platform)}\n\nSee how it works: ${site}`;
+    if (postBox) postBox.value = caption;
+  }
+
+  selAction.addEventListener('change', updateUI);
+  selPlatform && selPlatform.addEventListener('change', updateUI);
+
+  // Deep-link: preselect ?action=
+  const q = new URLSearchParams(location.search);
+  const deep = q.get('action');
+  if (deep && list.some(([t]) => t === deep)) selAction.value = deep;
+
+  updateUI();
+})();
+</script>
+<script>
+  // Turn "Raised the Flag" buttons into deep links to index
+  document.querySelectorAll('a[data-action]').forEach(a => {
+    const title = a.getAttribute('data-action');
+    a.href = `/?action=${encodeURIComponent(title)}#step1`;
+  });
+</script>
+
 const actionSelect = document.getElementById('actionSelect');
 ACTIONS.forEach(([label])=>{ const o=document.createElement('option'); o.textContent=label; o.value=label; actionSelect.appendChild(o); });
 const actionDesc = document.getElementById('actionDesc');
