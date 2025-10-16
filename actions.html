@@ -127,6 +127,38 @@
   header nav .button{background:var(--accent);color:#fff;border:none}
 </style>
 
+<script>
+(function () {
+  const brand = document.querySelector('.brand');
+  if (!brand) return;
+
+  // Keep normal navigation for modifier/middle clicks
+  brand.addEventListener('click', async (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;
+    e.preventDefault();
+
+    const url  = location.origin;
+    const text = 'Do one small good action with #LiveLikeCharlie';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Live Like Charlie', text, url });
+      } catch (_) { /* user canceled */ }
+    } else {
+      const fb = 'https://www.facebook.com/sharer/sharer.php?u=' +
+                 encodeURIComponent(url) + '&quote=' + encodeURIComponent(text);
+      const x  = 'https://x.com/intent/tweet?url=' +
+                 encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
+      window.open(fb, '_blank', 'noopener,noreferrer');
+      setTimeout(() => window.open(x, '_blank', 'noopener,noreferrer'), 350);
+    }
+  });
+
+  brand.style.cursor = 'pointer';
+})();
+</script>
+
+
 <body>
   
 <!-- BACKGROUND (put right after <body> on every page) -->
@@ -328,6 +360,7 @@
   </script>
 
 </section>
+
 
 
 
