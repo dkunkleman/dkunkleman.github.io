@@ -116,6 +116,24 @@
 </head>
 <body>
 
+<div id="page-bg" aria-hidden="true"></div>
+<script>
+  // Set on each page: add class="has-photo" to <body> and customize bgImages
+  document.body.classList.add('has-photo');
+  const bgImages = [
+    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+  ];
+  const bg = document.getElementById('page-bg');
+  let i = 0;
+  function setBG(idx){ bg.style.opacity = 0; setTimeout(()=>{ bg.style.backgroundImage = `url("${bgImages[idx]}")`; bg.style.opacity = 1; }, 220); }
+  setBG(i);
+  setInterval(()=>{ i = (i+1) % bgImages.length; setBG(i); }, 12000);
+</script>
+
+  
 <header>
   <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
     <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
@@ -471,6 +489,7 @@ const brand=document.querySelector(".brand");if(brand){brand.style.cursor="point
   
 </body>
 </html>
+
 
 
 
