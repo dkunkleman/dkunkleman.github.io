@@ -1,6 +1,19 @@
 <!doctype html>
 <html lang="en">
-<head>
+
+<title>Render Share Image</title>
+<style>
+  body{margin:0;background:#0b1220;color:#e6eefc;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  .panel{background:#0f1a33;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+  label{display:block;margin:10px 0 6px;font-weight:600}
+  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0c1630;color:#e6eefc}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  canvas{max-width:100%;background:#000;border-radius:12px}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);text-decoration:none;color:#fff;background:#162552}
+</style>
+</head>
+
 
 <!-- THEME (put in <head> on every page) -->
 <style>
@@ -32,19 +45,25 @@
   
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Render Share Image</title>
-<style>
-  body{margin:0;background:#0b1220;color:#e6eefc;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif}
-  .wrap{max-width:1000px;margin:0 auto;padding:20px}
-  .panel{background:#0f1a33;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
-  label{display:block;margin:10px 0 6px;font-weight:600}
-  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0c1630;color:#e6eefc}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  canvas{max-width:100%;background:#000;border-radius:12px}
-  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);text-decoration:none;color:#fff;background:#162552}
-</style>
-</head>
+  
 <body>
+
+<!-- BACKGROUND (put right after <body> on every page) -->
+<div id="page-bg" aria-hidden="true"></div>
+<script>
+  document.body.classList.add('has-photo');
+  const bgImages=[
+    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+  ];
+  const bg=document.getElementById('page-bg'); let i=0;
+  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
+  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
+</script>
+
+  
 <main class="wrap">
   <h1 style="margin-top:0">Render Share Image</h1>
   <p class="muted">Choose a size, tweak text, pick a background, then click <b>Download PNG</b>.</p>
