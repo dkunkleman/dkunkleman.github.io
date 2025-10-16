@@ -147,6 +147,13 @@
 
   
 </head>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+  }
+</script>
+  
 <body>
 
 <div id="page-bg" aria-hidden="true"></div>
