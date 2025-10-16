@@ -23,7 +23,6 @@
   input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
   button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
 </style>
-
   
 <meta property="og:title" content="Live Like Charlie — Do one small good action."/>
 <meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
@@ -45,6 +44,23 @@
 </style>
 </head>
 <body>
+
+<!-- BACKGROUND (put right after <body> on every page) -->
+<div id="page-bg" aria-hidden="true"></div>
+<script>
+  document.body.classList.add('has-photo');
+  const bgImages=[
+    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+  ];
+  const bg=document.getElementById('page-bg'); let i=0;
+  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
+  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
+</script>
+
+  
 <header><nav class="wrap"><a href="/">← Home</a><span style="flex:1"></span><a href="/actions.html">Actions</a></nav></header>
 <main class="wrap">
   <h1>Privacy Policy</h1>
