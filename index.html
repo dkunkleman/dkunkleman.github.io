@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta property="og:title" content="Live Like Charlie — Do one small good action."/>
+<meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
+<meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Live Like Charlie Challenge — Do One Small Good Thing</title>
@@ -627,10 +632,60 @@ const brand=document.querySelector(".brand");if(brand){brand.style.cursor="point
                            background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.18);
                            font-weight:900; cursor:pointer }
 </style>
+
+<script>
+(function(){
+  const map = {Impact:'#impact', Recent:'#recent', Finish:'#submit'};
+  document.querySelectorAll('a[href^="#"], a[href="/#impact"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const id = map[a.textContent.trim()] || a.getAttribute('href');
+      const el = document.querySelector(id);
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const sel = document.getElementById('action')||document.getElementById('actionSelect');
+  const compose = document.getElementById('compose');
+  const closeBtn = document.getElementById('closeCompose');
+  if(!sel || !compose) return;
+  sel.addEventListener('change', ()=>{ if(sel.value){ compose.classList.add('show'); }});
+  closeBtn?.addEventListener('click', ()=> compose.classList.remove('show'));
+  compose.addEventListener('click', e=>{
+    if(e.target.id==='compose') compose.classList.remove('show');
+  });
+})();
+</script>
+  
+<script>
+document.getElementById('openCompose')?.addEventListener('click', e=>{
+  e.preventDefault();
+  document.getElementById('compose')?.classList.add('show');
+});
+</script>
+
+<script>
+function isURL(u){ try{const x=new URL(u); return /^https?:/.test(x.protocol);}catch{return false}}
+document.getElementById('completeBtn')?.addEventListener('click', ()=>{
+  const v = document.getElementById('link')?.value.trim();
+  if(!isURL(v)){ alert('Please paste a valid https:// link to your public post.'); throw new Error('bad url'); }
+});
+</script>
+
+<script>
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[target="_blank"]');
+  if(a && !a.rel) a.rel="noopener noreferrer";
+});
+</script>
   
   
 </body>
 </html>
+
 
 
 
