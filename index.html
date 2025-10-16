@@ -495,9 +495,75 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}
 const brand=document.querySelector(".brand");if(brand){brand.style.cursor="pointer";brand.addEventListener("click",async(e)=>{e.preventDefault();const shareUrl=location.origin;const shareText="Join me: Do one small good action with #LiveLikeCharlie";if(navigator.share){await navigator.share({title:"Live Like Charlie",text:shareText,url:shareUrl})}else{const fb=`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;const x=`https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;window.open(fb,"_blank","noopener,noreferrer");setTimeout(()=>window.open(x,"_blank","noopener,noreferrer"),300)}})}
 </script>
 
+<script>
+/* === Step-1 compose popup + actions.html descriptions === */
+(function(){
+  const sel = document.getElementById('actionSelect') || document.getElementById('action'); // Step 1 select
+  const desc = document.getElementById('actionDesc');                                      // Step 1 description
+  const compose = document.getElementById('compose');                                       // modal
+  const closeCompose = document.getElementById('closeCompose');
+  const composeText = document.getElementById('composeText');
+
+  if(!sel || !compose || !composeText) return; // safety
+
+  // 1) Pull titles + descriptions from /actions.html (.card h3 + p)
+  let details = new Map();
+  (async () => {
+    try {
+      const res = await fetch('/actions.html', {cache:'no-store'});
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('.card').forEach(card => {
+        const title = (card.querySelector('h3')?.textContent || '').trim();
+        const d = (card.querySelector('p')?.textContent || '').trim();
+        if (title) details.set(title, d);
+      });
+    } catch(e){ console.warn('actions.html parse failed', e); }
+  })();
+
+  // 2) Show the modal and prefill the caption
+  function openComposeFor(actionName){
+    const caption =
+      `I just did “${actionName || 'One Small Good Thing'}” with #LiveLikeCharlie — ` +
+      `your turn: pick one, post it, and invite 3 friends. ${location.origin}`;
+    composeText.value = caption;
+    compose.classList.add('show');
+    // best-effort copy for quick paste
+    if (navigator?.clipboard?.writeText) navigator.clipboard.writeText(caption).catch(()=>{});
+  }
+
+  // 3) Platform buttons inside the modal (X/Facebook/Instagram/TikTok)
+  compose.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-platform]'); if(!btn) return;
+    const txt = encodeURIComponent(composeText.value || "");
+    if (btn.dataset.platform === 'x') {
+      window.open("https://twitter.com/intent/tweet?text=" + txt, "_blank");
+    } else if (btn.dataset.platform === 'facebook') {
+      const shareUrl = encodeURIComponent(location.origin + location.pathname);
+      window.open("https://www.facebook.com/sharer/sharer.php?u=" + shareUrl + "&quote=" + txt, "_blank");
+    } else if (btn.dataset.platform === 'instagram') {
+      window.open("https://www.instagram.com/", "_blank");
+      alert("Instagram doesn’t support prefilled text from the web. We copied your text. Paste it into the caption.");
+    } else if (btn.dataset.platform === 'tiktok') {
+      window.open("https://www.tiktok.com/creator-center/upload?lang=en", "_blank");
+      alert("TikTok doesn’t allow prefilled captions from the web. We copied your text. Paste it into the caption.");
+    }
+  });
+  closeCompose?.addEventListener('click', () => compose.classList.remove('show'));
+
+  // 4) When an action is selected in Step 1: update description, open the modal
+  sel.addEventListener('change', () => {
+    const v = sel.value;
+    if (desc) desc.textContent = details.get(v) || '';   // show actions.html description
+    if (v) openComposeFor(v);                             // Step 2 = pop-up
+  });
+})();
+</script>
+
   
 </body>
 </html>
+
 
 
 
