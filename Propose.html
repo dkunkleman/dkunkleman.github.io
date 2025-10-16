@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<!-- THEME (put in <head> on every page) -->
+<style>
+  :root{
+    --ink:#eaf2ff; --muted:#9fb3d1;
+    --brand:#e11d48; --accent:#2563eb;
+    --panel-bg: rgba(10,18,39,.58);
+    --panel-border: rgba(255,255,255,.16);
+    --glow: 0 10px 30px rgba(0,0,0,.45);
+  }
+  body.has-photo{color:var(--ink); background:#0b1220; margin:0}
+  #page-bg{position:fixed; inset:0; z-index:-2; background:#0b1220 center/cover no-repeat; transition:opacity .6s ease}
+  #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9));}
+  .panel,.card{background:var(--panel-bg)!important;border:1px solid var(--panel-border)!important;border-radius:16px;box-shadow:var(--glow);}
+  header{backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
+  .break{height:10px;border-radius:999px;margin:18px 0;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px);opacity:.9}
+  a{color:#b3d4ff;text-decoration:none}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
+  input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
+  button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
+</style>
+  
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+\1
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;color:#0a1227;line-height:1.45;max-width:760px}
+  label{display:block;font-weight:700;margin:.7rem 0 .25rem}
+  input,textarea,select{width:100%;padding:.8rem;border:1px solid #d1d5db;border-radius:10px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{display:inline-flex;gap:.5rem;padding:.8rem 1.1rem;border-radius:12px;border:1px solid #1e3a8a;background:#1e3a8a;color:#fff;font-weight:900;cursor:pointer}
+  .muted{color:#475569}
+  .card{border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0;background:#fff}
+</style>
+<body>
+
+<!-- BACKGROUND (put right after <body> on every page) -->
+<div id="page-bg" aria-hidden="true"></div>
+<script>
+  document.body.classList.add('has-photo');
+  const bgImages=[
+    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+  ];
+  const bg=document.getElementById('page-bg'); let i=0;
+  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
+  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
+</script>
+  
+  <h1>Propose a New Action</h1>
+  <p class="muted">Suggest a short, clear action title. We’ll review & add approved ones to the list.</p>
+
+  <form action="https://formspree.io/f/your-id" method="POST" enctype="multipart/form-data">
+    <label>Action title</label>
+    <input name="title" placeholder="e.g., Pray with a coworker" required>
+
+    <label>Why it fits “Like Charlie”</label>
+    <textarea name="why" rows="5" placeholder="Keep it short and positive." required></textarea>
+
+    <label>Your email (for follow-up)</label>
+    <input name="email" type="email" placeholder="you@example.com" required>
+
+    <div class="card">
+      <h3>Optional: upload a proof image or PDF (receipt/instructions)</h3>
+      <p class="muted">If your action involves a donation or an event template, attach a sample or receipt here.</p>
+      <label>Upload file (image/pdf)</label>
+      <input type="file" name="attachment">
+    </div>
+
+    <button class="btn" type="submit">Send proposal</button>
+  </form>
+
+  <p class="muted">Admin note: approved actions are added to <code>/data/actions.json</code>.</p>
+</body>
+</html>

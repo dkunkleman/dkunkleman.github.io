@@ -25,8 +25,8 @@
 </style>
    
 
-<link rel="canonical" href="https://www.cybermave.ai/">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Live Like Charlie","url":"https://www.cybermave.ai/"}</script>
+<link rel="canonical" href="https://livelikecharliechallenge.org/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Live Like Charlie","url":"https://livelikecharliechallenge.org/"}</script>
    
 <meta property="og:title" content="Live Like Charlie — Do one small good action."/>
 <meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
@@ -35,7 +35,8 @@
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Live Like Charlie Challenge — Do One Small Good Thing</title>
+\1
+<link rel="manifest" href="/manifest.webmanifest">
 <meta name="description" content="Pick an action, make your post, paste your link so it counts, and invite 3 friends." />
 
 <style>
@@ -416,7 +417,7 @@ function setComposeFor(platform, caption, site){
     const action=selAction.value, platform=selPlatform.value||"";
     const found=list.find(([t])=>t===action);
     if(descEl) descEl.textContent = found ? (found[1]||'') : '';
-    const site=(location.origin||"https://www.cybermave.ai")+"/?action="+encodeURIComponent(action||"");
+    const site=(location.origin||"https://livelikecharliechallenge.org")+"/?action="+encodeURIComponent(action||"");
     const caption=`I'm doing one small good thing, like Charlie: ${action||'One Small Good Thing'}.
 Join me: pick an action and do one small good thing like Charlie too. ${tags(platform)}
 
@@ -437,7 +438,7 @@ See how it works: ${site}`;
   document.getElementById('closeCompose').addEventListener('click', ()=> modal.classList.remove('show'));
   modal.querySelectorAll('button[data-platform]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const p=btn.dataset.platform, site=(location.origin||"https://www.cybermave.ai")+"/?action="+encodeURIComponent(selAction.value||"");
+      const p=btn.dataset.platform, site=(location.origin||"https://livelikecharliechallenge.org")+"/?action="+encodeURIComponent(selAction.value||"");
       const url=setComposeFor(p, txt.value, site); window.open(url,'_blank','noopener');
     });
   });
@@ -759,7 +760,6 @@ document.getElementById('action')?.addEventListener('change',e=>{
   
 </body>
 </html>
-
 
 
 
