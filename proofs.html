@@ -80,6 +80,23 @@
   code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:6px}.muted{color:#cbd5e1}
 </style></head>
 <body>
+
+<!-- BACKGROUND (put right after <body> on every page) -->
+<div id="page-bg" aria-hidden="true"></div>
+<script>
+  document.body.classList.add('has-photo');
+  const bgImages=[
+    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+  ];
+  const bg=document.getElementById('page-bg'); let i=0;
+  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
+  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
+</script>
+
+  
 <div class="container">
   <h1>Public Proofs — Daily Merkle Roots & Logs</h1>
   <p class="muted">Import your <code>transparency_log.json</code>, view daily Merkle roots, and verify inclusion of a canonical claim JSON (SHA-256). This page also shows a Merkle “branch” (sibling hash path) for matched leaves.</p>
