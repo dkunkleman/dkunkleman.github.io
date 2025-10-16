@@ -1,19 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Privacy Policy • Live Like Charlie</title>
-<meta name="description" content="Privacy policy for Live Like Charlie — how we collect, use, and protect your information." />
-<link rel="canonical" href="https://www.cybermave.ai/privacy.html" />
-<meta property="og:title" content="Live Like Charlie • Privacy Policy" />
-<meta property="og:description" content="How we collect, use, and protect your information across our site and challenge." />
-<meta property="og:image" content="https://www.cybermave.ai/og.jpg" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.cybermave.ai/privacy.html" />
-<meta name="twitter:card" content="summary_large_image" />
-<link rel="manifest" href="/manifest.webmanifest" />
-<meta name="theme-color" content="#0b1220" />
+
 <style>
   :root{
     --ink:#eaf2ff; --muted:#9fb3d1;
@@ -45,6 +32,53 @@
   footer{margin:30px 0 60px; color:var(--muted); font-size:13px; text-align:center}
 </style>
 </head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Privacy Policy • Live Like Charlie</title>
+<meta name="description" content="Privacy policy for Live Like Charlie — how we collect, use, and protect your information." />
+<link rel="canonical" href="https://www.cybermave.ai/privacy.html" />
+<meta property="og:title" content="Live Like Charlie • Privacy Policy" />
+<meta property="og:description" content="How we collect, use, and protect your information across our site and challenge." />
+<meta property="og:image" content="https://www.cybermave.ai/og.jpg" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.cybermave.ai/privacy.html" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0b1220" />
+  
+<script>
+(function () {
+  const brand = document.querySelector('.brand');
+  if (!brand) return;
+
+  // Keep normal navigation for modifier/middle clicks
+  brand.addEventListener('click', async (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;
+    e.preventDefault();
+
+    const url  = location.origin;
+    const text = 'Do one small good action with #LiveLikeCharlie';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Live Like Charlie', text, url });
+      } catch (_) { /* user canceled */ }
+    } else {
+      const fb = 'https://www.facebook.com/sharer/sharer.php?u=' +
+                 encodeURIComponent(url) + '&quote=' + encodeURIComponent(text);
+      const x  = 'https://x.com/intent/tweet?url=' +
+                 encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
+      window.open(fb, '_blank', 'noopener,noreferrer');
+      setTimeout(() => window.open(x, '_blank', 'noopener,noreferrer'), 350);
+    }
+  });
+
+  brand.style.cursor = 'pointer';
+})();
+</script>
+
+  
 <body>
 <div id="page-bg" aria-hidden="true"></div>
 
