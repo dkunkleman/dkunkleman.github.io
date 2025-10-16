@@ -29,6 +29,7 @@
   <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
     <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
     <nav style="display:flex;gap:12px;align-items:center">
+      <a href="/index.html">Home</a>
       <a href="/actions.html">Actions</a>
       <a href="/about.html">About</a>
       <a href="/privacy.html">Privacy</a>
@@ -78,7 +79,41 @@
   .blue{background:#3b82f6;color:#fff;border:none}.white{background:#fff;color:#0a1227}.red{background:#dc2626;color:#fff;border:none}
   .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px;margin-top:12px}
   code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:6px}.muted{color:#cbd5e1}
-</style></head>
+</style>
+</head>
+
+<script>
+(function () {
+  const brand = document.querySelector('.brand');
+  if (!brand) return;
+
+  // Keep normal navigation for modifier/middle clicks
+  brand.addEventListener('click', async (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;
+    e.preventDefault();
+
+    const url  = location.origin;
+    const text = 'Do one small good action with #LiveLikeCharlie';
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Live Like Charlie', text, url });
+      } catch (_) { /* user canceled */ }
+    } else {
+      const fb = 'https://www.facebook.com/sharer/sharer.php?u=' +
+                 encodeURIComponent(url) + '&quote=' + encodeURIComponent(text);
+      const x  = 'https://x.com/intent/tweet?url=' +
+                 encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
+      window.open(fb, '_blank', 'noopener,noreferrer');
+      setTimeout(() => window.open(x, '_blank', 'noopener,noreferrer'), 350);
+    }
+  });
+
+  brand.style.cursor = 'pointer';
+})();
+</script>
+
+  
 <body>
 
 <!-- BACKGROUND (put right after <body> on every page) -->
