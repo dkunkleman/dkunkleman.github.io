@@ -2,6 +2,29 @@
 <html lang="en">
 <head>
 
+<!-- THEME (put in <head> on every page) -->
+<style>
+  :root{
+    --ink:#eaf2ff; --muted:#9fb3d1;
+    --brand:#e11d48; --accent:#2563eb;
+    --panel-bg: rgba(10,18,39,.58);
+    --panel-border: rgba(255,255,255,.16);
+    --glow: 0 10px 30px rgba(0,0,0,.45);
+  }
+  body.has-photo{color:var(--ink); background:#0b1220; margin:0}
+  #page-bg{position:fixed; inset:0; z-index:-2; background:#0b1220 center/cover no-repeat; transition:opacity .6s ease}
+  #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9));}
+  .panel,.card{background:var(--panel-bg)!important;border:1px solid var(--panel-border)!important;border-radius:16px;box-shadow:var(--glow);}
+  header{backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
+  .break{height:10px;border-radius:999px;margin:18px 0;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px);opacity:.9}
+  a{color:#b3d4ff;text-decoration:none}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
+  input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
+  button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
+</style>
+   
+
 <link rel="canonical" href="https://www.cybermave.ai/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Live Like Charlie","url":"https://www.cybermave.ai/"}</script>
    
@@ -736,6 +759,7 @@ document.getElementById('action')?.addEventListener('change',e=>{
   
 </body>
 </html>
+
 
 
 
