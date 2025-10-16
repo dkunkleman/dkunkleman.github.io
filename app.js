@@ -161,8 +161,26 @@ $("#completeBtn")?.addEventListener('click', async()=>{
   const ins = await sb.from("submissions").insert([{ action, platform: "Unknown", link, name, screenshot_url }]).select();
   if(ins.error){ console.error(ins.error); alert("Save failed: "+ins.error.message); return; }
 
+
+async function triggerShare(){
+  const url  = location.origin;
+  const text = 'I completed a Like Charlie action! Your turn — pick one and invite 3 friends. #LiveLikeCharlie';
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Live Like Charlie', text, url }); } catch (_) {}
+  } else {
+    const fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) +
+               '&quote=' + encodeURIComponent(text);
+    const x  = 'https://x.com/intent/tweet?url=' + encodeURIComponent(url) +
+               '&text=' + encodeURIComponent(text);
+    window.open(fb, '_blank', 'noopener,noreferrer');
+    setTimeout(()=>window.open(x, '_blank', 'noopener,noreferrer'), 350);
+  }
+}
+ 
   showToast("Saved! Updating lists…");
   confetti();
+await triggerShare();   // <-- opens the same share sheet as the brand
+
 
   const k="lc_days"; const today=new Date().toISOString().slice(0,10);
   const days=new Set(JSON.parse(localStorage.getItem(k)||"[]")); days.add(today);
