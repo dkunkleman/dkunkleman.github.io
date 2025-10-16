@@ -16,6 +16,38 @@
 
 </head>
 
+<style>
+  /* Make the actions hero fully transparent */
+  .actions-hero{
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0; /* optional: remove extra glass padding if any */
+  }
+  .actions-hero .actions-bar{ background: transparent; }
+
+  /* Keep text readable on photos */
+  .actions-hero h1,
+  .actions-hero p{
+    text-shadow: 0 3px 18px rgba(0,0,0,.75), 0 1px 2px rgba(0,0,0,.85);
+    color: #fff; /* or your --ink variable if you prefer */
+  }
+
+  /* Optional: style the ghost button to look good on transparent bg */
+  .actions-hero .ghost{
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px;
+    padding: 10px 14px;
+    backdrop-filter: blur(2px);
+  }
+  .actions-hero .ghost:hover{
+    border-color: rgba(255,255,255,.6);
+  }
+</style>
+
+
 <!-- THEME (put in <head> on every page) -->
 <style>
   :root{
@@ -113,16 +145,17 @@
     .x{float:right;cursor:pointer;font-weight:900}
   </style>
 
-  <div class="actions-hero" style="background:transparent;border:0;box-shadow:none;padding:0">
-    <div class="actions-bar">
-      <button class="ghost" id="proposeOpen">Propose a "Like Charlie" Action to add to our list</button>
-    </div>
-    <h1>Like Charlie Actions</h1>
-    <p>1. Choose an action and complete it. Be bold and build, Like Charlie 
-    <p>2. Share about it on social media and Invite 3 friends to "Live Like Charlie" 
-    <p>3. Paste your link here to complete the challenge 
-    <p>Make a daily habit of doing at least one small good thing. "Live Like Charlie"</p>
+<div class="actions-hero">
+  <div class="actions-bar">
+    <button class="ghost" id="proposeOpen">Propose a "Like Charlie" Action to add to our list</button>
   </div>
+  <h1>Like Charlie Actions</h1>
+  <p>1. Choose an action and complete it. Be bold and build, Like Charlie</p>
+  <p>2. Share about it on social media and Invite 3 friends to "Live Like Charlie"</p>
+  <p>3. Paste your link here to complete the challenge</p>
+  <p>Make a daily habit of doing at least one small good thing. "Live Like Charlie"</p>
+</div>
+
 
   <div class="actions-grid">
     <!-- Core set -->
@@ -251,6 +284,7 @@
   </script>
 
 </section>
+
 
 
 
