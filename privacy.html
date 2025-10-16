@@ -2,6 +2,50 @@
 <html lang="en" data-theme="patriotic">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <header>
+  <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
+    <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie</span>.org</div>
+    <nav style="display:flex;gap:12px;align-items:center">
+      <a href="/actions.html">Actions</a>
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/proofs.html">Proofs</a>
+      <a href="/admin.html">Admin</a>
+      <a href="/#impact" class="button" data-impact>Impact</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header nav a{padding:8px 12px;border-radius:10px;text-decoration:none;border:1px solid transparent}
+  header nav a:hover{background:rgba(255,255,255,.06)}
+  header nav a.active{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
+  header nav .button{background:var(--accent);color:#fff;border:none}
+</style>
+
+<script>
+(function(){
+  const impact = document.querySelector('a[data-impact]');
+  if (impact){
+    impact.addEventListener('click', (e)=>{
+      // if already on home, smooth-scroll; else go to /#impact
+      const onHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
+      if (onHome){
+        e.preventDefault();
+        document.getElementById('impact')?.scrollIntoView({behavior:'smooth'});
+      }
+    });
+  }
+  // Active link highlighting for the current page
+  const path = location.pathname.replace(/\/index\.html$/, '/');
+  document.querySelectorAll('header nav a[href]').forEach(a=>{
+    const href = a.getAttribute('href');
+    if (!href) return;
+    if (href === '/#impact') return; // anchor button handled separately
+    if (path.startsWith(href)) a.classList.add('active');
+  });
+})();
+</script>
 <title>Privacy Policy • Like Charlie</title>
 <meta name="description" content="Privacy policy for Like Charlie.">
 <style>
