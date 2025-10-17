@@ -42,6 +42,68 @@ function isLikelyURL(u){
   try{ const x=new URL(u); return /^(https?):/.test(x.protocol) }catch{ return false }
 }
 
+function openComposeModal(actionName){
+  const M  = document.getElementById('composeModal');
+  const BG = document.getElementById('composeBg');
+  const TX = document.getElementById('composeText');
+  const AC = document.getElementById('composeAction');
+  if(!M || !BG || !TX) return;
+
+  AC && (AC.textContent = actionName || "");
+
+  const site = location.origin;
+  const base = `I just did "${actionName}" with #LiveLikeCharlie — your turn. ${site}`;
+  TX.value = base;
+  // Try to copy for convenience
+  navigator.clipboard?.writeText(base).catch(()=>{});
+
+  M.classList.add('open');
+  TX.focus();
+}
+
+function closeComposeModal(){
+  document.getElementById('composeModal')?.classList.remove('open');
+}
+
+function setComposeBackground(url){
+  const BG = document.getElementById('composeBg');
+  if(BG) BG.style.backgroundImage = url ? `url("${url}")` : '';
+}
+
+function renderComposeBackgroundChoices(){
+  const el = document.getElementById('bgPicker');
+  if(!el) return;
+
+  // Put any filenames you have in /img here (add/remove freely)
+  const images = [
+    '/img/flag.jpg',
+    '/img/constitution.jpg',
+    '/img/flag2.jpg',
+    '/img/eagle.jpg',
+    '/img/bibles.jpg'
+  ];
+
+  el.innerHTML = '';
+  images.forEach((src, i) => {
+    const b = document.createElement('button');
+    b.style.backgroundImage = `url("${src}")`;
+    b.title = 'Background ' + (i+1);
+    b.onclick = () => {
+      [...el.children].forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      setComposeBackground(src);
+    };
+    // Hide if missing
+    const img = new Image();
+    img.onerror = ()=> b.style.display='none';
+    img.src = src;
+
+    el.appendChild(b);
+    if(i === 0) b.click(); // pick first by default
+  });
+}
+
+
 /* ===== Sticky header + Social share strip ===== */
 (function mountStickyAndShareBar(){
   // Make top header/nav sticky
@@ -114,6 +176,32 @@ function isLikelyURL(u){
     }
   });
 })();
+
+document.getElementById('composeClose')?.addEventListener('click', closeComposeModal);
+document.querySelector('#composeModal .lc-backdrop')?.addEventListener('click', closeComposeModal);
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeComposeModal(); });
+
+document.getElementById('copyCompose')?.addEventListener('click', async ()=>{
+  const v = document.getElementById('composeText')?.value || '';
+  await navigator.clipboard.writeText(v);
+  showToast('Copied!');
+});
+
+document.getElementById('goX')?.addEventListener('click', ()=>{
+  const v = document.getElementById('composeText')?.value || '';
+  window.open('https://x.com/intent/tweet?text='+encodeURIComponent(v), '_blank','noopener,noreferrer');
+});
+document.getElementById('goFB')?.addEventListener('click', ()=>{
+  const v = document.getElementById('composeText')?.value || '';
+  window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.origin)+'&quote='+encodeURIComponent(v), '_blank','noopener,noreferrer');
+});
+document.getElementById('goIG')?.addEventListener('click', ()=>{
+  window.open('https://www.instagram.com/', '_blank','noopener,noreferrer');
+});
+document.getElementById('goTT')?.addEventListener('click', ()=>{
+  window.open('https://www.tiktok.com/creator-center/upload?lang=en', '_blank','noopener,noreferrer');
+});
+
 
 /* ===== Actions: fetch from /actions.html, compute counts, sort, render top-3 ===== */
 async function fetchActionsFromActionsHTML(){
