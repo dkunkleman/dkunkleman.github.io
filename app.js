@@ -1,54 +1,334 @@
 <script type="module">
+/* ===== Core setup ===== */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+/* Your Supabase (same as current) */
 const SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpYWpsYnhlemxkZGh4dGVidGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTcwNTYsImV4cCI6MjA3NjAzMzA1Nn0.szBJhvyDcV6oDn-NgVUUxF_MZdHC60xXBe0AgDDQbbU";
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const $ = s => document.querySelector(s);
-const td = v => `<td>${v??""}</td>`;
+
+/* Mini utils */
+const $  = sel => document.querySelector(sel);
+const td = v => `<td>${v ?? ""}</td>`;
 const esc = s => (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function showToast(msg){const T=$("#toast");if(!T)return;T.textContent=msg;T.style.display="block";setTimeout(()=>T.style.display="none",1400)}
-function confetti(){const n=80,box=document.body,H=window.innerHeight,W=window.innerWidth;for(let i=0;i<n;i++){const d=document.createElement("div");d.style.cssText=`position:fixed;left:${Math.random()*W}px;top:-10px;width:6px;height:10px;background:hsl(${Math.random()*360} 90% 60%);opacity:.9;transform:rotate(${Math.random()*360}deg);border-radius:2px;z-index:9999`;box.appendChild(d);const t=1500+Math.random()*1200,x=(Math.random()-.5)*120;d.animate([{transform:`translate(0,0) rotate(0deg)`},{transform:`translate(${x}px, ${H+40}px) rotate(${360*Math.random()}deg)`}],{duration:t,easing:"cubic-bezier(.2,.7,.2,1)"}).finished.then(()=>d.remove())}}
-function badge(count){if(count>=7)return`🏅 <span class="badge">7-Day Streak</span>`;if(count>=3)return`🎖️ <span class="badge">3-Day Streak</span>`;if(count>=1)return`✅ <span class="badge">First Action</span>`;return""}
-function isLikelyURL(u){try{const x=new URL(u);return /^(https?):/.test(x.protocol)}catch{return false}}
-async function fetchActionsFromActionsHTML(){const res=await fetch("/data/actions.json",{credentials:"omit"});const html=await res.text();const doc=new DOMParser().parseFromString(html,"text/html");const links=[...doc.querySelectorAll('.card a[data-action]')];const seen=new Set();const names=[];for(const a of links){const name=(a.getAttribute("data-action")||a.textContent||"").trim();if(name&&!seen.has(name.toLowerCase())){seen.add(name.toLowerCase());names.push(name)}}return names}
-function renderTop3Covers(top3Names){const cards=[...document.querySelectorAll(".img-cards .img-card .cap")];top3Names.slice(0,3).forEach((name,idx)=>{if(cards[idx]){cards[idx].textContent=name;const card=cards[idx].closest(".img-card");card.style.cursor="pointer";card.onclick=()=>{const sel=$("#action");if(sel){[...sel.options].forEach(o=>{if(o.value===name)sel.value=name});document.querySelector("#submit")?.scrollIntoView({behavior:"smooth"})}}}})}
-async function bubblePopularActions(){const actions=await fetchActionsFromActionsHTML();const {data,error}=await sb.from("submissions").select("action");const counts={};if(!error&&data){data.forEach(r=>counts[r.action]=(counts[r.action]||0)+1)}const pinned=["Live your faith","Know your rights","Build and serve"].map(s=>s.trim().toLowerCase());const keyed=actions.map((a,i)=>({name:a,i,c:counts[a]||0,pinned:pinned.includes(a.trim().toLowerCase())}));keyed.sort((A,B)=>{if(A.pinned!==B.pinned)return A.pinned?-1:1;if(B.c!==A.c)return B.c-A.c;return A.i-B.i});const sel=$("#action");if(sel){const first=sel.options[0];sel.innerHTML="";sel.appendChild(first);keyed.forEach(k=>{const o=document.createElement("option");o.value=k.name;o.text=k.name;sel.appendChild(o)})}renderTop3Covers(keyed.slice(0,3).map(k=>k.name))}
-$("#composeX")&&($("#composeX").onclick=()=>window.open("https://x.com/intent/tweet?text="+encodeURIComponent($("#suggested")?$("#suggested").value:""),"_blank","noopener,noreferrer"));
-$("#composeFB")&&($("#composeFB").onclick=()=>window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin),"_blank","noopener,noreferrer"));
-$("#copyMsg")&&($("#copyMsg").onclick=async()=>{const box=$("#suggested");if(!box)return;await navigator.clipboard.writeText(box.value);showToast("Copied!")});
-const platformOpeners={"X":()=>$("#composeX")?.click(),"Facebook":()=>$("#composeFB")?.click(),"Instagram":()=>window.open("https://www.instagram.com/","_blank","noopener,noreferrer"),"TikTok":()=>window.open("https://www.tiktok.com/creator-center/upload?lang=en","_blank","noopener,noreferrer"),"Other":()=>window.open(location.origin,"_blank","noopener,noreferrer")};
-$("#openPlatform")&&($("#openPlatform").onclick=()=>{const p=$("#platform")?.value;if(!p){alert("Select a platform");return}(platformOpeners[p]||platformOpeners["Other"])()});
-$("#shareNative")&&($("#shareNative").onclick=async()=>{if(navigator.share){await navigator.share({title:"Live Like Charlie",text:"I’m doing one small good action. Your turn—pick one, post it, invite 3 friends.",url:location.origin})}else{window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin),"_blank","noopener,noreferrer")}})
-async function completeChallenge(){const action=$("#action")?.value.trim();const platform=$("#platform")?.value.trim();const link=$("#link")?.value.trim();const name=($("#name")?.value||"").trim()||null;if(!action||!platform||!link){alert("Please pick action + platform and paste your link.");return}if(!isLikelyURL(link)){alert("Please paste a valid public link (starts with http/https).");return}let screenshot_url=null;const file=$("#shot")?.files?.[0];if(file){const path=`${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`;const up=await sb.storage.from("proofs").upload(path,file,{upsert:false});if(up.error){console.error(up.error);alert("Upload failed: "+up.error.message);return}const {data}=sb.storage.from("proofs").getPublicUrl(path);screenshot_url=data.publicUrl}const ins=await sb.from("submissions").insert([{action,platform,link,name,screenshot_url}]).select();if(ins.error){console.error(ins.error);alert("Save failed: "+ins.error.message);return}showToast("Saved! Updating lists…");confetti();const k="lc_days";const today=new Date().toISOString().slice(0,10);const days=new Set(JSON.parse(localStorage.getItem(k)||"[]"));days.add(today);localStorage.setItem(k,JSON.stringify([...days]));$("#badge")&&($("#badge").innerHTML=badge(days.size));$("#link").value="";if($("#shot"))$("#shot").value="";await Promise.all([bubblePopularActions(),loadRecent(),loadLeaders()]);if(navigator.share){await navigator.share({title:"Live Like Charlie",text:"I completed a Like Charlie action! Your turn—pick one, post it, and invite 3 friends.",url:location.origin})}}
-$("#completeBtn")&&($("#completeBtn").onclick=completeChallenge);
-$("#inviteBtn")&&($("#inviteBtn").onclick=async()=>{if(navigator.share){await navigator.share({title:"Live Like Charlie",text:"Join me: do one small good action, post it, and invite 3 friends.",url:location.origin})}else{alert("Copy the page link and text your friends!")}})
-async function loadRecent(){const {data,error}=await sb.from("submissions").select("created_at, action, platform, link, name, screenshot_url").order("created_at",{ascending:false}).limit(25);if(error){console.error(error);return}const rows=(data||[]).map(r=>{const when=new Date(r.created_at).toLocaleString();const url=`<a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">Open</a>`;const shot=r.screenshot_url?`<a href="${esc(r.screenshot_url)}" target="_blank" rel="noopener noreferrer">Screenshot</a>`:"";return `<tr>${td(when)}${td(esc(r.action))}${td(esc(r.platform))}${td(url)}${td(esc(r.name||""))}${td(shot)}</tr>`});const tbl=$("#recent");if(tbl)tbl.innerHTML=`<tr><th>When</th><th>Action</th><th>Platform</th><th>Link</th><th>Name</th><th>Proof</th></tr>`+rows.join("")}
-async function loadLeaders(){const {data,error}=await sb.from("submissions").select("action");if(error){console.error(error);return}const counts={};(data||[]).forEach(r=>counts[r.action]=(counts[r.action]||0)+1);const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);const tbl=$("#leaders");if(tbl)tbl.innerHTML=`<tr><th>#</th><th>Action</th><th>Count</th></tr>`+sorted.map((r,i)=>`<tr>${td(i+1)}${td(esc(r[0]))}${td(r[1])}</tr>`).join("")}
-const params=new URLSearchParams(location.search);const shared=params.get("shared_url")||params.get("url")||params.get("text");if(shared&&$("#link")){$("#link").value=shared;document.getElementById("submit")?.scrollIntoView({behavior:"smooth"})}
-await Promise.all([bubblePopularActions(),loadRecent(),loadLeaders()]);
-// If we arrived from /actions.html with ?action=...&step=2, preselect and open Step 2.
-{
-  const params = new URLSearchParams(location.search);
-  const chosen = params.get("action");
-  const step = params.get("step");
-  const sel = $("#action");
-  if (chosen && sel) {
-    // Ensure the option exists, then select it
-    let found = false;
-    [...sel.options].forEach(o => { if (o.value === chosen) found = true; });
-    if (!found) {
-      const o = document.createElement("option");
-      o.value = chosen; o.text = chosen;
-      sel.appendChild(o);
-    }
-    sel.value = chosen;
-  }
-  // Smooth-scroll to the Step 2 area if requested
-  if (step === "2") {
-    document.getElementById("submit")?.scrollIntoView({ behavior: "smooth" });
+const scrollTarget = () => (
+  document.getElementById("submit") ||
+  document.querySelector("#step2")  ||
+  document.querySelector("#link")   ||
+  document.body
+);
+function showToast(msg){
+  const T = $("#toast"); if(!T) return;
+  T.textContent = msg; T.style.display = "block";
+  setTimeout(()=>T.style.display="none",1400);
+}
+function confetti(){
+  const n=80, H=innerHeight, W=innerWidth;
+  for(let i=0;i<n;i++){
+    const d=document.createElement("div");
+    d.style.cssText=`position:fixed;left:${Math.random()*W}px;top:-10px;width:6px;height:10px;background:hsl(${Math.random()*360} 90% 60%);opacity:.9;border-radius:2px;z-index:9999`;
+    document.body.appendChild(d);
+    const t=1500+Math.random()*1200, x=(Math.random()-.5)*120;
+    d.animate([{transform:`translate(0,0)`},{transform:`translate(${x}px, ${H+40}px)`}],{duration:t,easing:"cubic-bezier(.2,.7,.2,1)"}).finished.then(()=>d.remove());
   }
 }
+function badge(count){
+  if(count>=7) return `🏅 <span class="badge">7-Day Streak</span>`;
+  if(count>=3) return `🎖️ <span class="badge">3-Day Streak</span>`;
+  if(count>=1) return `✅ <span class="badge">First Action</span>`;
+  return "";
+}
+function isLikelyURL(u){
+  try{ const x=new URL(u); return /^(https?):/.test(x.protocol) }catch{ return false }
+}
 
-if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}
-const brand=document.querySelector(".brand");if(brand){brand.style.cursor="pointer";brand.addEventListener("click",async(e)=>{e.preventDefault();const shareUrl=location.origin;const shareText="Join me: Do one small good action with #LiveLikeCharlie";if(navigator.share){await navigator.share({title:"Live Like Charlie",text:shareText,url:shareUrl})}else{const fb=`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;const x=`https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;window.open(fb,"_blank","noopener,noreferrer");setTimeout(()=>window.open(x,"_blank","noopener,noreferrer"),300)}})}
+/* ===== Sticky header + Social share strip ===== */
+(function mountStickyAndShareBar(){
+  // Make top header/nav sticky
+  const style = document.createElement("style");
+  style.textContent = `
+    header, .nav { position: sticky; top: 0; z-index: 1000; }
+    header { backdrop-filter: blur(6px); background: rgba(11,18,32,.65); }
+    #shareStrip {
+      position: sticky; top: 52px; z-index: 999;
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      padding:8px 12px; background: rgba(16,24,48,.55); border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    #shareStrip .icons { display:flex; gap:8px; align-items:center }
+    #shareStrip button, #shareStrip a {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+      color:#fff; text-decoration:none; cursor:pointer; background:rgba(255,255,255,.05);
+    }
+    #shareStrip input { flex:1 1 380px; min-width:240px; padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.35); color:#fff }
+  `;
+  document.head.appendChild(style);
+
+  // Build social strip
+  const strip = document.createElement("div");
+  strip.id = "shareStrip";
+  const msgDefault = "I’m doing one small good action with #LiveLikeCharlie — pick one, post it, and invite 3 friends: ";
+  strip.innerHTML = `
+    <div class="icons">
+      <strong>Share:</strong>
+      <a id="sX"       title="Share to X"        rel="noopener noreferrer">X</a>
+      <a id="sFB"      title="Share to Facebook" rel="noopener noreferrer">Facebook</a>
+      <a id="sIG"      title="Open Instagram"    rel="noopener noreferrer">Instagram</a>
+      <a id="sTT"      title="Open TikTok"       rel="noopener noreferrer">TikTok</a>
+      <button id="sCopy" title="Copy suggested message">Copy</button>
+      <button id="sShare" title="Native share">System Share</button>
+    </div>
+    <input id="sMsg" value="${esc(msgDefault)}${esc(location.origin)}" />
+  `;
+  const headerEl = document.querySelector("header") || document.body.firstElementChild;
+  headerEl?.insertAdjacentElement("afterend", strip);
+
+  // Wire handlers
+  const msg = () => ($("#sMsg")?.value || msgDefault) + " " + location.origin;
+
+  $("#sX")?.addEventListener("click",  e=>{
+    e.preventDefault();
+    const u = "https://x.com/intent/tweet?text="+encodeURIComponent(msg());
+    window.open(u,"_blank","noopener,noreferrer");
+  });
+  $("#sFB")?.addEventListener("click", e=>{
+    e.preventDefault();
+    const u = "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin)+"&quote="+encodeURIComponent(msg());
+    window.open(u,"_blank","noopener,noreferrer");
+  });
+  $("#sIG")?.addEventListener("click", e=>{
+    e.preventDefault(); window.open("https://www.instagram.com/","_blank","noopener,noreferrer");
+  });
+  $("#sTT")?.addEventListener("click", e=>{
+    e.preventDefault(); window.open("https://www.tiktok.com/creator-center/upload?lang=en","_blank","noopener,noreferrer");
+  });
+  $("#sCopy")?.addEventListener("click", async ()=>{
+    await navigator.clipboard.writeText($("#sMsg").value); showToast("Copied!");
+  });
+  $("#sShare")?.addEventListener("click", async ()=>{
+    if(navigator.share){
+      await navigator.share({ title:"Live Like Charlie", text: $("#sMsg").value, url: location.origin });
+    }else{
+      const u = "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin);
+      window.open(u,"_blank","noopener,noreferrer");
+    }
+  });
+})();
+
+/* ===== Actions: fetch from /actions.html, compute counts, sort, render top-3 ===== */
+async function fetchActionsFromActionsHTML(){
+  // Scrape visible actions (data-action) from /actions.html
+  const res  = await fetch("/actions.html", { credentials:"omit", cache:"no-store" });
+  const html = await res.text();
+  const doc  = new DOMParser().parseFromString(html,"text/html");
+  const links = [...doc.querySelectorAll('a[data-action]')];
+  const seen  = new Set();
+  const names = [];
+  for(const a of links){
+    const name = (a.getAttribute("data-action") || a.textContent || "").trim();
+    if(name && !seen.has(name.toLowerCase())){ seen.add(name.toLowerCase()); names.push(name); }
+  }
+  return names;
+}
+
+function renderTop3Covers(top3Names){
+  // Expect elements with [data-top3-card] and inner [data-top3-name]
+  const cards = [...document.querySelectorAll("[data-top3-card]")];
+  cards.forEach((card,i)=>{
+    const name = top3Names[i];
+    if(!name){ card.style.display="none"; return; }
+    card.style.display="";
+    const cap = card.querySelector("[data-top3-name]");
+    if(cap) cap.textContent = name;
+    card.style.cursor = "pointer";
+    card.onclick = () => {
+      const sel = $("#action");
+      if(sel){
+        // ensure option exists
+        let found=false; for(const o of sel.options){ if((o.value||o.text)===name){found=true;break} }
+        if(!found){ const o=document.createElement("option"); o.value=name; o.text=name; sel.appendChild(o); }
+        sel.value = name;
+        sel.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+      scrollTarget()?.scrollIntoView({behavior:"smooth"});
+    };
+  });
+}
+
+async function bubblePopularActions(){
+  const actions = await fetchActionsFromActionsHTML();
+
+  // Get counts
+  let counts = {};
+  try{
+    const { data, error } = await sb.from("submissions").select("action");
+    if(!error && Array.isArray(data)){
+      for(const r of data){ if(r && r.action){ counts[r.action] = (counts[r.action]||0)+1; } }
+    }
+  }catch(_){ /* ignore, render alpha if offline */ }
+
+  // Sort by count desc, then name asc
+  const keyed = actions.map(name=>({ name, n: counts[name]||0 }))
+                       .sort((a,b)=> (b.n - a.n) || a.name.localeCompare(b.name));
+
+  // Fill Step 1 select
+  const sel = $("#action");
+  if(sel){
+    const first = sel.options[0] ? sel.options[0].outerHTML : '<option value="">Select an action…(step 2 Posting the action will pop up)</option>';
+    sel.innerHTML = first + keyed.map(k=>`<option value="${esc(k.name)}">${esc(k.name)}</option>`).join("");
+    sel.addEventListener("change", () => {
+      if(!sel.value) return;
+      // Your description logic (if any) will still listen to 'change'
+      scrollTarget()?.scrollIntoView({ behavior:"smooth" });
+    }, { once: true });
+  }
+
+  // Paint Top-3
+  renderTop3Covers(keyed.slice(0,3).map(k=>k.name));
+}
+
+/* ===== Compose / share helpers in Step 2 ===== */
+$("#composeX")   && ($("#composeX").onclick  = () => window.open("https://x.com/intent/tweet?text="+encodeURIComponent($("#suggested")?$("#suggested").value:""), "_blank","noopener,noreferrer"));
+$("#composeFB")  && ($("#composeFB").onclick = () => window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin), "_blank","noopener,noreferrer"));
+$("#copyMsg")    && ($("#copyMsg").onclick   = async()=>{ const box=$("#suggested"); if(!box) return; await navigator.clipboard.writeText(box.value); showToast("Copied!"); });
+
+const platformOpeners = {
+  "X":         ()=>$("#composeX")?.click(),
+  "Facebook":  ()=>$("#composeFB")?.click(),
+  "Instagram": ()=>window.open("https://www.instagram.com/","_blank","noopener,noreferrer"),
+  "TikTok":    ()=>window.open("https://www.tiktok.com/creator-center/upload?lang=en","_blank","noopener,noreferrer"),
+  "Other":     ()=>window.open(location.origin,"_blank","noopener,noreferrer"),
+};
+$("#openPlatform") && ($("#openPlatform").onclick = ()=>{
+  const p = $("#platform")?.value;
+  if(!p){ alert("Select a platform"); return; }
+  (platformOpeners[p] || platformOpeners["Other"])();
+});
+$("#shareNative") && ($("#shareNative").onclick = async()=>{
+  if(navigator.share){
+    await navigator.share({ title:"Live Like Charlie", text:"I’m doing one small good action. Your turn—pick one, post it, invite 3 friends.", url: location.origin });
+  }else{
+    window.open("https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(location.origin),"_blank","noopener,noreferrer");
+  }
+});
+
+/* ===== Save (Step 3) ===== */
+async function completeChallenge(){
+  const action   = $("#action")?.value.trim();
+  const platform = $("#platform")?.value.trim();
+  const link     = $("#link")?.value.trim();
+  const name     = ($("#name")?.value || "").trim() || null;
+
+  if(!action || !platform || !link){ alert("Please pick action + platform and paste your link."); return; }
+  if(!isLikelyURL(link))           { alert("Please paste a valid public link (starts with http/https)."); return; }
+
+  // optional screenshot upload
+  let screenshot_url = null;
+  const file = $("#shot")?.files?.[0];
+  if(file){
+    const path = `${Date.now()}_${Math.random().toString(36).slice(2)}_${file.name}`;
+    const up = await sb.storage.from("proofs").upload(path, file, { upsert:false });
+    if(up.error){ console.error(up.error); alert("Upload failed: " + up.error.message); return; }
+    const { data } = sb.storage.from("proofs").getPublicUrl(path);
+    screenshot_url = data.publicUrl;
+  }
+
+  const ins = await sb.from("submissions").insert([{ action, platform, link, name, screenshot_url }]).select();
+  if(ins.error){ console.error(ins.error); alert("Save failed: " + ins.error.message); return; }
+
+  showToast("Saved! Updating lists…"); confetti();
+
+  // local streak badge
+  const k="lc_days", today=new Date().toISOString().slice(0,10);
+  const days=new Set(JSON.parse(localStorage.getItem(k)||"[]")); days.add(today);
+  localStorage.setItem(k, JSON.stringify([...days]));
+  $("#badge") && ($("#badge").innerHTML = badge(days.size));
+
+  // reset inputs
+  $("#link") && ($("#link").value = "");
+  if($("#shot")) $("#shot").value = "";
+
+  await Promise.all([ bubblePopularActions(), loadRecent(), loadLeaders() ]);
+
+  if(navigator.share){
+    await navigator.share({ title:"Live Like Charlie", text:"I completed a Like Charlie action! Your turn—pick one, post it, and invite 3 friends.", url: location.origin });
+  }
+}
+$("#completeBtn") && ($("#completeBtn").onclick = completeChallenge);
+$("#inviteBtn")   && ($("#inviteBtn").onclick   = async()=>{
+  if(navigator.share){
+    await navigator.share({ title:"Live Like Charlie", text:"Join me: do one small good action, post it, and invite 3 friends.", url: location.origin });
+  }else{
+    alert("Copy the page link and text your friends!");
+  }
+});
+
+/* ===== Recent + Leaders ===== */
+async function loadRecent(){
+  const { data, error } = await sb.from("submissions")
+    .select("created_at, action, platform, link, name, screenshot_url")
+    .order("created_at",{ascending:false}).limit(25);
+  if(error){ console.error(error); return; }
+
+  const rows = (data||[]).map(r=>{
+    const when = new Date(r.created_at).toLocaleString();
+    const url  = `<a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">Open</a>`;
+    const shot = r.screenshot_url ? `<a href="${esc(r.screenshot_url)}" target="_blank" rel="noopener noreferrer">Screenshot</a>` : "";
+    return `<tr>${td(when)}${td(esc(r.action))}${td(esc(r.platform))}${td(url)}${td(esc(r.name||""))}${td(shot)}</tr>`;
+  });
+  const tbl=$("#recent"); if(tbl) tbl.innerHTML = `<tr><th>When</th><th>Action</th><th>Platform</th><th>Link</th><th>Name</th><th>Proof</th></tr>` + rows.join("");
+}
+async function loadLeaders(){
+  const { data, error } = await sb.from("submissions").select("action");
+  if(error){ console.error(error); return; }
+  const counts = {}; (data||[]).forEach(r=> counts[r.action] = (counts[r.action]||0)+1);
+  const sorted = Object.entries(counts).sort((a,b)=> b[1]-a[1]);
+  const tbl = $("#leaders");
+  if(tbl) tbl.innerHTML = `<tr><th>#</th><th>Action</th><th>Count</th></tr>` + sorted.map((r,i)=>`<tr>${td(i+1)}${td(esc(r[0]))}${td(r[1])}</tr>`).join("");
+}
+
+/* ===== Deep links & boot ===== */
+const params = new URLSearchParams(location.search);
+const shared = params.get("shared_url") || params.get("url") || params.get("text");
+if(shared && $("#link")){ $("#link").value = shared; scrollTarget()?.scrollIntoView({behavior:"smooth"}); }
+
+await Promise.all([ bubblePopularActions(), loadRecent(), loadLeaders() ]);
+
+/* Accept ?action=...&step=2 from /actions.html red buttons */
+{
+  const chosen = params.get("action");
+  const step   = params.get("step");
+  const sel    = $("#action");
+  if(chosen && sel){
+    let found=false; for(const o of sel.options){ if((o.value||o.text)===chosen){found=true;break} }
+    if(!found){ const o=document.createElement("option"); o.value=chosen; o.text=chosen; sel.appendChild(o); }
+    sel.value = chosen;
+    sel.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+  if(step==="2"){ scrollTarget()?.scrollIntoView({behavior:"smooth"}); }
+}
+
+/* PWA worker (unchanged) */
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("/sw.js"); }
+
+/* Clickable brand share helper (unchanged) */
+{
+  const brand = document.querySelector(".brand");
+  if(brand){
+    brand.style.cursor = "pointer";
+    brand.addEventListener("click", async (e)=>{
+      e.preventDefault();
+      const shareUrl = location.origin;
+      const shareText = "Join me: Do one small good action with #LiveLikeCharlie";
+      if(navigator.share){
+        await navigator.share({ title:"Live Like Charlie", text:shareText, url:shareUrl });
+      }else{
+        const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        const x  = `https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+        window.open(fb,"_blank","noopener,noreferrer");
+        setTimeout(()=>window.open(x,"_blank","noopener,noreferrer"), 300);
+      }
+    });
+  }
+}
 </script>
