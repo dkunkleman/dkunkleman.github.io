@@ -3,6 +3,41 @@
 <head>
 
 <style>
+  /* Photo background for the "Propose a Like Charlie Action" popup */
+#proposeModal .box{
+  position: relative;
+  overflow: hidden;              /* keep bg inside rounded corners */
+  background: transparent;       /* let our image show through */
+}
+
+/* Full-bleed image from your /img folder */
+#proposeModal .box::before{
+  content: "";
+  position: absolute; inset: 0;
+  background: url("/img/flag.jpg") center/cover no-repeat; /* <-- change to your file */
+  filter: brightness(.75);       /* darken slightly for readability */
+  transform: scale(1.02);        /* tiny zoom to avoid edge seams */
+  z-index: 0;
+}
+
+/* Ensure the content sits above the bg */
+#proposeModal .box > *{
+  position: relative; z-index: 1;
+}
+
+/* (Optional) add subtle glass behind inputs for clarity */
+#proposeModal input,
+#proposeModal textarea,
+#proposeModal button{
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.22);
+}
+  /* Default background for Step-2 compose popup */
+#composeBg { background-image: url("/img/flag.jpg"); }  /* change to your file */
+
+<style>
+  
+<style>
   #step3 .stepcard { background: transparent !important; border: 1px solid rgba(255,255,255,.35) !important; box-shadow: none !important; }
   #step3 .stepcard .help { background: transparent !important; }
   #step3 { background-blend-mode: normal; }
