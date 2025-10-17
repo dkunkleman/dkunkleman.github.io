@@ -407,7 +407,31 @@
   })();
 </script>
 
+<script>
+/* Make all red action buttons deep-link to index.html and open Step 2 popup */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[data-action]').forEach(a => {
+    const name = a.getAttribute('data-action') || a.textContent.trim();
+    const url  = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+    a.setAttribute('href', url);
+  });
+});
 
+/* Click handler too (works even if an <a> had no href previously) */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  // if it's an <a> with href, let the browser follow it; otherwise, do it manually
+  if (!btn.getAttribute('href')) {
+    e.preventDefault();
+    const name = btn.getAttribute('data-action') || btn.textContent.trim();
+    location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+  }
+}, { passive: true });
+</script>
+
+  
 </body>
+
 
 </html>
