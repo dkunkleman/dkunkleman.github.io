@@ -1,46 +1,64 @@
 {
-  "items": [
-    { "title": "Share a photo/video or a favorite Charlie quote", "desc": "Post a photo or video, OR include a Charlie quote that inspires you. Tag 3 friends and invite them to act within 48 hours.", "category": "Media & Sharing" },
-    { "title": "Pete & Bobby Challenge (Health)", "desc": "Choose one healthy action today—walk a mile, make a healthy meal with family, schedule a checkup—and share why health matters to your mission.", "category": "Personal Growth" },
-    { "title": "Share a verse with a friend", "desc": "Pick a verse, include it in your post, and tell why it matters right now.", "category": "Faith & Family" },
-    { "title": "Serve", "desc": "Help a neighbor, teacher, veteran, or first responder. Share the story and how others can repeat it this week.", "category": "Service & Community" },
-    { "title": "Forgive", "desc": "Share a short forgiveness story (no private details needed) and encourage reconciliation.", "category": "Faith & Family" },
-    { "title": "Family Life", "desc": "Do something intentional with your family (meal, game night, bay walk). Post the moment and why family is your priority.", "category": "Faith & Family" },
-    { "title": "Stand & Speak (Podium)", "desc": "Attend a civic meeting or youth group and speak respectfully for truth. Share what you said and learned.", "category": "Civic" },
-    { "title": "Invite to Church", "desc": "Personally invite someone and post a simple invite graphic or story.", "category": "Faith & Family" },
-    { "title": "Share Christ (Evangelism)", "desc": "Share a testimony or talk about what following Jesus means to you.", "category": "Faith & Family" },
-    { "title": "Bridge Builder (Note/Call/Visit)", "desc": "Write a thank-you note, make a phone call, or visit someone who needs encouragement.", "category": "Service & Community" },
-    { "title": "Public Testimony (Online Post)", "desc": "State clearly what you believe and why—with humility and courage.", "category": "Media & Sharing" },
-    { "title": "Film Night Host (Christian Film Night)", "desc": "Host a watch party and pray/discuss afterward. Post the group pic + takeaways.", "category": "Events & Hosting" },
-    { "title": "Favorite Charlie Video (Share + why)", "desc": "Share a clip, add your takeaway, and tag 3 friends to share theirs.", "category": "Media & Sharing" },
-    { "title": "Hands-Free Driver (No phone while driving)", "desc": "Pledge to put the phone away while driving today. Share the reminder to protect families on the road.", "category": "Personal Growth" },
-    { "title": "Family Table Focus (Streak)", "desc": "Eat together without screens for 3+ nights. Post what changed.", "category": "Faith & Family" },
-    { "title": "Quiet Time Focus (Streak)", "desc": "Set a daily window for Scripture/prayer for 7 days. Share one insight.", "category": "Faith & Family" },
-    { "title": "Honor Service (Thank a First Responder)", "desc": "Deliver a thank-you and a small gift. Post the story (with permission).", "category": "Service & Community" },
-    { "title": "Creator Proceeds Donor", "desc": "Donate proceeds from your video/stream/book for the day. Post the receipt (blur private info).", "category": "Giving & Support" },
-    { "title": "YouTube Proceeds Donor", "desc": "Pledge one stream’s ads/superchat to charity. Share the proof link or screenshot.", "category": "Giving & Support" },
-    { "title": "Phone Off at Church", "desc": "Go distraction-free during worship. Post a simple reminder graphic.", "category": "Faith & Family" },
-    { "title": "Inspire", "desc": "Share an original encouragement for others choosing, like Charlie.", "category": "Media & Sharing" },
-    { "title": "BakeLikeCharlie (Bake & Sell)", "desc": "Host a bake sale with family or youth. Donate proceeds and post the story.", "category": "Events & Hosting" },
-    { "title": "Generations Badge (3+ generations together)", "desc": "Grandparent + parent + child complete an action together and share a photo/story.", "category": "Faith & Family" },
-    { "title": "Gold Standard — Doing It All", "desc": "Do at least one action in every category this month. Post your highlight reel.", "category": "Personal Growth" },
-    { "title": "Pray for Your Leaders (Name them)", "desc": "Post a prayer for leaders by name—national, state, local, church.", "category": "Civic" },
-    { "title": "Register to Vote (or Verify)", "desc": "Check your registration or register; share your confirmation link and help a friend do the same.", "category": "Civic" },
-    { "title": "Local School Support (Teacher/Classroom help)", "desc": "Ask what’s needed, bring supplies, or volunteer time. Share the win.", "category": "Service & Community" },
-    { "title": "Veteran Visit (Honor & Listen)", "desc": "Visit a veteran or VA home. Listen to their story; thank and pray for them.", "category": "Service & Community" },
-    { "title": "Small Business Shoutout (Buy Local)", "desc": "Buy from a local shop and tell others why you chose them.", "category": "Service & Community" },
-    { "title": "Community Clean-Up (Before/After pics)", "desc": "Pick a park/street, gather trash, and post before/after photos.", "category": "Service & Community" },
-    { "title": "Meal Train Start (Bless a Family)", "desc": "Start or join a meal train for a family in need. Share the link.", "category": "Service & Community" },
-    { "title": "Coach or Mentor (Youth)", "desc": "Volunteer to coach or mentor at church/school. Invite others.", "category": "Service & Community" },
-    { "title": "First Bible Give-Away", "desc": "Give someone their first Bible. Include a note in the front; share the story (with permission).", "category": "Faith & Family" },
-    { "title": "Scripture Memory (7 verses)", "desc": "Memorize 7 verses this week. Share the list and your progress.", "category": "Faith & Family" },
-    { "title": "Pro-Life Serve Day (Pray/Support)", "desc": "Serve a local pregnancy center (donations, prayer, volunteering). Post how to help.", "category": "Giving & Support" },
-    { "title": "Marriage Night (Invest in your covenant)", "desc": "Plan a distraction-free date night. Share one thing you’re building together.", "category": "Faith & Family" },
-    { "title": "Apologetics Share (1 reason for your hope)", "desc": "Share one reason you trust the Gospel—winsomely and briefly.", "category": "Faith & Family" },
-    { "title": "Read Aloud with Kids (Chapter a night)", "desc": "Choose a book and read aloud nightly. Post a family pic + title.", "category": "Faith & Family" },
-    { "title": "Add Your Church (Directory link)", "desc": "Post your church link and invite others in your city to visit.", "category": "Faith & Family" },
-    { "title": "Host a Like-Charlie Meetup (5+ people)", "desc": "Gather 5+ friends to take actions together; post a group photo and plan.", "category": "Events & Hosting" },
-    { "title": "Testimony Video (60–90 sec)", "desc": "Record a short testimony video and post with #LiveLikeCharlie.", "category": "Media & Sharing" },
-    { "title": "Worship Playlist Share (Top 10)", "desc": "Share a top-10 worship playlist and why these songs matter.", "category": "Media & Sharing" }
+  "details": [
+    {
+      "title": "Raise the Flag",
+      "description": "Hang a US flag at home or draw one with your kids. Share a photo + what America means to you."
+    },
+    {
+      "title": "Show Gratitude",
+      "description": "Handwrite a thank\u2011you note to someone who served you this week. Post a pic of the note (no addresses)."
+    },
+    {
+      "title": "Pick It Up",
+      "description": "Pick up 10 pieces of trash. Share before/after or your haul."
+    },
+    {
+      "title": "Pray and Post",
+      "description": "Pray for someone by name and post an encouraging note (no private details)."
+    },
+    {
+      "title": "Read the Bible",
+      "description": "Read 5 minutes. Share one sentence about how it helped today."
+    },
+    {
+      "title": "Help at Home",
+      "description": "Do a helpful job without being asked. Snap a quick photo that will inspire others."
+    },
+    {
+      "title": "Honor a Veteran",
+      "description": "Thank a veteran or first responder. If they agree, post a photo + what you learned."
+    },
+    {
+      "title": "Call or Visit Family",
+      "description": "Call/visit a family member. Share a photo or sentence about why they matter."
+    },
+    {
+      "title": "Listen Without Interrupting",
+      "description": "Have a conversation where you listen to the end. Share one thing you learned."
+    },
+    {
+      "title": "Invite Someone to Church",
+      "description": "Invite someone this week. If they come, share how it went (keep it kind)."
+    },
+    {
+      "title": "Share a Verse",
+      "description": "Pick a verse and post what it means to you. Tag 3 friends to do the same."
+    },
+    {
+      "title": "Thank a Teacher",
+      "description": "Bring a small gift or note. Share the idea so others can copy it."
+    },
+    {
+      "title": "Family Table (No Screens)",
+      "description": "Eat together with phones stacked for one meal. Share a family pic."
+    },
+    {
+      "title": "Three Generations",
+      "description": "Grandparent + parent + child do an action together. Post a joyful photo."
+    },
+    {
+      "title": "Worship Playlist Share",
+      "description": "Share 3 songs that lift your faith. Say why each matters."
+    }
   ]
 }

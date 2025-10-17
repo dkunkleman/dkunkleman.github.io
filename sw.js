@@ -1,63 +1,44 @@
-// Service Worker for LiveLikeCharlieChallenge.org
-const CACHE_NAME = 'llc-v1';
-const OFFLINE_FALLBACK_PAGE = '/';
-const ASSETS = [
-  '/', '/index.html',
-  '/app.js',
-  '/share.html', '/about.html', '/actions.html', '/privacy.html', '/Propose.html', '/admin.html', '/proofs.html',
-  '/manifest.webmanifest',
-  '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png',
-  '/data/actions.json',
-  '/share_image.js'
+// Minimal service worker for LiveLikeCharlieChallenge.org
+const VERSION = 'v1';
+const CORE = [
+  '/', '/index.html', '/actions.html', '/privacy.html', '/proofs.html',
+  '/manifest.webmanifest', '/data/actions.json'
 ];
+const CACHE_NAME = 'llc-' + VERSION;
 
-self.addEventListener('install', (event) => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(ASSETS.filter(Boolean));
-    self.skipWaiting();
-  })());
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((c) => c.addAll(CORE)).then(() => self.skipWaiting())
+  );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE_NAME) && caches.delete(k)));
-    self.clients.claim();
-  })());
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(k => k === CACHE_NAME ? null : caches.delete(k))))
+  );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  const url = new URL(req.url);
+  if (req.method !== 'GET') return; // passthrough for non-GET
 
-  // HTML: network-first, fallback to cache, then to root
-  if (request.headers.get('accept')?.includes('text/html')) {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(request);
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, fresh.clone());
-        return fresh;
-      } catch (err) {
-        const cache = await caches.open(CACHE_NAME);
-        return (await cache.match(request)) || (await cache.match(OFFLINE_FALLBACK_PAGE));
-      }
-    })());
-    return;
-  }
-
-  // Others: cache-first
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    try {
-      const fresh = await fetch(request);
-      cache.put(request, fresh.clone());
-      return fresh;
-    } catch (e) {
-      return cached || Response.error();
+  // cache-first for same-origin static assets
+  if (url.origin === location.origin) {
+    if (url.pathname.startsWith('/js/') || url.pathname.startsWith('/img/') ||
+        url.pathname.startsWith('/data/') || url.pathname.endsWith('.html') ||
+        url.pathname.endsWith('.webmanifest')) {
+      e.respondWith(
+        caches.match(req).then(res => res || fetch(req).then(r => {
+          const copy = r.clone();
+          caches.open(CACHE_NAME).then(c => c.put(req, copy));
+          return r;
+        }))
+      );
+      return;
     }
-  })());
+  }
+  // default: network-first
+  e.respondWith(fetch(req).catch(() => caches.match(req)));
 });
