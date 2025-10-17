@@ -430,8 +430,27 @@ document.addEventListener('click', (e) => {
 }, { passive: true });
 </script>
 
+<script>
+/* Give every red action button a real deep link:
+   /index.html?action=<Action Name>&step=2  */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-action], a.action, a.button-red').forEach(a => {
+    const name =
+      a.getAttribute('data-action') ||
+      a.textContent.trim() ||
+      a.closest('.card')?.querySelector('h3')?.textContent?.trim() ||
+      'Picked an action';
+    const url = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+    a.setAttribute('href', url);
+  });
+});
+</script>
+
+
+  
   
 </body>
 
 
 </html>
+
