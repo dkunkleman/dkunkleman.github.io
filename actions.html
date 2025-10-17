@@ -172,6 +172,18 @@
   });
 </script>
 
+<script>
+  // Jump to index with action preselected and Step 2 open
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('a[data-action]');
+    if (!btn) return;
+    e.preventDefault();
+    const name = btn.getAttribute('data-action') || btn.textContent.trim();
+    window.location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+  });
+</script>
+
+
 <body>
   
 <!-- BACKGROUND (put right after <body> on every page) -->
