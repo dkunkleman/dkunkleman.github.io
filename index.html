@@ -498,10 +498,12 @@ See how it works: ${site}`;
 </script>
 
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpYWpsYnhlemxkZGh4dGVidGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NTcwNTYsImV4cCI6MjA3NjAzMzA1Nn0.szBJhvyDcV6oDn-NgVUUxF_MZdHC60xXBe0AgDDQbbU";
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+- const SUPABASE_URL = "https://tiajlbxezlddhxtebtbg.supabase.co";
+- const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....";
+- const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
++ const SUPABASE_URL = window.SUPABASE_URL;
++ const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
++ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = s => document.querySelector(s);
 const td = v => `<td>${v??""}</td>`;
 const esc = s => (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
