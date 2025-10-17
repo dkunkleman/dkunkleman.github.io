@@ -1000,6 +1000,36 @@ document.getElementById('action')?.addEventListener('change',e=>{
   </div>
 </div>
 
+<script>
+(function(){
+  const p = new URLSearchParams(location.search);
+  const chosen = p.get('action');
+  const step   = p.get('step');
+  const sel    = document.getElementById('action');
+
+  // If we arrived with ?action=..., ensure it's in the dropdown and selected
+  if (chosen && sel) {
+    let found = false;
+    for (const o of sel.options) if ((o.value||o.text) === chosen) { found = true; break; }
+    if (!found) { const o = document.createElement('option'); o.value = chosen; o.text = chosen; sel.appendChild(o); }
+    sel.value = chosen;
+  }
+
+  // If step=2, open the compose modal and scroll to it
+  if (step === '2') {
+    // Prefill suggested text if your page uses #composeText or #suggested
+    const box = document.getElementById('composeText') || document.getElementById('suggested');
+    if (box) box.value = `I just did “${chosen || sel?.value || ''}” with #LiveLikeCharlie — your turn. ${location.origin}`;
+
+    // Open the modal (your compose modal wrapper should have id="composeModal")
+    document.getElementById('composeModal')?.classList.add('open');
+
+    // Smooth scroll
+    document.getElementById('submit')?.scrollIntoView({ behavior:'smooth' });
+  }
+})();
+</script>
+
   
 </body>
 </html>
