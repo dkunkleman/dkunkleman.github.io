@@ -25,8 +25,28 @@
   th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
   input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
   button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
+  /* Modal */
+.lc-modal{position:fixed;inset:0;display:none;z-index:1200}
+.lc-modal.open{display:block}
+.lc-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.lc-sheet{position:absolute;inset:6% 8%;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.lc-sheet-bg{position:absolute;inset:0;background:#0f1a33 center/cover no-repeat;filter:brightness(.7);transform:scale(1.02)}
+.lc-sheet-inner{position:relative;inset:0;display:flex;flex-direction:column;height:100%;color:#fff}
+.lc-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:rgba(10,15,28,.55);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.15)}
+.lc-sheet-head .pill{margin-left:8px;padding:4px 8px;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:.85rem;opacity:.9}
+.lc-sheet-body{padding:12px;overflow:auto}
+#composeText{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.35);color:#fff;padding:10px 12px}
+.btn{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.primary{background:#2563eb;border-color:#2563eb}
+.btn.danger{background:#831843;border-color:#831843}
+.btn.subtle{background:rgba(255,255,255,.08)}
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
+.bg-grid button{aspect-ratio:16/10;border-radius:10px;border:2px solid rgba(255,255,255,.25);background:#222;background-size:cover;background-position:center;cursor:pointer}
+.bg-grid button.active{outline:2px solid #fff}
+
 </style>
-   
+
+  
 
 <link rel="canonical" href="https://livelikecharliechallenge.org/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Live Like Charlie","url":"https://livelikecharliechallenge.org/"}</script>
@@ -785,6 +805,42 @@ document.getElementById('action')?.addEventListener('change',e=>{
 });
 </script>
 
+<!-- Compose Modal -->
+<div id="composeModal" class="lc-modal" aria-hidden="true">
+  <div class="lc-backdrop" data-close></div>
+
+  <div class="lc-sheet">
+    <div class="lc-sheet-bg" id="composeBg"></div>
+
+    <div class="lc-sheet-inner">
+      <div class="lc-sheet-head">
+        <div class="left">
+          <strong>Step 2. Compose your post</strong>
+          <span id="composeAction" class="pill"></span>
+        </div>
+        <div class="right">
+          <a class="btn subtle" href="/actions.html">← Back to Actions</a>
+          <button class="btn danger" id="composeClose">Close</button>
+        </div>
+      </div>
+
+      <div class="lc-sheet-body">
+        <textarea id="composeText" rows="5" spellcheck="false"></textarea>
+
+        <div class="row" style="gap:10px;margin:10px 0 4px">
+          <button class="btn primary" id="goX">Post on X</button>
+          <button class="btn primary" id="goFB">Post on Facebook</button>
+          <button class="btn" id="goIG">Open Instagram</button>
+          <button class="btn" id="goTT">Open TikTok</button>
+          <button class="btn" id="copyCompose">Copy text</button>
+        </div>
+
+        <div class="subtle" style="margin:6px 0 12px">Pick a background:</div>
+        <div id="bgPicker" class="bg-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
   
 </body>
