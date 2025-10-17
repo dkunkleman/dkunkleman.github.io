@@ -265,10 +265,10 @@ async function bubblePopularActions(){
     const first = sel.options[0] ? sel.options[0].outerHTML : '<option value="">Select an action…(step 2 Posting the action will pop up)</option>';
     sel.innerHTML = first + keyed.map(k=>`<option value="${esc(k.name)}">${esc(k.name)}</option>`).join("");
     sel.addEventListener("change", () => {
-      if(!sel.value) return;
-      // Your description logic (if any) will still listen to 'change'
-      scrollTarget()?.scrollIntoView({ behavior:"smooth" });
-    }, { once: true });
+  if (!sel.value) return;
+  openComposeModal(sel.value);                                  // <-- open the popup
+  document.getElementById('submit')?.scrollIntoView({ behavior: "smooth" });
+}, { once: true });
   }
 
   // Paint Top-3
@@ -393,8 +393,12 @@ await Promise.all([ bubblePopularActions(), loadRecent(), loadLeaders() ]);
     sel.value = chosen;
     sel.dispatchEvent(new Event("change",{bubbles:true}));
   }
-  if(step==="2"){ scrollTarget()?.scrollIntoView({behavior:"smooth"}); }
-}
+    if (step === "2") {
+    openComposeModal(chosen || sel?.value || "");               // <-- open the popup on arrival
+    scrollTarget()?.scrollIntoView({ behavior:"smooth" });
+  }
+  
+renderComposeBackgroundChoices();
 
 /* PWA worker (unchanged) */
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("/sw.js"); }
