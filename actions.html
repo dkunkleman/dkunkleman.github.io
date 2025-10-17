@@ -300,6 +300,15 @@ document.getElementById('action')?.addEventListener('change', e=>{
 })();
 </script>
 
+<script>
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('a[data-action]');
+    if (!btn) return;
+    e.preventDefault();
+    const name = btn.getAttribute('data-action') || btn.textContent.trim();
+    location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+  });
+</script>
 
 <body>
   
