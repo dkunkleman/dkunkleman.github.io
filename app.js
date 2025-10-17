@@ -26,6 +26,29 @@ async function loadRecent(){const {data,error}=await sb.from("submissions").sele
 async function loadLeaders(){const {data,error}=await sb.from("submissions").select("action");if(error){console.error(error);return}const counts={};(data||[]).forEach(r=>counts[r.action]=(counts[r.action]||0)+1);const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);const tbl=$("#leaders");if(tbl)tbl.innerHTML=`<tr><th>#</th><th>Action</th><th>Count</th></tr>`+sorted.map((r,i)=>`<tr>${td(i+1)}${td(esc(r[0]))}${td(r[1])}</tr>`).join("")}
 const params=new URLSearchParams(location.search);const shared=params.get("shared_url")||params.get("url")||params.get("text");if(shared&&$("#link")){$("#link").value=shared;document.getElementById("submit")?.scrollIntoView({behavior:"smooth"})}
 await Promise.all([bubblePopularActions(),loadRecent(),loadLeaders()]);
+// If we arrived from /actions.html with ?action=...&step=2, preselect and open Step 2.
+{
+  const params = new URLSearchParams(location.search);
+  const chosen = params.get("action");
+  const step = params.get("step");
+  const sel = $("#action");
+  if (chosen && sel) {
+    // Ensure the option exists, then select it
+    let found = false;
+    [...sel.options].forEach(o => { if (o.value === chosen) found = true; });
+    if (!found) {
+      const o = document.createElement("option");
+      o.value = chosen; o.text = chosen;
+      sel.appendChild(o);
+    }
+    sel.value = chosen;
+  }
+  // Smooth-scroll to the Step 2 area if requested
+  if (step === "2") {
+    document.getElementById("submit")?.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}
 const brand=document.querySelector(".brand");if(brand){brand.style.cursor="pointer";brand.addEventListener("click",async(e)=>{e.preventDefault();const shareUrl=location.origin;const shareText="Join me: Do one small good action with #LiveLikeCharlie";if(navigator.share){await navigator.share({title:"Live Like Charlie",text:shareText,url:shareUrl})}else{const fb=`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;const x=`https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;window.open(fb,"_blank","noopener,noreferrer");setTimeout(()=>window.open(x,"_blank","noopener,noreferrer"),300)}})}
 </script>
