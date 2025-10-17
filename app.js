@@ -264,11 +264,13 @@ async function bubblePopularActions(){
   if(sel){
     const first = sel.options[0] ? sel.options[0].outerHTML : '<option value="">Select an action…(step 2 Posting the action will pop up)</option>';
     sel.innerHTML = first + keyed.map(k=>`<option value="${esc(k.name)}">${esc(k.name)}</option>`).join("");
+    
     sel.addEventListener("change", () => {
   if (!sel.value) return;
-  openComposeModal(sel.value);                                  // <-- open the popup
+  openComposeModal(sel.value);
   document.getElementById('submit')?.scrollIntoView({ behavior: "smooth" });
-}, { once: true });
+}); // no { once:true }
+
   }
 
   // Paint Top-3
