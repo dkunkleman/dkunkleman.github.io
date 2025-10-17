@@ -676,20 +676,48 @@ See how it works: ${site}`;
     catch{ alert("Copy failed. Open compose and copy there."); }
   });
 
-  document.getElementById('saveBtn').addEventListener('click', async ()=>{
-    const action=(selAction.value||'').trim();
-    const url=(document.getElementById('postUrl').value||'').trim();
-    const name=(document.getElementById('yourName').value||'').trim();
-    const email=(document.getElementById('yourEmail').value||'').trim();
-    if(!action){ alert('Choose an action'); return; }
-    if(!db){ alert('Saved locally only — add Supabase keys to enable global impact.'); return; }
-    const { error } = await db.from("submissions").insert({
-      ts_ms: Date.now(), action, platform: selPlatform.value || "web", link: url, name, email,
-      donated:false, donation_org:'', donation_amt:'', donation_evidence_url:'', attested:false
-    });
-    if(error){ console.warn(error); alert('Save failed'); return; }
-    document.getElementById('postUrl').value=''; document.getElementById('saveStatus').textContent='Saved!'; renderImpact();
-  });
+ if(error){ console.warn(error); alert('Save failed'); return; }
+
+/* Your existing post-save UI */
+document.getElementById('postUrl').value='';
+document.getElementById('saveStatus').textContent='Saved!';
+renderImpact();
+
+/* NEW — confetti + share + Back to Actions */
+try {
+  // Confetti (uses your existing global confetti() helper)
+  if (typeof confetti === 'function') confetti();
+
+  // Share the site (fallback: copy URL + toast)
+  const shareData = {
+    title: 'Live Like Charlie',
+    text: 'Do one small good action. Post it. Invite 3 friends.',
+    url: location.origin
+  };
+  if (navigator.share) {
+    await navigator.share(shareData);
+  } else if (navigator.clipboard) {
+    await navigator.clipboard.writeText(shareData.url);
+    if (typeof showToast === 'function') showToast('Site link copied!');
+  }
+
+  // Inject a "Back to Actions" button under the link area (once)
+  const anchorAfter = document.getElementById('saveStatus') || document.body;
+  if (!document.getElementById('backToActions')) {
+    const back = document.createElement('a');
+    back.id = 'backToActions';
+    back.href = '/actions.html';
+    back.textContent = '← Back to Actions';
+    back.className = 'secondary';
+    back.style.display = 'inline-block';
+    back.style.marginTop = '8px';
+    back.style.marginLeft = '0';
+    anchorAfter.insertAdjacentElement('afterend', back);
+  }
+} catch (err) {
+  console.warn('Post-save share/back step failed:', err);
+}
+
 
   renderImpact();
 })();
@@ -1030,6 +1058,19 @@ document.getElementById('action')?.addEventListener('change',e=>{
 })();
 </script>
 
+<script>
+/* Hide the duplicate Completed Challenge that sits next to #copyMsg (keep the main one under the link box) */
+document.addEventListener('DOMContentLoaded', () => {
+  const copy = document.getElementById('copyMsg');
+  if (!copy) return;
+  const row = copy.closest('.two') || copy.parentElement;
+  if (!row) return;
+  const dup = row.querySelector('#saveBtn');
+  if (dup) dup.style.display = 'none'; // hide only that neighbor
+});
+</script>
+
   
 </body>
+
 </html>
