@@ -1059,18 +1059,6 @@ document.getElementById('action')?.addEventListener('change',e=>{
 </script>
 
 <script>
-/* Hide the duplicate Completed Challenge that sits next to #copyMsg (keep the main one under the link box) */
-document.addEventListener('DOMContentLoaded', () => {
-  const copy = document.getElementById('copyMsg');
-  if (!copy) return;
-  const row = copy.closest('.two') || copy.parentElement;
-  if (!row) return;
-  const dup = row.querySelector('#saveBtn');
-  if (dup) dup.style.display = 'none'; // hide only that neighbor
-});
-</script>
-
-<script>
 /* Open Step-2 composer automatically when coming from actions.html with ?step=2&action=... */
 (function () {
   const params = new URLSearchParams(location.search);
@@ -1132,8 +1120,22 @@ https://www.livelikecharliechallenge.org`;
   history.replaceState(null, '', cleanUrl);
 })();
 </script>  
+
+<script>
+/* Hide any duplicate "Completed Challenge" that sits next to #copyMsg */
+document.addEventListener('DOMContentLoaded', () => {
+  const copy = document.getElementById('copyMsg');
+  if (!copy) return;
+  const row = copy.closest('.two') || copy.parentElement;
+  if (!row) return;
+  const dup = row.querySelector('#saveBtn'); // the neighbor in that row
+  if (dup) dup.style.display = 'none';
+});
+</script>
+
   
 </body>
 
 </html>
+
 
