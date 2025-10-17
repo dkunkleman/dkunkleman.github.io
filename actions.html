@@ -386,5 +386,28 @@
     window.location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
   });
 </script>
+
+<script>
+  // Link every action card's button to the home composer using the card title.
+  (function () {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      const title = card.querySelector('h3')?.textContent?.trim();
+      const btn   = card.querySelector('a,button,[role="button"]');
+      if (title && btn) {
+        const url = '/?action=' + encodeURIComponent(title) + '#compose';
+        if (btn.tagName === 'A') btn.href = url;
+        btn.addEventListener('click', (e) => {
+          // works for buttons or if an <a> had no href before
+          if (!(btn.tagName === 'A')) e.preventDefault();
+          location.href = url;
+        }, { passive: true });
+      }
+    });
+  })();
+</script>
+
+
 </body>
+
 </html>
