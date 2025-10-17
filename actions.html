@@ -161,6 +161,16 @@
 })();
 </script>
 
+<script>
+  // When someone clicks a red action button, jump to index with the action preselected and open Step 2.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-action]');
+    if (!a) return;
+    const name = a.getAttribute('data-action') || a.textContent.trim();
+    // Go to index with ?action=...&step=2
+    location.href = `/index.html?action=${encodeURIComponent(name)}&step=2`;
+  });
+</script>
 
 <body>
   
