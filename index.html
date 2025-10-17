@@ -1070,7 +1070,70 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script>
+/* Open Step-2 composer automatically when coming from actions.html with ?step=2&action=... */
+(function () {
+  const params = new URLSearchParams(location.search);
+  const step   = params.get('step');
+  const action = params.get('action');
+
+  if (step !== '2') return;
+
+  const actionName = action ? decodeURIComponent(action) : 'Picked an action';
+
+  // Try to put the action into your Step-1 select (if it exists)
+  const select = document.querySelector('#actionSelect');
+  if (select) {
+    // If option exists, select it; otherwise leave current
+    const match = [...select.options].find(o => o.text.trim().toLowerCase() === actionName.toLowerCase());
+    if (match) select.value = match.value;
+  }
+
+  // Prefill the composer textarea (try common IDs)
+  const composeText =
+    document.querySelector('#composeText') ||
+    document.querySelector('textarea[name="composeText"]');
+
+  const prefill = `I just did “${actionName}” with #LiveLikeCharlie — your turn.
+https://www.livelikecharliechallenge.org`;
+
+  if (composeText) composeText.value = prefill;
+
+  // Update any visible pill/badge with the action (if present)
+  const pill = document.querySelector('#selectedActionPill');
+  if (pill) pill.textContent = actionName;
+
+  // Open the compose modal the same way your Step-1 button does
+  const openButtons = [
+    document.querySelector('#openComposer'),
+    document.querySelector('#openComposer2'),
+    document.querySelector('[data-open="composer"]')
+  ].filter(Boolean);
+
+  if (openButtons.length) {
+    // Use your existing handler
+    openButtons[0].click();
+  } else {
+    // Fallback: directly open a modal if your code uses .open on #composeModal
+    const modal = document.querySelector('#composeModal');
+    if (modal) {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  // Optional: copy the text for convenience (ignore failures)
+  if (composeText && navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(composeText.value).catch(()=>{});
+  }
+
+  // Clean params so refresh doesn’t keep re-opening
+  const cleanUrl = location.pathname + (location.hash || '');
+  history.replaceState(null, '', cleanUrl);
+})();
+</script>  
   
 </body>
 
 </html>
+
