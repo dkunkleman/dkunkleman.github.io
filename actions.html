@@ -1,102 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Like Charlie Actions</title>
 
-<!-- actions_partial_v3.html — Live Like Charlie / Actions list (expanded) -->
-<header>
-  <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
-    <div class="brand" style="font-weight:900">🇺🇸 <span style="color:var(--brand)">Live</span>Like<span style="color:var(--accent)">Charlie<span style="color:var(--brand)">Challenge</span>.org</div>
-    <nav style="display:flex;gap:12px;align-items:center">
-      <a href="/index.html">Home</a>
-      <a href="/actions.html">Actions</a>
-      <a href="/about.html">About</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/proofs.html">Proofs</a>
-      <a href="/admin.html">Admin</a>
-      <a href="/#impact" class="button" data-impact>Impact</a>
-    </nav>
-  </div>
-</header>
-
-</head>
-
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0b1220">
-
-<style>
-  /* 1) Safety net: slightly stronger text edges on photo areas */
-  .hero h1,
-  .hero .copy .muted,
-  .panel h1, .panel h2, .panel h3,
-  .panel p, .panel li {
-    text-shadow: 0 3px 22px rgba(0,0,0,.88), 0 1px 2px rgba(0,0,0,.72);
-  }
-
-  /* 2) Micro-overlay only behind text blocks (not the whole page) */
-  .read-plate{
-    background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.28));
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 12px;
-    padding: 10px 12px;
-    backdrop-filter: blur(6px);
-  }
-  /* Apply to any tricky text: e.g., hero copy or small captions */
-  .hero .copy { max-width: 900px; }
-  .hero .copy > p { display: inline-block; }
-  .hero .copy > p.readable { /* add class="readable" to any paragraph you want plated */
-    background: rgba(0,0,0,.22);
-    border-radius: 8px;
-    padding: 4px 8px;
-  }
-
-  /* 3) Slightly less transparency on panels when system prefers higher contrast */
-  @media (prefers-contrast: more){
-    :root{ --panel-bg: rgba(10,18,39,.42); }
-  }
-
-  /* 4) If a specific panel sits on a very bright photo, give it a hair more fill */
-  .panel[data-critical="1"]{ background: rgba(10,18,39,.48) !important; }
-
-  /* 5) Print-friendly: plain white background and dark text for paper */
-  @media print{
-    body{ background:#fff !important; color:#111 !important }
-    #page-bg{ display:none !important }
-    .panel, .card{ background:#fff !important; border:1px solid #ddd !important; box-shadow:none !important }
-    a{ color:#0645ad !important; text-decoration:underline }
-  }
-</style>
-
-
-<style>
-  /* Make the actions hero fully transparent */
-  .actions-hero{
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    padding: 0; /* optional: remove extra glass padding if any */
-  }
-  .actions-hero .actions-bar{ background: transparent; }
-
-  /* Keep text readable on photos */
-  .actions-hero h1,
-  .actions-hero p{
-    text-shadow: 0 3px 18px rgba(0,0,0,.75), 0 1px 2px rgba(0,0,0,.85);
-    color: #fff; /* or your --ink variable if you prefer */
-  }
-
-  /* Optional: style the ghost button to look good on transparent bg */
-  .actions-hero .ghost{
-    background: transparent;
-    color: #fff;
-    border: 1px solid rgba(255,255,255,.35);
-    border-radius: 999px;
-    padding: 10px 14px;
-    backdrop-filter: blur(2px);
-  }
-  .actions-hero .ghost:hover{
-    border-color: rgba(255,255,255,.6);
-  }
-</style>
-
-
-<!-- THEME (put in <head> on every page) -->
 <style>
   :root{
     --ink:#eaf2ff; --muted:#9fb3d1;
@@ -105,285 +13,75 @@
     --panel-border: rgba(255,255,255,.16);
     --glow: 0 10px 30px rgba(0,0,0,.45);
   }
-  body.has-photo{color:var(--ink); background:#0b1220; margin:0}
+  body{margin:0;color:var(--ink); background:#0b1220; font-family:system-ui,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif}
   #page-bg{position:fixed; inset:0; z-index:-2; background:#0b1220 center/cover no-repeat; transition:opacity .6s ease}
   #page-bg::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.70) 55%,rgba(0,0,0,.9));}
-  .panel,.card{background:var(--panel-bg)!important;border:1px solid var(--panel-border)!important;border-radius:16px;box-shadow:var(--glow);}
   header{backdrop-filter:blur(8px); border-bottom:1px solid var(--panel-border)}
-  .break{height:10px;border-radius:999px;margin:18px 0;background:repeating-linear-gradient(45deg,var(--brand) 0 10px,#fff 10px 20px,var(--accent) 20px 30px);opacity:.9}
-  a{color:#b3d4ff;text-decoration:none}
-  table{width:100%;border-collapse:collapse}
-  th,td{border-bottom:1px solid var(--panel-border);padding:10px;text-align:left}
-  input,select,textarea,button{background:#0c1731;color:#fff;border:1px solid var(--panel-border);border-radius:12px;padding:10px 12px}
-  button{background:linear-gradient(180deg,var(--accent),#1e49b8);border:none;font-weight:800;cursor:pointer}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px}
+  .brand{font-weight:900}
+  .actions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .card{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:16px;padding:16px;box-shadow:var(--glow)}
+  .card h3{margin:0 0 6px 0}
+  .card p{margin:0 0 8px 0;opacity:.95}
+  .card a[data-action]{display:inline-block;margin-top:6px;font-weight:700;text-decoration:none;padding:8px 10px;border-radius:10px;background:#e11d48;color:#fff}
 </style>
-
-
-<meta property="og:title" content="Live Like Charlie — Do one small good action."/>
-<meta property="og:description" content="Pick an action, post it, paste your link so it counts, and invite 3 friends."/>
-<meta property="og:image" content="https://livelikecharliechallenge.org/og.jpg"/>
-<meta name="twitter:card" content="summary_large_image"/>
-
-<style>
-  header nav a{padding:8px 12px;border-radius:10px;text-decoration:none;border:1px solid transparent}
-  header nav a:hover{background:rgba(255,255,255,.06)}
-  header nav a.active{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
-  header nav .button{background:var(--accent);color:#fff;border:none}
-  /* Beautiful photo background for the "Propose a Like Charlie Action" popup */
-#proposeModal .box{
-  position: relative;
-  overflow: hidden;          /* keep the bg inside rounded corners */
-  background: transparent;   /* let our image show through */
-}
-
-/* Full-bleed background layer using a local image */
-#proposeModal .box::before{
-  content: "";
-  position: absolute; inset: 0;
-  background: url("/img/flag.jpg") center/cover no-repeat; /* <-- change to any img you want */
-  filter: brightness(.75);         /* darken a bit for legibility */
-  transform: scale(1.02);          /* tiny zoom to avoid edges */
-  z-index: 0;
-}
-
-/* Ensure modal content sits above the background */
-#proposeModal .box > *{
-  position: relative; z-index: 1;
-}
-
-/* Optional: add a soft glass layer behind inputs for clarity */
-#proposeModal input,
-#proposeModal textarea,
-#proposeModal button{
-  background: rgba(0,0,0,.28);
-  border: 1px solid rgba(255,255,255,.22);
-}
-
-</style>
-
-
-
-<script>
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('a[data-action]');
-    if (!btn) return;
-    e.preventDefault();
-    const name = btn.getAttribute('data-action') || btn.textContent.trim();
-    location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
-  });
-</script>
+</head>
 
 <body>
-  
-<!-- BACKGROUND (put right after <body> on every page) -->
-<div id="page-bg" aria-hidden="true"></div>
-<script>
-  document.body.classList.add('has-photo');
-  const bgImages=[
-    "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
-  ];
-  const bg=document.getElementById('page-bg'); let i=0;
-  function setBG(idx){ bg.style.opacity=0; setTimeout(()=>{ bg.style.backgroundImage=`url("${bgImages[idx]}")`; bg.style.opacity=1; },220); }
-  setBG(i); setInterval(()=>{ i=(i+1)%bgImages.length; setBG(i); },12000);
-</script>
-
-  
-<script>
-(function(){
-  const impact = document.querySelector('a[data-impact]');
-  if (impact){
-    impact.addEventListener('click', (e)=>{
-      // if already on home, smooth-scroll; else go to /#impact
-      const onHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
-      if (onHome){
-        e.preventDefault();
-        document.getElementById('impact')?.scrollIntoView({behavior:'smooth'});
-      }
-    });
-  }
-  // Active link highlighting for the current page
-  const path = location.pathname.replace(/\/index\.html$/, '/');
-  document.querySelectorAll('header nav a[href]').forEach(a=>{
-    const href = a.getAttribute('href');
-    if (!href) return;
-    if (href === '/#impact') return; // anchor button handled separately
-    if (path.startsWith(href)) a.classList.add('active');
-  });
-})();
-</script>
-<section class="actions-wrap">
-  <style>
-    .actions-wrap{max-width:1100px;margin:0 auto;padding:24px}
-    .actions-hero{background:linear-gradient(135deg,#0b1220,#10224a);color:#fff;border-radius:16px;padding:24px;margin-bottom:20px;border:1px solid rgba(255,255,255,.08)}
-    .actions-hero h1{margin:0 0 8px 0;font-size:28px;letter-spacing:.2px}
-    .actions-hero p{margin:0;opacity:.9}
-    .actions-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:10px 0 16px 0}
-    .backhome{display:inline-block;background:#0a1530;border:1px solid rgba(255,255,255,.25);padding:8px 12px;border-radius:10px;text-decoration:none;color:#e8f1ff}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,.35);color:#e8f1ff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .actions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .card{background:#0f1a33;color:#cfe0ff;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;transition:.2s transform,.2s box-shadow}
-    .card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
-    .card h3{margin:0 0 6px 0;font-size:18px;color:#fff}
-    .card p{margin:0 0 8px 0;font-size:14px;opacity:.9;line-height:1.45}
-    .card a[data-action]{display:inline-block;margin-top:6px;font-weight:700;text-decoration:none;padding:8px 10px;border-radius:10px;background:#e11d48;color:#fff}
-    blockquote{margin:8px 0 0 0;padding-left:12px;border-left:3px solid rgba(255,255,255,.25);opacity:.9;font-size:13px}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px}
-    .modal .box{max-width:560px;width:100%;background:#0f1a33;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px}
-    .x{float:right;cursor:pointer;font-weight:900}
-  </style>
-
-<div class="actions-hero">
-  <div class="actions-bar">
-    <button class="ghost" id="proposeOpen">Propose a "Like Charlie" Action to add to our list</button>
+<header>
+  <div class="nav">
+    <div class="brand">🇺🇸 <span style="color:#e11d48">Live</span>Like<span style="color:#2563eb">Charlie</span>.org</div>
+    <nav style="display:flex;gap:12px;align-items:center">
+      <a href="/index.html">Home</a>
+      <a href="/actions.html">Actions</a>
+      <a href="/about.html">About</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/proofs.html">Proofs</a>
+      <a href="/admin.html">Admin</a>
+      <a href="/#impact" class="button" style="background:#2563eb;color:#fff;padding:8px 12px;border-radius:10px">Impact</a>
+    </nav>
   </div>
-  <h1>Like Charlie Actions</h1>
-  <p>1. Choose an action and complete it. Be bold and build, Like Charlie</p>
-  <p>2. Share about it on social media and Invite 3 friends to "Live Like Charlie"</p>
-  <p>3. Paste your link here to complete the challenge</p>
-  <p>Make a daily habit of doing at least one small good thing. "Live Like Charlie"</p>
-</div>
+</header>
 
+<div id="page-bg"></div>
+
+<main class="wrap">
+  <h1 style="margin:10px 0 18px">Like Charlie Actions</h1>
 
   <div class="actions-grid">
-    <!-- Core set -->
-    <div class="card"><h3>Raise the Flag</h3><p>Raise an American flag. Post the picture and say what being an American means to you. (Or, you can draw a picture and post it to social media. Tell it's story)</p><a data-action="Raise the Flag" href="javascript:void(0)">Raised the Flag</a></div>
-    <div class="card"><h3>Show Gratitude</h3><p>Take the time to Create and Send a Thank You note to someone.</p><blockquote>“As we express our gratitude, we must never forget that the highest appreciation is not to utter words, but to live by them.” — John F. Kennedy</blockquote><a data-action="Show Gratitude" href="javascript:void(0)">Showed Gratitude</a></div>
-    <div class="card"><h3>Support the All-American Halftime Show</h3><p>Turning Point USA is asking individuals to provide their name, contact information, and their musical genre preference.<a href="https://www.americanhalftimeshow.com/" target="_blank" rel="noopener">www.americanhalftimeshow.com</a>. Post pictures of who you would like to see there.</p><a data-action="Support the All-American Halftime Show" href="javascript:void(0)">Supported Family Values</a></div>
-    <div class="card"><h3>Pick It Up</h3><p>Pick up 10 pieces of trash. Post before and after pictures.</p><a data-action="Pick It Up" href="javascript:void(0)">Picked It Up</a></div>
-    <div class="card"><h3>Pray and Post</h3><p>Say a prayer for someone and post a kind message to encourage them.</p><a data-action="Pray and Post" href="javascript:void(0)">Prayed and Posted</a></div>
-    <div class="card"><h3>Read the Bible</h3><p>Read your Bible for 5 minutes. Post a sentence about how that passage helps you today.</p><a data-action="Read the Bible" href="javascript:void(0)">Read the Bible</a></div>
-    <div class="card"><h3>Help at Home</h3><p>Do a helpful job without being asked. Post a quick note or picture to inspire others to do the same.</p><a data-action="Help at Home" href="javascript:void(0)">Helped at Home</a></div>
-    <div class="card"><h3>Be a Friend</h3><p>Post a picture of you with your new friend or tell about this experience.</p><a data-action="Be a Friend" href="javascript:void(0)">Touched a Friend</a></div>
-    <div class="card"><h3>Donate to TPUSA, etc.</h3><p>Donate to TPUSA or a charity you love. Post why you appreciate that charity.<a href="https://donate.tpusa.com/" target="_blank" rel="noopener">donate.tpusa.com/</a>.</p><a data-action="Donate to TPUSA or a Charity" href="javascript:void(0)">Donated. Here's Why</a></div>
-    <div class="card"><h3>Donate to TPUSA, etc.</h3><p>Donate to TPUSA or a charity you love. Post why you appreciate that charity.</p><a data-action="Donate to TPUSA or a Charity" href="javascript:void(0)">Donated</a></div>     
-    <div class="card"><h3>Volunteer 1 Hour</h3><p>Spend an hour serving. Post why volunteering matters to you.</p><a data-action="Volunteer 1 Hour" href="javascript:void(0)">Volenteered</a></div>
-    <div class="card"><h3>Learn a New Skill</h3><p>Learn or practice a real-life skill. Post about the experience or its significance.</p><a data-action="Learn a New Skill" href="javascript:void(0)">Learned a Skill</a></div>
-    <div class="card"><h3>Call or Visit Family</h3><p>Call, visit, or video chat with family. Share a picture or story about why you appreciate them.</p><a data-action="Call or Visit Family" href="javascript:void(0)">Called or Visited Family</a></div>
-    <div class="card"><h3>Honor a Veteran or First Responder</h3><p>Thank a veteran or first responder. Possibly give them a gift. Post why you appreciate them.</p><a data-action="Honor a Veteran or First Responder" href="javascript:void(0)">Honored a Veteran</a></div>
-    <div class="card"><h3>Share a Favorite Charlie Quote</h3><p>Share your favorite photo, video, or quote from Charlie and why it’s important to you.</p><a data-action="Share a Favorite Charlie Quote" href="javascript:void(0)">Shared a Quote</a></div>
-    <div class="card"><h3>Join the Pete & Bobby Challenge</h3><p>Take a step for your health. Join the Pete & Bobby Challenge or start consistently excercising.<a href="https://peteandbobbychallenge.com/" target="_blank" rel="noopener">peteandbobbychallenge.com</a>. Post milestones or wins.</p><a data-action="Join the Pete & Bobby Challenge" href="javascript:void(0)">Joined for Health</a></div>
-    <div class="card"><h3>Choose a Verse & Share</h3><p>Pick a verse and post what it means to you. Share it with 3 friends.</p><a data-action="Choose a Verse & Share" href="javascript:void(0)">Shared a verse</a></div>
-    <div class="card"><h3>Share a Story of Forgiveness</h3><p>Share (no private details) how forgiving someone helped you.</p><a data-action="Share a Forgiveness Story" href="javascript:void(0)">Shared Forgiveness</a></div>
-    <div class="card"><h3>Meet Your Spouse with a Hug</h3><p>Greet your spouse with a hug when they come through the door. Post why you appreciate them.</p><a data-action="Meet Your Spouse with a Hug" href="javascript:void(0)">Suprised Spouse</a></div>
-    <div class="card"><h3>Intentional Family Time</h3><p>Share pictures/stories from time you spent together on purpose.</p><a data-action="Intentional Family Time" href="javascript:void(0)">Enjoyed Family</a></div>
-    <div class="card"><h3>Do a Chore Your Spouse Normally Does</h3><p>Take over a chore they usually do. Share the reaction or experience.</p><a data-action="Do a Chore for Your Spouse" href="javascript:void(0)">Helped my Spouse</a></div>
-    <div class="card"><h3>Listen Without Interrupting</h3><p>Listen all the way through. Post what you learned.</p><a data-action="Listen Without Interrupting" href="javascript:void(0)">Listened All the Way</a></div>
-    <div class="card"><h3>Speak Truth with Humility</h3><p>Share the truth with courage and kindness. Post what happened.</p><a data-action="Speak Truth with Humility" href="javascript:void(0)">A Moment of Boldness</a></div>
-    <div class="card"><h3>Invite Someone to Church</h3><p>Invite Someone. If they come, share about the experience.</p><a data-action="Invite 3 People to Church" href="javascript:void(0)">Invited to Church</a></div>
-    <div class="card"><h3>Share Your Testimony</h3><p>Share what following Jesus means to you (in person or online).</p><a data-action="Share Your Testimony" href="javascript:void(0)">Shared Testimony</a></div>
-    <div class="card"><h3>Host a Film Night</h3><p>Host a Christian film night; pray/discuss/have fun afterward. Post a group pic + takeaways.</p><a data-action="Host a Film Night" href="javascript:void(0)">Hosted Film Night</a></div>
-    <div class="card"><h3>Hands-Free Driver</h3><p>Pledge no phone while driving today. Share for accountability and as a reminder to protect families.</p><a data-action="Hands-Free Driver" href="javascript:void(0)">Am Hands-Free</a></div>
-    <div class="card"><h3>Family Table Focus (3+ nights)</h3><p>Eat together without screens for 3+ nights. Share what changed or what you learned.</p><a data-action="Family Table Focus (3+ nights)" href="javascript:void(0)">Went No Screens</a></div>
-    <div class="card"><h3>Creator Proceeds Donor</h3><p>Donate a day’s proceeds from your content. Post the receipt (blur private info).</p><a data-action="Creator Proceeds Donor" href="javascript:void(0)">Donated Proceeds</a></div>
-    <div class="card"><h3>Phone Off at Church</h3><p>Go distraction‑free during the church service. Post a simple reminder graphic.</p><a data-action="Phone Off at Church" href="javascript:void(0)">Turned Phone Off</a></div>
-    <div class="card"><h3>Host a Sale for Good</h3><p>Run a bake/garage sale. Donate proceeds. Share the story.</p><a data-action="Host a Sale for Good" href="javascript:void(0)">Donated Proceeds</a></div>
-    <div class="card"><h3>3 Generations</h3><p>Grandparent + parent + child complete an action here together; share a photo/story.</p><a data-action="Generations: 3 Together" href="javascript:void(0)">Enjoyed Family Time</a></div>
-    <div class="card"><h3>Be Registered to Vote</h3><p>Register to Vote or help someone register to vote. If you're already registered to vote, Share why voting is important or who you support.</p><a data-action="Register to Vote (or Verify)" href="javascript:void(0)">Registered to Vote</a></div>
-    <div class="card"><h3>Pray for Your Leaders (Name Them)</h3><p>Post a prayer for leaders by name (national, state, local, church). Send them a note/text telling them you are praying for them.</p><a data-action="Pray for Your Leaders (Name Them)" href="javascript:void(0)">Prayed & Sent Note</a></div>
-    <div class="card"><h3>Bring a Teacher a Gift</h3><p>Show appreciation to a teacher. Share a picture or story about the experience.</p><a data-action="Bring a Teacher a Gift" href="javascript:void(0)">Thanked a Teacher</a></div>
-    <div class="card"><h3>Join a TPUSA Chapter</h3><p>Join TPUSA's nationwide student movement promoting freedom-loving American values on over 3,500 campuses.<a href="https://www.tpusastudents.com" target="_blank" rel="noopener">tpusastudents.com</a>. Post a group picture.</p><a data-action="Join a TPUSA Chapter" href="javascript:void(0)">Joined TPUSA</a></div>
-    <div class="card"><h3>Veteran Visit (Honor & Listen)</h3><p>Visit a veteran/VA home; listen to their story; thank and pray for them.</p><a data-action="Veteran Visit (Honor & Listen)" href="javascript:void(0)">Visited a Veteran</a></div>
-    <div class="card"><h3>Purchase Charlie Gear</h3><p>Post a picture with your new gear.<a href="https://tpusamerch.com/" target="_blank" rel="noopener">tpusamerch.com</a>. </p><a data-action="Purchase Charlie Gear" href="javascript:void(0)">Purchased Charlie Gear</a></div>
-    <div class="card"><h3>Start a Meal Train</h3><p>Start/join a meal train for a family in need. Share the link.</p><a data-action="Meal Train Start" href="javascript:void(0)">Participated</a></div>
-    <div class="card"><h3>Coach or Mentor (Youth)</h3><p>Volunteer to coach or mentor at church/school. Start a mentorship program.</p><a data-action="Coach or Mentor (Youth)" href="javascript:void(0)">Mentoring, Coaching</a></div>
-    <div class="card"><h3>Work for TPUSA</h3><p>Post a picture while you are working.<a href="https://tpusa.com/careers/" target="_blank" rel="noopener">tpusa.com/careers</a>. </p><a data-action="Work for TPUSA" href="javascript:void(0)">Working for TPUSA</a></div>
-    <div class="card"><h3>Give a Bible to Someone</h3><p>Give someone their first Bible. Include a welcoming note inside. Tell them what the Bible means to you</p><a data-action="First Bible Give-Away" href="javascript:void(0)">Gave a Bible</a></div>
-    <div class="card"><h3>Scripture Memory</h3><p>Share a verse you memorized and what it means to you.</p><a data-action="Scripture Memory Share" href="javascript:void(0)">Memorizing Scripture</a></div>
-    <div class="card"><h3>Choose Life</h3><p>Serve a local pregnancy center (donations, prayer, volunteering). Post how others can help.</p><a data-action="Pro-Life Serve Day" href="javascript:void(0)">Chose Life</a></div>
-    <div class="card"><h3>Celebrate Your Children</h3><p>Share how special your children are and why you’re glad you chose life.</p><a data-action="Pro-Life: Celebrate Your Children" href="javascript:void(0)">Celebrated Children</a></div>
-    <div class="card"><h3>Happy Spouse</h3><p>Plan a distraction‑free date night. Share one thing you’re thankful to be doing or building together. Happy Spouse, Happy House!</p><a data-action="Marriage Night" href="javascript:void(0)">Completed</a></div>
-    <div class="card"><h3>Join TPUSA's The Charlie Challenge</h3><p>Join thousands of American families committed to honoring Charlie's legacy through peaceful dialogue and biblical truth. Sign our petition and get access to free family resources<a href="https://tpusa.com/alumniassociation-join/" target="_blank" rel="noopener">tpusa.com/alumniassociation-join/</a>. </p><a data-action="Join TPUSA's The Charlie Challenge" href="javascript:void(0)">Joined TPUSA's The Charlie Challenge</a></div>
-    <div class="card"><h3>Join TPUSA's 1776 Society</h3><p>JOIN US on the frontlines of the American Culture War by becoming a member of Turning Point USA’s 1776 Society!<a href="https://charliechallenge.org/" target="_blank" rel="noopener">charliechallenge.org</a>. </p><a data-action="Join TPUSA's 1776 Society" href="javascript:void(0)">Joined TPUSA's 1776 Society</a></div>
-    <div class="card"><h3>Apologetics Share</h3><p>Share one reason for your hope in the Gospel—winsome and brief.</p><a data-action="Apologetics Share" href="javascript:void(0)">Shared Apologetics</a></div>
-    <div class="card"><h3>Read Aloud with Kids</h3><p>Pick a book and read aloud nightly. Post a family pic + title.</p><a data-action="Read Aloud with Kids" href="javascript:void(0)">Read to Kids</a></div>
-    <div class="card"><h3>Post Church Link</h3><p>Post your church’s link or a program flyer and invite others in your city to visit.</p><a data-action="Add Your Church" href="javascript:void(0)">Posted Link</a></div>
-    <div class="card"><h3>Host a Like-Charlie Meetup</h3><p>Gather 5+ friends to do actions together; share a group photo and plan. Have fun.</p><a data-action="Host a Like-Charlie Meetup" href="javascript:void(0)">Hosted</a></div>
-    <div class="card"><h3>Join TPUSA's Alumni</h3><p>Sign up for our monthly newsletter featuring upcoming Alumni events, exciting updates within the TPUSA network, and ways to connect with other TPUSA Alumni across the country!<a href="https://tpusa.com/alumniassociation-join/" target="_blank" rel="noopener">tpusa.com/alumniassociation-join/</a>. </p><a data-action="Join TPUSA's Alumni" href="javascript:void(0)">Joined TPUSA's Alumni</a></div>
-    <div class="card"><h3>Testimony Video (60–90s)</h3><p>Record a short testimony video and post with #LiveLikeCharlie.</p><a data-action="Testimony Video (60–90s)" href="javascript:void(0)">Posted Testimony</a></div>
-    <div class="card"><h3>Worship Playlist Share (Top 10)</h3><p>Share your top‑10 worship playlist and why each song matters.</p><a data-action="Worship Playlist Share (Top 10)" href="javascript:void(0)">Shared Playlist</a></div>
+    <!-- A few samples; keep all your existing cards, this click handler will wire them automatically -->
+    <div class="card"><h3>Meet Your Spouse with a Hug</h3><p>Greet your spouse with a hug when they come through the door. Post why you appreciate them.</p><a data-action="Meet Your Spouse with a Hug" href="#">Do this</a></div>
+    <div class="card"><h3>Raise the Flag</h3><p>Raise an American flag. Post a picture and say what it means to you.</p><a data-action="Raise the Flag" href="#">Raised the Flag</a></div>
+    <div class="card"><h3>Show Gratitude</h3><p>Create and send a Thank You note to someone.</p><a data-action="Show Gratitude" href="#">Showed Gratitude</a></div>
+
+    <!-- TIP: keep the rest of your existing cards here; the script below uses the h3 text or data-action -->
   </div>
-
-  <!-- Propose Action Modal -->
-  <div class="modal" id="proposeModal" aria-hidden="true">
-    <div class="box">
-      <span class="x" id="proposeClose">✕</span>
-      <h3>Propose a Like Charlie Action</h3>
-      <p class="muted" style="margin-top:0">Tell us your idea. Short and simple wins.</p>
-      <div class="two">
-        <input id="propTitle" placeholder="Action title (e.g., Serve a Neighbor)" />
-        <input id="propLink" placeholder="(optional) Helpful link" />
-      </div>
-      <textarea id="propDesc" rows="4" placeholder="One‑line description (what to do + what to post)"></textarea>
-      <button id="propSubmit" style="margin-top:10px">Submit Action Proposal</button>
-      <div id="propStatus" class="muted" style="margin-top:8px"></div>
-    </div>
-  </div>
-
-  <script>
-    (function(){
-      const pm = document.getElementById('proposeModal');
-      const openBtn = document.getElementById('proposeOpen');
-      const closeBtn = document.getElementById('proposeClose');
-      const body = document.body;
-      function openModal(){ pm.style.display='flex'; body.style.overflow='hidden'; }
-      function closeModal(){ pm.style.display='none'; body.style.overflow=''; }
-      openBtn?.addEventListener('click', openModal);
-      closeBtn?.addEventListener('click', closeModal);
-      pm?.addEventListener('click', (e)=>{ if(e.target===pm) closeModal(); });
-
-      async function submitProposal(){
-        const title = document.getElementById('propTitle').value.trim();
-        const desc  = document.getElementById('propDesc').value.trim();
-        const link  = document.getElementById('propLink').value.trim();
-        const status = document.getElementById('propStatus');
-        if(!title || !desc){ status.textContent = "Please add a title and a short description."; return; }
-        status.textContent = "Submitting…";
-        const URL = (window.SUPABASE_URL||"").replace(/\/+$/,"");
-        const KEY = window.SUPABASE_ANON_KEY||"";
-        if(URL && KEY){
-          try{
-            const res = await fetch(URL + "/rest/v1/action_proposals", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "apikey": KEY,
-                "Authorization": `Bearer ${KEY}`,
-                "Prefer": "return=representation"
-              },
-              body: JSON.stringify({ title, description: desc, link: link||null, ua: navigator.userAgent })
-            });
-            if(!res.ok){ throw new Error(await res.text());}
-            status.textContent = "Thanks! We received your idea.";
-            setTimeout(closeModal, 900);
-          }catch(err){
-            status.textContent = "Submit failed. Please try again later.";
-            console.error(err);
-          }
-        }else{
-          const mail = `mailto:?subject=Like Charlie Action Proposal&body=Title: ${encodeURIComponent(title)}%0A%0ADescription:%0A${encodeURIComponent(desc)}%0A%0ALink:%0A${encodeURIComponent(link)}`;
-          window.location.href = mail;
-          status.textContent = "Opening your mail app…";
-          setTimeout(closeModal, 900);
-        }
-      }
-      document.getElementById('propSubmit')?.addEventListener('click', submitProposal);
-    })();
-  </script>
-
-</section>
-
+</main>
 
 <script>
-  // Single router: click any red "Do this" button => go to index with action preselected and Step 2 open
+  // Background rotator (optional, cosmetic)
+  (function(){
+    const bg=document.getElementById('page-bg');
+    const imgs=[
+      "https://images.unsplash.com/photo-1465447142348-e9952c393450?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1511735643442-503bb3bd3487?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2000&auto=format&fit=crop"
+    ];
+    let i=0; const setBG=idx=>{bg.style.opacity=0; setTimeout(()=>{bg.style.backgroundImage=`url("${imgs[idx]}")`; bg.style.opacity=1;},220);}
+    setBG(i); setInterval(()=>{i=(i+1)%imgs.length; setBG(i)},12000);
+  })();
+
+  // Route every red button to index.html with preselected action + step=2
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('a[data-action]');
     if (!btn) return;
     e.preventDefault();
-    const name = btn.getAttribute('data-action') || btn.textContent.trim();
-    window.location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+    const card = btn.closest('.card');
+    const title = btn.getAttribute('data-action') || card?.querySelector('h3')?.textContent?.trim() || 'Picked an action';
+    const url = '/index.html?action=' + encodeURIComponent(title) + '&step=2';
+    location.href = url;
   });
 </script>
 </body>
