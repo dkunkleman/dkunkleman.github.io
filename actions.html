@@ -161,175 +161,7 @@
 
 </style>
 
-<script>
-(function () {
-  const brand = document.querySelector('.brand');
-  if (!brand) return;
 
-  // Keep normal navigation for modifier/middle clicks
-  brand.addEventListener('click', async (e) => {
-    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button === 1) return;
-    e.preventDefault();
-
-    const url  = location.origin;
-    const text = 'Do one small good action with #LiveLikeCharlie';
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'Live Like Charlie', text, url });
-      } catch (_) { /* user canceled */ }
-    } else {
-      const fb = 'https://www.facebook.com/sharer/sharer.php?u=' +
-                 encodeURIComponent(url) + '&quote=' + encodeURIComponent(text);
-      const x  = 'https://x.com/intent/tweet?url=' +
-                 encodeURIComponent(url) + '&text=' + encodeURIComponent(text);
-      window.open(fb, '_blank', 'noopener,noreferrer');
-      setTimeout(() => window.open(x, '_blank', 'noopener,noreferrer'), 350);
-    }
-  });
-
-  brand.style.cursor = 'pointer';
-})();
-</script>
-
-<script>
-  // When someone clicks a red action button, jump to index with the action preselected and open Step 2.
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[data-action]');
-    if (!a) return;
-    const name = a.getAttribute('data-action') || a.textContent.trim();
-    // Go to index with ?action=...&step=2
-    location.href = `/index.html?action=${encodeURIComponent(name)}&step=2`;
-  });
-</script>
-
-<script>
-  // Jump to index with action preselected and Step 2 open
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('a[data-action]');
-    if (!btn) return;
-    e.preventDefault();
-    const name = btn.getAttribute('data-action') || btn.textContent.trim();
-    window.location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
-  });
-</script>
-
-<script>
-/* ---------- helpers ---------- */
-const $ = s => document.querySelector(s);
-function scrollToStep2(){ document.getElementById('submit')?.scrollIntoView({ behavior:'smooth' }); }
-
-/* ---------- compose modal open/close ---------- */
-function openComposeModal(actionName){
-  const M  = $('#composeModal');
-  const BG = $('#composeBg');
-  const TX = $('#composeText') || $('#suggested');
-  const AC = $('#composeAction');
-  if(!M || !BG || !TX) return;
-
-  AC && (AC.textContent = actionName || '');
-
-  const site = location.origin;
-  const base = `I just did “${actionName}” with #LiveLikeCharlie — your turn. ${site}`;
-  TX.value = base;
-  navigator.clipboard?.writeText(base).catch(()=>{});
-
-  M.classList.add('open');
-  TX.focus();
-}
-function closeComposeModal(){
-  $('#composeModal')?.classList.remove('open');
-}
-$('#composeClose')?.addEventListener('click', closeComposeModal);
-$('#composeModal .lc-backdrop')?.addEventListener('click', closeComposeModal);
-document.addEventListener('keydown', e => { if(e.key === 'Escape') closeComposeModal(); });
-
-/* ---------- background picker ---------- */
-function setComposeBackground(url){
-  const BG = $('#composeBg'); if(BG) BG.style.backgroundImage = url ? `url("${url}")` : '';
-}
-function renderComposeBackgroundChoices(){
-  const el = $('#bgPicker'); if(!el) return;
-  const images = [
-    '/img/flag.jpg',
-    '/img/constitution.jpg',
-    '/img/flag2.jpg',
-    '/img/eagle.jpg',
-    '/img/bibles.jpg'
-  ];
-  el.innerHTML = '';
-  images.forEach((src, i) => {
-    const b = document.createElement('button');
-    b.className = 'bg-thumb';
-    b.style.cssText = `aspect-ratio:16/10;border-radius:10px;border:2px solid rgba(255,255,255,.25);background:#222 center/cover no-repeat;cursor:pointer;background-image:url("${src}")`;
-    b.title = 'Background ' + (i+1);
-
-    const img = new Image();
-    img.onerror = ()=> b.style.display='none';
-    img.onload  = ()=> {}; img.src = src;
-
-    b.onclick = () => {
-      [...el.children].forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      setComposeBackground(src);
-    };
-    el.appendChild(b);
-    if(i===0) b.click(); // default
-  });
-}
-renderComposeBackgroundChoices();
-
-/* ---------- platform buttons in modal ---------- */
-$('#copyCompose')?.addEventListener('click', async ()=>{
-  const v = $('#composeText')?.value || '';
-  await navigator.clipboard.writeText(v);
-  (window.showToast?showToast:alert)('Copied!');
-});
-$('#goX')?.addEventListener('click', ()=>{
-  const v = $('#composeText')?.value || '';
-  window.open('https://x.com/intent/tweet?text='+encodeURIComponent(v), '_blank','noopener,noreferrer');
-});
-$('#goFB')?.addEventListener('click', ()=>{
-  const v = $('#composeText')?.value || '';
-  window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.origin)+'&quote='+encodeURIComponent(v), '_blank','noopener,noreferrer');
-});
-$('#goIG')?.addEventListener('click', ()=> window.open('https://www.instagram.com/','_blank','noopener,noreferrer'));
-$('#goTT')?.addEventListener('click', ()=> window.open('https://www.tiktok.com/creator-center/upload?lang=en','_blank','noopener,noreferrer'));
-
-/* ---------- Step-1 dropdown → open modal ---------- */
-document.getElementById('action')?.addEventListener('change', e=>{
-  const a = e.target.value;
-  if(!a) return;
-  // keep your existing behavior of filling the text box:
-  const box = document.getElementById('composeText') || document.getElementById('suggested');
-  if(box) box.value = `I just did “${a}” with #LiveLikeCharlie — your turn. ${location.origin}`;
-  // now open the modal and scroll to Step 2
-  openComposeModal(a);
-  scrollToStep2();
-});
-
-/* ---------- deep-link: ?action=NAME&step=2 ---------- */
-(function handleDeepLink(){
-  const params = new URLSearchParams(location.search);
-  const chosen = params.get('action');
-  const step   = params.get('step');
-  const sel    = document.getElementById('action');
-
-  if (chosen && sel) {
-    let found = false;
-    for (const o of sel.options) if ((o.value||o.text) === chosen) { found = true; break; }
-    if (!found) { const o = document.createElement('option'); o.value = chosen; o.text = chosen; sel.appendChild(o); }
-    sel.value = chosen;
-    // also fill text
-    const box = document.getElementById('composeText') || document.getElementById('suggested');
-    if(box) box.value = `I just did “${chosen}” with #LiveLikeCharlie — your turn. ${location.origin}`;
-  }
-  if (step === '2') {
-    openComposeModal(chosen || sel?.value || '');
-    scrollToStep2();
-  }
-})();
-</script>
 
 <script>
   document.addEventListener('click', (e) => {
@@ -542,3 +374,17 @@ document.getElementById('action')?.addEventListener('change', e=>{
   </script>
 
 </section>
+
+
+<script>
+  // Single router: click any red "Do this" button => go to index with action preselected and Step 2 open
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('a[data-action]');
+    if (!btn) return;
+    e.preventDefault();
+    const name = btn.getAttribute('data-action') || btn.textContent.trim();
+    window.location.href = '/index.html?action=' + encodeURIComponent(name) + '&step=2';
+  });
+</script>
+</body>
+</html>
