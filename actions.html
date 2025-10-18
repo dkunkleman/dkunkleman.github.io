@@ -1,3 +1,4 @@
+
 <!-- actions_partial_v3.html — Live Like Charlie / Actions list (expanded) -->
 <header>
   <div class="nav wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0">
@@ -128,6 +129,36 @@
   header nav a:hover{background:rgba(255,255,255,.06)}
   header nav a.active{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
   header nav .button{background:var(--accent);color:#fff;border:none}
+  /* Beautiful photo background for the "Propose a Like Charlie Action" popup */
+#proposeModal .box{
+  position: relative;
+  overflow: hidden;          /* keep the bg inside rounded corners */
+  background: transparent;   /* let our image show through */
+}
+
+/* Full-bleed background layer using a local image */
+#proposeModal .box::before{
+  content: "";
+  position: absolute; inset: 0;
+  background: url("/img/flag.jpg") center/cover no-repeat; /* <-- change to any img you want */
+  filter: brightness(.75);         /* darken a bit for legibility */
+  transform: scale(1.02);          /* tiny zoom to avoid edges */
+  z-index: 0;
+}
+
+/* Ensure modal content sits above the background */
+#proposeModal .box > *{
+  position: relative; z-index: 1;
+}
+
+/* Optional: add a soft glass layer behind inputs for clarity */
+#proposeModal input,
+#proposeModal textarea,
+#proposeModal button{
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.22);
+}
+
 </style>
 
 <script>
