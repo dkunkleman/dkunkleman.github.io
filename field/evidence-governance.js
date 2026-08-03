@@ -140,4 +140,288 @@
     const rows = [];
     (data.markers || []).filter(record => !["photo", "voice_note"].includes(String(record.type || ""))).forEach(record => rows.push({
       record_type: "observation",
-      ×Þø¶‰žËkºwµçUÍÕ±Ð€ô…ÁÁ±å½ÉÉ•Ñ•‘Y…±Õ”¡É•ÍÕ±Ð°½ÉÉ•Ñ¥½¸¤ì(€€€ô¤ì(€€€É•ÍÕ±Ð¹É•½É‘}ÍÑ…ÑÕÌ€ôÍÑ…ÑÕÌì(€€€É•ÍÕ±Ð¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì€ôÍÑ…ÑÕÌ€ôôô€‰Ù½¥‘•ˆì(€€€É•ÍÕ±Ð¹½ÉÉ•Ñ¥½¹}¥‘Ì€ô¡¥ÍÑ½Éä¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹½ÉÉ•Ñ¥½¹}¥¤ì(€€€É•ÑÕÉ¸É•ÍÕ±Ðì(€ô((€™Õ¹Ñ¥½¸É•½É‘MÑ…ÑÕÌ¡¥¹ÍÁ•Ñ¥½¸°É•½É‘QåÁ”°É•½É‘%¤ì(€€€½¹ÍÐ¡¥ÍÑ½Éä€ô½ÉÉ•Ñ¥½¹Í½È¡¥¹ÍÁ•Ñ¥½¸ñðíô°É•½É‘QåÁ”°É•½É‘%¤ì(€€€É•ÑÕÉ¸¡¥ÍÑ½Éä¹±•¹Ñ €ü¡¥ÍÑ½Éåm¡¥ÍÑ½Éä¹±•¹Ñ €´€Åt¹É•ÍÕ±Ñ¥¹}ÍÑ…ÑÕÌ€è€‰…Ñ¥Ù”ˆì(€ô((€™Õ¹Ñ¥½¸‰Õ¥±‘™™•Ñ¥Ù•%¹ÍÁ•Ñ¥½¸¡¥¹ÍÁ•Ñ¥½¸¤ì(€€€½¹ÍÐÉ…Ü€ô•¹ÍÕÉ•½Ù•É¹…¹•5½‘•°¡±½¹”¡¥¹ÍÁ•Ñ¥½¸ñðíô¤¤ì(€€€½¹ÍÐ…±±5…É­•ÉÌ€ô€¡É…Ü¹µ…É­•ÉÌñðmt¤¹µ…À¡¥Ñ•´€ôø•™™•Ñ¥Ù•I•½É¡É…Ü°€‰½‰Í•ÉÙ…Ñ¥½¸ˆ°¥Ñ•´¤¤ì(€€€½¹ÍÐ…±±A¡½Ñ½Ì€ô€¡É…Ü¹Á¡½Ñ½Ìñðmt¤¹µ…À¡¥Ñ•´€ôøì(€€€€€½¹ÍÐÁ¡½Ñ¼€ô•™™•Ñ¥Ù•I•½É¡É…Ü°€‰Á¡½Ñ¼ˆ°¥Ñ•´¤ì(€€€€€¥˜€¡É•½É‘MÑ…ÑÕÌ¡É…Ü°€‰Á¡½Ñ½}±…ÍÍ¥™¥…Ñ¥½¸ˆ°¥Ñ•´¹¥¤€ôôô€‰Ù½¥‘•ˆ¤ì(€€€€€€€Á¡½Ñ¼¹Á¡½Ñ½}µ•…¹¥¹œ€ô=‰©•Ð¹…ÍÍ¥¸¡íô°Á¡½Ñ¼¹Á¡½Ñ½}µ•…¹¥¹œñðíô°ìÍÑ…ÑÕÌè€‰Ù½¥‘•‘}‰å}½ÉÉ•Ñ¥½¸ˆ°•á±Õ‘•‘}™É½µ}ÕÉÉ•¹Ñ}¥¹Ñ•ÉÁÉ•Ñ…Ñ¥½¸èÑÉÕ”ô¤ì(€€€€€ô(€€€€€É•ÑÕÉ¸Á¡½Ñ¼ì(€€€ô¤ì(€€€½¹ÍÐ…±±Y½¥•Ì€ô€¡É…Ü¹Ù½¥•}¹½Ñ•Ìñðmt¤¹µ…À¡¥Ñ•´€ôø•™™•Ñ¥Ù•I•½É¡É…Ü°€‰Ù½¥•}¹½Ñ”ˆ°¥Ñ•´¤¤ì(€€€½¹ÍÐ…±±É•…Ì€ô€¡É…Ü¹¥¹ÍÁ•Ñ¥½¹}…É•…Ìñðmt¤¹µ…À¡¥Ñ•´€ôø•™™•Ñ¥Ù•I•½É¡É…Ü°€‰…É•…}…ÍÍ¥¹µ•¹Ðˆ°¥Ñ•´¤¤ì(€€€½¹ÍÐ…±±EÕ•ÍÑ¥½¹Ì€ô€¡É…Ü¹¥¹Ù•ÍÑ¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¹Ìñðmt¤¹µ…À¡¥Ñ•´€ôø•™™•Ñ¥Ù•I•½É¡É…Ü°€‰ÅÕ•ÍÑ¥½¹}…ÍÍ¥¹µ•¹Ðˆ°¥Ñ•´¤¤ì(€€€½¹ÍÐ…±±!åÁ½Ñ¡•Í•Ì€ô€¡É…Ü¹¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í•Ìñðmt¤¹µ…À¡¥Ñ•´€ôø•™™•Ñ¥Ù•I•½É¡É…Ü°€‰¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í¥Ìˆ°¥Ñ•´¤¤ì(€€€½¹ÍÐÙ½¥‘A¡½Ñ½%‘Ì€ô¹•ÜM•Ð¡…±±A¡½Ñ½Ì¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤¹µ…À¡¥Ñ•´€ôøMÑÉ¥¹œ¡¥Ñ•´¹¥¤¤¤ì(€€€½¹ÍÐÙ½¥‘Y½¥•%‘Ì€ô¹•ÜM•Ð¡…±±Y½¥•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤¹µ…À¡¥Ñ•´€ôøMÑÉ¥¹œ¡¥Ñ•´¹¥¤¤¤ì(€€€½¹ÍÐ…Ñ¥Ù•A¡½Ñ½	å%€ô¹•Ü5…À¡…±±A¡½Ñ½Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤¹µ…À¡¥Ñ•´€ôømMÑÉ¥¹œ¡¥Ñ•´¹¥¤°¥Ñ•µt¤¤ì(€€€½¹ÍÐ…Ñ¥Ù•Y½¥•	å%€ô¹•Ü5…À¡…±±Y½¥•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤¹µ…À¡¥Ñ•´€ôømMÑÉ¥¹œ¡¥Ñ•´¹¥¤°¥Ñ•µt¤¤ì(€€€½¹ÍÐµ…É­•ÉÌ€ô…±±5…É­•ÉÌ¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì€˜˜€…Ù½¥‘A¡½Ñ½%‘Ì¹¡…Ì¡MÑÉ¥¹œ¡¥Ñ•´¹Á¡½Ñ½}¥ñð€ˆˆ¤¤€˜˜€…Ù½¥‘Y½¥•%‘Ì¹¡…Ì¡MÑÉ¥¹œ¡¥Ñ•´¹Ù½¥•}¹½Ñ•}¥ñð€ˆˆ¤¤¤¹µ…À¡¥Ñ•´€ôøì(€€€€€½¹ÍÐ±¥¹­•‘A¡½Ñ¼€ô…Ñ¥Ù•A¡½Ñ½	å%¹•Ð¡MÑÉ¥¹œ¡¥Ñ•´¹Á¡½Ñ½}¥ñð€ˆˆ¤¤ì(€€€€€½¹ÍÐ±¥¹­•‘Y½¥”€ô…Ñ¥Ù•Y½¥•	å%¹•Ð¡MÑÉ¥¹œ¡¥Ñ•´¹Ù½¥•}¹½Ñ•}¥ñð€ˆˆ¤¤ì(€€€€€¥˜€¡±¥¹­•‘A¡½Ñ¼¤ì(€€€€€€€¥Ñ•´¹…É•…}¥€ô±¥¹­•‘A¡½Ñ¼¹…É•…}¥ñð¥Ñ•´¹…É•…}¥ñð¹Õ±°ì(€€€€€€€¥Ñ•´¹…ÑÑÉ¥‰ÕÑ•Ì€ô=‰©•Ð¹…ÍÍ¥¸¡íô°¥Ñ•´¹…ÑÑÉ¥‰ÕÑ•Ìñðíô°ì…Ñ•½Éäè±¥¹­•‘A¡½Ñ¼¹…Ñ•½Éäñð¹Õ±°ô¤ì(€€€€€ô(€€€€€¥˜€¡±¥¹­•‘Y½¥”¤¥Ñ•´¹…É•…}¥€ô±¥¹­•‘Y½¥”¹…É•…}¥ñð¥Ñ•´¹…É•…}¥ñð¹Õ±°ì(€€€€€É•ÑÕÉ¸¥Ñ•´ì(€€€ô¤ì(€€€½¹ÍÐ…Ñ¥Ù•I•Ù¥•Ý¹¹½Ñ…Ñ¥½¹Ì€ô€¡É…Ü¹É•Ù¥•Ý}…¹¹½Ñ…Ñ¥½¹Ìñðmt¤¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹…ÁÁÉ½Ù•‘}‰å}¥¹ÍÁ•Ñ½È€ôôôÑÉÕ”€˜˜¥Ñ•´¹ÍÑ…ÑÕÌ€ôôô€‰Ñ¥Ù”ˆ¤ì(€€€½¹ÍÐ…Ñ¥Ù”€ô=‰©•Ð¹…ÍÍ¥¸¡íô°É…Ü°ì(€€€€€µ…É­•ÉÌ°(€€€€€Á¡½Ñ½Ìè…±±A¡½Ñ½Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤°(€€€€€Ù½¥•}¹½Ñ•Ìè…±±Y½¥•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤°(€€€€€¥¹ÍÁ•Ñ¥½¹}…É•…Ìè…±±É•…Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤°(€€€€€¥¹Ù•ÍÑ¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¹Ìè…±±EÕ•ÍÑ¥½¹Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤°(€€€€€¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í•Ìè…±±!åÁ½Ñ¡•Í•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€…¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤°(€€€€€É•Ù¥•Ý}…¹¹½Ñ…Ñ¥½¹Ìè…Ñ¥Ù•I•Ù¥•Ý¹¹½Ñ…Ñ¥½¹Ì(€€€ô¤ì(€€€É•ÑÕÉ¸ì(€€€€€…Ñ¥Ù”°(€€€€€…±±}É•½É‘Ìèì½‰Í•ÉÙ…Ñ¥½¹Ìè…±±5…É­•ÉÌ°Á¡½Ñ½É…Á¡Ìè…±±A¡½Ñ½Ì°Ù½¥•}¹½Ñ•Ìè…±±Y½¥•Ì°¥¹ÍÁ•Ñ¥½¹}…É•…Ìè…±±É•…Ì°¥¹Ù•ÍÑ¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¹Ìè…±±EÕ•ÍÑ¥½¹Ì°¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í•Ìè…±±!åÁ½Ñ¡•Í•Ìô°(€€€€€…Õ‘¥Ñ}¡¥ÍÑ½Éäèì(€€€€€€€Í¡•µ…}¹…µ”è€‰ÁÉ½Á•ÉÑäµ¥¹Ñ•±±¥•¹”µ•Ù¥‘•¹”µ…Õ‘¥Ðˆ°(€€€€€€€Í¡•µ…}Ù•ÉÍ¥½¸è€ˆÄ¸Àˆ°(€€€€€€€¥µµÕÑ…‰±•}Í½ÕÉ•}ÉÕ±”è€‰=É¥¥¹…°•¹ÑÉ¥•Ì…É”¹•Ù•ÈÉ•ÝÉ¥ÑÑ•¸½È‘•±•Ñ•¸I•Á½ÉÑÌÕÍ”Ñ¡”•™™•Ñ¥Ù”…Ñ¥Ù”Ù¥•ÜìÙ½¥‘•É•½É‘ÌÉ•µ…¥¸¡•É”¸ˆ°(€€€€€€€½ÉÉ•Ñ¥½¹Ìè±½¹”¡É…Ü¹½ÉÉ•Ñ¥½¹Ìñðmt¤°(€€€€€€€É•Ù¥•Ý}…¹¹½Ñ…Ñ¥½¹Ìè±½¹”¡É…Ü¹É•Ù¥•Ý}…¹¹½Ñ…Ñ¥½¹Ìñðmt¤°(€€€€€€€Í½ÕÉ•}É•½É‘}½Õ¹ÑÌèì½‰Í•ÉÙ…Ñ¥½¹Ìè…±±5…É­•ÉÌ¹±•¹Ñ °Á¡½Ñ½É…Á¡Ìè…±±A¡½Ñ½Ì¹±•¹Ñ °Ù½¥•}¹½Ñ•Ìè…±±Y½¥•Ì¹±•¹Ñ ô°(€€€€€€€Ù½¥‘•‘}É•½É‘}¥‘Ìèl¸¸¹…±±5…É­•ÉÌ°€¸¸¹…±±A¡½Ñ½Ì°€¸¸¹…±±Y½¥•Ít¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹•á±Õ‘•‘}™É½µ}™¥¹‘¥¹Ì¤¹µ…À¡¥Ñ•´€ôø¥‘=˜¡¥Ñ•´°¥Ñ•´¹Á¡½Ñ½}¹Õµ‰•È€ü€‰Á¡½Ñ¼ˆ€è€¡¥Ñ•´¹ÍÑ…ÉÑ•‘}…Ð€ü€‰Ù½¥•}¹½Ñ”ˆ€è€‰½‰Í•ÉÙ…Ñ¥½¸ˆ¤¤¤(€€€€€ô(€€€ôì(€ô((€™Õ¹Ñ¥½¸Õ¹‘½1…ÍÑÑ¥½¸¡¥¹ÍÁ•Ñ¥½¸°½ÁÑ¥½¹Ì¤ì(€€€½¹ÍÐ‘…Ñ„€ô•¹ÍÕÉ•½Ù•É¹…¹•5½‘•°¡¥¹ÍÁ•Ñ¥½¸¤ì(€€€½¹ÍÐÍ•ÑÑ¥¹Ì€ô½ÁÑ¥½¹Ìñðíôì(€€€½¹ÍÐ…¹‘¥‘…Ñ•Ì€ôÉ•½É‘Í½É½ÉÉ•Ñ¥½¸¡‘…Ñ„¤¹™¥±Ñ•È¡¥Ñ•´€ôøÉ•½É‘MÑ…ÑÕÌ¡‘…Ñ„°¥Ñ•´¹É•½É‘}ÑåÁ”°¥Ñ•´¹É•½É‘}¥¤€„ôô€‰Ù½¥‘•ˆ¤ì(€€€½¹ÍÐÑ…É•Ð€ôÍ•ÑÑ¥¹Ì¹É•½É‘}ÑåÁ”€˜˜Í•ÑÑ¥¹Ì¹É•½É‘}¥€ü…¹‘¥‘…Ñ•Ì¹™¥¹¡¥Ñ•´€ôø¥Ñ•´¹É•½É‘}ÑåÁ”€ôôôÍ•ÑÑ¥¹Ì¹É•½É‘}ÑåÁ”€˜˜MÑÉ¥¹œ¡¥Ñ•´¹É•½É‘}¥¤€ôôôMÑÉ¥¹œ¡Í•ÑÑ¥¹Ì¹É•½É‘}¥¤¤€è…¹‘¥‘…Ñ•ÍlÁtì(€€€¥˜€ …Ñ…É•Ð¤Ñ¡É½Ü¹•ÜÉÉ½È ‰Q¡•É”¥Ì¹¼…Ñ¥Ù”…Ñ¥½¸Ñ¼Õ¹‘¼¸ˆ¤ì(€€€É•ÑÕÉ¸…‘‘½ÉÉ•Ñ¥½¸¡‘…Ñ„°ì½ÉÉ•Ñ¥½¹}¥èÍ•ÑÑ¥¹Ì¹½ÉÉ•Ñ¥½¹}¥°É•½É‘}ÑåÁ”èÑ…É•Ð¹É•½É‘}ÑåÁ”°É•½É‘}¥èÑ…É•Ð¹É•½É‘}¥°½ÉÉ•Ñ¥½¹}É•…Í½¸è€‰ÕÍ•É}Õ¹‘¼ˆ°½ÉÉ•Ñ•‘}Ù…±Õ”è¹Õ±°°¥¹ÍÁ•Ñ½É}¥‘•¹Ñ¥ÑäèÍ•ÑÑ¥¹Ì¹¥¹ÍÁ•Ñ½É}¥‘•¹Ñ¥Ñäñð‘…Ñ„¹¥¹ÍÁ•Ñ½É}¥‘•¹Ñ¥Ñä°½ÉÉ•Ñ¥½¹}Ñ¥µ”èÍ•ÑÑ¥¹Ì¹½ÉÉ•Ñ•‘}…Ðñð¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤ô¤ì(€ô((€™Õ¹Ñ¥½¸Á¡½Ñ½A…ÑÑ•É¸¡Á¡½Ñ¼¤ì(€€€½¹ÍÐµ•…¹¥¹œ€ôÁ¡½Ñ¼€˜˜Á¡½Ñ¼¹Á¡½Ñ½}µ•…¹¥¹œñðíôì(€€€½¹ÍÐÉ½±•Ì€ôÉÉ…ä¹¥ÍÉÉ…ä¡µ•…¹¥¹œ¹•Ù¥‘•¹•}É½±•Ì¤€üµ•…¹¥¹œ¹•Ù¥‘•¹•}É½±•Ì€èmtì(€€€½¹ÍÐÁÉ•Í•¹Ð€ôA!=Q=}Y%9}I=1L¹™¥±Ñ•È¡É½±”€ôøÉ½±•Ì¹¥¹±Õ‘•Ì¡É½±”¤¤ì(€€€É•ÑÕÉ¸ìÁÉ•Í•¹Ð°µ¥ÍÍ¥¹œèA!=Q=}Y%9}I=1L¹™¥±Ñ•È¡É½±”€ôø€…ÁÉ•Í•¹Ð¹¥¹±Õ‘•Ì¡É½±”¤¤°½µÁ±•Ñ”èÁÉ•Í•¹Ð¹±•¹Ñ €ôôôA!=Q=}Y%9}I=1L¹±•¹Ñ ôì(€ô((€™Õ¹Ñ¥½¸É•…Ñ•¥•±‘Ù¥‘•¹•I•Ù¥•Ü¡¥¹ÍÁ•Ñ¥½¸¤ì(€€€½¹ÍÐ‘…Ñ„€ô¥¹ÍÁ•Ñ¥½¸ñðíôì(€€€½¹ÍÐÁ¡½Ñ½Ì€ô‘…Ñ„¹Á¡½Ñ½Ìñðmtì(€€€½¹ÍÐ¡åÁ½Ñ¡•Í•Ì€ô‘…Ñ„¹¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í•Ìñðmtì(€€€½¹ÍÐÁ…ÑÑ•É¹Ì€ôÁ¡½Ñ½Ì¹µ…À¡Á¡½Ñ¼€ôø€¡ìÁ¡½Ñ½}¥èÁ¡½Ñ¼¹¥°Á¡½Ñ½}¹Õµ‰•ÈèÁ¡½Ñ¼¹Á¡½Ñ½}¹Õµ‰•È°Á…ÑÑ•É¸èÁ¡½Ñ½A…ÑÑ•É¸¡Á¡½Ñ¼¤ô¤¤ì(€€€½¹ÍÐ±½ÝY…±Õ•…¹‘¥‘…Ñ•Ì€ômtì(€€€±•ÐÕÉÉ•¹ÑIÕ¸€ômtì(€€€Á¡½Ñ½Ì¹Í±¥” ¤¹Í½ÉÐ ¡„°ˆ¤€ôøMÑÉ¥¹œ¡„¹É•½É‘•‘}…Ðñð„¹Ñ¥µ”ñð€ˆˆ¤¹±½…±•½µÁ…É”¡MÑÉ¥¹œ¡ˆ¹É•½É‘•‘}…Ðñðˆ¹Ñ¥µ”ñð€ˆˆ¤¤¤¹™½É… ¡Á¡½Ñ¼€ôøì(€€€€€¥˜€¡l‰ÕÁ±¥…Ñ”ˆ°€‰I•™•É•¹”‰t¹¥¹±Õ‘•Ì¡Á¡½Ñ¼¹Á¡½Ñ½}Ù…±Õ”¤¤ÕÉÉ•¹ÑIÕ¸¹ÁÕÍ ¡Á¡½Ñ¼¤ì(€€€€€•±Í”ì(€€€€€€€¥˜€¡ÕÉÉ•¹ÑIÕ¸¹±•¹Ñ €øô€Ì¤±½ÝY…±Õ•…¹‘¥‘…Ñ•Ì¹ÁÕÍ ¡ÕÉÉ•¹ÑIÕ¸¹Í±¥” ¤¤ì(€€€€€€€ÕÉÉ•¹ÑIÕ¸€ômtì(€€€€€ô(€€€ô¤ì(€€€¥˜€¡ÕÉÉ•¹ÑIÕ¸¹±•¹Ñ €øô€Ì¤±½ÝY…±Õ•…¹‘¥‘…Ñ•Ì¹ÁÕÍ ¡ÕÉÉ•¹ÑIÕ¸¤ì(€€€É•ÑÕÉ¸ì(€€€€€Í¡•µ…}¹…µ”è€‰ÁÉ½Á•ÉÑäµ¥¹Ñ•±±¥•¹”µ™¥•±µ•Ù¥‘•¹”µÉ•Ù¥•Üˆ°(€€€€€Í¡•µ…}Ù•ÉÍ¥½¸è€ˆÄ¸Àˆ°(€€€€€ÍÑÉ½¹•ÍÑ}•Ù¥‘•¹”èÁ¡½Ñ½Ì¹™¥±Ñ•È¡Á¡½Ñ¼€ôøÁ¡½Ñ¼¹Á¡½Ñ½}Ù…±Õ”€ôôô€‰É¥Ñ¥…°ˆ¤¹µ…À¡Á¡½Ñ¼€ôøÁ¡½Ñ¼¹¥¤°(€€€€€É•Á•Ñ¥Ñ¥Ù•}Á¡½Ñ½É…Á¡ÌèÁ¡½Ñ½Ì¹™¥±Ñ•È¡Á¡½Ñ¼€ôøÁ¡½Ñ¼¹Á¡½Ñ½}Ù…±Õ”€ôôô€‰ÕÁ±¥…Ñ”ˆ¤¹µ…À¡Á¡½Ñ¼€ôøÁ¡½Ñ¼¹¥¤°(€€€€€µ¥ÍÍ¥¹}½¹Ñ•áÑ}Á¡½Ñ½É…Á¡ÌèÁ…ÑÑ•É¹Ì¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹Á…ÑÑ•É¸¹µ¥ÍÍ¥¹œ¹¥¹±Õ‘•Ì ‰½¹Ñ•áÐˆ¤¤¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹Á¡½Ñ½}¥¤°(€€€€€µ¥ÍÍ¥¹}µ•…ÍÕÉ•µ•¹ÑÌèÁ…ÑÑ•É¹Ì¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹Á…ÑÑ•É¸¹µ¥ÍÍ¥¹œ¹¥¹±Õ‘•Ì ‰µ•…ÍÕÉ•µ•¹Ðˆ¤¤¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹Á¡½Ñ½}¥¤°(€€€€€™½ÕÉ}Á¡½Ñ½}Á…ÑÑ•É¹}‰å}Á¡½Ñ¼èÁ…ÑÑ•É¹Ì°(€€€€€Õ¹ÍÕÁÁ½ÉÑ•‘}½¹±ÕÍ¥½¹Ìè¡åÁ½Ñ¡•Í•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€„¡¥Ñ•´¹ÍÕÁÁ½ÉÑ¥¹}Á¡½Ñ½}¥‘Ìñðmt¤¹±•¹Ñ €˜˜€„¡¥Ñ•´¹ÑÉ¥•É¥¹}½‰Í•ÉÙ…Ñ¥½¹}¥‘Ìñðmt¤¹±•¹Ñ ¤¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹¡åÁ½Ñ¡•Í¥Í}¥¤°(€€€€€ÁÉ½™•ÍÍ¥½¹…±}ÅÕ•ÍÑ¥½¹Í}É•…‘äè¡åÁ½Ñ¡•Í•Ì¹™¥±Ñ•È¡¥Ñ•´€ôø¥Ñ•´¹Ù•É¥™¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¸¤¹µ…À¡¥Ñ•´€ôø€¡ì¡åÁ½Ñ¡•Í¥Í}¥è¥Ñ•´¹¡åÁ½Ñ¡•Í¥Í}¥°ÁÉ½™•ÍÍ¥½¹…±}ÑåÁ”è¥Ñ•´¹ÁÉ½™•ÍÍ¥½¹…±}ÑåÁ”°•á…Ñ}ÅÕ•ÍÑ¥½¸è¥Ñ•´¹Ù•É¥™¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¸ô¤¤°(€€€€€™¥•±‘}Ñ¥µ•}Ý¥Ñ¡}Á½ÍÍ¥‰±•}±½Ý}…‘‘¥Ñ¥½¹…±}Ù…±Õ”è±½ÝY…±Õ•…¹‘¥‘…Ñ•Ì¹µ…À¡ÉÕ¸€ôø€¡ì(€€€€€€€ÍÑ…ÉÑ•‘}…ÐèÉÕ¹lÁt¹É•½É‘•‘}…ÐñðÉÕ¹lÁt¹Ñ¥µ”°(€€€€€€€•¹‘•‘}…ÐèÉÕ¹mÉÕ¸¹±•¹Ñ €´€Åt¹É•½É‘•‘}…ÐñðÉÕ¹mÉÕ¸¹±•¹Ñ €´€Åt¹Ñ¥µ”°(€€€€€€€Á¡½Ñ½É…Á¡}¥‘ÌèÉÕ¸¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹¥¤°(€€€€€€€‰…Í¥Ìè€‰Q¡É•”½Èµ½É”½¹Í•ÕÑ¥Ù”Á¡½Ñ½É…Á¡ÌÝ•É”µ…É­•I•™•É•¹”½ÈÕÁ±¥…Ñ”¸ˆ°(€€€€€€€É•Ù¥•Ý}É•ÅÕ¥É•è€‰Í¬Ý¡•Ñ¡•ÈÑ¡”Í•ÅÕ•¹”…‘‘•¹•Ü½¹Ñ•áÐ°µ•…ÍÕÉ•µ•¹Ð°½ÈÉ•±…Ñ¥½¹Í¡¥À•Ù¥‘•¹”‰•™½É”…±±¥¹œÑ¡”Ñ¥µ”Õ¹¹••ÍÍ…Éä¸ˆ(€€€€€ô¤¤°(€€€€€±½Ý}…‘‘¥Ñ¥½¹…±}Ù…±Õ•}ÉÕ±”è€‰I•Ù¥•Ü±½¹œÍÑ½ÁÁ•½‘½Õµ•¹Ñ¥¹œÁ•É¥½‘Ì…¹½¹Í•ÕÑ¥Ù”ÕÁ±¥…Ñ”½I•™•É•¹”Á¡½Ñ½É…Á¡Ìì‘¼¹½Ð¥¹™•ÈÝ…ÍÑ•Ñ¥µ”Ý¥Ñ¡½ÕÐ¥¹ÍÁ•Ñ½È½¹™¥Éµ…Ñ¥½¸¸ˆ°(€€€€€ÑÉ…¥¹¥¹}ÁÉ½µÁÑÌèl(€€€€€€€€‰]¡…Ð‘•¥Í¥½¸Ý¥±°Ñ¡¥Ì•Ù¥‘•¹”¡•±ÀÍ½µ•½¹”µ…­”üˆ°(€€€€€€€€‰]¡…Ð™…ÐÝ½Õ±„ÁÉ½™•ÍÍ¥½¹…°½Ñ¡•ÉÝ¥Í”¡…Ù”Ñ¼Ù¥Í¥ÐÑ¡”Í¥Ñ”Ñ¼½±±•Ðüˆ°(€€€€€€€€‰…¸$µ•…ÍÕÉ”¥ÐÉ…Ñ¡•ÈÑ¡…¸µ•É•±ä‘•ÍÉ¥‰”¥Ðüˆ°(€€€€€€€€‰!…Ù”$Í¡½Ý¸½¹Ñ•áÐ…ÌÝ•±°…ÌÑ¡”±½Í”µÕÀüˆ°(€€€€€€€€‰´$É•½É‘¥¹œ„™…Ð°•ÍÑ¥µ…Ñ”°½È¡åÁ½Ñ¡•Í¥Ìüˆ°(€€€€€€€€‰%Ì…¹½Ñ¡•ÈÁ¡½Ñ½É…Á …‘‘¥¹œ¥¹™½Éµ…Ñ¥½¸½Èµ•É•±äÉ•Á•…Ñ¥¹œÑ¡”±…ÍÐ½¹”üˆ(€€€€€t(€€€ôì(€ô((€™Õ¹Ñ¥½¸É•…Ñ•AÉ½™•ÍÍ¥½¹…±!…¹‘½™™…É‘Ì¡¥¹ÍÁ•Ñ¥½¸°µ…ÁA…Ñ ¤ì(€€€½¹ÍÐ‘…Ñ„€ô¥¹ÍÁ•Ñ¥½¸ñðíôì(€€€½¹ÍÐ½‰Í•ÉÙ…Ñ¥½¹Ì€ô‘…Ñ„¹µ…É­•ÉÌñðmtì(€€€½¹ÍÐÁ¡½Ñ½Ì€ô‘…Ñ„¹Á¡½Ñ½Ìñðmtì(€€€½¹ÍÐ…É‘Ì€ômtì(€€€€¡‘…Ñ„¹¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í•Ìñðmt¤¹™½É… ¡¡åÁ½Ñ¡•Í¥Ì€ôøì(€€€€€½¹ÍÐÍÕÁÁ½ÉÑ¥¹=‰Í•ÉÙ…Ñ¥½¹Ì€ô½‰Í•ÉÙ…Ñ¥½¹Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€¡¡åÁ½Ñ¡•Í¥Ì¹ÑÉ¥•É¥¹}½‰Í•ÉÙ…Ñ¥½¹}¥‘Ìñðmt¤¹¥¹±Õ‘•Ì¡¥Ñ•´¹¥¤¤ì(€€€€€½¹ÍÐÍÕÁÁ½ÉÑ¥¹A¡½Ñ½Ì€ôÁ¡½Ñ½Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€¡¡åÁ½Ñ¡•Í¥Ì¹ÍÕÁÁ½ÉÑ¥¹}Á¡½Ñ½}¥‘Ìñðmt¤¹¥¹±Õ‘•Ì¡¥Ñ•´¹¥¤¤ì(€€€€€½¹ÍÐ±½…Ñ¥½¹M½ÕÉ”€ôÍÕÁÁ½ÉÑ¥¹=‰Í•ÉÙ…Ñ¥½¹ÍlÁtñðÍÕÁÁ½ÉÑ¥¹A¡½Ñ½ÍlÁtñðíôì(€€€€€AI=MM%=91}U%9L¹™½É… ¡…Õ‘¥•¹”€ôø…É‘Ì¹ÁÕÍ ¡ì(€€€€€€€…É‘}¥è¡…¹‘½™˜´‘í¡åÁ½Ñ¡•Í¥Ì¹¡åÁ½Ñ¡•Í¥Í}¥‘ô´‘í…Õ‘¥•¹”¹É•Á±…” ½my„µèÀ´åt¬½œ°€ˆ´ˆ¥õ€°(€€€€€€€…Õ‘¥•¹”°(€€€€€€€•á…Ñ}ÅÕ•ÍÑ¥½¸è¡åÁ½Ñ¡•Í¥Ì¹Ù•É¥™¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¸°(€€€€€€€ÁÍ}±½…Ñ¥½¸è9Õµ‰•È¹¥Í¥¹¥Ñ”¡9Õµ‰•È¡±½…Ñ¥½¹M½ÕÉ”¹±…Ð¤¤€˜˜9Õµ‰•È¹¥Í¥¹¥Ñ”¡9Õµ‰•È¡±½…Ñ¥½¹M½ÕÉ”¹±½¸¤¤€üì±…Ñ¥ÑÕ‘”è9Õµ‰•È¡±½…Ñ¥½¹M½ÕÉ”¹±…Ð¤°±½¹¥ÑÕ‘”è9Õµ‰•È¡±½…Ñ¥½¹M½ÕÉ”¹±½¸¤°…ÕÉ…å}´è±½…Ñ¥½¹M½ÕÉ”¹ÁÍ}…ÕÉ…å}´ñð¹Õ±°ô€è¹Õ±°°(€€€€€€€É•±•Ù…¹Ñ}µ…Àèµ…ÁA…Ñ ñð€‰ÁÉ¥¹Ñ…‰±”µÉ•Á½ÉÐ¹¡Ñµ°ˆ°(€€€€€€€Á¡½Ñ½É…Á¡}¥‘ÌèÍÕÁÁ½ÉÑ¥¹A¡½Ñ½Ì¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹¥¤°(€€€€€€€µ•…ÍÕÉ•µ•¹ÑÌèÍÕÁÁ½ÉÑ¥¹=‰Í•ÉÙ…Ñ¥½¹Ì¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹…ÑÑÉ¥‰ÕÑ•Ìñð¥Ñ•´¹½‰Í•ÉÙ…Ñ¥½¹}…ÑÑÉ¥‰ÕÑ•Ìñðíô¤¹™¥±Ñ•È¡Ù…±Õ”€ôø=‰©•Ð¹­•åÌ¡Ù…±Õ”¤¹±•¹Ñ ¤°(€€€€€€€Ý•…Ñ¡•É}…¹‘}É…¥¹™…±±}½¹Ñ•áÐè‘…Ñ„¹½¹‘¥Ñ¥½¹Ìñðíô°(€€€€€€€¥¹ÍÁ•Ñ½É}½‰Í•ÉÙ…Ñ¥½¹}¥‘ÌèÍÕÁÁ½ÉÑ¥¹=‰Í•ÉÙ…Ñ¥½¹Ì¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹¥¤°(€€€€€€€¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í¥Ìèì¡åÁ½Ñ¡•Í¥Í}¥è¡åÁ½Ñ¡•Í¥Ì¹¡åÁ½Ñ¡•Í¥Í}¥°ÍÑ…Ñ•µ•¹Ðè¡åÁ½Ñ¡•Í¥Ì¹ÍÑ…Ñ•µ•¹Ð°™…ÑÕ…±}ÍÑ…ÑÕÌè¡åÁ½Ñ¡•Í¥Ì¹™…ÑÕ…±}ÍÑ…ÑÕÌô°(€€€€€€€Õ¹­¹½Ý¹Ìèm¡åÁ½Ñ¡•Í¥Ì¹Ù•É¥™¥…Ñ¥½¹}ÅÕ•ÍÑ¥½¹t°(€€€€€€€Ý¡å}…¹ÍÝ•É}µ…ÑÑ•ÉÌè€‰Q¡”…¹ÍÝ•È½Õ±µ…Ñ•É¥…±±ä¡…¹”½¹±ÕÍ¥½¹Ì…‰½ÕÐ‘É…¥¹…”É¥Í¬°ÕÍ…‰±”±…¹°…•ÍÌ°Í¥Ñ”Ý½É¬°½ÍÐ°Á•Éµ¥ÑÑ¥¹œ°½È¹•¥¡‰½É¥¹œµÁÉ½Á•ÉÑä•áÁ½ÍÕÉ”¸ˆ°(€€€€€€€•áÁ•Ñ•‘}‘•¥Í¥½¹}¡…¹”è…Õ‘¥•¹”€ôôô€‰‰Õå•Èˆ€ü€‰AÕÉ¡…Í”Ñ•ÉµÌ°½¹Ñ¥¹•¹¥•Ì°ÁÉ¥”°½È‘•¥Í¥½¸Ñ¼ÁÉ½••¸ˆ€è€¡…Õ‘¥•¹”€ôôô€‰Í•±±•Èˆ€ü€‰¥Í±½ÍÕÉ”°É•½É‘ÌÑ¼ÁÉ½Ù¥‘”°½È½ÉÉ•Ñ¥Ù”µÝ½É¬‘¥ÍÕÍÍ¥½¹Ì¸ˆ€è€‰M½Á”°™•…Í¥‰¥±¥Ñä°½ÍÐ°½È¹••™½È…‘‘¥Ñ¥½¹…°±¥•¹Í•…¹…±åÍ¥Ì¸ˆ¤°(€€€€€€€±¥µ¥Ñ…Ñ¥½¸è€‰Q¡¥Ì™¥•±É•½É¥ÌÉ•½¹¹…¥ÍÍ…¹”•Ù¥‘•¹”¸%Ð‘½•Ì¹½ÐÉ•Á±…”±¥•¹Í•ÁÉ½™•ÍÍ¥½¹…°Ý½É¬…¹‘½•Ì¹½ÐÉ•½µµ•¹½¹ÍÑÉÕÑ¥½¸¸ˆ(€€€€€ô¤¤ì(€€€ô¤ì(€€€½‰Í•ÉÙ…Ñ¥½¹Ì¹™¥±Ñ•È¡¥Ñ•´€ôø€½¹••‘ÌÁÉ½™•ÍÍ¥½¹…°Ù•É¥™¥…Ñ¥½¸½¤¹Ñ•ÍÐ¡MÑÉ¥¹œ¡¥Ñ•´¹•Ù¥‘•¹•}±…ÍÍ¥™¥…Ñ¥½¸ñð€ˆˆ¤¤¤¹™½É… ¡½‰Í•ÉÙ…Ñ¥½¸€ôøì(€€€€€½¹ÍÐ±¥¹­•‘A¡½Ñ½Ì€ôÁ¡½Ñ½Ì¹™¥±Ñ•È¡Á¡½Ñ¼€ôøMÑÉ¥¹œ¡Á¡½Ñ¼¹…ÍÍ½¥…Ñ•‘}½‰Í•ÉÙ…Ñ¥½¹}¥ñð€ˆˆ¤€ôôôMÑÉ¥¹œ¡½‰Í•ÉÙ…Ñ¥½¸¹¥¤¤ì(€€€€€½¹ÍÐ…ÑÑÉ¥‰ÕÑ•Ì€ô½‰Í•ÉÙ…Ñ¥½¸¹…ÑÑÉ¥‰ÕÑ•Ìñðíôì(€€€€€½¹ÍÐ•á…ÑEÕ•ÍÑ¥½¸€ô…ÑÑÉ¥‰ÕÑ•Ì¹ÁÉ½™•ÍÍ¥½¹…±}ÅÕ•ÍÑ¥½¸ñð]¡…Ð¥ÌÑ¡”ÁÉ½™•ÍÍ¥½¹…±±äÙ•É¥™¥•¹…ÑÕÉ”°•áÑ•¹Ð°…ÕÍ”°…¹‘•¥Í¥½¸Í¥¹¥™¥…¹”½˜€‘í½‰Í•ÉÙ…Ñ¥½¸¹‰ÕÑÑ½¹}±…‰•°ñð½‰Í•ÉÙ…Ñ¥½¸¹ÑåÁ”ñð½‰Í•ÉÙ…Ñ¥½¸¹¥‘ôÉ•½É‘•…ÐÑ¡¥Ì±½…Ñ¥½¸ý€ì(€€€€€AI=MM%=91}U%9L¹™½É… ¡…Õ‘¥•¹”€ôø…É‘Ì¹ÁÕÍ ¡ì(€€€€€€€…É‘}¥è¡…¹‘½™˜´‘í½‰Í•ÉÙ…Ñ¥½¸¹¥‘ô´‘í…Õ‘¥•¹”¹É•Á±…” ½my„µèÀ´åt¬½œ°€ˆ´ˆ¥õ€°(€€€€€€€…Õ‘¥•¹”°(€€€€€€€•á…Ñ}ÅÕ•ÍÑ¥½¸è•á…ÑEÕ•ÍÑ¥½¸°(€€€€€€€ÁÍ}±½…Ñ¥½¸è9Õµ‰•È¹¥Í¥¹¥Ñ”¡9Õµ‰•È¡½‰Í•ÉÙ…Ñ¥½¸¹±…Ð¤¤€˜˜9Õµ‰•È¹¥Í¥¹¥Ñ”¡9Õµ‰•È¡½‰Í•ÉÙ…Ñ¥½¸¹±½¸¤¤€üì±…Ñ¥ÑÕ‘”è9Õµ‰•È¡½‰Í•ÉÙ…Ñ¥½¸¹±…Ð¤°±½¹¥ÑÕ‘”è9Õµ‰•È¡½‰Í•ÉÙ…Ñ¥½¸¹±½¸¤°…ÕÉ…å}´è½‰Í•ÉÙ…Ñ¥½¸¹ÁÍ}…ÕÉ…å}´ñð¹Õ±°ô€è¹Õ±°°(€€€€€€€É•±•Ù…¹Ñ}µ…Àèµ…ÁA…Ñ ñð€‰ÁÉ¥¹Ñ…‰±”µÉ•Á½ÉÐ¹¡Ñµ°ˆ°(€€€€€€€Á¡½Ñ½É…Á¡}¥‘Ìè±¥¹­•‘A¡½Ñ½Ì¹µ…À¡¥Ñ•´€ôø¥Ñ•´¹¥¤°(€€€€€€€µ•…ÍÕÉ•µ•¹ÑÌè=‰©•Ð¹­•åÌ¡…ÑÑÉ¥‰ÕÑ•Ì¤¹±•¹Ñ €üm…ÑÑÉ¥‰ÕÑ•Ít€èmt°(€€€€€€€Ý•…Ñ¡•É}…¹‘}É…¥¹™…±±}½¹Ñ•áÐè‘…Ñ„¹½¹‘¥Ñ¥½¹Ìñðíô°(€€€€€€€¥¹ÍÁ•Ñ½É}½‰Í•ÉÙ…Ñ¥½¹}¥‘Ìèm½‰Í•ÉÙ…Ñ¥½¸¹¥‘t°(€€€€€€€¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í¥Ìèì¡åÁ½Ñ¡•Í¥Í}¥è¹Õ±°°ÍÑ…Ñ•µ•¹Ðè€‰9¼¥¹ÍÁ•Ñ½È¡åÁ½Ñ¡•Í¥Ì¥Ì…ÍÍ•ÉÑ•ìÑ¡”™¥•±½‰Í•ÉÙ…Ñ¥½¸¥Ì™±…•™½ÈÁÉ½™•ÍÍ¥½¹…°Ù•É¥™¥…Ñ¥½¸¸ˆ°™…ÑÕ…±}ÍÑ…ÑÕÌè€‰=	MIYQ%=9}IEU%I%9}AI=MM%=91}YI%%Q%=8ˆô°(€€€€€€€Õ¹­¹½Ý¹Ìèm•á…ÑEÕ•ÍÑ¥½¹t°(€€€€€€€Ý¡å}…¹ÍÝ•É}µ…ÑÑ•ÉÌè€‰Q¡”Ù•É¥™¥•…¹ÍÝ•È½Õ±¡…¹”…•ÍÌ°‰Õ¥±‘…‰¥±¥Ñä°•½¹½µ¥ŒÁ½Ñ•¹Ñ¥…°°½ÍÐ½É¥Í¬°½ÈÑ¡”Í¥¹¥™¥…¹”½˜Ñ¡”Í¥Ñ”½¹‘¥Ñ¥½¸¸ˆ°(€€€€€€€•áÁ•Ñ•‘}‘•¥Í¥½¹}¡…¹”è…Õ‘¥•¹”€ôôô€‰‰Õå•Èˆ€ü€‰AÕÉ¡…Í”Ñ•ÉµÌ°½¹Ñ¥¹•¹¥•Ì°ÁÉ¥”°½È‘•¥Í¥½¸Ñ¼ÁÉ½••¸ˆ€è€¡…Õ‘¥•¹”€ôôô€‰Í•±±•Èˆ€ü€‰¥Í±½ÍÕÉ”°É•½É‘ÌÑ¼ÁÉ½Ù¥‘”°½È½ÉÉ•Ñ¥Ù”µÝ½É¬‘¥ÍÕÍÍ¥½¹Ì¸ˆ€è€‰M½Á”°™•…Í¥‰¥±¥Ñä°½ÍÐ°½È¹••™½È…‘‘¥Ñ¥½¹…°±¥•¹Í•…¹…±åÍ¥Ì¸ˆ¤°(€€€€€€€±¥µ¥Ñ…Ñ¥½¸è€‰Q¡¥Ì™¥•±É•½É¥ÌÉ•½¹¹…¥ÍÍ…¹”•Ù¥‘•¹”¸%Ð‘½•Ì¹½ÐÉ•Á±…”±¥•¹Í•ÁÉ½™•ÍÍ¥½¹…°Ý½É¬…¹‘½•Ì¹½ÐÉ•½µµ•¹½¹ÍÑÉÕÑ¥½¸¸ˆ(€€€€€ô¤¤ì(€€€ô¤ì(€€€É•ÑÕÉ¸ìÍ¡•µ…}¹…µ”è€‰ÁÉ½Á•ÉÑäµ¥¹Ñ•±±¥•¹”µÁÉ½™•ÍÍ¥½¹…°µ¡…¹‘½™˜µ…É‘Ìˆ°Í¡•µ…}Ù•ÉÍ¥½¸è€ˆÄ¸Àˆ°…É‘Ìôì(€ô((€™Õ¹Ñ¥½¸¡…¹‘½™™…É‘Í5…É­‘½Ý¸¡‰Õ¹‘±”¤ì(€€€½¹ÍÐ…É‘Ì€ô‰Õ¹‘±”€˜˜‰Õ¹‘±”¹…É‘Ìñðmtì(€€€¥˜€ ……É‘Ì¹±•¹Ñ ¤É•ÑÕÉ¸€ˆŒAÉ½™•ÍÍ¥½¹…°!…¹‘½™˜…É‘Íq¹q¹9¼¥ÍÍÕ”É•ÅÕ¥É¥¹œ„ÁÉ½™•ÍÍ¥½¹…°¡…¹‘½™˜…ÉÝ…ÌÉ•½É‘•¹q¸ˆì(€€€É•ÑÕÉ¸€ŒAÉ½™•ÍÍ¥½¹…°!…¹‘½™˜…É‘Íq¹q¹Q¡•Í”…É‘Ì½É¥•¹Ð„ÁÉ½™•ÍÍ¥½¹…°ìÑ¡•ä‘¼¹½ÐÉ•Á±…”±¥•¹Í•Ý½É¬¹q¹q¸‘í…É‘Ì¹µ…À¡…É€ôø€ŒŒ€‘í…É¹…Õ‘¥•¹”¹Ñ½UÁÁ•É…Í” ¥ôƒŠP€‘í…É¹…É‘}¥‘õq¹q¸´á…ÐÅÕ•ÍÑ¥½¸è€‘í…É¹•á…Ñ}ÅÕ•ÍÑ¥½¹õq¸´ALè€‘í…É¹ÁÍ}±½…Ñ¥½¸€ü€‘í…É¹ÁÍ}±½…Ñ¥½¸¹±…Ñ¥ÑÕ‘•ô°€‘í…É¹ÁÍ}±½…Ñ¥½¸¹±½¹¥ÑÕ‘•ô€¡…ÕÉ…ä€‘í…É¹ÁÍ}±½…Ñ¥½¸¹…ÕÉ…å}´ñð€‰Õ¹­¹½Ý¸‰ô´¥€€è€‰9¼Í¥¹±”Ù•É¥™¥•Á½¥¹ÐìÕÍ”±¥¹­••Ù¥‘•¹”‰õq¸´I•±•Ù…¹Ðµ…Àè€‘í…É¹É•±•Ù…¹Ñ}µ…Áõq¸´A¡½Ñ½É…Á¡Ìè€‘í…É¹Á¡½Ñ½É…Á¡}¥‘Ì¹©½¥¸ ˆ°€ˆ¤ñð€‰9½¹”ÍÁ•¥™¥…±±ä±¥¹­•‰õq¸´=‰Í•ÉÙ…Ñ¥½¹Ìè€‘í…É¹¥¹ÍÁ•Ñ½É}½‰Í•ÉÙ…Ñ¥½¹}¥‘Ì¹©½¥¸ ˆ°€ˆ¤ñð€‰9½¹”ÍÁ•¥™¥…±±ä±¥¹­•‰õq¸´%¹ÍÁ•Ñ½È¡åÁ½Ñ¡•Í¥Ìè€‘í…É¹¥¹ÍÁ•Ñ½É}¡åÁ½Ñ¡•Í¥Ì¹ÍÑ…Ñ•µ•¹Ñõq¸´]¡…ÐÉ•µ…¥¹ÌÕ¹­¹½Ý¸è€‘í…É¹Õ¹­¹½Ý¹Ì¹©½¥¸ ˆì€ˆ¥õq¸´]¡ä¥Ðµ…ÑÑ•ÉÌè€‘í…É¹Ý¡å}…¹ÍÝ•É}µ…ÑÑ•ÉÍõq¸´•¥Í¥½¸¥Ð½Õ±¡…¹”è€‘í…É¹•áÁ•Ñ•‘}‘•¥Í¥½¹}¡…¹•õq¸´1¥µ¥Ñ…Ñ¥½¸è€‘í…É¹±¥µ¥Ñ…Ñ¥½¹õq¹€¤¹©½¥¸ ‰q¸´´µq¹q¸ˆ¥õ€ì(€ô((€É•ÑÕÉ¸ì(€€€=IIQ%=9}IM=9L°(€€€AI=MM%=91}U%9L°(€€€A!=Q=}Y%9}I=1L°(€€€AIM=9}9QI9}Q%5°(€€€AIM=9}!eA=Q!M%M}%°(€€€AIM=9}@ÐÑ}!=5M%Q}=IIQ%=9}%°(€€€AIM=9}@ÐÑ}A!=Q=}=IIQ%=9}%°(€€€•¹ÍÕÉ•½Ù•É¹…¹•5½‘•°°(€€€É•½É‘Í½É½ÉÉ•Ñ¥½¸°(€€€…‘‘½ÉÉ•Ñ¥½¸°(€€€Õ¹‘½1…ÍÑÑ¥½¸°(€€€½ÉÉ•Ñ¥½¹Í½È°(€€€É•½É‘MÑ…ÑÕÌ°(€€€•™™•Ñ¥Ù•I•½É°(€€€‰Õ¥±‘™™•Ñ¥Ù•%¹ÍÁ•Ñ¥½¸°(€€€Á¡½Ñ½A…ÑÑ•É¸°(€€€É•…Ñ•¥•±‘Ù¥‘•¹•I•Ù¥•Ü°(€€€É•…Ñ•AÉ½™•ÍÍ¥½¹…±!…¹‘½™™…É‘Ì°(€€€¡…¹‘½™™…É‘Í5…É­‘½Ý¸(€ôì)ô¤ì(
+      record_id: record.id,
+      recorded_at: record.time,
+      label: `${record.button_label || record.type || "Observation"}${record.note ? ` â€” ${record.note}` : ""}`,
+      original_entry: clone(record)
+    }));
+    (data.photos || []).forEach(record => rows.push({
+      record_type: "photo",
+      record_id: record.id,
+      recorded_at: record.recorded_at || record.time,
+      label: `${record.photo_number || "Photo"} â€” ${record.category || "Other"}`,
+      original_entry: clone(record)
+    }));
+    (data.voice_notes || []).forEach(record => rows.push({
+      record_type: "voice_note",
+      record_id: record.id,
+      recorded_at: record.started_at || record.recorded_at,
+      label: `${record.purpose === "photo_explanation" ? "Photo explanation" : "Voice note"}${record.photo_id ? ` for ${record.photo_id}` : ""}`,
+      original_entry: clone(record)
+    }));
+    (data.inspector_hypotheses || []).forEach(record => rows.push({ record_type: "inspector_hypothesis", record_id: record.hypothesis_id, recorded_at: record.recorded_at, label: `Inspector hypothesis â€” ${record.statement || record.hypothesis_id}`, original_entry: clone(record) }));
+    (data.inspection_areas || []).forEach(record => rows.push({ record_type: "area_assignment", record_id: record.area_id, recorded_at: record.created_at || data.started, label: `Area assignment â€” ${record.name}`, original_entry: clone(record) }));
+    (data.investigation_questions || []).forEach(record => rows.push({ record_type: "question_assignment", record_id: record.question_id, recorded_at: record.created_at || data.started, label: `Question assignment â€” ${record.text}`, original_entry: clone(record) }));
+    (data.photos || []).filter(record => record.photo_meaning && record.photo_meaning.recorded_at).forEach(record => rows.push({ record_type: "photo_classification", record_id: record.id, recorded_at: record.photo_meaning.recorded_at, label: `Photo classification â€” ${record.photo_number || record.id}`, original_entry: clone(record.photo_meaning) }));
+    (data.evidence_set_events || []).forEach(record => rows.push({ record_type: "group_assignment", record_id: record.event_id, recorded_at: record.recorded_at, label: `Group assignment â€” ${record.event_type} ${record.record_id || record.evidence_set_id}`, original_entry: clone(record) }));
+    return rows.filter(item => item.record_id).sort((a, b) => String(b.recorded_at || "").localeCompare(String(a.recorded_at || "")));
+  }
+
+  function addCorrection(inspection, request) {
+    const data = ensureGovernanceModel(inspection);
+    const settings = request || {};
+    if (!CORRECTION_REASONS.includes(settings.correction_reason)) throw new Error("Choose a recognized correction reason.");
+    const record = recordsForCorrection(data).find(item => item.record_type === settings.record_type && String(item.record_id) === String(settings.record_id));
+    if (!record) throw new Error("The selected original record could not be found.");
+    const correction = {
+      correction_id: settings.correction_id || `correction-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      target: { record_type: record.record_type, record_id: record.record_id },
+      correction_time: settings.correction_time || new Date().toISOString(),
+      correction_reason: settings.correction_reason,
+      corrected_value: settings.corrected_value ? clone(settings.corrected_value) : null,
+      inspector_identity: String(settings.inspector_identity || data.inspector_identity || "Field Inspector").trim() || "Field Inspector",
+      resulting_status: VOID_REASONS.has(settings.correction_reason) ? "voided" : (settings.correction_reason === "Correct" ? "active" : "corrected"),
+      original_entry: record.original_entry,
+      source: "field correction control",
+      immutable: true
+    };
+    correction.status = correction.resulting_status;
+    correction.corrected_at = correction.correction_time;
+    correction.original_record_preserved = true;
+    data.corrections.push(correction);
+    data.inspector_identity = correction.inspector_identity;
+    return correction;
+  }
+
+  function correctionsFor(inspection, recordType, recordId) {
+    return (inspection.corrections || []).filter(item => item.target && item.target.record_type === recordType && String(item.target.record_id) === String(recordId)).sort((a, b) => String(a.correction_time || "").localeCompare(String(b.correction_time || "")));
+  }
+
+  function applyCorrectedValue(record, correction) {
+    const result = clone(record);
+    const value = correction && correction.corrected_value || {};
+    if (value.category) result.category = value.category;
+    if (value.type) {
+      result.type = value.type;
+      result.observation_type = `field.${value.type}`;
+      result.button_label = value.label || value.type;
+    }
+    if (Object.prototype.hasOwnProperty.call(value, "area_id")) result.area_id = value.area_id || null;
+    if (Object.prototype.hasOwnProperty.call(value, "question_ids")) result.question_ids = Array.isArray(value.question_ids) ? value.question_ids.slice() : [];
+    if (Object.prototype.hasOwnProperty.call(value, "associated_observation_id")) result.associated_observation_id = value.associated_observation_id || null;
+    if (value.photo_meaning) result.photo_meaning = Object.assign({}, result.photo_meaning || {}, clone(value.photo_meaning));
+    if (value.note) result.note = value.note;
+    if (value.clarification) result.correction_clarification = value.clarification;
+    return result;
+  }
+
+  function effectiveRecord(inspection, recordType, record) {
+    const history = correctionsFor(inspection, recordType, idOf(record, recordType));
+    let result = clone(record);
+    let status = "active";
+    history.forEach(correction => {
+      status = correction.resulting_status || (VOID_REASONS.has(correction.correction_reason) ? "voided" : "corrected");
+      if (status !== "voided") result = applyCorrectedValue(result, correction);
+    });
+    result.record_status = status;
+    result.excluded_from_findings = status === "voided";
+    result.correction_ids = history.map(item => item.correction_id);
+    return result;
+  }
+
+  function recordStatus(inspection, recordType, recordId) {
+    const history = correctionsFor(inspection || {}, recordType, recordId);
+    return history.length ? history[history.length - 1].resulting_status : "active";
+  }
+
+  function buildEffectiveInspection(inspection) {
+    const raw = ensureGovernanceModel(clone(inspection || {}));
+    const allMarkers = (raw.markers || []).map(item => effectiveRecord(raw, "observation", item));
+    const allPhotos = (raw.photos || []).map(item => {
+      const photo = effectiveRecord(raw, "photo", item);
+      if (recordStatus(raw, "photo_classification", item.id) === "voided") {
+        photo.photo_meaning = Object.assign({}, photo.photo_meaning || {}, { status: "voided_by_correction", excluded_from_current_interpretation: true });
+      }
+      return photo;
+    });
+    const allVoices = (raw.voice_notes || []).map(item => effectiveRecord(raw, "voice_note", item));
+    const allAreas = (raw.inspection_areas || []).map(item => effectiveRecord(raw, "area_assignment", item));
+    const allQuestions = (raw.investigation_questions || []).map(item => effectiveRecord(raw, "question_assignment", item));
+    const allHypotheses = (raw.inspector_hypotheses || []).map(item => effectiveRecord(raw, "inspector_hypothesis", item));
+    const voidPhotoIds = new Set(allPhotos.filter(item => item.excluded_from_findings).map(item => String(item.id)));
+    const voidVoiceIds = new Set(allVoices.filter(item => item.excluded_from_findings).map(item => String(item.id)));
+    const activePhotoById = new Map(allPhotos.filter(item => !item.excluded_from_findings).map(item => [String(item.id), item]));
+    const activeVoiceById = new Map(allVoices.filter(item => !item.excluded_from_findings).map(item => [String(item.id), item]));
+    const markers = allMarkers.filter(item => !item.excluded_from_findings && !voidPhotoIds.has(String(item.photo_id || "")) && !voidVoiceIds.has(String(item.voice_note_id || ""))).map(item => {
+      const linkedPhoto = activePhotoById.get(String(item.photo_id || ""));
+      const linkedVoice = activeVoiceById.get(String(item.voice_note_id || ""));
+      if (linkedPhoto) {
+        item.area_id = linkedPhoto.area_id || item.area_id || null;
+        item.attributes = Object.assign({}, item.attributes || {}, { category: linkedPhoto.category || null });
+      }
+      if (linkedVoice) item.area_id = linkedVoice.area_id || item.area_id || null;
+      return item;
+    });
+    const activeReviewAnnotations = (raw.review_annotations || []).filter(item => item.approved_by_inspector === true && item.status === "Active");
+    const active = Object.assign({}, raw, {
+      markers,
+      photos: allPhotos.filter(item => !item.excluded_from_findings),
+      voice_notes: allVoices.filter(item => !item.excluded_from_findings),
+      inspection_areas: allAreas.filter(item => !item.excluded_from_findings),
+      investigation_questions: allQuestions.filter(item => !item.excluded_from_findings),
+      inspector_hypotheses: allHypotheses.filter(item => !item.excluded_from_findings),
+      review_annotations: activeReviewAnnotations
+    });
+    return {
+      active,
+      all_records: { observations: allMarkers, photographs: allPhotos, voice_notes: allVoices, inspection_areas: allAreas, investigation_questions: allQuestions, inspector_hypotheses: allHypotheses },
+      audit_history: {
+        schema_name: "property-intelligence-evidence-audit",
+        schema_version: "1.0",
+        immutable_source_rule: "Original entries are never rewritten or deleted. Reports use the effective active view; voided records remain here.",
+        corrections: clone(raw.corrections || []),
+        review_annotations: clone(raw.review_annotations || []),
+        source_record_counts: { observations: allMarkers.length, photographs: allPhotos.length, voice_notes: allVoices.length },
+        voided_record_ids: [...allMarkers, ...allPhotos, ...allVoices].filter(item => item.excluded_from_findings).map(item => idOf(item, item.photo_number ? "photo" : (item.started_at ? "voice_note" : "observation")))
+      }
+    };
+  }
+
+  function undoLastAction(inspection, options) {
+    const data = ensureGovernanceModel(inspection);
+    const settings = options || {};
+    const candidates = recordsForCorrection(data).filter(item => recordStatus(data, item.record_type, item.record_id) !== "voided");
+    const target = settings.record_type && settings.record_id ? candidates.find(item => item.record_type === settings.record_type && String(item.record_id) === String(settings.record_id)) : candidates[0];
+    if (!target) throw new Error("There is no active action to undo.");
+    return addCorrection(data, { correction_id: settings.correction_id, record_type: target.record_type, record_id: target.record_id, correction_reason: "user_undo", corrected_value: null, inspector_identity: settings.inspector_identity || data.inspector_identity, correction_time: settings.corrected_at || new Date().toISOString() });
+  }
+
+  function photoPattern(photo) {
+    const meaning = photo && photo.photo_meaning || {};
+    const roles = Array.isArray(meaning.evidence_roles) ? meaning.evidence_roles : [];
+    const present = PHOTO_EVIDENCE_ROLES.filter(role => roles.includes(role));
+    return { present, missing: PHOTO_EVIDENCE_ROLES.filter(role => !present.includes(role)), complete: present.length === PHOTO_EVIDENCE_ROLES.length };
+  }
+
+  function createFieldEvidenceReview(inspection) {
+    const data = inspection || {};
+    const photos = data.photos || [];
+    const hypotheses = data.inspector_hypotheses || [];
+    const patterns = photos.map(photo => ({ photo_id: photo.id, photo_number: photo.photo_number, pattern: photoPattern(photo) }));
+    const lowValueCandidates = [];
+    let currentRun = [];
+    photos.slice().sort((a, b) => String(a.recorded_at || a.time || "").localeCompare(String(b.recorded_at || b.time || ""))).forEach(photo => {
+      if (["Duplicate", "Reference"].includes(photo.photo_value)) currentRun.push(photo);
+      else {
+        if (currentRun.length >= 3) lowValueCandidates.push(currentRun.slice());
+        currentRun = [];
+      }
+    });
+    if (currentRun.length >= 3) lowValueCandidates.push(currentRun);
+    return {
+      schema_name: "property-intelligence-field-evidence-review",
+      schema_version: "1.0",
+      strongest_evidence: photos.filter(photo => photo.photo_value === "Critical").map(photo => photo.id),
+      repetitive_photographs: photos.filter(photo => photo.photo_value === "Duplicate").map(photo => photo.id),
+      missing_context_photographs: patterns.filter(item => item.pattern.missing.includes("context")).map(item => item.photo_id),
+      missing_measurements: patterns.filter(item => item.pattern.missing.includes("measurement")).map(item => item.photo_id),
+      four_photo_pattern_by_photo: patterns,
+      unsupported_conclusions: hypotheses.filter(item => !(item.supporting_photo_ids || []).length && !(item.triggering_observation_ids || []).length).map(item => item.hypothesis_id),
+      professional_questions_ready: hypotheses.filter(item => item.verification_question).map(item => ({ hypothesis_id: item.hypothesis_id, professional_type: item.professional_type, exact_question: item.verification_question })),
+      field_time_with_possible_low_additional_value: lowValueCandidates.map(run => ({
+        started_at: run[0].recorded_at || run[0].time,
+        ended_at: run[run.length - 1].recorded_at || run[run.length - 1].time,
+        photograph_ids: run.map(item => item.id),
+        basis: "Three or more consecutive photographs were marked Reference or Duplicate.",
+        review_required: "Ask whether the sequence added new context, measurement, or relationship evidence before calling the time unnecessary."
+      })),
+      low_additional_value_rule: "Review long stopped/documenting periods and consecutive Duplicate/Reference photographs; do not infer wasted time without inspector confirmation.",
+      training_prompts: [
+        "What decision will this evidence help someone make?",
+        "What fact would a professional otherwise have to visit the site to collect?",
+        "Can I measure it rather than merely describe it?",
+        "Have I shown context as well as the close-up?",
+        "Am I recording a fact, estimate, or hypothesis?",
+        "Is another photograph adding information or merely repeating the last one?"
+      ]
+    };
+  }
+
+  function createProfessionalHandoffCards(inspection, mapPath) {
+    const data = inspection || {};
+    const observations = data.markers || [];
+    const photos = data.photos || [];
+    const cards = [];
+    (data.inspector_hypotheses || []).forEach(hypothesis => {
+      const supportingObservations = observations.filter(item => (hypothesis.triggering_observation_ids || []).includes(item.id));
+      const supportingPhotos = photos.filter(item => (hypothesis.supporting_photo_ids || []).includes(item.id));
+      const locationSource = supportingObservations[0] || supportingPhotos[0] || {};
+      PROFESSIONAL_AUDIENCES.forEach(audience => cards.push({
+        card_id: `handoff-${hypothesis.hypothesis_id}-${audience.replace(/[^a-z0-9]+/g, "-")}`,
+        audience,
+        exact_question: hypothesis.verification_question,
+        gps_location: Number.isFinite(Number(locationSource.lat)) && Number.isFinite(Number(locationSource.lon)) ? { latitude: Number(locationSource.lat), longitude: Number(locationSource.lon), accuracy_m: locationSource.gps_accuracy_m || null } : null,
+        relevant_map: mapPath || "printable-report.html",
+        photograph_ids: supportingPhotos.map(item => item.id),
+        measurements: supportingObservations.map(item => item.attributes || item.observation_attributes || {}).filter(value => Object.keys(value).length),
+        weather_and_rainfall_context: data.conditions || {},
+        inspector_observation_ids: supportingObservations.map(item => item.id),
+        inspector_hypothesis: { hypothesis_id: hypothesis.hypothesis_id, statement: hypothesis.statement, factual_status: hypothesis.factual_status },
+        unknowns: [hypothesis.verification_question],
+        why_answer_matters: "The answer could materially change conclusions about drainage risk, usable land, access, site work, cost, permitting, or neighboring-property exposure.",
+        expected_decision_change: audience === "buyer" ? "Purchase terms, contingencies, price, or decision to proceed." : (audience === "seller" ? "Disclosure, records to provide, or corrective-work discussions." : "Scope, feasibility, cost, or need for additional licensed analysis."),
+        limitation: "This field record is reconnaissance evidence. It does not replace licensed professional work and does not recommend construction."
+      }));
+    });
+    observations.filter(item => /needs professional verification/i.test(String(item.evidence_classification || ""))).forEach(observation => {
+      const linkedPhotos = photos.filter(photo => String(photo.associated_observation_id || "") === String(observation.id));
+      const attributes = observation.attributes || {};
+      const exactQuestion = attributes.professional_question || `What is the professionally verified nature, extent, cause, and decision significance of ${observation.button_label || observation.type || observation.id} recorded at this location?`;
+      PROFESSIONAL_AUDIENCES.forEach(audience => cards.push({
+        card_id: `handoff-${observation.id}-${audience.replace(/[^a-z0-9]+/g, "-")}`,
+        audience,
+        exact_question: exactQuestion,
+        gps_location: Number.isFinite(Number(observation.lat)) && Number.isFinite(Number(observation.lon)) ? { latitude: Number(observation.lat), longitude: Number(observation.lon), accuracy_m: observation.gps_accuracy_m || null } : null,
+        relevant_map: mapPath || "printable-report.html",
+        photograph_ids: linkedPhotos.map(item => item.id),
+        measurements: Object.keys(attributes).length ? [attributes] : [],
+        weather_and_rainfall_context: data.conditions || {},
+        inspector_observation_ids: [observation.id],
+        inspector_hypothesis: { hypothesis_id: null, statement: "No inspector hypothesis is asserted; the field observation is flagged for professional verification.", factual_status: "OBSERVATION_REQUIRING_PROFESSIONAL_VERIFICATION" },
+        unknowns: [exactQuestion],
+        why_answer_matters: "The verified answer could change access, buildability, economic potential, cost/risk, or the significance of the site condition.",
+        expected_decision_change: audience === "buyer" ? "Purchase terms, contingencies, price, or decision to proceed." : (audience === "seller" ? "Disclosure, records to provide, or corrective-work discussions." : "Scope, feasibility, cost, or need for additional licensed analysis."),
+        limitation: "This field record is reconnaissance evidence. It does not replace licensed professional work and does not recommend construction."
+      }));
+    });
+    return { schema_name: "property-intelligence-professional-handoff-cards", schema_version: "1.0", cards };
+  }
+
+  function handoffCardsMarkdown(bundle) {
+    const cards = bundle && bundle.cards || [];
+    if (!cards.length) return "# Professional Handoff Cards\n\nNo issue requiring a professional handoff card was recorded.\n";
+    return `# Professional Handoff Cards\n\nThese cards orient a professional; they do not replace licensed work.\n\n${cards.map(card => `## ${card.audience.toUpperCase()} â€” ${card.card_id}\n\n- Exact question: ${card.exact_question}\n- GPS: ${card.gps_location ? `${card.gps_location.latitude}, ${card.gps_location.longitude} (accuracy ${card.gps_location.accuracy_m || "unknown"} m)` : "No single verified point; use linked evidence"}\n- Relevant map: ${card.relevant_map}\n- Photographs: ${card.photograph_ids.join(", ") || "None specifically linked"}\n- Observations: ${card.inspector_observation_ids.join(", ") || "None specifically linked"}\n- Inspector hypothesis: ${card.inspector_hypothesis.statement}\n- What remains unknown: ${card.unknowns.join("; ")}\n- Why it matters: ${card.why_answer_matters}\n- Decision it could change: ${card.expected_decision_change}\n- Limitation: ${card.limitation}\n`).join("\n---\n\n")}`;
+  }
+
+  return {
+    CORRECTION_REASONS,
+    PROFESSIONAL_AUDIENCES,
+    PHOTO_EVIDENCE_ROLES,
+    PEARSON_ENTRANCE_TIME,
+    PEARSON_HYPOTHESIS_ID,
+    PEARSON_P44_HOMESITE_CORRECTION_ID,
+    PEARSON_P44_PHOTO_CORRECTION_ID,
+    ensureGovernanceModel,
+    recordsForCorrection,
+    addCorrection,
+    undoLastAction,
+    correctionsFor,
+    recordStatus,
+    effectiveRecord,
+    buildEffectiveInspection,
+    photoPattern,
+    createFieldEvidenceReview,
+    createProfessionalHandoffCards,
+    handoffCardsMarkdown
+  };
+});

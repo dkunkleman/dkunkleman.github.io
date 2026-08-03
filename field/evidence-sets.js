@@ -232,131 +232,160 @@
       ai_species_suggestions: eventsForSet(data, effective.evidence_set_id).filter(item => item.event_type === "ai_species_suggestion").map(item => item.suggestion),
       inspector_determinations: eventsForSet(data, effective.evidence_set_id).filter(item => item.event_type === "species_determination").map(item => item.determination),
       leaf_provenance: eventsForSet(data, effective.evidence_set_id).filter(item => item.event_type === "leaf_provenance_recorded").map(item => ({ photo_id: item.record_id, confidence: item.confidence })),
-      confidence_limit: effective.subject_details && effective.subject_details.whole_t×‹h‘éì¶»§q«^vÛK]™YHšY]ÈØ\È›ÝØY™[HØZ[˜X›KˆY[YšXØ][ÛˆÛÛ™šY[˜ÙH]\Ý™Y›XÝHZ\ÜÚ[™ÈšY]È[™™[HÛ›HÛˆØ\\™Y˜\šË[šËÜ›ÝÛˆœ˜YÛY[ËÛÛ›™XÝYX]™\ËÚYËØY™\›ÙXÝ]™HX]\šX[[™Xš]]ˆˆˆ[ˆNÂˆYˆ
-Y™™XÝ]™KœÙ]Ý\HOOH•Ø]\ˆ\™XHŠHÂˆÛÛœÝØ]\ˆHÝÜË›X\
-][HOˆ][KœÝËØ]\ŠK™š[\Š›ÛÛX[ŠNÂˆÝ[[X\žKØ]\ˆHÂˆYX\Ý\™YÙ\ÎˆØ]\‹›X\
-][HOˆ
-È\Ø˜[™ˆ][KØ]\—Ù\Ø˜[™[\Ù^XÝÚ[Žˆ][KØ]\—Ù\Ù^XÝÚ[ˆOH[È[ˆ][KØ]\—Ù\Ù^XÝÚ[‹˜\Ú\Îˆ][K›YX\Ý\™[Y[Ø˜\Ú\È[JJKˆ\Ý[X]YÛ[™ÝÙˆØ]\‹›X\
-][HOˆ[X™\Š][KØ]\—Û[™ÝÙ
-JK™š[\Š[X™\‹š\Ñš[š]JKœÛÜ
+      confidence_limit: effective.subject_details && effective.subject_details.whole_tree_visibility !== "Yes" ? "A complete whole-tree view was not safely obtainable. Identification confidence must reflect the missing view and rely only on captured bark, trunk, crown fragments, connected leaves, twig/bud, reproductive material, and habitat." : null
+    };
+    if (effective.set_type === "Water Area") {
+      const water = photos.map(item => item.photo.water).filter(Boolean);
+      summary.water = {
+        measured_depths: water.map(item => ({ depth_band: item.water_depth_band || null, depth_exact_in: item.water_depth_exact_in == null ? null : item.water_depth_exact_in, basis: item.measurement_basis || null })),
+        estimated_length_ft: water.map(item => Number(item.water_length_ft)).filter(Number.isFinite).sort((a, b) => b - a)[0] || null,
+        estimated_width_ft: water.map(item => Number(item.water_width_ft)).filter(Number.isFinite).sort((a, b) => b - a)[0] || null,
+        standing_or_flowing: Array.from(new Set(water.map(item => item.water_type || item.water_behavior).filter(Boolean))),
+        transition_photo_ids: photos.filter(item => item.link.photo_role === "Transition").map(item => item.photo.id),
+        boundary_rule: "All photographed points are observed. Any connecting outline is inferred and must be styled differently from observed points."
+      };
+    }
+    return summary;
+  }
 
-KŠHOˆˆHJVÌH[ˆ\Ý[X]YÝÚYÙˆØ]\‹›X\
-][HOˆ[X™\Š][KØ]\—ÝÚYÙ
-JK™š[\Š[X™\‹š\Ñš[š]JKœÛÜ
+  function eventsForSet(inspection, evidenceSetId) {
+    return (inspection.evidence_set_events || []).filter(item => item.evidence_set_id === evidenceSetId).sort((a, b) => String(a.recorded_at || "").localeCompare(String(b.recorded_at || "")));
+  }
 
-KŠHOˆˆHJVÌH[ˆÝ[™[™×ÛÜ—Ù›ÝÚ[™Îˆ\œ˜^K™œ›ÛJ™]ÈÙ]
-Ø]\‹›X\
-][HOˆ][KØ]\—Ý\H][KØ]\—Ø™Z]š[ÜŠK™š[\Š›ÛÛX[ŠJJKˆ˜[œÚ][Û—ÜÝ×ÚYÎˆÝÜË™š[\Š][HOˆ][K›[šËœÝ×Ü›ÛHOOH•˜[œÚ][ÛˆŠK›X\
-][HOˆ][KœÝËšY
-Kˆ›Ý[™\žWÜ[Nˆ[ÝÙÜ˜\YÚ[È\™HØœÙ\™Yˆ[žHÛÛ›™XÝ[™ÈÝ][™H\È[™™\œ™Y[™]\Ý™HÝ[YY™™\™[Hœ›ÛHØœÙ\™YÚ[Ëˆ‚ˆNÂˆBˆ™]\›ˆÝ[[X\žNÂˆB‚ˆ[˜Ý[Ûˆ]™[Ñ›Ü”Ù]
-[œÜXÝ[Û‹]šY[˜ÙTÙ]Y
-HÂˆ™]\›ˆ
-[œÜXÝ[Û‹™]šY[˜ÙWÜÙ]Ù]™[È×JK™š[\Š][HOˆ][K™]šY[˜ÙWÜÙ]ÚYOOH]šY[˜ÙTÙ]Y
-KœÛÜ
+  function treeEvidencePlan(details) {
+    const info = details || {};
+    const visibility = TREE_VISIBILITY.includes(info.whole_tree_visibility) ? info.whole_tree_visibility : "Unsure";
+    const purpose = String(info.purpose || "unknown").toLowerCase();
+    let required;
+    if (purpose === "timber sample") required = ["Measurement", "Bark", "Lower trunk to first fork", "Visible crown segment"];
+    else if (purpose === "landscape" || purpose === "preserve") required = ["Base / ground", "Relationship to surroundings", "Visible crown segment"];
+    else if (purpose === "hazard") required = ["Base / ground", "Visible defect", "Relationship to surroundings", "Targets"];
+    else if (purpose === "species identification") required = ["Bark", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud"];
+    else if (purpose === "forest character") required = ["Context", "Surrounding canopy", "Relationship to surroundings"];
+    else required = ["Bark", "Base / ground", "Visible crown segment"];
+    if (visibility === "Yes") required.unshift("Whole tree");
+    else required.unshift("Lower trunk to first fork");
+    return {
+      whole_tree_visibility: visibility,
+      purpose: info.purpose || "unknown",
+      required_roles: Array.from(new Set(required)),
+      useful_when_available: ["Fruit / seed / cone / flower", "Scale photograph", "Opposite direction", "360-degree panorama"],
+      obstruction_is_valid_evidence: visibility !== "Yes",
+      do_not_repeat_whole_tree_prompt: visibility.startsWith("No â€”"),
+      safety_rule: "Never cross water, climb, enter unsafe brush, leave authorized property, or stand in traffic to complete a checklist.",
+      report_rule: visibility === "Yes" ? "Report the captured whole-tree context and other identifying views." : `Report that a whole-tree view was not safely obtainable (${visibility}) and explain how that limits confidence without criticizing the inspector.`
+    };
+  }
 
-KŠHOˆÝš[™ÊKœ™XÛÜ™YØ]ˆŠK›ØØ[PÛÛ\\™JÝš[™Ê‹œ™XÛÜ™YØ]ˆŠJJNÂˆB‚ˆ[˜Ý[Ûˆ™YQ]šY[˜ÙT[Š]Z[ÊHÂˆÛÛœÝ[™›ÈH]Z[ÈßNÂˆÛÛœÝš\ÚXš[]HH‘QWÕ’TÒP’SUKš[˜ÛY\Ê[™›ËÚÛWÝ™YWÝš\ÚXš[]JHÈ[™›ËÚÛWÝ™YWÝš\ÚXš[]Hˆ•[œÝ\™HŽÂˆÛÛœÝ\œÜÙHHÝš[™Ê[™›Ëœ\œÜÙH[šÛ›ÝÛˆŠKÓÝÙ\Ø\ÙJ
-NÂˆ]™\]Z\™YÂˆYˆ
-\œÜÙHOOH[X™\ˆØ[\HŠH™\]Z\™YHÈ“YX\Ý\™[Y[‹˜\šÈ‹“ÝÙ\ˆ[šÈÈš\œÝ›ÜšÈ‹•š\ÚX›HÜ›ÝÛˆÙYÛY[—NÂˆ[ÙHYˆ
-\œÜÙHOOH›[™ØØ\Hˆ\œÜÙHOOHœ™\Ù\™HŠH™\]Z\™YHÈ˜\ÙHÈÜ›Ý[™‹”™[][ÛœÚ\ÈÝ\œ›Ý[™[™ÜÈ‹•š\ÚX›HÜ›ÝÛˆÙYÛY[—NÂˆ[ÙHYˆ
-\œÜÙHOOHš^˜\™ŠH™\]Z\™YHÈ˜\ÙHÈÜ›Ý[™‹•š\ÚX›HY™XÝ‹”™[][ÛœÚ\ÈÝ\œ›Ý[™[™ÜÈ‹•\™Ù]È—NÂˆ[ÙHYˆ
-\œÜÙHOOHœÜXÚY\ÈY[YšXØ][ÛˆŠH™\]Z\™YHÈ˜\šÈ‹ÛÛ›™XÝYœ˜[˜Ú‹“XYˆ\\ˆÝ\™˜XÙH‹“XYˆ[™\œÚYH‹•ÚYÈÈ\›Z[˜[Y—NÂˆ[ÙHYˆ
-\œÜÙHOOH™›Ü™\ÝÚ\˜XÝ\ˆŠH™\]Z\™YHÈÛÛ^‹”Ý\œ›Ý[™[™ÈØ[›ÜH‹”™[][ÛœÚ\ÈÝ\œ›Ý[™[™ÜÈ—NÂˆ[ÙH™\]Z\™YHÈ˜\šÈ‹˜\ÙHÈÜ›Ý[™‹•š\ÚX›HÜ›ÝÛˆÙYÛY[—NÂˆYˆ
-š\ÚXš[]HOOH–Y\ÈŠH™\]Z\™Y[œÚY
-•ÚÛH™YHŠNÂˆ[ÙH™\]Z\™Y[œÚY
-“ÝÙ\ˆ[šÈÈš\œÝ›ÜšÈŠNÂˆ™]\›ˆÂˆÚÛWÝ™YWÝš\ÚXš[]Nˆš\ÚXš[]Kˆ\œÜÙNˆ[™›Ëœ\œÜÙH[šÛ›ÝÛˆ‹ˆ™\]Z\™YÜ›Û\Îˆ\œ˜^K™œ›ÛJ™]ÈÙ]
-™\]Z\™Y
-JKˆ\ÙY[ÝÚ[—Ø]˜Z[X›NˆÈ‘œZ]ÈÙYYÈÛÛ™HÈ›ÝÙ\ˆ‹”ØØ[HÝÙÜ˜\‹“ÜÜÚ]H\™XÝ[Ûˆ‹ŒÍŒYYÜ™YH[›Ü˜[XH—KˆØœÝXÝ[Û—Ú\×Ý˜[YÙ]šY[˜ÙNˆš\ÚXš[]HOOH–Y\È‹ˆ×Û›ÝÜ™\X]ÝÚÛWÝ™YWÜ›Û\ˆš\ÚXš[]KœÝ\ÕÚ]
-“›È8 %ŠKˆØY™]WÜ[Nˆ“™]™\ˆÜ›ÜÜÈØ]\‹Û[X‹[\ˆ[œØY™Hœ\ÚX]™H]]Üš^™Y›Ü\KÜˆÝ[™[ˆ˜Y™šXÈÈÛÛ\]HHÚXÚÛ\Ýˆ‹ˆ™\ÜÜ[Nˆš\ÚXš[]HOOH–Y\ÈˆÈ”™\ÜHØ\\™YÚÛK]™YHÛÛ^[™Ý\ˆY[YžZ[™ÈšY]ÜËˆˆˆ™\Ü]HÚÛK]™YHšY]ÈØ\È›ÝØY™[HØZ[˜X›H
-	Ýš\ÚXš[]_JH[™^Z[ˆÝÈ][Z]ÈÛÛ™šY[˜ÙHÚ]Ý]Üš]XÚ^š[™ÈH[œÜXÝÜ‹˜ˆNÂˆB‚ˆ[˜Ý[ÛˆYZTÜXÚY\ÔÝYÙÙ\Ý[ÛŠ[œÜXÝ[Û‹]šY[˜ÙTÙ]YÝYÙÙ\Ý[ÛŠHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆYˆ
-Y]K™]šY[˜ÙWÜÙ]ËœÛÛYJ][HOˆ][K™]šY[˜ÙWÜÙ]ÚYOOH]šY[˜ÙTÙ]Y	‰ˆÈ’[™]šYX[™YH‹•™YHÜ›Ý\ÈØ[›ÜH—Kš[˜ÛY\Ê][KœÙ]Ý\JJJH›ÝÈ™]È\œ›ÜŠ”ÜXÚY\ÈÝYÙÙ\Ý[ÛœÈ™\]Z\™HH™YH]šY[˜ÙHÙ]ˆŠNÂˆÛÛœÝ[œ]HÝYÙÙ\Ý[ÛˆßNÂˆ™]\›ˆ\[™]™[
-]KÈ]šY[˜ÙWÜÙ]ÚYˆ]šY[˜ÙTÙ]Y]™[Ý\Nˆ˜ZWÜÜXÚY\×ÜÝYÙÙ\Ý[Ûˆ‹ÝYÙÙ\Ý[ÛŽˆÈZÙ[WÜÜXÚY\Îˆ[œ]›ZÙ[WÜÜXÚY\È•[šÛ›ÝÛˆ‹[\›˜]]™WÜÜXÚY\Îˆ\œ˜^Kš\Ð\œ˜^J[œ]˜[\›˜]]™WÜÜXÚY\ÊHÈ[œ]˜[\›˜]]™WÜÜXÚY\Èˆ×KÛÛ™šY[˜ÙWÛ]™[ˆ[œ]˜ÛÛ™šY[˜ÙWÛ]™[›ÝÈ‹Y[YžZ[™×Ù™X]\™\×Ýš\ÚX›Nˆ\œ˜^Kš\Ð\œ˜^J[œ]šY[YžZ[™×Ù™X]\™\×Ýš\ÚX›JHÈ[œ]šY[YžZ[™×Ù™X]\™\×Ýš\ÚX›Hˆ×K[\Ü[Ù™X]\™\×ÛZ\ÜÚ[™Îˆ\œ˜^Kš\Ð\œ˜^J[œ]š[\Ü[Ù™X]\™\×ÛZ\ÜÚ[™ÊHÈ[œ]š[\Ü[Ù™X]\™\×ÛZ\ÜÚ[™Èˆ×KÝ]\ÎˆRHÝYÙÙ\Ý[Ûˆ8 %›ÝÛÛ™š\›YY‹\ØÛZ[Y\Žˆ“™]™\ˆ™\Ù[\ÈRHÜXÚY\ÈÝYÙÙ\Ý[Ûˆ\ÈÛÛ™š\›YYˆˆK[œÜXÝÜ—ØÛÛ™š\›YYˆ˜[ÙKÜ™X]YØžNˆ[œ]˜Ü™X]YØžHRH™]šY]ÈˆJNÂˆB‚ˆ[˜Ý[Ûˆ™XÛÜ™ÜXÚY\Ñ]\›Z[˜][ÛŠ[œÜXÝ[Û‹]šY[˜ÙTÙ]Y]\›Z[˜][Û‹ÜXÚY\ËÜ™X]YžJHÂˆYˆ
-TÔPÒQT×ÑUT“RSUSÓ”Ëš[˜ÛY\Ê]\›Z[˜][ÛŠJH›ÝÈ™]È\œ›ÜŠÚÛÜÙHH™XÛÙÛš^™YÜXÚY\ËZY[YšXØ][Ûˆ]\›Z[˜][Û‹ˆŠNÂˆ™]\›ˆ\[™]™[
-[œÜXÝ[Û‹È]šY[˜ÙWÜÙ]ÚYˆ]šY[˜ÙTÙ]Y]™[Ý\NˆœÜXÚY\×Ù]\›Z[˜][Ûˆ‹]\›Z[˜][ÛŽˆÈÝ]\Îˆ]\›Z[˜][Û‹ÜXÚY\ÎˆÜXÚY\È•[šÛ›ÝÛˆ‹™XÛÜ™YØžNˆÜ™X]YžH[œÜXÝ[Û‹š[œÜXÝÜ—ÚY[]H‘šY[[œÜXÝÜˆ‹˜XÝX[Ü[Nˆ]\›Z[˜][ÛˆOOH’[œÜXÝÜˆÛÛ™š\›YYˆÈ’[œÜXÝÜ‹XÛÛ™š\›YYšY[Y[YšXØ][ÛŽÈ›ÝHXÙ[œÙY›Ù™\ÜÚ[Û˜[]\›Z[˜][Ûˆ[›\ÜÈÝ]Yˆˆˆ“›ÝÛÛ™š\›YYˆˆK[œÜXÝÜ—ØÛÛ™š\›YYˆYKÜ™X]YØžNˆÜ™X]YžH[œÜXÝ[Û‹š[œÜXÝÜ—ÚY[]H‘šY[[œÜXÝÜˆˆJNÂˆB‚ˆ[˜Ý[Ûˆ™XÛÜ™XY”›Ý™[˜[˜ÙJ[œÜXÝ[Û‹]šY[˜ÙTÙ]YÝÒYÛÛ™šY[˜ÙKÜ™X]YžJHÂˆYˆ
-QSS—ÓPQ—ÐÓÓ‘’QSÑKš[˜ÛY\ÊÛÛ™šY[˜ÙJJH›ÝÈ™]È\œ›ÜŠÚÛÜÙHÝÈÛÛ™šY[HHXYˆØ[YHœ›ÛH\È™YKˆŠNÂˆ™]\›ˆ\[™]™[
-[œÜXÝ[Û‹È]šY[˜ÙWÜÙ]ÚYˆ]šY[˜ÙTÙ]Y]™[Ý\Nˆ›XY—Ü›Ý™[˜[˜ÙWÜ™XÛÜ™Y‹™XÛÜ™Ý\NˆœÝÈ‹™XÛÜ™ÚYˆÝÒYÛÛ™šY[˜ÙK\ÜÛØÚX][Û—ÜÝ]\ÎˆÛÛ™šY[˜ÙHOOHSS—ÓPQ—ÐÓÓ‘’QSÑVÌHÈš[œÜXÝÜ—ØÛÛ™š\›YYˆˆ
-ÛÛ™šY[˜ÙHOOH”›Ø˜X›HˆÈœ›Ø˜X›Hˆˆ[™\šYšYYŠKXÝ]˜][Û—Ü[Nˆ[ˆ[™\šYšYY˜[[ˆXYˆ\È™]™\ˆÚ[[H™X]Y\È™[Û™Ú[™ÈÈH™YKˆ‹[œÜXÝÜ—ØÛÛ™š\›YYˆYKÜ™X]YØžNˆÜ™X]YžH[œÜXÝ[Û‹š[œÜXÝÜ—ÚY[]H‘šY[[œÜXÝÜˆˆJNÂˆB‚ˆ[˜Ý[ÛˆÜ™X]Q]šY[˜ÙTÙ]Ý[[X\šY\Ê[œÜXÝ[ÛŠHÂˆ™]\›ˆÈØÚ[XWÛ˜[YNˆœ›Ü\KZ[[YÙ[˜ÙKY]šY[˜ÙK\Ù]Z[™^‹ØÚ[XWÝ™\œÚ[ÛŽˆŒKŒ‹Ù]ÎˆZ[Y™™XÝ]™Q]šY[˜ÙTÙ]Ê[œÜXÝ[ÛŠK›X\
-Ù]OˆÝ[[X\š^™Q]šY[˜ÙTÙ]
-[œÜXÝ[Û‹Ù]
-JHNÂˆB‚ˆ[˜Ý[ÛˆYÝYÙÙ\Ý[ÛŠ[œÜXÝ[Û‹ÝYÙÙ\Ý[ÛŠHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆYˆ
-]K™]šY[˜ÙWÜÙ]ÜÝYÙÙ\Ý[ÛœËœÛÛYJ][HOˆ][KœÝYÙÙ\Ý[Û—ÚYOOHÝYÙÙ\Ý[Û‹œÝYÙÙ\Ý[Û—ÚY
-JH™]\›ˆ[ÂˆÛÛœÝ›ÝÈHØš™XÝ˜\ÜÚYÛŠÈÝ]\Îˆœ[™[™×Ú[œÜXÝÜ—ØÛÛ™š\›X][Ûˆ‹Ü™X]YØ]ˆ™]È]J
-KÒTÓÔÝš[™Ê
-KXÝ]˜][Û—Ü[Nˆ“™]™\ˆXÝ]˜]HÜˆÜ›Ý\Ú[[Kˆ[œÜXÝÜˆÛÛ™š\›X][Ûˆ\È™\]Z\™YˆˆKÛÛ™JÝYÙÙ\Ý[ÛŠJNÂˆ]K™]šY[˜ÙWÜÙ]ÜÝYÙÙ\Ý[ÛœËœ\Ú
-›ÝÊNÂˆ™]\›ˆ›ÝÎÂˆB‚ˆ[˜Ý[ÛˆYX\œÛÛ”ÝYÙÙ\Ý[ÛœÊ[œÜXÝ[ÛŠHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆÛÛœÝÝÜÈH]KœÝÜÈ×NÂˆÛÛœÝ\ÈH[X™\ˆOˆÝÜËœÛÛYJÝÈOˆÝÓ[X™\ŠÝÊHOOH[X™\ŠNÂˆÛÛœÝY˜[™ÙHH
-Y\K[X™\œË›Û\ËX™[
-HOˆÂˆYˆ
-[[X™\œË™]™\žJ\ÊJH™]\›ŽÂˆYÝYÙÙ\Ý[ÛŠ]KÈÝYÙÙ\Ý[Û—ÚYˆYÙ]Ý\Nˆ\KÝYÙÙ\ÝYÛX™[ˆX™[Ý×ÚYÎˆ[X™\œË›X\
-[X™\ˆOˆÝÜË™š[™
-ÝÈOˆÝÓ[X™\ŠÝÊHOOH[X™\ŠKšY
-KÝYÙÙ\ÝYÜÝ×Ü›Û\Îˆ[X™\œË›X\
+  function addAiSpeciesSuggestion(inspection, evidenceSetId, suggestion) {
+    const data = ensureEvidenceSetModel(inspection);
+    if (!data.evidence_sets.some(item => item.evidence_set_id === evidenceSetId && ["Individual Tree", "Tree Group / Canopy"].includes(item.set_type))) throw new Error("Species suggestions require a tree evidence set.");
+    const input = suggestion || {};
+    return appendEvent(data, { evidence_set_id: evidenceSetId, event_type: "ai_species_suggestion", suggestion: { likely_species: input.likely_species || "Unknown", alternative_species: Array.isArray(input.alternative_species) ? input.alternative_species : [], confidence_level: input.confidence_level || "low", identifying_features_visible: Array.isArray(input.identifying_features_visible) ? input.identifying_features_visible : [], important_features_missing: Array.isArray(input.important_features_missing) ? input.important_features_missing : [], status: "AI suggestion â€” not confirmed", disclaimer: "Never present this AI species suggestion as confirmed." }, inspector_confirmed: false, created_by: input.created_by || "AI review" });
+  }
 
-[X™\‹[™^
-HOˆ
-ÈÝ×ÚYˆÝÜË™š[™
-ÝÈOˆÝÓ[X™\ŠÝÊHOOH[X™\ŠKšYÝ×Û[X™\Žˆ	Û[X™\ŸX›ÛNˆ›Û\ÖÚ[™^HÛÛ^ˆJJK˜\Ú\Îˆ’[œÜXÝÜ‹Y\™XÝYX\œÛÛˆ›ØY™]šY]ÈˆJNÂˆNÂˆY˜[™ÙJœX\œÛÛ‹\K\ËZ\™ÛÛÙ‹’[™]šYX[™YH‹ÍK‹×KÈ˜\šÈ‹˜\ÙHÈÜ›Ý[™‹•ÚÛH™YH—K“X]\™H\™ÛÛÙKTÈŠNÂˆY˜[™ÙJœX\œÛÛ‹\\LZ\™ÛÛÙ‹’[™]šYX[™YH‹ÍKLKÈ˜\šÈ‹˜\ÙHÈÜ›Ý[™‹•ÚÛH™YH—K”ÙXÛÛ™\™ÛÛÙTLŠNÂˆY˜[™ÙJœX\œÛÛ‹\LK\LË\[™H‹’[™]šYX[™YH‹ÍLKL‹L×KÈ˜\šÈ‹˜\ÙHÈÜ›Ý[™‹•ÚÛH™YH—K“X]\™H[™HLKTLÈŠNÂˆY˜[™ÙJœX\œÛÛ‹\MË\NK\[™KXØ[›ÜH‹•™YHÜ›Ý\ÈØ[›ÜH‹ÍMËNNWKÈ•ÚÛH™YH‹”Ý\œ›Ý[™[™ÈØ[›ÜH‹ÛÛ^—K”[™H[™Ø[ØX›HØ[›ÜHMËTNHŠNÂˆY˜[™ÙJœX\œÛÛ‹\\K\[™H‹’[™]šYX[™YH‹ÍWKÈ•ÚÛH™YH‹˜\šÈ—K“X]\™H[™HTHŠNÂˆY˜[™ÙJœX\œÛÛ‹\‹\ËZ\™ÛÛÙ‹’[™]šYX[™YH‹Í‹×KÈ•ÚÛH™YH‹˜\šÈ—K“X]\™H\™ÛÛÙ‹TÈŠNÂˆY˜[™ÙJœX\œÛÛ‹\Ž\Ì‹]Ø]\ˆ‹•Ø]\ˆ\™XH‹ÍŽŽKÌÌKÌ—KÈÛÛ^‹”™[][ÛœÚ\ÈÝ\œ›Ý[™[™ÜÈ‹ÛÜÙK]\‹‘]Z[‹“YX\Ý\™[Y[—K“ØØ[^™YØ]\ˆ\™XHŽTÌˆŠNÂˆYˆ
-\ÊÌÊJHYÝYÙÙ\Ý[ÛŠ]KÈÝYÙÙ\Ý[Û—ÚYˆœX\œÛÛ‹\ÌË]˜[œÚ][Ûˆ‹Ù]Ý\Nˆ“Ý\ˆ‹ÝYÙÙ\ÝYÛX™[ˆ•˜[œÚ][ÛˆÈÜ›Ý[™Ú]Ý]š\ÚX›HÝ[™[™ÈØ]\ˆ‹Ý×ÚYÎˆÜÝÜË™š[™
-ÝÈOˆÝÓ[X™\ŠÝÊHOOHÌÊKšYKÝYÙÙ\ÝYÜÝ×Ü›Û\ÎˆÞÈÝ×ÚYˆÝÜË™š[™
-ÝÈOˆÝÓ[X™\ŠÝÊHOOHÌÊKšYÝ×Û[X™\Žˆ”ÌÈ‹›ÛNˆ•˜[œÚ][ÛˆˆWK˜\Ú\Îˆ’[œÜXÝÜ‹Y\™XÝYX\œÛÛˆ›ØY™]šY]ÎÈÛÛœÚY\ˆ]XÚ[™ÈÈHÛÛ™š\›YYŽTÌˆØ]\ˆÙ]ˆˆJNÂˆ™]\›ˆ]K™]šY[˜ÙWÜÙ]ÜÝYÙÙ\Ý[ÛœÎÂˆB‚ˆ[˜Ý[ÛˆÝYÙÙ\Ý™XÙ[Ü›Ý\
-[œÜXÝ[Û‹Ü[ÛœÊHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆÛÛœÝÙ][™ÜÈHØš™XÝ˜\ÜÚYÛŠÈX^ÜÙXÛÛ™ÎˆLŒX^Ù\Ý[˜ÙWÛNˆMKZ[š[][WÜÝÜÎˆˆKÜ[ÛœÈßJNÂˆÛÛœÝ\ÜÚYÛ™YH™]ÈÙ]
-Z[Y™™XÝ]™Q]šY[˜ÙTÙ]Ê]JK™›]X\
-Ù]Oˆ
-Ù]œÝ×Û[šÜÈ×JK›X\
-[šÈOˆÝš[™Ê[šËœ™XÛÜ™ÚY
-JJJNÂˆÛÛœÝÝÜÈH
-]KœÝÜÈ×JK™š[\Š][HOˆX\ÜÚYÛ™Yš\ÊÝš[™Ê][KšY
-JJKœÛXÙJ
-KœÛÜ
+  function recordSpeciesDetermination(inspection, evidenceSetId, determination, species, createdBy) {
+    if (!SPECIES_DETERMINATIONS.includes(determination)) throw new Error("Choose a recognized species-identification determination.");
+    return appendEvent(inspection, { evidence_set_id: evidenceSetId, event_type: "species_determination", determination: { status: determination, species: species || "Unknown", recorded_by: createdBy || inspection.inspector_identity || "Field Inspector", factual_rule: determination === "Inspector confirmed" ? "Inspector-confirmed field identification; not a licensed professional determination unless stated." : "Not confirmed." }, inspector_confirmed: true, created_by: createdBy || inspection.inspector_identity || "Field Inspector" });
+  }
 
-KŠHOˆÝš[™ÊKœ™XÛÜ™YØ]K[YHˆŠK›ØØ[PÛÛ\\™JÝš[™Ê‹œ™XÛÜ™YØ]‹[YHˆŠJJNÂˆYˆ
-ÝÜË›[™ÝÙ][™ÜË›Z[š[][WÜÝÜÊH™]\›ˆ[ÂˆÛÛœÝZ[HÜÝÜÖÜÝÜË›[™ÝHWWNÂˆ›Üˆ
-][™^HÝÜË›[™ÝHŽÈ[™^HÈ[™^OHJHÂˆÛÛœÝØ[™Y]HHÝÜÖÚ[™^K]\ÝHZ[ÝZ[›[™ÝHWNÂˆÛÛœÝÙXÛÛ™ÈHX]˜XœÊ™]È]J]\Ýœ™XÛÜ™YØ]]\Ý[YJHH™]È]JØ[™Y]Kœ™XÛÜ™YØ]Ø[™Y]K[YJJHÈLÂˆÛÛœÝ\Ý[˜ÙHH]™\œÚ[™SY]\œÊØ[™Y]K]\Ý
-NÂˆÛÛœÝØ[YTÝXš™XÝHÝš[™ÊØ[™Y]KœÝ×ÛYX[š[™È	‰ˆØ[™Y]KœÝ×ÛYX[š[™ËœÝXš™XÝØ[™Y]K˜Ø]YÛÜžHˆŠHOOHÝš[™Ê]\ÝœÝ×ÛYX[š[™È	‰ˆ]\ÝœÝ×ÛYX[š[™ËœÝXš™XÝ]\Ý˜Ø]YÛÜžHˆŠNÂˆÛÛœÝØÙ[™SX]ÚHØ[™Y]KœØÙ[™WÜÚYÛ˜]\™H	‰ˆ]\ÝœØÙ[™WÜÚYÛ˜]\™H	‰ˆØ[™Y]KœØÙ[™WÜÚYÛ˜]\™HOOH]\ÝœØÙ[™WÜÚYÛ˜]\™NÂˆYˆ
-ÙXÛÛ™ÈHÙ][™ÜË›X^ÜÙXÛÛ™È	‰ˆ
-\Ý[˜ÙHOH[\Ý[˜ÙHHÙ][™ÜË›X^Ù\Ý[˜ÙWÛJH	‰ˆ
-Ø[YTÝXš™XÝØÙ[™SX]Ú
-JHZ[œ\Ú
-Ø[™Y]JNÈ[ÙHœ™XZÎÂˆBˆYˆ
-Z[›[™ÝÙ][™ÜË›Z[š[][WÜÝÜÊH™]\›ˆ[ÂˆZ[œ™]™\œÙJ
-NÂˆÛÛœÝÝYÙÙ\Ý[Û’YH]]ËYÜ›Ý\IÝZ[›X\
-][HOˆ][KšY
-Kš›Ú[Š‹HŠ_XÂˆÛÛœÝ^\Ý[™ÈH]K™]šY[˜ÙWÜÙ]ÜÝYÙÙ\Ý[ÛœË™š[™
-][HOˆ][KœÝYÙÙ\Ý[Û—ÚYOOHÝYÙÙ\Ý[Û’Y
-NÂˆYˆ
-^\Ý[™ÊH™]\›ˆ^\Ý[™ÎÂˆ™]\›ˆYÝYÙÙ\Ý[ÛŠ]KÈÝYÙÙ\Ý[Û—ÚYˆÝYÙÙ\Ý[Û’YÙ]Ý\Nˆ“Ý\ˆ‹ÝYÙÙ\ÝYÛX™[ˆ”ÜÜÚX›HØ[YHÝXš™XÝ‹Ý×ÚYÎˆZ[›X\
-][HOˆ][KšY
-KÝYÙÙ\ÝYÜÝ×Ü›Û\ÎˆZ[›X\
+  function recordLeafProvenance(inspection, evidenceSetId, photoId, confidence, createdBy) {
+    if (!FALLEN_LEAF_CONFIDENCE.includes(confidence)) throw new Error("Choose how confidently the leaf came from this tree.");
+    return appendEvent(inspection, { evidence_set_id: evidenceSetId, event_type: "leaf_provenance_recorded", record_type: "photo", record_id: photoId, confidence, association_status: confidence === FALLEN_LEAF_CONFIDENCE[0] ? "inspector_confirmed" : (confidence === "Probably" ? "probable" : "unverified"), activation_rule: "An unverified fallen leaf is never silently treated as belonging to the tree.", inspector_confirmed: true, created_by: createdBy || inspection.inspector_identity || "Field Inspector" });
+  }
 
-][K[™^
-HOˆ
-ÈÝ×ÚYˆ][KšYÝ×Û[X™\Žˆ][KœÝ×Û[X™\ˆ[›ÛNˆ[™^OOHÈÛÛ^ˆˆ‘]Z[ˆJJK˜\Ú\ÎˆZÙ[ˆÚ][ˆ	ÜÙ][™ÜË›X^ÜÙXÛÛ™ßHÙXÛÛ™È[™	ÜÙ][™ÜË›X^Ù\Ý[˜ÙWÛ_HY]\œÈÚ]X]Ú[™ÈÝXš™XÝØØ]YÛÜžHÜˆØÙ[™HÚYÛ˜]\™K˜JNÂˆB‚ˆ[˜Ý[Ûˆ]XÝÝXš™XÝÚ[™ÙJ[œÜXÝ[Û‹Ü[ÛœÊHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆÛÛœÝÙ][™ÜÈHØš™XÝ˜\ÜÚYÛŠÈX^ÜÙXÛÛ™ÎˆNX^Ù\Ý[˜ÙWÛNˆKÜ[ÛœÈßJNÂˆÛÛœÝÝÜÈH
-]KœÝÜÈ×JKœÛXÙJ
-KœÛÜ
+  function createEvidenceSetSummaries(inspection) {
+    return { schema_name: "property-intelligence-evidence-set-index", schema_version: "1.0", sets: buildEffectiveEvidenceSets(inspection).map(set => summarizeEvidenceSet(inspection, set)) };
+  }
 
-KŠHOˆÝš[™ÊKœ™XÛÜ™YØ]K[YHˆŠK›ØØ[PÛÛ\\™JÝš[™Ê‹œ™XÛÜ™YØ]‹[YHˆŠJJNÂˆYˆ
-ÝÜË›[™ÝŠH™]\›ˆ[ÂˆÛÛœÝ™]š[Ý\ÈHÝÜÖÜÝÜË›[™ÝH—KÝ\œ™[HÝÜÖÜÝÜË›[™ÝHWNÂˆÛÛœÝ™]š[Ý\ÔÝXš™XÝHÝš[™Ê™]š[Ý\ËœÝ×ÛYX[š[™È	‰ˆ™]š[Ý\ËœÝ×ÛYX[š[™ËœÝXš™XÝ™]š[Ý\Ë˜Ø]YÛÜžHˆŠNÂˆÛÛœÝÝ\œ™[ÝXš™XÝHÝš[™ÊÝ\œ™[œÝ×ÛYX[š[™È	‰ˆÝ\œ™[œÝ×ÛYX[š[™ËœÝXš™XÝÝ\œ™[˜Ø]YÛÜžHˆŠNÂˆÛÛœÝÙXÛÛ™ÈHX]˜XœÊ™]È]JÝ\œ™[œ™XÛÜ™YØ]Ý\œ™[[YJHH™]È]J™]š[Ý\Ëœ™XÛÜ™YØ]™]š[Ý\Ë[YJJHÈLÂˆÛÛœÝ\Ý[˜ÙHH]™\œÚ[™SY]\œÊ™]š[Ý\ËÝ\œ™[
-NÂˆÛÛœÝØÙ[™PÚ[™ÙYH™]š[Ý\ËœØÙ[™WÜÚYÛ˜]\™H	‰ˆÝ\œ™[œØÙ[™WÜÚYÛ˜]\™H	‰ˆ™]š[Ý\ËœØÙ[™WÜÚYÛ˜]\™HOOHÝ\œ™[œØÙ[™WÜÚYÛ˜]\™NÂˆYˆ
-ÙXÛÛ™ÈHÙ][™ÜË›X^ÜÙXÛÛ™È	‰ˆ
-\Ý[˜ÙHOH[\Ý[˜ÙHHÙ][™ÜË›X^Ù\Ý[˜ÙWÛJH	‰ˆ™]š[Ý\ÔÝXš™XÝ	‰ˆÝ\œ™[ÝXš™XÝ	‰ˆ
-™]š[Ý\ÔÝXš™XÝOOHÝ\œ™[ÝXš™XÝØÙ[™PÚ[™ÙY
-JH™]\›ˆÈ™]š[Ý\×ÜÝ×ÚYˆ™]š[Ý\ËšYÝ\œ™[ÜÝ×ÚYˆÝ\œ™[šY™]š[Ý\×ÜÝXš™XÝˆ™]š[Ý\ÔÝXš™XÝÝ\œ™[ÜÝXš™XÝˆÝ\œ™[ÝXš™XÝ[YWÙ[WÜÙXÛÛ™ÎˆÙXÛÛ™Ë\Ý[˜ÙWÛNˆ\Ý[˜ÙK›Û\ˆ\™H[ÝHÝ\[™ÈH™]ÈÝXš™XÝÈ‹XÝ]˜][Û—Ü[Nˆ’[œÜXÝÜˆÛÛ™š\›X][Ûˆ™\]Z\™YˆˆNÂˆ™]\›ˆ[ÂˆB‚ˆ[˜Ý[ÛˆÛÛ™š\›TÝYÙÙ\Ý[ÛŠ[œÜXÝ[Û‹ÝYÙÙ\Ý[Û’YÜ™X]YžJHÂˆÛÛœÝ]HH[œÝ\™Q]šY[˜ÙTÙ][Ù[
-[œÜXÝ[ÛŠNÂˆÛÛœÝÝYÙÙ\Ý[ÛˆH]K™]šY[˜ÙWÜÙ]ÜÝYÙÙ\Ý[ÛœË™š[™
-][HOˆ][KœÝYÙÙ\Ý[Û—ÚYOOHÝYÙÙ\Ý[Û’Y
-NÂˆYˆ
-\ÝYÙÙ\Ý[ÛŠH›ÝÈ™]È\œ›ÜŠ•HÜ›Ý\[™ÈÝYÙÙ\Ý[ÛˆØ\È›Ý›Ý[™ˆŠNÂˆYˆ
-ÝYÙÙ\Ý[Û‹œÝ]\ÈOOH˜ÛÛ™š\›YYŠH™]\›ˆY™™XÝ]™Q]šY[˜ÙTÙ]
-]KÝYÙÙ\Ý[Û‹™]šY[˜ÙWÜÙ]ÚY
-NÂˆÛÛœÝ™]š[Ý\ÐXÝ]™HH]K˜XÝ]™WÙ]šY[˜ÙWÜÙ]ÚYÂˆ]K˜XÝ]™WÙ]šY[˜ÙWÜÙ]ÚYH[ÂˆÛÛœÝÙ]HÝ\]šY[˜ÙTÙ]
-]KÈÙ]Ý\NˆÝYÙÙ\Ý[Û‹œÙ]Ý\KX™[ˆÝYÙÙ\Ý[Û‹œÝYÙÙ\ÝYÛX™[Ü™X]YØžNˆÜ™X]YžK™[][ÛœÚ\Ø˜\Ú\ÎˆÛÛ™š\›YYÜÝYÙÙ\Ý[ÛŽ‰ÜÝYÙÙ\Ý[Û’YX[œÜXÝÜ—ØÛÛ™š\›YYˆYHJNÂˆ
-ÝYÙÙ\Ý[Û‹œÝYÙÙ\ÝYÜÝ×Ü›Û\È×JK™›Ü‘XXÚ
-][HOˆ]XÚ™XÛÜ™
-]KÙ]™]šY[˜ÙWÜÙ]ÚYœÝÈ‹][KœÝ×ÚYÈÝ×Ü›ÛNˆ][Kœ›ÛKÜ™X]YØžNˆÜ™X]YžK™[][ÛœÚ\Ø˜\Ú\ÎˆÛÛ™š\›YYÜÝYÙÙ\Ý[ÛŽ‰ÜÝYÙÙ\Ý[Û’YXJJNÂˆš[š\Ú]šY[˜ÙTÙ]
-]KÙ]™]šY[˜ÙWÜÙ]ÚYÈÛÝ\˜ÙWÜÝYÙÙ\Ý[Û—ÚYˆÝYÙÙ\Ý[Û’YJNÂˆÝYÙÙ\Ý[Û‹œÝ]\ÈH˜ÛÛ™š\›YYŽÂˆÝYÙÙ\Ý[Û‹˜ÛÛ™š\›YYØ]H™]È]J
-KÒTÓÔÝš[™Ê
-NÂˆÝYÙÙ\Ý[Û‹˜ÛÛ™š\›YYØžHHÜ™X]YžH]Kš[œÜXÝÜ—ÚY[]H‘šY[[œÜXÝÜˆŽÂˆÝYÙÙ\Ý[Û‹™]šY[˜ÙWÜÙ]ÚYHÙ]™]šY[˜ÙWÜÙ]ÚYÂˆ]K˜XÝ]™WÙ]šY[˜ÙWÜÙ]ÚYH™]š[Ý\ÐXÝ]™NÂˆ™]\›ˆY™™XÝ]™Q]šY[˜ÙTÙ]
-]KÙ]™]šY[˜ÙWÜÙ]ÚY
-NÂˆB‚ˆ™]\›ˆÂˆÑUÕTTËÕ×Ô“ÓTË‘TURT‘QÔ“ÓTË‘QWÕ’TÒP’SUKÔPÒQT×ÑUT“RSUSÓ”ËSS—ÓPQ—ÐÓÓ‘’QSÑKˆ[œÝ\™Q]šY[˜ÙTÙ][Ù[Ý\]šY[˜ÙTÙ]]XÚ™XÛÜ™Ù]ÝÔ›ÛK]XÚ™XÛÜ™š[š\Ú]šY[˜ÙTÙ]ˆY™™XÝ]™Q]šY[˜ÙTÙ]Z[Y™™XÝ]™Q]šY[˜ÙTÙ]ËÝ[[X\š^™Q]šY[˜ÙTÙ]Ü™X]Q]šY[˜ÙTÙ]Ý[[X\šY\Ëˆ™YQ]šY[˜ÙT[‹YZTÜXÚY\ÔÝYÙÙ\Ý[Û‹™XÛÜ™ÜXÚY\Ñ]\›Z[˜][Û‹™XÛÜ™XY”›Ý™[˜[˜ÙKˆÝYÙÙ\Ý™XÙ[Ü›Ý\]XÝÝXš™XÝÚ[™ÙKYX\œÛÛ”ÝYÙÙ\Ý[ÛœËÛÛ™š\›TÝYÙÙ\Ý[Û‹]™\œÚ[™SY]\œËX^Ù\\˜][Û‚ˆNÂŸJNÂ
+  function addSuggestion(inspection, suggestion) {
+    const data = ensureEvidenceSetModel(inspection);
+    if (data.evidence_set_suggestions.some(item => item.suggestion_id === suggestion.suggestion_id)) return null;
+    const row = Object.assign({ status: "pending_inspector_confirmation", created_at: new Date().toISOString(), activation_rule: "Never activate or group silently. Inspector confirmation is required." }, clone(suggestion));
+    data.evidence_set_suggestions.push(row);
+    return row;
+  }
+
+  function addPearsonSuggestions(inspection) {
+    const data = ensureEvidenceSetModel(inspection);
+    const photos = data.photos || [];
+    const has = number => photos.some(photo => photoNumber(photo) === number);
+    const addRange = (id, type, numbers, roles, label) => {
+      if (!numbers.every(has)) return;
+      addSuggestion(data, { suggestion_id: id, set_type: type, suggested_label: label, photo_ids: numbers.map(number => photos.find(photo => photoNumber(photo) === number).id), suggested_photo_roles: numbers.map((number, index) => ({ photo_id: photos.find(photo => photoNumber(photo) === number).id, photo_number: `P${number}`, role: roles[index] || "Context" })), basis: "Inspector-directed Pearson Road review" });
+    };
+    addRange("pearson-p45-p47-hardwood", "Individual Tree", [45, 46, 47], ["Bark", "Base / ground", "Whole tree"], "Mature hardwood P45-P47");
+    addRange("pearson-p48-p50-hardwood", "Individual Tree", [48, 49, 50], ["Bark", "Base / ground", "Whole tree"], "Second hardwood P48-P50");
+    addRange("pearson-p51-p53-pine", "Individual Tree", [51, 52, 53], ["Bark", "Base / ground", "Whole tree"], "Mature pine P51-P53");
+    addRange("pearson-p57-p59-pine-canopy", "Tree Group / Canopy", [57, 58, 59], ["Whole tree", "Surrounding canopy", "Context"], "Pine and walkable canopy P57-P59");
+    addRange("pearson-p64-p65-pine", "Individual Tree", [64, 65], ["Whole tree", "Bark"], "Mature pine P64-P65");
+    addRange("pearson-p66-p67-hardwood", "Individual Tree", [66, 67], ["Whole tree", "Bark"], "Mature hardwood P66-P67");
+    addRange("pearson-p68-p72-water", "Water Area", [68, 69, 70, 71, 72], ["Context", "Relationship to surroundings", "Close-up", "Detail", "Measurement"], "Localized water area P68-P72");
+    if (has(73)) addSuggestion(data, { suggestion_id: "pearson-p73-transition", set_type: "Other", suggested_label: "Transition to ground without visible standing water", photo_ids: [photos.find(photo => photoNumber(photo) === 73).id], suggested_photo_roles: [{ photo_id: photos.find(photo => photoNumber(photo) === 73).id, photo_number: "P73", role: "Transition" }], basis: "Inspector-directed Pearson Road review; consider attaching to the confirmed P68-P72 water set." });
+    return data.evidence_set_suggestions;
+  }
+
+  function suggestRecentGroup(inspection, options) {
+    const data = ensureEvidenceSetModel(inspection);
+    const settings = Object.assign({ max_seconds: 120, max_distance_m: 15, minimum_photos: 2 }, options || {});
+    const assigned = new Set(buildEffectiveEvidenceSets(data).flatMap(set => (set.photo_links || []).map(link => String(link.record_id))));
+    const photos = (data.photos || []).filter(item => !assigned.has(String(item.id))).slice().sort((a, b) => String(a.recorded_at || a.time || "").localeCompare(String(b.recorded_at || b.time || "")));
+    if (photos.length < settings.minimum_photos) return null;
+    const tail = [photos[photos.length - 1]];
+    for (let index = photos.length - 2; index >= 0; index -= 1) {
+      const candidate = photos[index], latest = tail[tail.length - 1];
+      const seconds = Math.abs(new Date(latest.recorded_at || latest.time) - new Date(candidate.recorded_at || candidate.time)) / 1000;
+      const distance = haversineMeters(candidate, latest);
+      const sameSubject = String(candidate.photo_meaning && candidate.photo_meaning.subject || candidate.category || "") === String(latest.photo_meaning && latest.photo_meaning.subject || latest.category || "");
+      const sceneMatch = candidate.scene_signature && latest.scene_signature && candidate.scene_signature === latest.scene_signature;
+      if (seconds <= settings.max_seconds && (distance == null || distance <= settings.max_distance_m) && (sameSubject || sceneMatch)) tail.push(candidate); else break;
+    }
+    if (tail.length < settings.minimum_photos) return null;
+    tail.reverse();
+    const suggestionId = `auto-group-${tail.map(item => item.id).join("-")}`;
+    const existing = data.evidence_set_suggestions.find(item => item.suggestion_id === suggestionId);
+    if (existing) return existing;
+    return addSuggestion(data, { suggestion_id: suggestionId, set_type: "Other", suggested_label: "Possible same subject", photo_ids: tail.map(item => item.id), suggested_photo_roles: tail.map((item, index) => ({ photo_id: item.id, photo_number: item.photo_number || null, role: index === 0 ? "Context" : "Detail" })), basis: `Taken within ${settings.max_seconds} seconds and ${settings.max_distance_m} meters with matching subject/category or scene signature.` });
+  }
+
+  function detectSubjectChange(inspection, options) {
+    const data = ensureEvidenceSetModel(inspection);
+    const settings = Object.assign({ max_seconds: 180, max_distance_m: 40 }, options || {});
+    const photos = (data.photos || []).slice().sort((a, b) => String(a.recorded_at || a.time || "").localeCompare(String(b.recorded_at || b.time || "")));
+    if (photos.length < 2) return null;
+    const previous = photos[photos.length - 2], current = photos[photos.length - 1];
+    const previousSubject = String(previous.photo_meaning && previous.photo_meaning.subject || previous.category || "");
+    const currentSubject = String(current.photo_meaning && current.photo_meaning.subject || current.category || "");
+    const seconds = Math.abs(new Date(current.recorded_at || current.time) - new Date(previous.recorded_at || previous.time)) / 1000;
+    const distance = haversineMeters(previous, current);
+    const sceneChanged = previous.scene_signature && current.scene_signature && previous.scene_signature !== current.scene_signature;
+    if (seconds <= settings.max_seconds && (distance == null || distance <= settings.max_distance_m) && previousSubject && currentSubject && (previousSubject !== currentSubject || sceneChanged)) return { previous_photo_id: previous.id, current_photo_id: current.id, previous_subject: previousSubject, current_subject: currentSubject, time_delta_seconds: seconds, distance_m: distance, prompt: "Are you starting a new subject?", activation_rule: "Inspector confirmation required." };
+    return null;
+  }
+
+  function confirmSuggestion(inspection, suggestionId, createdBy) {
+    const data = ensureEvidenceSetModel(inspection);
+    const suggestion = data.evidence_set_suggestions.find(item => item.suggestion_id === suggestionId);
+    if (!suggestion) throw new Error("The grouping suggestion was not found.");
+    if (suggestion.status === "confirmed") return effectiveEvidenceSet(data, suggestion.evidence_set_id);
+    const previousActive = data.active_evidence_set_id;
+    data.active_evidence_set_id = null;
+    const set = startEvidenceSet(data, { set_type: suggestion.set_type, label: suggestion.suggested_label, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}`, inspector_confirmed: true });
+    (suggestion.suggested_photo_roles || []).forEach(item => attachRecord(data, set.evidence_set_id, "photo", item.photo_id, { photo_role: item.role, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}` }));
+    finishEvidenceSet(data, set.evidence_set_id, { source_suggestion_id: suggestionId });
+    suggestion.status = "confirmed";
+    suggestion.confirmed_at = new Date().toISOString();
+    suggestion.confirmed_by = createdBy || data.inspector_identity || "Field Inspector";
+    suggestion.evidence_set_id = set.evidence_set_id;
+    data.active_evidence_set_id = previousActive;
+    return effectiveEvidenceSet(data, set.evidence_set_id);
+  }
+
+  return {
+    SET_TYPES, PHOTO_ROLES, REQUIRED_ROLES, TREE_VISIBILITY, SPECIES_DETERMINATIONS, FALLEN_LEAF_CONFIDENCE,
+    ensureEvidenceSetModel, startEvidenceSet, attachRecord, setPhotoRole, detachRecord, finishEvidenceSet,
+    effectiveEvidenceSet, buildEffectiveEvidenceSets, summarizeEvidenceSet, createEvidenceSetSummaries,
+    treeEvidencePlan, addAiSpeciesSuggestion, recordSpeciesDetermination, recordLeafProvenance,
+    suggestRecentGroup, detectSubjectChange, addPearsonSuggestions, confirmSuggestion, haversineMeters, maxSeparation
+  };
+});
