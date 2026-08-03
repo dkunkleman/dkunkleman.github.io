@@ -12,6 +12,18 @@ Every proposed feature must materially accomplish at least one of these outcomes
 
 If a feature does not accomplish one of those outcomes, it should not be added.
 
+Feature gate: **What uncertainty does this remove?** If the answer is unclear, the feature does not belong in the current product.
+
+Every report must reduce uncertainty about five decisions:
+
+1. Can I access it?
+2. Can I build here?
+3. Can I make money here?
+4. What might cost me money?
+5. What makes this property special?
+
+Evidence collection exists to improve these decisions. Reports lead with decision answers, strengths, weaknesses, material unknowns, explained confidence, the lowest-cost next investigation, and narrowly justified professional follow-up. They do not lead with a catalog of observations.
+
 Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The phone collects durable observations, the append-only Property Intelligence Repository stores every inspection and version permanently, and ChatGPT analyzes repository records into maps, reports, comparisons, remaining questions, next-visit priorities, and decisions. These responsibilities stay separate.
 
 Inspector judgment is a durable data asset, but it is not observed evidence. Capture theories, preferences, concerns, and field intuition as Inspector Thoughts; preserve them beside the evidence with explicit non-factual labeling so later inspections can compare what was observed, what the inspector believed, and what ultimately proved true.

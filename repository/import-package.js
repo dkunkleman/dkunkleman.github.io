@@ -157,6 +157,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["repository-comparison.json", `analysis/${contract.export_id}/repository-comparison.json`],
     ["AI_README.md", `analysis/${contract.export_id}/AI_README.md`],
     ["AI_ANALYSIS.json", `analysis/${contract.export_id}/AI_ANALYSIS.json`],
+    ["DECISION_BRIEF.json", `analysis/${contract.export_id}/DECISION_BRIEF.json`],
     ["REPORT_TEMPLATE.md", `analysis/${contract.export_id}/REPORT_TEMPLATE.md`],
     ["INSPECTOR_THOUGHTS.md", `analysis/${contract.export_id}/INSPECTOR_THOUGHTS.md`],
     ["EVIDENCE_RELATIONSHIPS.json", `analysis/${contract.export_id}/EVIDENCE_RELATIONSHIPS.json`],

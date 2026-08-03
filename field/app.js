@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.4.1";
+  const APP_VERSION = "3.5.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -1795,7 +1795,7 @@
     try {
       const result = await buildPackageWithRecovery("report", null);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE: every photograph is viewable and every evidence relationship is indexed, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "field event")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
+      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE: every photograph is viewable and the evidence is organized around the five property decisions, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "field event")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
     } catch (error) {
       setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
     } finally {

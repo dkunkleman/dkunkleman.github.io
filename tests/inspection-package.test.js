@@ -195,7 +195,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -214,7 +214,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "1.4");
+  assert.equal(manifest.format_version, "1.5");
   assert.equal(manifest.repository.export_id, "export_full_test");
   assert.equal(manifest.repository.append_only, true);
   assert.equal(manifest.repository.overwrite_allowed, false);
@@ -261,6 +261,8 @@ async function main() {
     assert(Array.isArray(observation.attachments.nearest_photographs) && observation.attachments.nearest_photographs.length, `${observation.observation_id} references nearest photographs`);
     assert(Array.isArray(observation.attachments.nearest_voice_notes) && observation.attachments.nearest_voice_notes.length, `${observation.observation_id} references nearest voice notes`);
     assert(observation.observed_at && observation.compass_heading_deg != null && observation.evidence_classification, `${observation.observation_id} preserves timestamp, heading, and evidence classification`);
+    assert(Array.isArray(observation.decision_relevance) && observation.decision_relevance.length, `${observation.observation_id} is routed to at least one property decision`);
+    observation.decision_relevance.forEach(link => assert(link.decision_id && link.question && link.candidate_effect, `${observation.observation_id} has an explicit decision relationship`));
   });
   assert(!manifest.inspection.observations.some(observation => observation.observation_type === "field.thought"), "inspector thoughts are not represented as factual observations");
   assert.equal(manifest.inspection.inspector_thoughts[0].text, "I think the road berm may be causing this standing water.");
@@ -285,18 +287,27 @@ async function main() {
   assert(distanceMeters(manifest.inspection.gps_track) > 100, "walking distance can be reconstructed from the package alone");
 
   const aiAnalysis = JSON.parse(files.get("AI_ANALYSIS.json").toString("utf8"));
+  const decisionBrief = JSON.parse(files.get("DECISION_BRIEF.json").toString("utf8"));
   const relationships = JSON.parse(files.get("EVIDENCE_RELATIONSHIPS.json").toString("utf8"));
   const aiReadme = files.get("AI_README.md").toString("utf8");
   const reportTemplate = files.get("REPORT_TEMPLATE.md").toString("utf8");
   const thoughtDocument = files.get("INSPECTOR_THOUGHTS.md").toString("utf8");
-  ["executive_summary", "property_information", "inspection_conditions", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
+  ["executive_summary", "decision_framework", "decision_brief", "stakeholder_questions", "property_information", "inspection_conditions", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
+  assert.equal(decisionBrief.decisions.length, 5, "decision brief contains the five rural-property decisions");
+  assert.deepEqual(decisionBrief.decisions.map(decision => decision.question), ["Can I access it?", "Can I build here?", "Can I make money here?", "What might cost me money?", "What makes this property special?"]);
+  decisionBrief.decisions.forEach(decision => {
+    assert.equal(decision.estimated_confidence.scale, "0-100", `${decision.question} requires estimated confidence`);
+    assert(decision.lowest_cost_next_investigation.rule.includes("Prefer a free record check"), `${decision.question} requires the cheapest investigation first`);
+    assert(decision.professional_follow_up.rule.includes("exact question"), `${decision.question} prevents generic professional referrals`);
+  });
+  for (const stakeholder of ["buyer", "seller", "builder", "developer", "engineer", "forester"]) assert(aiAnalysis.stakeholder_questions[stakeholder].length, `${stakeholder} questions are provided`);
   assert.equal(aiAnalysis.photographs.length, 2);
   assert.equal(aiAnalysis.inspector_thoughts.length, 1);
   assert.equal(relationships.observations.length, manifest.summary.observation_count);
   assert.equal(relationships.photographs.length, 2);
   assert.equal(relationships.voice_notes.length, 1);
-  assert(aiReadme.includes("Every observation directly names its GPS point") && aiReadme.includes("not observed facts") && aiReadme.includes("Absence of an observation is not proof"), "AI README explains relationships, thought boundaries, and unanswered-question rules in plain English");
-  ["Executive Summary", "Property Overview", "Inspection Conditions", "Access", "Drainage", "Homesites", "Timber", "Utilities", "Hazards", "Unique Features", "Inspection Statistics", "Questions Answered", "Questions Remaining", "Lowest-Cost Next Steps", "Recommended Professional Follow-up", "Appendix"].forEach(heading => assert(reportTemplate.includes(`## ${heading}`), `report template includes ${heading}`));
+  assert(aiReadme.includes("Can I access it?") && aiReadme.includes("Every observation directly names its GPS point") && aiReadme.includes("not observed facts") && aiReadme.includes("Absence of an observation is not proof") && aiReadme.includes("0-100 confidence score"), "AI README explains decisions, relationships, thought boundaries, uncertainty, and confidence in plain English");
+  ["Decision Summary", "Property Overview", "Inspection Conditions", "Decision Matrix", "Can I Access It?", "Can I Build Here?", "Can I Make Money Here?", "What Might Cost Me Money?", "What Makes This Property Special?", "Strengths", "Weaknesses", "Unknowns and Coverage Gaps", "What Changed the Assessment", "Inspection Statistics", "Questions Answered", "Questions Remaining", "Lowest-Cost Next Investigation", "Estimated Confidence", "Buyer Questions", "Seller Transparency", "Builder Questions", "Developer Questions", "Engineer Questions", "Forester Questions", "Recommended Professional Follow-up", "Evidence Appendix"].forEach(heading => assert(reportTemplate.includes(`## ${heading}`), `report template includes ${heading}`));
   assert(thoughtDocument.includes("I think the road berm may be causing this standing water.") && thoughtDocument.includes("NOT AN OBSERVED FACT"), "inspector reasoning is preserved and explicitly separated from facts");
 
   const parcelGeoJson = JSON.parse(files.get("context/parcels.geojson").toString("utf8"));
@@ -307,11 +318,12 @@ async function main() {
   assert.deepEqual(photoIndex.photographs.map(photo => photo.photo_number), ["P1", "P2"], "photo index uses stable P numbers");
   const reconstruction = JSON.parse(files.get("chatgpt-reconstruction.json").toString("utf8"));
   assert.equal(reconstruction.user_questions_required_before_analysis, false, "reconstruction begins without asking the field user questions");
-  ["Interactive map", "Printable report", "Inspection timeline", "Photo gallery", "Questions answered", "Questions remaining", "Suggested next visit", "Areas not yet inspected"].forEach(output => assert(reconstruction.required_outputs_in_order.includes(output), `${output} reconstruction output is required`));
+  ["Decision summary", "Strengths, weaknesses, and material unknowns", "Explained confidence for each of the five decisions", "Lowest-cost next investigation", "Buyer, seller, builder, developer, engineer, and forester questions", "Interactive map", "Printable report", "Inspection timeline", "Photo gallery", "Questions answered", "Questions remaining", "Suggested next visit", "Areas not yet inspected"].forEach(output => assert(reconstruction.required_outputs_in_order.includes(output), `${output} reconstruction output is required`));
   assert.equal(reconstruction.integrity_expectations.expected_photo_count, 2);
   const report = files.get("printable-report.html").toString("utf8");
   assert(report.includes('src="photos/001_analysis.png"'), "printable report resolves actual photo 1 from the package");
   assert(report.includes('src="photos/002_analysis.png"'), "printable report resolves actual photo 2 from the package");
+  assert(report.includes("Decision Brief") && report.includes("Every next step must state what uncertainty it removes."), "printable evidence report leads the analyst into decision-focused uncertainty reduction");
   ["Complete Route", "Water and Drainage", "Dry Ground and Homesites", "Access and Obstacles", "Trees and Timber", "Photos", "Inspection Conditions"].forEach(section => assert(report.includes(section), `${section} report section exists`));
   assert(report.indexOf("Complete Route") < report.indexOf("Pearson Road Property Inspection"), "complete parcel route is report page 1");
   assert(report.includes("miles walked") && report.includes("elapsed") && report.includes("numbered detail zone"), "page 1 carries date, distance, duration, and numbered zones");
@@ -376,7 +388,7 @@ async function main() {
     assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "conditions.json")), "inspection weather is preserved in its repository evidence folder per export");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
-    for (const name of ["AI_README.md", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {
+    for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {
       assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", name)), `repository extracts ${name} for direct ChatGPT analysis`);
     }
     await assert.rejects(async () => Repository.importInspectionPackage(reportPath, repositoryRoot), /already exists/, "reimporting an export never overwrites its earlier version");
@@ -552,7 +564,7 @@ async function main() {
   assert.equal([...largeFullFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo full archive contains every analysis copy");
   assert(largeFullArchive.blob.size > largeReport.blob.size, "full archive is larger because it preserves exact originals");
 
-  process.stdout.write(`PASS: verified AI-ready relationships, separated inspector thoughts, report instructions, append-only repository ingestion, exact photo recovery, and 190-photo scale.\n`);
+  process.stdout.write(`PASS: verified five-decision analysis, confidence and uncertainty-reduction rules, stakeholder questions, AI-ready relationships, exact photo recovery, append-only ingestion, and 190-photo scale.\n`);
 }
 
 main().catch(error => {

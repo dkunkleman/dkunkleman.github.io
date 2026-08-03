@@ -7,7 +7,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.4";
+  const FORMAT_VERSION = "1.5";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -547,6 +547,7 @@
         comparison_record: { source: "repository-comparison.json", destination: `analysis/${exportId}/repository-comparison.json` },
         ai_readme: { source: "AI_README.md", destination: `analysis/${exportId}/AI_README.md` },
         ai_analysis: { source: "AI_ANALYSIS.json", destination: `analysis/${exportId}/AI_ANALYSIS.json` },
+        decision_brief: { source: "DECISION_BRIEF.json", destination: `analysis/${exportId}/DECISION_BRIEF.json` },
         report_template: { source: "REPORT_TEMPLATE.md", destination: `analysis/${exportId}/REPORT_TEMPLATE.md` },
         inspector_thoughts: { source: "INSPECTOR_THOUGHTS.md", destination: `analysis/${exportId}/INSPECTOR_THOUGHTS.md` },
         evidence_relationships: { source: "EVIDENCE_RELATIONSHIPS.json", destination: `analysis/${exportId}/EVIDENCE_RELATIONSHIPS.json` },
@@ -591,6 +592,7 @@
         geometry: observation.geometry,
         evidence_classification: observation.evidence_classification,
         attributes: observation.attributes,
+        decision_relevance: observation.decision_relevance,
         attachments: observation.attachments
       })),
       inspector_thoughts: (manifest.inspection.inspector_thoughts || []).map(thought => ({
@@ -749,12 +751,12 @@
 
   function createObservationsCsv(observations) {
     const rows = [[
-      "observation_id", "inspection_id", "property_id", "gps_point_id", "nearest_photo_ids", "nearest_voice_note_ids", "observed_at", "observation_type", "label",
+      "observation_id", "inspection_id", "property_id", "gps_point_id", "decision_ids", "decision_candidate_effects", "nearest_photo_ids", "nearest_voice_note_ids", "observed_at", "observation_type", "label",
       "evidence_classification", "latitude", "longitude", "gps_accuracy_m", "compass_heading_deg",
       "note", "attributes_json", "photo_id", "voice_note_id"
     ]];
     (observations || []).forEach(item => rows.push([
-      item.observation_id, item.inspection_id, item.property_id, item.gps_point_id, (item.attachments.nearest_photographs || []).map(photo => photo.photo_id).join("|"), (item.attachments.nearest_voice_notes || []).map(voice => voice.voice_note_id).join("|"), item.observed_at, item.observation_type,
+      item.observation_id, item.inspection_id, item.property_id, item.gps_point_id, (item.decision_relevance || []).map(link => link.decision_id).join("|"), (item.decision_relevance || []).map(link => `${link.decision_id}:${link.candidate_effect}`).join("|"), (item.attachments.nearest_photographs || []).map(photo => photo.photo_id).join("|"), (item.attachments.nearest_voice_notes || []).map(voice => voice.voice_note_id).join("|"), item.observed_at, item.observation_type,
       item.label, item.evidence_classification, item.gps.latitude, item.gps.longitude, item.gps.accuracy_m,
       item.compass_heading_deg, item.note, JSON.stringify(item.attributes || {}),
       item.attachments.photo_id, item.attachments.voice_note_id
@@ -870,6 +872,9 @@
     const metrics = manifest.inspection.metrics;
     const conditions = manifest.inspection.conditions || {};
     const zones = detailRegions(manifest.inspection.observations);
+    const decisionBrief = createDecisionBrief(manifest);
+    const decisionRows = decisionBrief.decisions.map(decision => `<tr><th>${htmlEscape(decision.question)}</th><td>${decision.evidence_observation_ids.length}</td><td>${decision.possible_strength_observation_ids.length}</td><td>${decision.possible_weakness_observation_ids.length}</td><td>Analyze linked evidence; state material unknowns and explained 0-100 confidence.</td></tr>`).join("");
+    const decisionPage = `<section class="page portrait"><h1>Decision Brief</h1><p>This field evidence is organized to answer five decisions. Counts route evidence for analysis; they are not conclusions and do not establish feasibility, value, or cost.</p><table><thead><tr><th>Decision</th><th>Relevant observations</th><th>Possible strengths</th><th>Possible weaknesses</th><th>Required analysis</th></tr></thead><tbody>${decisionRows}</tbody></table><h2>Required decision output</h2><p>For each decision: answer directly, cite material evidence, identify strengths and weaknesses, state material unknowns, explain confidence, and name the lowest-cost credible investigation. Every next step must state what uncertainty it removes.</p><div class="disclaimer">A recorded condition is not automatically a strength or weakness. Review its location, note, photographs, voice notes, inspection conditions, map context, and intended use.</div></section>`;
     const rasterDefinitions = `<svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs>${terrainDataUrl ? `<image id="reportTerrainRaster" href="${terrainDataUrl}" width="1800" height="1500" preserveAspectRatio="none"/>` : ""}${contourDataUrl ? `<image id="reportContourRaster" href="${contourDataUrl}" width="1800" height="1500" preserveAspectRatio="none"/>` : ""}</defs></svg>`;
     const mapPage = (title, groups, extra) => `<section class="page landscape${extra && extra.summary ? " route-page" : ""}"><h1>${htmlEscape(title)}</h1>${extra && extra.summary ? `<div class="route-summary"><strong>${htmlEscape(conditions.inspection_date || manifest.inspection.started_at || "Date not recorded")}</strong><span>${metrics.distance_walked_miles.toFixed(2)} miles walked</span><span>${formatReportDuration(metrics.elapsed_time_ms)} elapsed</span><span>${zones.length} numbered detail zone${zones.length === 1 ? "" : "s"}</span></div>` : ""}${createReportMapSvg({ manifest, parcels, groups, terrainDataUrl, contourDataUrl, zones: extra && extra.zones ? zones : [], view: extra && extra.view, title })}<p class="map-note">Numbered symbols match the observation and photograph records. Red line: subject parcel. Yellow/black line: walked route.</p></section>`;
     const mapPages = [
@@ -895,7 +900,7 @@
     const observationRows = (manifest.inspection.observations || []).map((item, index) => `<tr><td>${index + 1}</td><td>${htmlEscape(item.observed_at)}</td><td>${htmlEscape(item.label)}</td><td>${htmlEscape(item.evidence_classification)}</td><td>${htmlEscape(item.gps.latitude)}, ${htmlEscape(item.gps.longitude)}</td><td>${htmlEscape(item.note || "")}</td></tr>`).join("");
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pearson Road Inspection Report</title><style>
       @page portrait{size:letter portrait;margin:.45in}@page landscape{size:letter landscape;margin:.35in}*{box-sizing:border-box}body{margin:0;color:#111;font-family:Arial,sans-serif;background:#ddd}.page{background:#fff;margin:16px auto;padding:.35in;page-break-after:always;break-after:page}.portrait{page:portrait;width:8.5in;min-height:11in}.landscape{page:landscape;width:11in;min-height:8.5in}h1{margin:0 0 10px;font-size:24px}h2{margin:18px 0 8px}.report-map{display:block;width:100%;height:6.75in;border:2px solid #111;background:#ddd}.route-page .report-map{height:6.2in}.route-summary{display:flex;gap:20px;align-items:center;margin:-3px 0 7px;padding:7px 10px;background:#eee;border:1px solid #777;font-size:13px}.map-note{margin:6px 0;font-size:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.summary div{border:1px solid #777;padding:9px}.summary strong{display:block;font-size:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #777;padding:6px;text-align:left;vertical-align:top}.photo-page img{display:block;max-width:100%;max-height:7.1in;margin:0 auto 12px;object-fit:contain}.photo-page dl{display:grid;grid-template-columns:1.55in 1fr;margin:0}.photo-page dt,.photo-page dd{margin:0;border-top:1px solid #aaa;padding:6px}.photo-page dt{font-weight:bold}.disclaimer{border:3px solid #111;padding:12px;font-weight:bold}.photo-marker{cursor:pointer}.photo-marker:hover circle,.photo-marker:focus circle{stroke:#00ffff;stroke-width:12}#photoHover{position:fixed;z-index:20;display:none;width:280px;padding:7px;background:#fff;border:3px solid #111;box-shadow:0 4px 20px #0008}#photoHover img{display:block;width:100%;max-height:220px;object-fit:contain}dialog{max-width:min(92vw,760px);border:3px solid #111}dialog img{max-width:100%;max-height:75vh}@media print{body{background:#fff}.page{margin:0}#photoHover,dialog{display:none!important}}@media(max-width:800px){.page,.portrait,.landscape{width:100%;min-height:0;margin:0 0 12px;padding:12px}.report-map,.route-page .report-map{height:auto;aspect-ratio:6/5}.route-summary{display:grid;grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
-    </style></head><body>${rasterDefinitions}${mapPages}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><p><strong>Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}<section class="page portrait"><h1>Observation Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
+    </style></head><body>${rasterDefinitions}${mapPages}${decisionPage}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><p><strong>Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}<section class="page portrait"><h1>Evidence Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
   }
 
   function makeReadme(manifest) {
@@ -904,11 +909,12 @@
       fullArchive ? "PROPERTY INSPECTOR — FULL EVIDENCE ARCHIVE" : "PROPERTY INSPECTOR — CHATGPT ANALYSIS PACKAGE",
       "",
       "Save this ZIP as one immutable upload to the Property Intelligence Repository.",
-      "The repository should start with repository-import.json, preserve the source ZIP, and reject any overwrite. ChatGPT should analyze the extracted repository record beginning with chatgpt-reconstruction.json and inspection.json.",
+      "The repository should start with repository-import.json, preserve the source ZIP, and reject any overwrite. ChatGPT should analyze the extracted repository record beginning with AI_README.md and DECISION_BRIEF.json.",
       "",
       "Contents:",
       "- AI_README.md: plain-English first instruction for ChatGPT, including relationships, classifications, maps, weather, reporting, and unanswered-question rules.",
       "- AI_ANALYSIS.json: analysis-first structure containing property, conditions, statistics, full GPS track, observations, photos, voice notes, thoughts, layers, public data, relationships, questions, and metadata.",
+      "- DECISION_BRIEF.json: five-decision evidence routing, strengths/weaknesses/unknowns instructions, confidence rubric, and lowest-cost uncertainty-reduction rules.",
       "- REPORT_TEMPLATE.md: required professional Property Intelligence Report structure.",
       "- INSPECTOR_THOUGHTS.md: inspector reasoning kept separate from observed evidence.",
       "- EVIDENCE_RELATIONSHIPS.json: direct GPS, observation, photo, voice, weather, map, and thought links.",
@@ -950,12 +956,17 @@
   function createReconstructionGuide(manifest) {
     return {
       mode: "chatgpt-property-inspection-reconstruction",
-      version: "1.0",
+      version: "1.1",
       auto_start: true,
       user_questions_required_before_analysis: false,
-      objective: "Reconstruct the field day from this ZIP alone and produce a useful property-intelligence result without asking where the inspector walked or which photograph belongs to which observation.",
-      start_here: ["AI_README.md", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "inspection.json"],
+      objective: "Reconstruct the field day from this ZIP alone, then reduce uncertainty about access, buildability, economic potential, cost/risk, and distinctive value without asking the field user to match evidence.",
+      start_here: ["AI_README.md", "DECISION_BRIEF.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "inspection.json"],
       required_outputs_in_order: [
+        "Decision summary",
+        "Strengths, weaknesses, and material unknowns",
+        "Explained confidence for each of the five decisions",
+        "Lowest-cost next investigation",
+        "Buyer, seller, builder, developer, engineer, and forester questions",
         "Interactive map",
         "Printable report",
         "Inspection timeline",
@@ -1006,6 +1017,80 @@
     "Needs Professional Verification": "Potentially important but not established; recommend the appropriate qualified professional and explain what should be verified."
   };
 
+  const propertyDecisionFramework = [
+    {
+      decision_id: "D1_ACCESS",
+      question: "Can I access it?",
+      title: "Access",
+      purpose: "Determine whether people, passenger vehicles, construction equipment, emergency vehicles, and future users can reach and move through the property.",
+      possible_strength_types: ["field.entrance", "field.open", "field.culvert", "field.dry"],
+      possible_weakness_types: ["field.blocked", "field.thick", "field.wet", "field.ditch", "field.hazard", "field.culvert"]
+    },
+    {
+      decision_id: "D2_BUILD",
+      question: "Can I build here?",
+      title: "Buildability",
+      purpose: "Identify plausible building areas and the access, drainage, grade, utility, permitting, and site-work uncertainties that could prevent or burden construction.",
+      possible_strength_types: ["field.homesite", "field.high", "field.dry", "field.open", "field.entrance"],
+      possible_weakness_types: ["field.wet", "field.ditch", "field.hazard", "field.blocked", "field.thick", "field.culvert"]
+    },
+    {
+      decision_id: "D3_ECONOMICS",
+      question: "Can I make money here?",
+      title: "Economic Potential",
+      purpose: "Identify supported income, development, timber, resale, conservation, recreation, or improvement opportunities without inventing value or yield.",
+      possible_strength_types: ["field.timber", "field.tree", "field.homesite", "field.open", "field.entrance", "field.wildlife", "field.high"],
+      possible_weakness_types: ["field.blocked", "field.wet", "field.hazard", "field.thick"]
+    },
+    {
+      decision_id: "D4_COST_RISK",
+      question: "What might cost me money?",
+      title: "Cost and Risk",
+      purpose: "Surface conditions that may create acquisition, access, clearing, drainage, infrastructure, professional, maintenance, insurance, legal, or permitting cost.",
+      possible_strength_types: ["field.dry", "field.high", "field.open", "field.entrance"],
+      possible_weakness_types: ["field.wet", "field.blocked", "field.culvert", "field.ditch", "field.hazard", "field.thick"]
+    },
+    {
+      decision_id: "D5_DISTINCTION",
+      question: "What makes this property special?",
+      title: "Distinctive Value",
+      purpose: "Identify features that materially distinguish the property for use, enjoyment, marketability, conservation, identity, or long-term value.",
+      possible_strength_types: ["field.tree", "field.wildlife", "field.high", "field.open", "field.homesite", "field.timber", "field.wet"],
+      possible_weakness_types: []
+    }
+  ];
+
+  function decisionRelevanceForObservation(observation) {
+    const type = observation.observation_type || "field.other";
+    const relationships = [];
+    propertyDecisionFramework.forEach(decision => {
+      const strength = decision.possible_strength_types.includes(type);
+      const weakness = decision.possible_weakness_types.includes(type);
+      if (!strength && !weakness) return;
+      relationships.push({
+        decision_id: decision.decision_id,
+        question: decision.question,
+        candidate_effect: strength && weakness ? "context_requires_analysis" : (strength ? "possible_strength" : "possible_weakness"),
+        rule: "Review the note, location, photographs, voice notes, conditions, and map context before deciding whether this evidence helps or hurts the decision."
+      });
+    });
+    if (!relationships.length) {
+      relationships.push({
+        decision_id: "D4_COST_RISK",
+        question: "What might cost me money?",
+        candidate_effect: "context_requires_analysis",
+        rule: "Determine whether this general evidence reveals a cost, risk, or unresolved condition; if not, explain its decision relevance under Distinctive Value."
+      });
+      relationships.push({
+        decision_id: "D5_DISTINCTION",
+        question: "What makes this property special?",
+        candidate_effect: "context_requires_analysis",
+        rule: "Determine whether this general evidence identifies a distinctive feature or simply provides neutral context."
+      });
+    }
+    return relationships;
+  }
+
   function createEvidenceRelationships(manifest) {
     return {
       schema_name: "property-intelligence-evidence-relationships",
@@ -1015,6 +1100,7 @@
       observations: manifest.inspection.observations.map(observation => ({
         observation_id: observation.observation_id,
         gps_point_id: observation.gps_point_id,
+        decision_relevance: observation.decision_relevance,
         photograph_links: observation.attachments.nearest_photographs,
         voice_note_links: observation.attachments.nearest_voice_notes,
         observed_at: observation.observed_at,
@@ -1052,16 +1138,93 @@
     };
   }
 
+  function createDecisionBrief(manifest) {
+    const observations = manifest.inspection.observations || [];
+    const decisions = propertyDecisionFramework.map(definition => {
+      const relevant = observations.filter(observation => (observation.decision_relevance || []).some(link => link.decision_id === definition.decision_id));
+      const strengthCandidates = relevant.filter(observation => (observation.decision_relevance || []).some(link => link.decision_id === definition.decision_id && link.candidate_effect === "possible_strength"));
+      const weaknessCandidates = relevant.filter(observation => (observation.decision_relevance || []).some(link => link.decision_id === definition.decision_id && link.candidate_effect === "possible_weakness"));
+      return {
+        decision_id: definition.decision_id,
+        question: definition.question,
+        title: definition.title,
+        purpose: definition.purpose,
+        answer_status: "GENERATE_FROM_EVIDENCE",
+        evidence_observation_ids: relevant.map(observation => observation.observation_id),
+        possible_strength_observation_ids: strengthCandidates.map(observation => observation.observation_id),
+        possible_weakness_observation_ids: weaknessCandidates.map(observation => observation.observation_id),
+        strengths: { status: "CONFIRM_FROM_EVIDENCE", items: [] },
+        weaknesses: { status: "CONFIRM_FROM_EVIDENCE", items: [] },
+        unknowns: {
+          status: relevant.length ? "IDENTIFY_GAPS_AND_CONFLICTS" : "INSUFFICIENT_DECISION_EVIDENCE",
+          rule: "Name the missing fact, why it matters to this decision, and the least expensive reliable way to obtain it."
+        },
+        estimated_confidence: {
+          status: "CALCULATE_AFTER_REVIEW",
+          scale: "0-100",
+          required_explanation: "State the evidence supporting the score, spatial or temporal gaps, conflicts, assumptions, and what would most improve confidence.",
+          floor_rule: relevant.length ? null : "Do not assign more than 20 when no directly relevant observation was recorded."
+        },
+        lowest_cost_next_investigation: {
+          status: "RECOMMEND_AFTER_REVIEW",
+          rule: "Prefer a free record check, targeted return visit, simple measurement, phone call, or narrowly scoped professional question before a broad expensive engagement when that can reliably remove the uncertainty.",
+          required_fields: ["action", "uncertainty_removed", "decision_affected", "estimated_cost_tier", "estimated_time", "evidence_trigger"]
+        },
+        professional_follow_up: {
+          status: "RECOMMEND_ONLY_WHEN_JUSTIFIED",
+          rule: "Name the professional, the exact question to answer, the triggering evidence, and the decision that answer could change."
+        }
+      };
+    });
+    return {
+      schema_name: "property-intelligence-decision-brief",
+      schema_version: "1.0",
+      inspection_id: manifest.inspection_id,
+      property_id: manifest.property_id,
+      objective: "Remove uncertainty from five rural-property decisions. Organize the report around decisions rather than around the volume of collected data.",
+      decisions,
+      decision_summary: {
+        overall_recommendation: "GENERATE_FROM_EVIDENCE",
+        strengths: "IDENTIFY_MATERIAL_SUPPORTED_STRENGTHS",
+        weaknesses: "IDENTIFY_MATERIAL_SUPPORTED_WEAKNESSES",
+        unknowns: "IDENTIFY_DECISION_MATERIAL_UNKNOWNS",
+        opinion_changes: "EXPLAIN_WHICH_EVIDENCE_CHANGED_OR_SHOULD_CHANGE_THE_ASSESSMENT",
+        cheapest_uncertainty_reduction: "RANK_THE_LOWEST_COST_NEXT_ACTIONS_BY_DECISION_VALUE",
+        confidence: "REPORT_ONE_EXPLAINED_0_TO_100_SCORE_PER_DECISION; DO_NOT AVERAGE AWAY A CRITICAL UNKNOWN"
+      },
+      confidence_rubric: [
+        { range: "90-100", meaning: "High confidence: multiple consistent direct or measured sources, relevant media, and adequate spatial coverage; no material unresolved contradiction." },
+        { range: "70-89", meaning: "Moderately high: useful consistent evidence with limited gaps that are unlikely to reverse the decision." },
+        { range: "50-69", meaning: "Moderate: meaningful evidence exists, but a material gap, assumption, seasonality issue, or limited coverage could change the conclusion." },
+        { range: "25-49", meaning: "Low: sparse, indirect, conflicting, or poorly distributed evidence; use only for preliminary direction." },
+        { range: "0-24", meaning: "Insufficient: the inspection package cannot responsibly answer the decision." }
+      ],
+      reporting_rules: [
+        "A recorded condition is not automatically a strength or weakness; evaluate its actual effect on intended use.",
+        "Absence of an observation is not proof of absence.",
+        "Do not infer market value, buildability, legal access, wetland status, septic suitability, timber value, or utility capacity without supporting evidence.",
+        "Every material conclusion must cite evidence identifiers.",
+        "Every material unknown must be paired with the cheapest credible next investigation.",
+        "Every professional referral must state the exact question and the evidence that makes the referral worthwhile."
+      ]
+    };
+  }
+
   function createSuggestedInspectionQuestions(manifest) {
     const types = new Set(manifest.inspection.observations.map(observation => observation.observation_type));
     const questions = [
-      { id: "Q-access", category: "Access", question: "What access limitations, entrance constraints, road conditions, or blocked areas are supported by this inspection?", evidence_types: ["field.entrance", "field.blocked", "field.culvert"] },
-      { id: "Q-drainage", category: "Drainage", question: "Where was water observed, what may influence its movement, and what remains unknown about duration or recurrence?", evidence_types: ["field.wet", "field.dry", "field.ditch", "field.culvert"] },
-      { id: "Q-homesites", category: "Homesites", question: "Which locations appear most promising for a homesite, and what evidence or professional verification could change that conclusion?", evidence_types: ["field.homesite", "field.high", "field.dry", "field.wet"] },
-      { id: "Q-timber", category: "Timber", question: "What timber or specimen-tree evidence was collected, and what inventory measurements remain necessary?", evidence_types: ["field.tree", "field.timber"] },
-      { id: "Q-utilities", category: "Utilities", question: "What utility evidence is present, and which utility locations or capacities remain unverified?", evidence_types: ["field.utility"] },
-      { id: "Q-hazards", category: "Hazards", question: "What hazards or material concerns were recorded, and what is the lowest-cost way to reduce uncertainty about each?", evidence_types: ["field.hazard", "field.blocked", "field.wet"] },
-      { id: "Q-coverage", category: "Coverage", question: "Which portions of the subject parcel were not adequately inspected or photographed?", evidence_types: [] }
+      { id: "Q-access", stakeholder: "Decision", decision_id: "D1_ACCESS", category: "Can I access it?", question: "What access limitations, entrance constraints, road conditions, crossings, or blocked areas could affect ordinary, construction, or emergency access?", evidence_types: ["field.entrance", "field.blocked", "field.culvert", "field.wet", "field.ditch"] },
+      { id: "Q-build", stakeholder: "Decision", decision_id: "D2_BUILD", category: "Can I build here?", question: "Which areas appear plausibly buildable, what evidence supports them, and which drainage, grade, soil, septic, utility, access, boundary, or permitting unknown could reverse that conclusion?", evidence_types: ["field.homesite", "field.high", "field.dry", "field.wet", "field.ditch", "field.entrance"] },
+      { id: "Q-economics", stakeholder: "Decision", decision_id: "D3_ECONOMICS", category: "Can I make money here?", question: "Which income, development, timber, conservation, recreation, or resale possibilities are supported, and what missing fact prevents a credible value or yield conclusion?", evidence_types: ["field.timber", "field.tree", "field.homesite", "field.open", "field.entrance", "field.wildlife"] },
+      { id: "Q-cost", stakeholder: "Decision", decision_id: "D4_COST_RISK", category: "What might cost me money?", question: "Which observed or suspected conditions could create acquisition, clearing, access, drainage, infrastructure, maintenance, insurance, legal, or permitting cost?", evidence_types: ["field.hazard", "field.blocked", "field.wet", "field.culvert", "field.ditch", "field.thick"] },
+      { id: "Q-special", stakeholder: "Decision", decision_id: "D5_DISTINCTION", category: "What makes this property special?", question: "Which physical, ecological, visual, access, timber, recreational, or homesite features materially distinguish this property?", evidence_types: ["field.tree", "field.wildlife", "field.high", "field.open", "field.homesite", "field.timber", "field.wet"] },
+      { id: "Q-buyer", stakeholder: "Buyer", decision_id: null, category: "Buyer Questions", question: "What facts could change the intended use, offer price, contingencies, financing, insurance, or willingness to close?", evidence_types: ["field.hazard", "field.blocked", "field.wet", "field.homesite", "field.entrance"] },
+      { id: "Q-seller", stakeholder: "Seller", decision_id: null, category: "Seller Transparency", question: "Which observed conditions, known repairs, access arrangements, drainage history, boundaries, utilities, or recurring problems should the seller clarify with records or direct answers?", evidence_types: ["field.hazard", "field.blocked", "field.wet", "field.culvert", "field.entrance"] },
+      { id: "Q-builder", stakeholder: "Builder", decision_id: "D2_BUILD", category: "Builder Questions", question: "What site access, clearing, grading, drainage, foundation, staging, utility, and material-delivery constraints should a builder price or verify?", evidence_types: ["field.homesite", "field.high", "field.wet", "field.thick", "field.entrance", "field.blocked"] },
+      { id: "Q-developer", stakeholder: "Developer", decision_id: "D3_ECONOMICS", category: "Developer Questions", question: "What limits usable yield, road layout, lot placement, infrastructure cost, phasing, permitting, or marketable features?", evidence_types: ["field.homesite", "field.entrance", "field.wet", "field.high", "field.open", "field.blocked"] },
+      { id: "Q-engineer", stakeholder: "Engineer", decision_id: "D4_COST_RISK", category: "Engineer Questions", question: "Which exact drainage, crossing, slope, access, foundation, or erosion question needs an engineer, and what evidence triggered it?", evidence_types: ["field.culvert", "field.ditch", "field.wet", "field.hazard", "field.high"] },
+      { id: "Q-forester", stakeholder: "Forester", decision_id: "D3_ECONOMICS", category: "Forester Questions", question: "What species, diameter, quality, density, access, health, habitat, or merchantable-volume information is missing before timber conclusions are credible?", evidence_types: ["field.tree", "field.timber", "field.blocked", "field.wet"] },
+      { id: "Q-coverage", stakeholder: "Inspector", decision_id: null, category: "Coverage", question: "Which portions of the subject parcel were not adequately walked, observed, or photographed, and which decision is most exposed by that gap?", evidence_types: [] }
     ];
     return questions.map(item => Object.assign({}, item, {
       supporting_observation_ids: manifest.inspection.observations.filter(observation => item.evidence_types.includes(observation.observation_type)).map(observation => observation.observation_id),
@@ -1070,13 +1233,13 @@
     }));
   }
 
-  function createAiAnalysis(manifest, relationships, questions) {
+  function createAiAnalysis(manifest, relationships, questions, decisionBrief) {
     return {
       schema_name: "property-intelligence-ai-analysis-package",
-      schema_version: "1.0",
+      schema_version: "1.1",
       executive_summary: {
         status: "GENERATE_FROM_EVIDENCE",
-        instruction: "Write a concise professional summary after reviewing every section and actual media file. Separate facts, public data, estimates, inspector thoughts, and recommendations.",
+        instruction: "Write a concise decision summary after reviewing every section and actual media file. Lead with what the evidence means for access, buildability, economic potential, cost/risk, and distinctive value. Separate facts, public data, estimates, inspector thoughts, and recommendations.",
         verified_inputs: {
           inspection_id: manifest.inspection_id,
           property_id: manifest.property_id,
@@ -1088,6 +1251,14 @@
           inspector_thought_count: manifest.summary.inspector_thought_count
         }
       },
+      decision_framework: propertyDecisionFramework,
+      decision_brief: decisionBrief,
+      stakeholder_questions: questions.reduce((groups, question) => {
+        const key = String(question.stakeholder || "Other").toLowerCase().replace(/[^a-z0-9]+/g, "_");
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(question);
+        return groups;
+      }, {}),
       property_information: manifest.property,
       inspection_conditions: manifest.inspection.conditions,
       inspection_statistics: manifest.inspection.metrics,
@@ -1128,7 +1299,17 @@
 
 ## Start here
 
-This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`AI_ANALYSIS.json\` first, then inspect every actual photograph and voice note referenced there. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`DECISION_BRIEF.json\` and \`AI_ANALYSIS.json\` first, then inspect every actual photograph and voice note referenced there. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
+
+The purpose is not to repeat the evidence. The purpose is to reduce uncertainty about five decisions:
+
+1. Can I access it?
+2. Can I build here?
+3. Can I make money here?
+4. What might cost me money?
+5. What makes this property special?
+
+Every observation includes \`decision_relevance\`. Treat its candidate effect as a routing aid, not a conclusion. Decide whether it is truly a strength, weakness, neutral fact, or unresolved issue only after reviewing the linked evidence and intended use.
 
 ## How the evidence fits together
 
@@ -1137,6 +1318,7 @@ This package records one rural-property field inspection. Assume no prior knowle
 - Every photograph names its observation, GPS point, direction faced, timestamp, weather record, map coordinates, and actual analysis-image path.
 - Every voice note names its observation, GPS point, timestamp, and actual audio path.
 - \`EVIDENCE_RELATIONSHIPS.json\` is the compact relationship graph. \`inspection.json\` remains the canonical record.
+- \`DECISION_BRIEF.json\` groups evidence under the five decisions and provides the confidence and uncertainty-reduction rules.
 - \`INSPECTOR_THOUGHTS.md\` contains experience, theories, concerns, and preferences. These are useful interpretations, but they are not observed facts and must never be silently converted into facts.
 
 ## Evidence classifications
@@ -1151,18 +1333,20 @@ The walked route is in \`track.geojson\` and \`track.gpx\`. Parcel geometry is i
 
 The \`weather\` section identifies the inspection-condition record and its evidence classification. Manual field entries describe conditions during or around this visit. If authoritative weather history is absent, say so under Questions Remaining; do not invent rainfall or station data.
 
-## Generate the report
+## Generate the decision report
 
 1. Reconcile counts in \`AI_ANALYSIS.json\` with the actual photo and voice files.
 2. Review the route, parcel, terrain, contours, every observation, every photograph, every voice note, and every inspector thought.
-3. Use \`REPORT_TEMPLATE.md\` in order. Cite observation IDs, photo numbers, voice-note IDs, GPS point IDs, and public-layer sources near material statements.
-4. Separate supported findings from estimates, interpretations, and professional-verification items.
-5. Answer all supported suggested questions. Put unresolved matters under Questions Remaining without interrupting report generation to ask the user.
-6. Recommend the lowest-cost next evidence-gathering step before recommending expensive professional work when reasonable.
+3. Answer each of the five decisions directly. For each, state supported strengths, supported weaknesses, material unknowns, an explained 0-100 confidence score, and the cheapest credible next investigation.
+4. Use \`REPORT_TEMPLATE.md\` in order. Cite observation IDs, photo numbers, voice-note IDs, GPS point IDs, and public-layer sources near material statements.
+5. Separate supported findings from estimates, interpretations, and professional-verification items.
+6. Answer the buyer, seller, builder, developer, engineer, and forester questions that the evidence supports. Put unresolved matters under Questions Remaining without interrupting report generation to ask the user.
+7. Recommend professional follow-up only when evidence justifies it. Name the professional, the exact question, the triggering evidence, and which decision the answer could change.
+8. Recommend the lowest-cost next evidence-gathering step before expensive professional work whenever that step can reliably reduce the uncertainty.
 
 ## Unanswered-question rule
 
-A question remains unanswered when relevant evidence is absent, conflicting, spatially incomplete, marked Estimated or Needs Professional Verification, dependent on unprovided public data, or outside the capability of a field inspection. Absence of an observation is not proof that a condition does not exist.
+A question remains unanswered when relevant evidence is absent, conflicting, spatially incomplete, marked Estimated or Needs Professional Verification, dependent on unprovided public data, or outside the capability of a field inspection. Absence of an observation is not proof that a condition does not exist. Never hide a critical unknown inside an average confidence score.
 
 Inspection ID: \`${manifest.inspection_id}\`
 
@@ -1175,27 +1359,41 @@ Package mode: \`${manifest.package_mode}\`
   function createReportTemplate() {
     return `# Property Intelligence Report
 
-> Generate this report from the package evidence without asking the user to match files. Cite evidence identifiers. Clearly distinguish Observed, Measured, Estimated, Public Data, Interpretation, and Needs Professional Verification.
+> Generate a decision report from the package evidence without asking the user to match files. Cite evidence identifiers. Clearly distinguish Observed, Measured, Estimated, Public Data, Interpretation, and Needs Professional Verification. Do not confuse a large amount of data with a high-confidence answer.
 
-## Executive Summary
+## Decision Summary
 
 ## Property Overview
 
 ## Inspection Conditions
 
-## Access
+## Decision Matrix
 
-## Drainage
+For each decision provide: direct answer, material evidence, strengths, weaknesses, unknowns, 0-100 confidence with explanation, cheapest next investigation, and professional follow-up only when justified.
 
-## Homesites
+## Can I Access It?
 
-## Timber
+## Can I Build Here?
 
-## Utilities
+## Can I Make Money Here?
 
-## Hazards
+## What Might Cost Me Money?
 
-## Unique Features
+## What Makes This Property Special?
+
+## Strengths
+
+Include only strengths supported by cited evidence and explain why each matters to a decision.
+
+## Weaknesses
+
+Include only weaknesses supported by cited evidence and explain the likely consequence without inventing cost.
+
+## Unknowns and Coverage Gaps
+
+For every material unknown state why it matters, what evidence is missing, and which decision it could change.
+
+## What Changed the Assessment
 
 ## Inspection Statistics
 
@@ -1203,11 +1401,31 @@ Package mode: \`${manifest.package_mode}\`
 
 ## Questions Remaining
 
-## Lowest-Cost Next Steps
+## Lowest-Cost Next Investigation
+
+Rank actions by uncertainty removed per dollar and per hour. Prefer records, targeted calls, simple measurements, and focused return visits when reliable.
+
+## Estimated Confidence
+
+Give a separate explained 0-100 score for each of the five decisions. Do not average away a critical unknown.
+
+## Buyer Questions
+
+## Seller Transparency
+
+## Builder Questions
+
+## Developer Questions
+
+## Engineer Questions
+
+## Forester Questions
 
 ## Recommended Professional Follow-up
 
-## Appendix
+Name the professional, exact question, triggering evidence, expected decision value, and whether a cheaper preliminary step should happen first.
+
+## Evidence Appendix
 
 Include an evidence index, photograph index, route and map-layer summary, voice-note references, inspector-thought comparison, methodology, sources, assumptions, and limitations.
 `;
@@ -1228,7 +1446,7 @@ These entries preserve the inspector's judgment, theory, concern, preference, an
 
 Answer supported questions in the report. Move unsupported or incomplete questions to Questions Remaining without asking the user before generating the report.
 
-${questions.map(question => `## ${question.category}\n\n${question.question}\n\n- Evidence present: ${question.evidence_present ? "Yes" : "No or not specifically recorded"}\n- Supporting observations: ${question.supporting_observation_ids.join(", ") || "None specifically linked"}\n`).join("\n")}`;
+${questions.map(question => `## ${question.category}\n\n${question.question}\n\n- Audience: ${question.stakeholder}\n- Decision: ${question.decision_id || "Cross-cutting"}\n- Evidence present: ${question.evidence_present ? "Yes" : "No or not specifically recorded"}\n- Supporting observations: ${question.supporting_observation_ids.join(", ") || "None specifically linked"}\n- Output rule: Answer when supported. Otherwise state the uncertainty and the lowest-cost credible way to resolve it.\n`).join("\n")}`;
   }
 
   async function createInspectionPackage(options) {
@@ -1475,6 +1693,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     }));
     observations.forEach((observation, index) => {
       const event = evidenceEvents[index];
+      observation.decision_relevance = decisionRelevanceForObservation(observation);
       const gpsReference = nearestGpsReference(event, gpsTrack);
       observation.gps_point_id = gpsReference ? gpsReference.gps_point_id : null;
       observation.gps_point_reference = gpsReference;
@@ -1549,12 +1768,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.3",
-      purpose: "Portable observations that can be imported across properties and compared without rewriting the field record.",
+      schema_version: "1.4",
+      purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
       stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "gps_point", "observation", "inspector_thought", "attachment", "map_context"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
-        classification: ["taxonomy_version", "observation_type", "label", "evidence_classification"],
+        classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance"],
         time_and_place: ["observed_at", "geometry", "gps"],
         optional_measurements: ["attributes", "compass_heading_deg", "device_orientation"],
         evidence_links: ["gps_point_id", "attachments.photo_id", "attachments.voice_note_id", "attachments.nearest_photographs", "attachments.nearest_voice_notes"]
@@ -1629,6 +1848,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       files: {
         ai_readme: "AI_README.md",
         ai_analysis: "AI_ANALYSIS.json",
+        decision_brief: "DECISION_BRIEF.json",
         report_template: "REPORT_TEMPLATE.md",
         inspector_thoughts: "INSPECTOR_THOUGHTS.md",
         evidence_relationships: "EVIDENCE_RELATIONSHIPS.json",
@@ -1670,7 +1890,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const reconstructionGuide = createReconstructionGuide(manifest);
     const evidenceRelationships = createEvidenceRelationships(manifest);
     const suggestedQuestions = createSuggestedInspectionQuestions(manifest);
-    const aiAnalysis = createAiAnalysis(manifest, evidenceRelationships, suggestedQuestions);
+    const decisionBrief = createDecisionBrief(manifest);
+    const aiAnalysis = createAiAnalysis(manifest, evidenceRelationships, suggestedQuestions, decisionBrief);
     const aiReadme = createAiReadme(manifest);
     const reportTemplate = createReportTemplate();
     const inspectorThoughtsMarkdown = createInspectorThoughtsMarkdown(manifest);
@@ -1682,6 +1903,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const modifiedAt = new Date(exportedAt);
     zip.add("AI_README.md", aiReadme, { modifiedAt });
     zip.add("AI_ANALYSIS.json", JSON.stringify(aiAnalysis, null, 2) + "\n", { modifiedAt });
+    zip.add("DECISION_BRIEF.json", JSON.stringify(decisionBrief, null, 2) + "\n", { modifiedAt });
     zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
     zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });
     zip.add("EVIDENCE_RELATIONSHIPS.json", JSON.stringify(evidenceRelationships, null, 2) + "\n", { modifiedAt });
@@ -1734,6 +1956,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     createRepositoryImportManifest,
     createRepositoryComparisonRecord,
     createEvidenceRelationships,
+    createDecisionBrief,
     createSuggestedInspectionQuestions,
     createAiAnalysis,
     createAiReadme,

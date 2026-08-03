@@ -17,13 +17,14 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 `Finish Inspection` creates an AI-ready `AI_ANALYSIS_REPORT_PACKAGE` ZIP for repository ingestion and immediate ChatGPT analysis. **Create FULL EVIDENCE ARCHIVE** creates the permanent evidentiary ZIP without clearing or altering the saved inspection.
 
-- **CHATGPT ANALYSIS PACKAGE** includes every analysis-quality photograph, voice note, raw GPS point, orientation sample, evidence observation, inspector thought, report instruction, map layer, and reconstruction file. Images use a 1,900-pixel maximum dimension and JPEG quality 0.80; older stored analysis copies are optimized sequentially during export without altering the saved evidence. Exact originals are not duplicated, but their SHA-256, source name, dimensions, size, timestamp, and metadata remain in the manifest.
+- **CHATGPT ANALYSIS PACKAGE** includes every analysis-quality photograph, voice note, raw GPS point, orientation sample, evidence observation, inspector thought, report instruction, map layer, and reconstruction file. It routes every observation to access, buildability, economic potential, cost/risk, or distinctive value and requires explained confidence plus the cheapest credible next investigation. Images use a 1,900-pixel maximum dimension and JPEG quality 0.80; older stored analysis copies are optimized sequentially during export without altering the saved evidence. Exact originals are not duplicated, but their SHA-256, source name, dimensions, size, timestamp, and metadata remain in the manifest.
 - **FULL EVIDENCE ARCHIVE** additionally includes every exact original photograph byte-for-byte. Its larger size is intentional.
 
 Both modes contain:
 
 - `AI_README.md`, the plain-English first-read contract that tells ChatGPT what the inspection contains, how evidence relates, and how to report uncertainty;
 - `AI_ANALYSIS.json`, the analysis-first view organized as Executive Summary, Property Information, Inspection Conditions, Inspection Statistics, GPS Track, Observations, Photographs, Voice Notes, Map Layers, Weather, Terrain, Contours, Parcel Boundary, Public Data, Evidence Relationships, Suggested Inspection Questions, and Metadata;
+- `DECISION_BRIEF.json`, the five-decision brief with routed evidence, possible strengths and weaknesses, material-unknown rules, an explained 0-100 confidence rubric, lowest-cost investigation requirements, and evidence-triggered professional follow-up;
 - `REPORT_TEMPLATE.md`, with the required professional Property Intelligence Report sections;
 - `INSPECTOR_THOUGHTS.md`, which preserves the inspector's judgment, theories, concerns, and preferences while explicitly separating them from observed facts;
 - `EVIDENCE_RELATIONSHIPS.json`, which directly joins observations, photographs, voice notes, and stable GPS-point IDs;
@@ -70,7 +71,7 @@ The recovery tests simulate stale cached connections, close events, transaction-
 5. Close Safari after saving one observation, reopen it, and confirm the counters and photographs return.
 6. Take 20 photos over several minutes. Background and reopen Safari twice, rotate between portrait and landscape, and continue taking photos. If a pending-photo button appears, tap it and confirm recovery.
 7. Still offline, tap **Finish Inspection**. Use **Save to Property Intelligence Repository** in the iOS share sheet for the single `AI_ANALYSIS_REPORT_PACKAGE` ZIP.
-8. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. ChatGPT should begin with `AI_README.md`, use `AI_ANALYSIS.json`, and produce the map, report, timeline, gallery, questions, next visit, and uninspected areas without asking the user to match evidence.
+8. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. ChatGPT should begin with `AI_README.md` and `DECISION_BRIEF.json`, answer the five property decisions, then produce the supporting map, report, timeline, gallery, role-specific questions, next visit, and uninspected areas without asking the user to match evidence.
 9. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Save it to the same repository inspection; it must create a second export version and add exact originals without replacing the report package.
 
 Do not clear the inspection until the repository confirms both packages were received and every photo can be displayed.
