@@ -1,123 +1,206 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Pearson Road Field Tracker</title>
-<style>
-:root { --bg:#f3f0e7; --ink:#142018; --green:#215a35; --red:#d62424; --blue:#1c6bd1; }
-* { box-sizing:border-box; }
-html,body { margin:0; background:var(--bg); color:var(--ink); font-family:Arial,Helvetica,sans-serif; }
-header { background:#fff; padding:10px 12px; border-bottom:1px solid #c9c5b9; }
-h1 { margin:0; font-size:20px; }
-header p { margin:4px 0 0; font-size:13px; color:#4f5a51; }
-#controls { position:sticky; top:0; z-index:10; background:rgba(255,255,255,.97); padding:8px; border-bottom:1px solid #bbb; display:flex; gap:6px; flex-wrap:wrap; }
-button { border:0; border-radius:5px; padding:10px 11px; font-weight:700; font-size:14px; background:var(--green); color:#fff; }
-button.secondary { background:#505d65; }
-button.wet { background:#1c6bd1; }
-button.dry { background:#8a6b17; }
-button.blocked { background:#d62424; }
-button.high { background:#b34700; }
-button.photo { background:#6a3fa0; }
-button:disabled { opacity:.45; }
-#status { background:#111; color:#fff; padding:8px 10px; font:13px/1.35 monospace; }
-#mapFrame { position:relative; width:100%; max-width:1500px; margin:0 auto; background:#e7e2d4; overflow:hidden; aspect-ratio:1800/1500; touch-action:pan-x pan-y; }
-#mapFrame img, #overlay { position:absolute; inset:0; width:100%; height:100%; display:block; }
-#hillshade { z-index:1; }
-#contours { z-index:2; opacity:.9; }
-#overlay { z-index:3; pointer-events:none; }
-#below { max-width:1100px; margin:0 auto; padding:10px 12px 25px; }
-.card { background:#fff; border:1px solid #d1cec2; border-radius:7px; padding:10px; margin-top:10px; }
-.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
-.metric span { display:block; font-size:11px; color:#667068; }
-.metric strong { display:block; font-size:18px; margin-top:2px; }
-label { font-size:13px; }
-input[type=range] { width:150px; vertical-align:middle; }
-.small { font-size:12px; color:#59635b; line-height:1.4; }
-.lineKey { display:inline-block; width:32px; height:0; vertical-align:middle; margin-right:7px; }
-.subjectKey { border-top:5px solid #ff2020; }
-.neighborKey { border-top:2px solid #ffffff; box-shadow:0 1px 0 #111; }
-#gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
-.thumb { background:#fff; border:1px solid #ccc; border-radius:6px; padding:6px; font-size:11px; }
-.thumb img { width:100%; border-radius:4px; display:block; }
-@media(max-width:700px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } button { padding:9px 9px; font-size:13px; } #status { font-size:11px; } }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#173b24">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Property Inspector">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Property Inspector</title>
+  <style>
+    :root {
+      --bg: #ece9df;
+      --card: #fff;
+      --ink: #111b14;
+      --muted: #536058;
+      --green: #1d5b32;
+      --dark-green: #173b24;
+      --red: #c72424;
+      --blue: #155fbd;
+      --purple: #63389a;
+      --amber: #9a5b00;
+      --focus: #ffe34f;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    body { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+    header { background: var(--dark-green); color: #fff; padding: max(12px, env(safe-area-inset-top)) 14px 12px; }
+    header h1 { margin: 0; font-size: 23px; line-height: 1.15; }
+    header p { margin: 5px 0 0; font-size: 13px; opacity: .9; }
+    #offlineState { display: inline-block; margin-top: 8px; border: 2px solid #fff; border-radius: 999px; padding: 5px 10px; font-size: 13px; font-weight: 800; }
+    #offlineState[data-ready="true"] { color: #0c3218; background: #8bf0a5; border-color: #8bf0a5; }
+    #offlineState[data-ready="false"] { color: #3b0b0b; background: #ffaaa3; border-color: #ffaaa3; }
+    #workflow { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.98); border-bottom: 2px solid #a7a79d; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    #nextStep { background: #111; color: #fff; border-left: 7px solid var(--focus); padding: 10px 11px; min-height: 48px; font-weight: 850; font-size: 16px; line-height: 1.3; }
+    #primaryControls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    button, .button-link { min-height: 54px; border: 0; border-radius: 8px; padding: 10px 8px; color: #fff; background: var(--green); font: 800 16px/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    button:active, .button-link:active { transform: scale(.985); }
+    button:focus-visible, .button-link:focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; }
+    button:disabled { opacity: .38; transform: none; }
+    #start { background: #18783a; }
+    #finish { background: #111; border: 3px solid var(--focus); }
+    #stop { grid-column: 1 / -1; background: #4c5650; }
+    #status { margin-top: 8px; border-radius: 6px; background: #1d2420; color: #fff; padding: 9px 10px; min-height: 42px; font: 700 13px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #status[data-kind="error"] { background: #8e1111; }
+    #status[data-kind="warning"] { background: #704400; }
+    #status[data-kind="success"] { background: #096028; }
+    #status[data-kind="active"] { background: #173f60; }
+    main { max-width: 1200px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid #c7c5bb; border-radius: 9px; padding: 12px; margin: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .card h2 { margin: 0 0 4px; font-size: 19px; }
+    .card > p:first-of-type { margin-top: 4px; }
+    #fieldButtons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    #fieldButtons button { min-height: 62px; font-size: 15px; }
+    button.wet { background: var(--blue); }
+    button.dry { background: #80620d; }
+    button.blocked { background: var(--red); }
+    button.high { background: #a34300; }
+    button.homesite { background: #177252; }
+    button.culvert { background: #275975; }
+    button.tree { background: #327019; }
+    button.entrance { background: #75551c; }
+    button.wildlife { background: #5b4d1b; }
+    button.photo { background: var(--purple); }
+    button.voice { background: #9b1e58; }
+    button.voice.recording { animation: recordPulse 1.25s infinite; background: #d0063b; }
+    button.note { background: #4d5960; }
+    @keyframes recordPulse { 50% { box-shadow: 0 0 0 6px rgba(208,6,59,.25); } }
+    #mapFrame { position: relative; width: calc(100% - 20px); margin: 10px auto 0; background: #d8d1bd; overflow: hidden; aspect-ratio: 1800/1500; border: 2px solid #777; border-radius: 8px; touch-action: pan-x pan-y; }
+    #mapFrame img, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    #hillshade { z-index: 1; }
+    #contours { z-index: 2; opacity: .9; }
+    #overlay { z-index: 3; pointer-events: none; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .metric { min-width: 0; background: #f5f5f0; border-radius: 6px; padding: 8px; }
+    .metric span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .metric strong { display: block; margin-top: 3px; overflow-wrap: anywhere; font-size: 17px; }
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 10px; }
+    .thumb { border: 2px solid #bcbcb4; border-radius: 7px; padding: 6px; font-size: 11px; line-height: 1.4; }
+    .thumb img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
+    .photo-error { color: #890d0d; border-color: #b00000; background: #fff0ef; }
+    .lineKey { display: inline-block; width: 32px; height: 0; vertical-align: middle; margin-right: 7px; }
+    .subjectKey { border-top: 6px solid #ff2020; }
+    .neighborKey { border-top: 3px solid #fff; box-shadow: 0 1px 0 #111; }
+    .small { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .field-warning { border-left: 7px solid var(--amber); }
+    label { display: block; margin-top: 10px; font-weight: 700; font-size: 14px; }
+    input[type="range"] { width: min(250px, 70vw); vertical-align: middle; }
+    #packageReady { border: 3px solid #0b762f; background: #ecfff2; }
+    #packageReady[hidden], #packageLink[hidden], #sharePackage[hidden] { display: none; }
+    #packageReady p { font-weight: 700; }
+    #packageLink, #sharePackage { display: block; width: 100%; margin-top: 8px; text-decoration: none; background: #0b762f; }
+    #sharePackage { background: #111; border: 3px solid var(--focus); }
+    details summary { min-height: 44px; padding: 10px 0; font-weight: 800; cursor: pointer; }
+    .utilityButtons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .utilityButtons button { background: #56625b; font-size: 14px; }
+    #clear { background: #a31616; }
+    @media (max-width: 430px) {
+      #fieldButtons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #fieldButtons button { min-height: 64px; font-size: 16px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #nextStep { font-size: 15px; }
+      button, .button-link { font-size: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) { button.voice.recording { animation: none; } }
+  </style>
 </head>
 <body>
-<header>
-  <h1>Pearson Road Field Tracker</h1>
-  <p>Live GPS, county property lines, USGS 2-foot contours, field markers, photos, notes, and export.</p>
-</header>
-<div id="controls">
-  <button id="start">Start tracking</button>
-  <button id="stop" class="secondary" disabled>Stop</button>
-  <button id="wet" class="wet" disabled>Wet</button>
-  <button id="dry" class="dry" disabled>Dry</button>
-  <button id="blocked" class="blocked" disabled>Blocked</button>
-  <button id="high" class="high" disabled>High ground</button>
-  <button id="note" class="secondary" disabled>Note</button>
-  <button id="photo" class="photo" disabled>Photo</button>
-  <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
-</div>
-<div id="status">Ready. Tap Start tracking and allow Precise Location.</div>
-<div id="mapFrame">
-  <img id="hillshade" src="https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?bbox=-87.1%2C30.4825%2C-87.083%2C30.497&bboxSR=4326&size=1800%2C1500&imageSR=4326&format=png32&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A%22Hillshade+Elevation+Tinted%22%7D&transparent=true&f=image" alt="USGS terrain hillshade">
-  <img id="contours" src="https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?bbox=-87.1%2C30.4825%2C-87.083%2C30.497&bboxSR=4326&size=1800%2C1500&imageSR=4326&format=png32&interpolation=RSP_BilinearInterpolation&renderingRule=%7B%22rasterFunction%22%3A%22Preset+2ft+Contour+Interval%22%7D&transparent=true&f=image" alt="USGS 2-foot contours">
-  <svg id="overlay" viewBox="0 0 1800 1500" preserveAspectRatio="none"></svg>
-</div>
-<div id="below">
-  <div class="card grid">
-    <div class="metric"><span>Track points</span><strong id="pointCount">0</strong></div>
-    <div class="metric"><span>Distance walked</span><strong id="distance">0 ft</strong></div>
-    <div class="metric"><span>GPS accuracy</span><strong id="accuracy">—</strong></div>
-    <div class="metric"><span>Current location</span><strong id="location">—</strong></div>
-  </div>
-  <div class="card"><strong>Property lines</strong><p><span class="lineKey subjectKey"></span><strong>Red:</strong> subject parcel</p><p><span class="lineKey neighborKey"></span><strong>White/black:</strong> surrounding parcels</p></div>
-  <div class="card"><strong>Map display</strong><br><label>Contours <input id="contourOpacity" type="range" min="0" max="1" step=".05" value=".90"></label><label>Terrain <input id="terrainOpacity" type="range" min="0" max="1" step=".05" value="1"></label></div>
-  <div class="card"><strong>Photos</strong><div id="gallery"></div></div>
-  <div class="card"><strong>Save field record</strong><br><br><button id="csv" class="secondary">Export CSV</button> <button id="geojson" class="secondary">Export GeoJSON</button> <button id="gpx" class="secondary">Export GPX</button> <button id="clear" class="blocked">Clear</button><p class="small">Photos are stored on this phone with the session. Export files contain the route, markers, notes, and photo metadata.</p></div>
-  <div class="card small"><strong>Important:</strong> Keep this page open and the phone awake. iPhone may pause browser GPS when the screen locks or Safari is backgrounded.</div>
-</div>
-<script>
-(function(){
-"use strict";
-const W=1800,H=1500,xmin=-87.1,ymin=30.4825,xmax=-87.083,ymax=30.497;
-const svg=document.getElementById("overlay"),statusEl=document.getElementById("status"),startBtn=document.getElementById("start"),stopBtn=document.getElementById("stop"),photoInput=document.getElementById("photoInput");
-const markerButtons=["wet","dry","blocked","high","note","photo"].map(id=>document.getElementById(id));
-const stateKey="pearsonFieldTrackV2";
-let watchId=null,wakeLock=null,lastPosition=null,parcelFeatures=[];
-let data={started:null,stopped:null,points:[],markers:[],photos:[]};
-function sx(lon){return(lon-xmin)/(xmax-xmin)*W;} function sy(lat){return H-(lat-ymin)/(ymax-ymin)*H;}
-function addSvg(tag,attrs,text){const el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs||{}).forEach(([k,v])=>el.setAttribute(k,String(v)));if(text!==undefined)el.textContent=text;svg.appendChild(el);return el;}
-function haversine(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lon-a.lon)*p,la1=a.lat*p,la2=b.lat*p,h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
-function save(){localStorage.setItem(stateKey,JSON.stringify(data));} function load(){try{const x=JSON.parse(localStorage.getItem(stateKey)||"null");if(x&&Array.isArray(x.points))data=x;}catch(e){}}
-function totalDistance(){let m=0;for(let i=1;i<data.points.length;i++)m+=haversine(data.points[i-1],data.points[i]);return m;}
-function markerStyle(type){return{wet:{fill:"#1c6bd1",label:"WET"},dry:{fill:"#8a6b17",label:"DRY"},blocked:{fill:"#d62424",label:"BLOCK"},high:{fill:"#b34700",label:"HIGH"},note:{fill:"#555",label:"NOTE"},photo:{fill:"#6a3fa0",label:"PIC"}}[type]||{fill:"#555",label:type.toUpperCase()};}
-function pointPath(coords){return coords.map((p,i)=>(i?"L":"M")+sx(p[0]).toFixed(1)+" "+sy(p[1]).toFixed(1)).join(" ")+" Z";}
-function drawPropertyLines(){parcelFeatures.forEach(f=>{const geom=f.geometry||{},props=f.attributes||{},par=String(props.PAR_NUM||""),isSubject=par==="221S280000001010000",rings=geom.rings||[];(rings||[]).forEach(ring=>{if(!isSubject){addSvg("path",{d:pointPath(ring),fill:"none",stroke:"#111","stroke-width":5,"vector-effect":"non-scaling-stroke",opacity:.5});addSvg("path",{d:pointPath(ring),fill:"none",stroke:"#fff","stroke-width":2,"vector-effect":"non-scaling-stroke"});}else addSvg("path",{d:pointPath(ring),fill:"rgba(255,255,255,.01)",stroke:"#ff2020","stroke-width":8,"vector-effect":"non-scaling-stroke"});});});}
-function redraw(){svg.innerHTML="";drawPropertyLines();const pts=data.points.filter(p=>p.lon>=xmin&&p.lon<=xmax&&p.lat>=ymin&&p.lat<=ymax);if(pts.length>1){const d=pts.map((p,i)=>(i?"L":"M")+sx(p.lon).toFixed(1)+" "+sy(p.lat).toFixed(1)).join(" ");addSvg("path",{d,fill:"none",stroke:"#111","stroke-width":10,"vector-effect":"non-scaling-stroke",opacity:.82});addSvg("path",{d,fill:"none",stroke:"#ffe54a","stroke-width":5,"vector-effect":"non-scaling-stroke"});}pts.forEach((p,i)=>{if(i%5!==0&&i!==pts.length-1)return;addSvg("circle",{cx:sx(p.lon),cy:sy(p.lat),r:i===pts.length-1?14:6,fill:i===pts.length-1?"#00e0ff":"#ffe54a",stroke:"#111","stroke-width":3});});data.markers.forEach(m=>{if(m.lon<xmin||m.lon>xmax||m.lat<ymin||m.lat>ymax)return;const s=markerStyle(m.type),x=sx(m.lon),y=sy(m.lat);addSvg("circle",{cx:x,cy:y,r:20,fill:s.fill,stroke:"#fff","stroke-width":5});addSvg("text",{x,y:y+5,"text-anchor":"middle","font-size":12,"font-family":"Arial","font-weight":900,fill:"#fff","paint-order":"stroke",stroke:"#000","stroke-width":2},s.label);});document.getElementById("pointCount").textContent=data.points.length;const ft=totalDistance()*3.280839895;document.getElementById("distance").textContent=ft<5280?Math.round(ft)+" ft":(ft/5280).toFixed(2)+" mi";renderGallery();}
-function renderGallery(){const g=document.getElementById("gallery");g.innerHTML="";(data.photos||[]).forEach((p,i)=>{const d=document.createElement("div");d.className="thumb";d.innerHTML='<img src="'+p.dataUrl+'"><div>'+new Date(p.time).toLocaleString()+'</div><div>'+p.lat.toFixed(6)+', '+p.lon.toFixed(6)+'</div>';g.appendChild(d);});}
-function jsonp(url,cb){const s=document.createElement("script");s.src=url+(url.includes("?")?"&":"?")+"f=pjson&callback="+encodeURIComponent(cb)+"&_="+Date.now();s.onerror=()=>statusEl.textContent="County property lines were blocked. GPS can still record.";document.head.appendChild(s);}
-window.parcelsLoaded=function(d){if(d&&d.features){parcelFeatures=d.features;redraw();statusEl.textContent="Map and property lines loaded. Tap Start tracking.";}};
-function loadParcels(){const e={xmin,ymin,xmax,ymax,spatialReference:{wkid:4326}},u="https://services.arcgis.com/Eg4L1xEv2R3abuQd/ArcGIS/rest/services/ParcelsOpenData/FeatureServer/0/query?where=1%3D1&geometry="+encodeURIComponent(JSON.stringify(e))+"&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=PAR_NUM%2CParcelDisp%2CCALC_ACRE&returnGeometry=true&outSR=4326";jsonp(u,"parcelsLoaded");}
-async function keepAwake(){try{if("wakeLock"in navigator)wakeLock=await navigator.wakeLock.request("screen");}catch(e){}}
-function setTrackingUI(on){startBtn.disabled=on;stopBtn.disabled=!on;markerButtons.forEach(b=>b.disabled=!on);}
-function onPosition(pos){const c=pos.coords,p={time:new Date(pos.timestamp).toISOString(),lat:c.latitude,lon:c.longitude,accuracy_m:c.accuracy,altitude_m:Number.isFinite(c.altitude)?c.altitude:null,altitude_accuracy_m:Number.isFinite(c.altitudeAccuracy)?c.altitudeAccuracy:null,speed_mps:Number.isFinite(c.speed)?c.speed:null,heading_deg:Number.isFinite(c.heading)?c.heading:null};const prev=data.points[data.points.length-1],moved=!prev||haversine(prev,p)>=2.5,aged=!prev||(new Date(p.time)-new Date(prev.time))>=15000;if(moved||aged){data.points.push(p);save();redraw();}lastPosition=p;document.getElementById("accuracy").textContent=Math.round(c.accuracy)+" m";document.getElementById("location").textContent=c.latitude.toFixed(5)+", "+c.longitude.toFixed(5);statusEl.textContent="GPS active | accuracy ±"+Math.round(c.accuracy)+" m | "+c.latitude.toFixed(6)+", "+c.longitude.toFixed(6);}
-function onError(err){statusEl.textContent="GPS error: "+err.message+". Allow location access and Precise Location.";}
-async function startTracking(){if(!navigator.geolocation){statusEl.textContent="This browser does not provide GPS.";return;}data.started=data.started||new Date().toISOString();data.stopped=null;save();setTrackingUI(true);await keepAwake();watchId=navigator.geolocation.watchPosition(onPosition,onError,{enableHighAccuracy:true,maximumAge:0,timeout:20000});}
-function stopTracking(){if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;if(wakeLock){try{wakeLock.release();}catch(e){}wakeLock=null;}data.stopped=new Date().toISOString();save();setTrackingUI(false);statusEl.textContent="Tracking stopped. Export GeoJSON when finished.";}
-function addMarker(type){if(!lastPosition){statusEl.textContent="Waiting for the first GPS location.";return;}let note="";if(type==="note")note=prompt("Type the field note:")||"";data.markers.push({type,note,time:new Date().toISOString(),lat:lastPosition.lat,lon:lastPosition.lon,gps_accuracy_m:lastPosition.accuracy_m});save();redraw();statusEl.textContent="Marked "+type+" at current location.";}
-function resizePhoto(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const max=1400,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.82));};img.src=e.target.result;};r.readAsDataURL(file);}
-function takePhoto(){if(!lastPosition){statusEl.textContent="Waiting for the first GPS location.";return;}photoInput.click();}
-photoInput.onchange=()=>{const f=photoInput.files&&photoInput.files[0];if(!f)return;resizePhoto(f,dataUrl=>{const p={id:Date.now(),time:new Date().toISOString(),lat:lastPosition.lat,lon:lastPosition.lon,gps_accuracy_m:lastPosition.accuracy_m,dataUrl};data.photos.push(p);data.markers.push({type:"photo",note:"",time:p.time,lat:p.lat,lon:p.lon,gps_accuracy_m:p.gps_accuracy_m,photo_id:p.id});try{save();}catch(e){statusEl.textContent="Photo saved for this session but phone storage is nearly full.";}redraw();statusEl.textContent="Photo pinned to current location.";});photoInput.value="";};
-function download(name,mime,text){const b=new Blob([text],{type:mime}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
-function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"','&quot;').replaceAll("'","&apos;");}
-function exportCSV(){const rows=[["record_type","time","latitude","longitude","gps_accuracy_m","altitude_m","type","note","photo_id"]];data.points.forEach(p=>rows.push(["track",p.time,p.lat,p.lon,p.accuracy_m,p.altitude_m??"","","",""]));data.markers.forEach(m=>rows.push(["marker",m.time,m.lat,m.lon,m.gps_accuracy_m,"",m.type,m.note,m.photo_id||""]));download("Pearson_Road_Field_Track.csv","text/csv",rows.map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\n"));}
-function exportGeoJSON(){const features=[];if(data.points.length)features.push({type:"Feature",properties:{name:"Pearson Road field track",started:data.started,stopped:data.stopped},geometry:{type:"LineString",coordinates:data.points.map(p=>[p.lon,p.lat])}});data.markers.forEach(m=>features.push({type:"Feature",properties:{record_type:"field_marker",type:m.type,note:m.note,time:m.time,gps_accuracy_m:m.gps_accuracy_m,photo_id:m.photo_id||null},geometry:{type:"Point",coordinates:[m.lon,m.lat]}}));download("Pearson_Road_Field_Track.geojson","application/geo+json",JSON.stringify({type:"FeatureCollection",features},null,2));}
-function exportGPX(){let g='<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Pearson Road Field Tracker" xmlns="http://www.topografix.com/GPX/1/1">\n';data.markers.forEach(m=>{g+=`<wpt lat="${m.lat}" lon="${m.lon}"><time>${esc(m.time)}</time><name>${esc(m.type.toUpperCase())}</name><desc>${esc(m.note||"")}</desc></wpt>\n`;});g+='<trk><name>Pearson Road field track</name><trkseg>\n';data.points.forEach(p=>{g+=`<trkpt lat="${p.lat}" lon="${p.lon}">${p.altitude_m!==null?`<ele>${p.altitude_m}</ele>`:""}<time>${esc(p.time)}</time></trkpt>\n`;});g+='</trkseg></trk></gpx>';download("Pearson_Road_Field_Track.gpx","application/gpx+xml",g);}
-startBtn.onclick=startTracking;stopBtn.onclick=stopTracking;document.getElementById("wet").onclick=()=>addMarker("wet");document.getElementById("dry").onclick=()=>addMarker("dry");document.getElementById("blocked").onclick=()=>addMarker("blocked");document.getElementById("high").onclick=()=>addMarker("high");document.getElementById("note").onclick=()=>addMarker("note");document.getElementById("photo").onclick=takePhoto;document.getElementById("csv").onclick=exportCSV;document.getElementById("geojson").onclick=exportGeoJSON;document.getElementById("gpx").onclick=exportGPX;document.getElementById("clear").onclick=()=>{if(confirm("Erase the saved track, markers, and photos?")){data={started:null,stopped:null,points:[],markers:[],photos:[]};lastPosition=null;save();redraw();statusEl.textContent="Saved session cleared.";}};document.getElementById("contourOpacity").oninput=e=>document.getElementById("contours").style.opacity=e.target.value;document.getElementById("terrainOpacity").oninput=e=>document.getElementById("hillshade").style.opacity=e.target.value;
-load();redraw();loadParcels();
-})();
-</script>
+  <header>
+    <h1>Property Inspector</h1>
+    <p>Offline field evidence for real rural property inspections.</p>
+    <span id="offlineState" data-ready="false">Preparing offline use…</span>
+  </header>
+
+  <section id="workflow" aria-label="Inspection controls">
+    <div id="nextStep">NEXT: Wait for “Offline ready,” then tap Start Inspection.</div>
+    <div id="primaryControls">
+      <button id="start" disabled>Start Inspection</button>
+      <button id="finish" disabled>Finish Inspection</button>
+      <button id="stop" disabled>Pause GPS</button>
+    </div>
+    <div id="status" role="status" aria-live="polite">Loading the offline field tool…</div>
+  </section>
+
+  <main>
+    <section class="card" aria-labelledby="record-heading">
+      <h2 id="record-heading">Record what you see</h2>
+      <p class="small">One tap records the current GPS, time, accuracy, heading, and orientation. Photo and Voice Note also preserve the actual evidence.</p>
+      <div id="fieldButtons">
+        <button id="wet" class="wet" disabled>Wet</button>
+        <button id="dry" class="dry" disabled>Dry</button>
+        <button id="blocked" class="blocked" disabled>Blocked</button>
+        <button id="high" class="high" disabled>High Ground</button>
+        <button id="homesite" class="homesite" disabled>Homesite</button>
+        <button id="culvert" class="culvert" disabled>Culvert</button>
+        <button id="tree" class="tree" disabled>Specimen Tree</button>
+        <button id="entrance" class="entrance" disabled>Entrance</button>
+        <button id="wildlife" class="wildlife" disabled>Wildlife</button>
+        <button id="photo" class="photo" disabled>Take Photo</button>
+        <button id="voice" class="voice" disabled>Start Voice Note</button>
+        <button id="note" class="note" disabled>Free Note</button>
+      </div>
+      <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+    </section>
+
+    <div id="mapFrame" aria-label="Offline terrain, contours, parcels, GPS track, and markers">
+      <img id="hillshade" src="./assets/usgs-terrain.png" alt="Offline USGS terrain hillshade">
+      <img id="contours" src="./assets/usgs-contours-2ft.png" alt="Offline USGS 2-foot contours">
+      <svg id="overlay" viewBox="0 0 1800 1500" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+
+    <section class="card metrics" aria-label="Inspection status">
+      <div class="metric"><span>GPS points</span><strong id="pointCount">0</strong></div>
+      <div class="metric"><span>Distance walked</span><strong id="distance">0 ft</strong></div>
+      <div class="metric"><span>GPS accuracy</span><strong id="accuracy">—</strong></div>
+      <div class="metric"><span>Current location</span><strong id="location">—</strong></div>
+      <div class="metric"><span>Compass</span><strong id="heading">—</strong></div>
+      <div class="metric"><span>Photos</span><strong id="photoCount">0</strong></div>
+      <div class="metric"><span>Observations</span><strong id="eventCount">0</strong></div>
+      <div class="metric"><span>Voice notes</span><strong id="voiceCount">0</strong></div>
+    </section>
+
+    <section class="card" aria-labelledby="photo-heading">
+      <h2 id="photo-heading">Photographs</h2>
+      <p class="small">Every shown photo has original image bytes stored on this iPhone. Finish Inspection is blocked if any photo cannot be recovered.</p>
+      <div id="gallery"></div>
+    </section>
+
+    <section id="packageReady" class="card" hidden>
+      <h2>Inspection package ready</h2>
+      <p id="packageSummary">Everything is in one file.</p>
+      <button id="sharePackage" hidden>Send Package to ChatGPT</button>
+      <a id="packageLink" class="button-link" hidden>Save Inspection Package</a>
+      <p class="small">Do not clear the inspection until ChatGPT confirms it received the package.</p>
+    </section>
+
+    <section class="card">
+      <h2>Map key</h2>
+      <p><span class="lineKey subjectKey"></span><strong>Red:</strong> subject parcel</p>
+      <p><span class="lineKey neighborKey"></span><strong>White/black:</strong> neighboring parcels</p>
+      <label>2-foot contours <input id="contourOpacity" type="range" min="0" max="1" step=".05" value=".90"></label>
+      <label>USGS terrain <input id="terrainOpacity" type="range" min="0" max="1" step=".05" value="1"></label>
+    </section>
+
+    <section class="card field-warning">
+      <h2>Before entering the property</h2>
+      <p class="small"><strong>Confirm “Offline ready.”</strong> Keep Safari open and keep the iPhone charged. Low Power Mode and a locked screen can pause browser GPS. Carry a battery pack for large parcels.</p>
+    </section>
+
+    <details class="card">
+      <summary>Troubleshooting and recovery</summary>
+      <p class="small">The Finish Inspection button is the normal workflow. These individual data exports are only for technical recovery; they do not include photographs and are not a complete inspection package.</p>
+      <div class="utilityButtons">
+        <button id="csv">Recovery CSV</button>
+        <button id="geojson">Recovery GeoJSON</button>
+        <button id="gpx">Recovery GPX</button>
+        <button id="clear">Clear Inspection</button>
+      </div>
+    </details>
+  </main>
+
+  <script src="./inspection-package.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
