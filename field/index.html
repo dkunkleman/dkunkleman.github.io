@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#173b24">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Property Inspector">
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
   <title>Property Inspector</title>
   <style>
     :root {
@@ -113,6 +115,19 @@
     #packageFilename { display: block; padding: 9px; border: 2px dashed #0b762f; background: #fff; overflow-wrap: anywhere; font: 800 15px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
     #packageLink, #sharePackage { display: block; width: 100%; margin-top: 8px; text-decoration: none; background: #0b762f; }
     #sharePackage { background: #111; border: 3px solid var(--focus); }
+    .export-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .export-mode { border: 2px solid #777; border-radius: 8px; padding: 10px; background: #f7f7f2; }
+    .export-mode.recommended { border: 3px solid #11652d; background: #edfff1; }
+    .export-mode h3 { margin: 0 0 5px; font-size: 16px; }
+    .export-mode p { margin: 4px 0; }
+    .package-estimate { display: block; margin-top: 8px; font: 900 18px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #fullArchive { width: 100%; margin-top: 9px; background: #492568; }
+    #estimateWarning { color: #8b1010; font-weight: 900; }
+    #retryPendingPhoto { width: 100%; margin: 8px 0; background: #8a4400; border: 3px solid var(--focus); }
+    #retryPendingPhoto[hidden], #galleryPager[hidden] { display: none; }
+    #galleryPager { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 10px; }
+    #galleryPager button { min-height: 48px; background: #4c5650; }
+    #galleryPageInfo { font-weight: 900; text-align: center; white-space: nowrap; }
     details summary { min-height: 44px; padding: 10px 0; font-weight: 800; cursor: pointer; }
     .utilityButtons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .utilityButtons button { background: #56625b; font-size: 14px; }
@@ -122,6 +137,7 @@
       #fieldButtons button { min-height: 64px; font-size: 16px; }
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .condition-grid { grid-template-columns: 1fr; }
+      .export-modes { grid-template-columns: 1fr; }
       #nextStep { font-size: 15px; }
       button, .button-link { font-size: 15px; }
     }
@@ -215,10 +231,32 @@
       <div class="metric"><span>Stopped time</span><strong id="stoppedTime">0 min</strong></div>
     </section>
 
+    <section class="card" aria-labelledby="export-heading">
+      <h2 id="export-heading">Inspection packages</h2>
+      <p class="small">Nothing is removed after either export. <strong>Finish Inspection</strong> creates the smaller ChatGPT package. The full archive remains available afterward from the saved originals.</p>
+      <div class="export-modes">
+        <div class="export-mode recommended">
+          <h3>CHATGPT / REPORT PACKAGE</h3>
+          <p class="small">Every photo is viewable at analysis quality. Full-resolution originals are represented by their filename, dimensions, byte size, timestamp, metadata, and SHA-256 hash instead of duplicate image bytes.</p>
+          <span id="reportEstimate" class="package-estimate">Estimating…</span>
+          <p class="small">Created when you tap <strong>Finish Inspection</strong>.</p>
+        </div>
+        <div class="export-mode">
+          <h3>FULL EVIDENCE ARCHIVE</h3>
+          <p class="small">Every original photo byte-for-byte, analysis copies, voice notes, raw GPS, orientations, observations, hashes, and map context. Intended for permanent and professional evidence storage.</p>
+          <span id="fullEstimate" class="package-estimate">Estimating…</span>
+          <button id="fullArchive" disabled>Create FULL EVIDENCE ARCHIVE</button>
+        </div>
+      </div>
+      <p id="estimateWarning" class="small" hidden></p>
+    </section>
+
     <section class="card" aria-labelledby="photo-heading">
       <h2 id="photo-heading">Photographs</h2>
       <p class="small">Every shown photo has original image bytes stored on this iPhone. Finish Inspection is blocked if any photo cannot be recovered.</p>
+      <button id="retryPendingPhoto" hidden>Retry Pending Photo</button>
       <div id="gallery"></div>
+      <div id="galleryPager" hidden><button id="galleryPrevious">Previous Photos</button><span id="galleryPageInfo"></span><button id="galleryNext">Next Photos</button></div>
     </section>
 
     <section id="packageReady" class="card" hidden>
@@ -248,7 +286,7 @@
       <summary>Troubleshooting and recovery</summary>
       <p class="small">The Finish Inspection button is the normal workflow. These individual data exports are only for technical recovery; they do not include photographs and are not a complete inspection package.</p>
       <div class="utilityButtons">
-        <button id="backup">Export Backup Now</button>
+        <button id="backup">Full Archive Backup Now</button>
         <button id="csv">Recovery CSV</button>
         <button id="geojson">Recovery GeoJSON</button>
         <button id="gpx">Recovery GPX</button>
@@ -296,6 +334,7 @@
   </dialog>
 
   <script src="./inspection-package.js"></script>
+  <script src="./idb-recovery.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

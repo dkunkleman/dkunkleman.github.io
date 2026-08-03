@@ -157,25 +157,29 @@ async function main() {
     voice_notes: [{ id: "voice-1", started_at: "2026-08-02T14:05:00.000Z", finished_at: "2026-08-02T14:05:04.500Z", duration_ms: 4500, mime_type: "audio/mp4", size_bytes: voiceBytes.length, lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, recovered_after_interruption: false }]
   };
 
+  const basePhotoEntries = [
+    { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
+    { id: "photo-2", originalBlob: new Blob([photoTwoBytes], { type: "image/png" }), analysisBlob: new Blob([photoTwoBytes], { type: "image/png" }) }
+  ];
+  const baseVoiceEntries = [{ id: "voice-1", audioBlob: new Blob([voiceBytes], { type: "audio/mp4" }) }];
+  const baseMapContext = {
+    terrainBlob: new Blob([terrainBytes], { type: "image/png" }),
+    contourBlob: new Blob([contourBytes], { type: "image/png" }),
+    parcelsText
+  };
   const result = await Package.createInspectionPackage({
     inspection,
-    photoEntries: [
-      { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
-      { id: "photo-2", originalBlob: new Blob([photoTwoBytes], { type: "image/png" }), analysisBlob: new Blob([photoTwoBytes], { type: "image/png" }) }
-    ],
-    voiceEntries: [{ id: "voice-1", audioBlob: new Blob([voiceBytes], { type: "audio/mp4" }) }],
-    mapContext: {
-      terrainBlob: new Blob([terrainBytes], { type: "image/png" }),
-      contourBlob: new Blob([contourBytes], { type: "image/png" }),
-      parcelsText
-    },
+    photoEntries: basePhotoEntries,
+    voiceEntries: baseVoiceEntries,
+    mapContext: baseMapContext,
     appVersion: "test",
     sourceUrl: "https://example.test/field/",
+    packageMode: "full_archive",
     exportedAt: "2026-08-02T15:00:01.000Z"
   });
 
   assert.equal(result.blob.type, "application/zip");
-  assert.match(result.fileName, /^Pearson_Road_Inspection_\d{4}-\d{2}-\d{2}_\d{4}\.zip$/);
+  assert.match(result.fileName, /^Pearson_Road_Inspection_FULL_ARCHIVE_\d{4}-\d{2}-\d{2}_\d{4}\.zip$/);
   const zipBytes = Buffer.from(await result.blob.arrayBuffer());
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
@@ -200,6 +204,8 @@ async function main() {
   assert.equal(manifest.summary.gps_track_point_count, points.length);
   assert.equal(manifest.summary.field_event_count, markers.length);
   assert.equal(manifest.summary.photo_count, 2);
+  assert.equal(manifest.package_mode, "full_evidence_archive");
+  assert.equal(manifest.summary.original_photo_evidence_count, 2);
   assert.equal(manifest.summary.original_photo_count, 2);
   assert.equal(manifest.summary.analysis_photo_count, 2);
   assert.equal(manifest.summary.voice_note_count, 1);
@@ -250,6 +256,35 @@ async function main() {
   assert(!report.includes("â") && !report.includes("Â"), "printable report contains no mojibake text");
   assert(!/<(?:script|img)[^>]+src=["']https?:/i.test(report), "printable report has no live external dependencies");
 
+  const reportResult = await Package.createInspectionPackage({
+    inspection,
+    photoEntries: basePhotoEntries,
+    voiceEntries: baseVoiceEntries,
+    mapContext: baseMapContext,
+    packageMode: "report",
+    appVersion: "test",
+    exportedAt: "2026-08-02T15:02:00.000Z"
+  });
+  assert.match(reportResult.fileName, /^Pearson_Road_Inspection_REPORT_PACKAGE_/);
+  const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
+  assert(!reportFiles.has("photos/001_original.png") && !reportFiles.has("photos/002_original.png"), "report package does not duplicate full-resolution originals");
+  assert.deepEqual(reportFiles.get("photos/001_analysis.png"), photoOneBytes, "report package contains actual viewable photo 1");
+  assert.deepEqual(reportFiles.get("photos/002_analysis.png"), photoTwoBytes, "report package contains actual viewable photo 2");
+  const reportManifest = JSON.parse(reportFiles.get("inspection.json").toString("utf8"));
+  assert.equal(reportManifest.package_mode, "chatgpt_report_package");
+  assert.equal(reportManifest.summary.original_photo_count, 0);
+  assert.equal(reportManifest.summary.original_photo_evidence_count, 2);
+  assert.equal(reportManifest.summary.analysis_photo_count, 2);
+  reportManifest.photographs.forEach(photo => {
+    assert.equal(photo.original.path, null, `${photo.photo_number} original path is intentionally absent`);
+    assert.equal(photo.original.included_in_package, false, `${photo.photo_number} records intentional omission`);
+    assert.match(photo.original.sha256, /^[0-9a-f]{64}$/, `${photo.photo_number} omitted original retains SHA-256`);
+    assert(photo.original.source_filename && photo.original.size_bytes && photo.original.width_px && photo.original.height_px && photo.original.recorded_at, `${photo.photo_number} omitted original retains filename, dimensions, size, and timestamp`);
+    assert(reportFiles.has(photo.analysis.path), `${photo.photo_number} analysis image resolves inside report package`);
+    assert.equal(photo.thumbnail.path, photo.analysis.path, `${photo.photo_number} reuses the analysis image as a no-duplication thumbnail`);
+  });
+  assert(reportResult.blob.size < result.blob.size, "report package is smaller than the full evidence archive");
+
   await assert.rejects(
     () => Package.createInspectionPackage({ inspection, photoEntries: [], voiceEntries: [], mapContext: { terrainBlob: new Blob([terrainBytes]), contourBlob: new Blob([contourBytes]), parcelsText } }),
     /Photo storage mismatch/,
@@ -267,7 +302,7 @@ async function main() {
     packageKind: "backup",
     exportedAt: "2026-08-02T15:10:00.000Z"
   });
-  assert.match(noImagery.fileName, /^Pearson_Road_Inspection_Backup_/);
+  assert.match(noImagery.fileName, /^Pearson_Road_Inspection_FULL_ARCHIVE_Backup_/);
   const noImageryFiles = extractStoredZip(Buffer.from(await noImagery.blob.arrayBuffer()));
   assert(noImageryFiles.has("printable-report.html"), "printable report still exists when raster imagery fails");
   assert(!noImageryFiles.has("context/usgs-terrain.png"), "missing terrain is honestly omitted");
@@ -283,7 +318,120 @@ async function main() {
     "package creation fails closed when a photo cannot be displayed for analysis"
   );
 
-  process.stdout.write(`PASS: recovered ${manifest.summary.photo_count} originals, ${manifest.summary.photo_count} analysis copies, ${manifest.summary.voice_note_count} voice note, ${manifest.summary.gps_track_point_count} GPS points, ${manifest.summary.field_event_count} observations, and all offline map context from one ${zipBytes.length}-byte ZIP.\n`);
+  const largeOriginal = new Blob([Buffer.alloc(1024, 0x4f)], { type: "image/jpeg" });
+  const largeAnalysis = new Blob([Buffer.alloc(384, 0x41)], { type: "image/jpeg" });
+  const largePhotos = Array.from({ length: 190 }, (_, index) => ({
+    id: `large-photo-${index + 1}`,
+    photo_number: `P${index + 1}`,
+    associated_marker_id: `large-event-${index + 1}`,
+    category: index % 3 === 0 ? "Wet" : "Other",
+    note: `Scale-test photograph ${index + 1}`,
+    evidence_classification: "Observed",
+    observation_attributes: {},
+    recorded_at: new Date(Date.parse("2026-08-02T14:00:00.000Z") + index * 30000).toISOString(),
+    lat: 30.486 + (index % 19) * 0.0004,
+    lon: -87.098 + Math.floor(index / 19) * 0.0005,
+    gps_accuracy_m: 4,
+    gps_position_at: started,
+    compass_heading_deg: index % 360,
+    width_px: 1900,
+    height_px: 1425,
+    pixel_orientation: "landscape",
+    original_filename: `IMG_${String(index + 1).padStart(4, "0")}.JPG`,
+    original_mime_type: "image/jpeg",
+    original_size_bytes: largeOriginal.size,
+    analysis_size_bytes: largeAnalysis.size
+  }));
+  const largeMarkers = Array.from({ length: 252 }, (_, index) => ({
+    id: `large-event-${index + 1}`,
+    type: index < 190 ? "photo" : "note",
+    observation_type: index < 190 ? "field.photo" : "field.note",
+    button_label: index < 190 ? "Photo" : "Free Note",
+    evidence_classification: "Observed",
+    note: `Observation ${index + 1}`,
+    attributes: index < 190 ? { photo_number: `P${index + 1}` } : {},
+    time: new Date(Date.parse(started) + index * 20000).toISOString(),
+    lat: 30.486 + (index % 21) * 0.00035,
+    lon: -87.098 + Math.floor(index / 21) * 0.0004,
+    gps_accuracy_m: 4,
+    gps_position_at: started,
+    photo_id: index < 190 ? `large-photo-${index + 1}` : null,
+    voice_note_id: null
+  }));
+  const largePoints = Array.from({ length: 4964 }, (_, index) => ({
+    sequence: index + 1,
+    time: new Date(Date.parse(started) + index * 1000).toISOString(),
+    lat: 30.485 + (index % 500) * 0.000015,
+    lon: -87.099 + Math.floor(index / 500) * 0.0005,
+    accuracy_m: 4,
+    speed_mps: 1,
+    heading_deg: index % 360
+  }));
+  const largeInspection = {
+    schema_name: inspection.schema_name,
+    schema_version: inspection.schema_version,
+    property_id: inspection.property_id,
+    inspection_id: "inspection-190-photo-scale",
+    started,
+    stopped: "2026-08-02T16:00:00.000Z",
+    lifecycle_events: inspection.lifecycle_events,
+    points: largePoints,
+    markers: largeMarkers,
+    orientation_samples: Array.from({ length: 944 }, (_, index) => ({ time: new Date(Date.parse(started) + index * 5000).toISOString(), alpha_deg: index % 360, beta_deg: 2, gamma_deg: -1 })),
+    conditions: inspection.conditions,
+    photos: largePhotos,
+    voice_notes: [
+      Object.assign({}, inspection.voice_notes[0], { id: "large-voice-1", size_bytes: voiceBytes.length }),
+      Object.assign({}, inspection.voice_notes[0], { id: "large-voice-2", size_bytes: voiceBytes.length })
+    ]
+  };
+  const largePhotoEntries = largePhotos.map(photo => ({ id: photo.id, originalBlob: largeOriginal, analysisBlob: largeAnalysis }));
+  const largeVoiceEntries = largeInspection.voice_notes.map(note => ({ id: note.id, audioBlob: new Blob([voiceBytes], { type: "audio/mp4" }) }));
+  const simulatedScaleEntries = largePhotos.map(photo => ({ id: photo.id, originalBlob: { size: 7.2 * 1024 * 1024 }, analysisBlob: { size: 0.8 * 1024 * 1024 } }));
+  const simulatedSizes = Package.estimateInspectionPackageSizes({
+    inspection: largeInspection,
+    photoEntries: simulatedScaleEntries,
+    voiceEntries: [{ audioBlob: { size: 1024 * 1024 } }, { audioBlob: { size: 1024 * 1024 } }],
+    mapContext: { terrainBlob: { size: terrainBytes.length }, contourBlob: { size: contourBytes.length }, parcelsText }
+  });
+  assert(simulatedSizes.reportBytes < 200 * 1024 * 1024, "190-photo report estimate stays preferably below 200 MB at 0.8 MB per analysis image");
+  assert(simulatedSizes.fullArchiveBytes > 1400 * 1024 * 1024, "190-photo full archive estimate honestly reflects approximately 1.4 GB of originals");
+
+  const largeReport = await Package.createInspectionPackage({
+    inspection: largeInspection,
+    photoEntries: largePhotoEntries,
+    voiceEntries: largeVoiceEntries,
+    mapContext: { terrainBlob: null, contourBlob: null, parcelsText },
+    packageMode: "report",
+    exportedAt: "2026-08-02T16:01:00.000Z"
+  });
+  const largeReportFiles = extractStoredZip(Buffer.from(await largeReport.blob.arrayBuffer()));
+  assert.equal([...largeReportFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo report package contains every analysis-quality photograph");
+  assert.equal([...largeReportFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 0, "190-photo report package contains no duplicate originals");
+  const largeReportManifest = JSON.parse(largeReportFiles.get("inspection.json").toString("utf8"));
+  assert.equal(largeReportManifest.summary.gps_track_point_count, 4964);
+  assert.equal(largeReportManifest.summary.field_event_count, 252);
+  assert.equal(largeReportManifest.summary.device_orientation_sample_count, 944);
+  assert.equal(largeReportManifest.summary.photo_count, 190);
+  assert.equal(largeReportManifest.summary.voice_note_count, 2);
+  const largePrintableReport = largeReportFiles.get("printable-report.html").toString("utf8");
+  assert(largePrintableReport.includes('src="photos/190_analysis.jpg"'), "190th photograph resolves in the printable report");
+  assert(largePrintableReport.includes('loading="lazy"'), "large printable photo gallery uses browser lazy loading");
+
+  const largeFullArchive = await Package.createInspectionPackage({
+    inspection: largeInspection,
+    photoEntries: largePhotoEntries,
+    voiceEntries: largeVoiceEntries,
+    mapContext: { terrainBlob: null, contourBlob: null, parcelsText },
+    packageMode: "full_archive",
+    exportedAt: "2026-08-02T16:02:00.000Z"
+  });
+  const largeFullFiles = extractStoredZip(Buffer.from(await largeFullArchive.blob.arrayBuffer()));
+  assert.equal([...largeFullFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 190, "190-photo full archive contains every original photograph");
+  assert.equal([...largeFullFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo full archive contains every analysis copy");
+  assert(largeFullArchive.blob.size > largeReport.blob.size, "full archive is larger because it preserves exact originals");
+
+  process.stdout.write(`PASS: verified full and report exports, exact photo recovery, and 190-photo scale with 4,964 GPS points, 252 observations, 944 orientations, and 2 voice notes.\n`);
 }
 
 main().catch(error => {

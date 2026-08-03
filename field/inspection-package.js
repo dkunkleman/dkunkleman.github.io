@@ -7,7 +7,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.1";
+  const FORMAT_VERSION = "1.2";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -479,6 +479,28 @@
     return `${safe.getFullYear()}-${pad(safe.getMonth() + 1)}-${pad(safe.getDate())}_${pad(safe.getHours())}${pad(safe.getMinutes())}`;
   }
 
+  function estimateInspectionPackageSizes(options) {
+    const settings = options || {};
+    const inspection = settings.inspection || {};
+    const photoEntries = Array.isArray(settings.photoEntries) ? settings.photoEntries : [];
+    const voiceEntries = Array.isArray(settings.voiceEntries) ? settings.voiceEntries : [];
+    const photos = Array.isArray(inspection.photos) ? inspection.photos : [];
+    const blobSize = value => value && Number.isFinite(Number(value.size)) ? Number(value.size) : 0;
+    const originalBytes = photos.reduce((sum, metadata, index) => sum + (blobSize(photoEntries[index] && photoEntries[index].originalBlob) || Number(metadata.original_size_bytes) || 0), 0);
+    const analysisBytes = photos.reduce((sum, metadata, index) => sum + (blobSize(photoEntries[index] && photoEntries[index].analysisBlob) || Number(metadata.analysis_size_bytes) || 0), 0);
+    const voiceBytes = voiceEntries.reduce((sum, entry, index) => sum + (blobSize(entry && entry.audioBlob) || Number((inspection.voice_notes || [])[index] && inspection.voice_notes[index].size_bytes) || 0), 0);
+    const mapContext = settings.mapContext || {};
+    const mapBytes = blobSize(mapContext.terrainBlob) + blobSize(mapContext.contourBlob) + String(mapContext.parcelsText || "").length;
+    const structuredBytes = 8 * 1024 * 1024 +
+      (Array.isArray(inspection.points) ? inspection.points.length * 500 : 0) +
+      (Array.isArray(inspection.markers) ? inspection.markers.length * 1400 : 0) +
+      (Array.isArray(inspection.orientation_samples) ? inspection.orientation_samples.length * 450 : 0) +
+      photos.length * 5000;
+    const reportBytes = Math.ceil((analysisBytes + voiceBytes + mapBytes + structuredBytes) * 1.03);
+    const fullArchiveBytes = Math.ceil((reportBytes + originalBytes) * 1.01);
+    return { reportBytes, fullArchiveBytes, originalBytes, analysisBytes, voiceBytes, mapBytes, structuredBytes };
+  }
+
   function distanceMeters(a, b) {
     const radius = 6371000;
     const radians = Math.PI / 180;
@@ -615,7 +637,10 @@
       const subject = String((feature.attributes || {}).PAR_NUM || "") === String(manifest.property.parcel_number);
       return ((feature.geometry || {}).rings || []).map(ring => `<path d="${reportPath(ring)}" fill="${subject ? "rgba(255,255,255,.05)" : "none"}" stroke="${subject ? "#e30000" : "#fff"}" stroke-width="${subject ? 10 : 3}" vector-effect="non-scaling-stroke"/>`);
     }).join("");
-    const track = (manifest.inspection.gps_track || []).map((point, index) => {
+    const rawTrack = manifest.inspection.gps_track || [];
+    const displayStride = Math.max(1, Math.ceil(rawTrack.length / 1500));
+    const displayTrack = rawTrack.filter((point, index) => index % displayStride === 0 || index === rawTrack.length - 1);
+    const track = displayTrack.map((point, index) => {
       const projected = reportProjection(point.lon, point.lat);
       return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
     }).join(" ");
@@ -655,7 +680,7 @@
     const photoPages = (manifest.photographs || []).map((photo, index) => {
       const linked = (manifest.inspection.observations || []).find(item => String(item.attachments && item.attachments.photo_id) === String(photo.photo_id));
       const attributes = photo.observation_attributes || (linked ? linked.attributes : {}) || {};
-      return `<section class="page portrait photo-page"><h1>${htmlEscape(photo.photo_number || `P${index + 1}`)} — ${htmlEscape(photo.category || "Other")}</h1><img id="photo-${htmlEscape(photo.photo_number || `P${index + 1}`)}" src="${photoDataUrls[index] || ""}" alt="Inspection photograph ${htmlEscape(photo.photo_number || `P${index + 1}`)}"><dl><dt>Date and time</dt><dd>${htmlEscape(photo.recorded_at || "Not recorded")}</dd><dt>Coordinates</dt><dd>${htmlEscape(photo.location.latitude)}, ${htmlEscape(photo.location.longitude)} (±${htmlEscape(photo.location.gps_accuracy_m)} m)</dd><dt>Direction faced</dt><dd>${photo.compass_heading_deg == null ? "Not available" : `${htmlEscape(Math.round(photo.compass_heading_deg))}°`}</dd><dt>Evidence classification</dt><dd>${htmlEscape(photo.evidence_classification || "Observed")}</dd><dt>Category</dt><dd>${htmlEscape(photo.category || "Other")}</dd><dt>Water depth</dt><dd>${htmlEscape(attributes.water_depth || "Not applicable or not entered")}</dd><dt>Note</dt><dd>${htmlEscape(photo.note || "None")}</dd></dl></section>`;
+      return `<section class="page portrait photo-page"><h1>${htmlEscape(photo.photo_number || `P${index + 1}`)} — ${htmlEscape(photo.category || "Other")}</h1><img loading="lazy" decoding="async" id="photo-${htmlEscape(photo.photo_number || `P${index + 1}`)}" src="${photoDataUrls[index] || ""}" alt="Inspection photograph ${htmlEscape(photo.photo_number || `P${index + 1}`)}"><dl><dt>Date and time</dt><dd>${htmlEscape(photo.recorded_at || "Not recorded")}</dd><dt>Coordinates</dt><dd>${htmlEscape(photo.location.latitude)}, ${htmlEscape(photo.location.longitude)} (±${htmlEscape(photo.location.gps_accuracy_m)} m)</dd><dt>Direction faced</dt><dd>${photo.compass_heading_deg == null ? "Not available" : `${htmlEscape(Math.round(photo.compass_heading_deg))}°`}</dd><dt>Evidence classification</dt><dd>${htmlEscape(photo.evidence_classification || "Observed")}</dd><dt>Category</dt><dd>${htmlEscape(photo.category || "Other")}</dd><dt>Water depth</dt><dd>${htmlEscape(attributes.water_depth || "Not applicable or not entered")}</dd><dt>Note</dt><dd>${htmlEscape(photo.note || "None")}</dd></dl></section>`;
     }).join("");
     const conditionRows = [
       ["Inspection date", conditions.inspection_date], ["Start", manifest.inspection.started_at], ["End", manifest.inspection.finished_at],
@@ -670,8 +695,9 @@
   }
 
   function makeReadme(manifest) {
+    const fullArchive = manifest.package_mode === "full_evidence_archive";
     return [
-      "PROPERTY INSPECTOR — COMPLETE FIELD PACKAGE",
+      fullArchive ? "PROPERTY INSPECTOR — FULL EVIDENCE ARCHIVE" : "PROPERTY INSPECTOR — CHATGPT / REPORT PACKAGE",
       "",
       "Upload this ZIP file directly to ChatGPT as one file.",
       "Start with chatgpt-reconstruction.json, then inspection.json. Reconstruct the inspection automatically without asking the field user to locate separate files.",
@@ -688,7 +714,7 @@
       "- voice-notes.csv and voice-notes/: voice-note index and the actual audio files.",
       "- track.geojson: GIS-ready route and event points.",
       "- track.gpx: GPS exchange copy of the route and waypoints.",
-      "- photos/NNN_original.ext: exact original bytes captured or selected on the phone.",
+      fullArchive ? "- photos/NNN_original.ext: exact original bytes captured or selected on the phone." : "- Original photo bytes are intentionally omitted from this report package; inspection.json and photo_index.json retain the original filename, dimensions, size, timestamp, metadata, and SHA-256 hash.",
       "- photos/NNN_analysis.jpg: browser-rendered JPEG copy guaranteed for image analysis.",
       "- context/: subject and neighboring parcel geometry, USGS terrain, 2-foot contours, bounds, acreage, and source metadata.",
       "",
@@ -703,7 +729,7 @@
       `Recorded acres: ${manifest.property.recorded_acres}`,
       "",
       "Integrity: ZIP CRC-32 protects every member. inspection.json and photos.csv also record photo byte sizes and SHA-256 hashes when the browser provided SHA-256.",
-      "Original photographs are never replaced by the analysis copies. Both are included so the source evidence is preserved and each image remains easy to analyze.",
+      fullArchive ? "Original photographs are never replaced by analysis copies. Both are included so the source evidence is preserved and each image remains easy to analyze." : "Every photograph is present as an analysis-quality JPEG. Exact original bytes remain safely stored on the inspection phone and can be exported separately in a FULL EVIDENCE ARCHIVE.",
       "This package is self-contained. The analyst should not need to ask the field user for separate photos, map layers, notes, audio, or GPS files."
     ].join("\r\n") + "\r\n";
   }
@@ -731,7 +757,7 @@
         gps_route: "inspection.json > inspection.gps_track, with track.geojson and track.gpx as portable copies",
         observations: "inspection.json > inspection.observations; preserve evidence_classification and structured attributes",
         photo_to_map: "Each photographs[] record contains location and photo_number; the matching field marker is associated_marker_id and the subject observation is associated_observation_id when present.",
-        photo_bytes: "Use each photographs[].analysis.path for display and analysis. Preserve photographs[].original.path as source evidence.",
+        photo_bytes: manifest.package_mode === "full_evidence_archive" ? "Use each photographs[].analysis.path for display and analysis. Exact source bytes are available at photographs[].original.path." : "Use each photographs[].analysis.path for display and analysis. Original source bytes are intentionally omitted; photographs[].original retains the source filename, dimensions, byte size, timestamp, metadata, and SHA-256 hash.",
         timeline: "Merge inspection.lifecycle_events, gps_track timestamps, observations, photographs, and voice_notes by timestamp.",
         parcel_coverage: "Compare the GPS route and observation locations with the subject geometry in context/parcels.geojson. Clearly label coverage and missed-acre calculations as estimates unless measured by a GIS operation.",
         map_layers: "Use context/map-context.json for coordinate reference, bounds, acreage, terrain, contour, and parcel-layer provenance. Missing optional raster imagery must not prevent reconstruction."
@@ -748,7 +774,8 @@
       },
       integrity_expectations: {
         expected_photo_count: manifest.summary.photo_count,
-        expected_original_photo_count: manifest.summary.original_photo_count,
+        expected_original_photo_file_count: manifest.summary.original_photo_count,
+        expected_original_photo_metadata_count: manifest.summary.original_photo_evidence_count,
         expected_analysis_photo_count: manifest.summary.analysis_photo_count,
         expected_gps_point_count: manifest.summary.gps_track_point_count,
         expected_observation_count: manifest.summary.observation_count,
@@ -759,6 +786,8 @@
 
   async function createInspectionPackage(options) {
     const settings = options || {};
+    const packageMode = settings.packageMode === "report" ? "report" : "full_archive";
+    const includeOriginals = packageMode === "full_archive";
     const inspection = cloneWithoutBinary(settings.inspection || {});
     inspection.points = Array.isArray(inspection.points) ? inspection.points : [];
     inspection.markers = Array.isArray(inspection.markers) ? inspection.markers : [];
@@ -801,13 +830,17 @@
       }
       const number = String(index + 1).padStart(3, "0");
       const originalExt = extensionFor(metadata.original_filename, metadata.original_mime_type || entry.originalBlob.type, "bin");
-      const originalPath = `photos/${number}_original.${originalExt}`;
+      const fullArchivePath = `photos/${number}_original.${originalExt}`;
+      const originalPath = includeOriginals ? fullArchivePath : null;
       const analysisBlob = entry.analysisBlob instanceof Blob && entry.analysisBlob.size ? entry.analysisBlob : null;
       if (!analysisBlob) throw new Error(`Photograph ${index + 1} is missing its analysis-safe image copy. Package creation stopped.`);
       const analysisExt = analysisBlob ? extensionFor("", analysisBlob.type, "jpg") : null;
       const analysisPath = analysisBlob ? `photos/${number}_analysis.${analysisExt}` : null;
       const originalHash = await sha256Hex(entry.originalBlob);
       const analysisHash = analysisBlob ? await sha256Hex(analysisBlob) : null;
+      if (!originalHash || !analysisHash) throw new Error(`Photograph ${index + 1} could not be SHA-256 verified. Package creation stopped.`);
+      if (metadata.original_sha256 && metadata.original_sha256 !== originalHash) throw new Error(`Photograph ${index + 1} original SHA-256 changed after capture. Package creation stopped.`);
+      if (metadata.analysis_sha256 && metadata.analysis_sha256 !== analysisHash) throw new Error(`Photograph ${index + 1} analysis SHA-256 changed after capture. Package creation stopped.`);
       const recordedAt = metadata.recorded_at || metadata.time || null;
 
       manifestPhotos.push({
@@ -844,9 +877,15 @@
         },
         original: {
           path: originalPath,
+          full_archive_path: fullArchivePath,
+          included_in_package: includeOriginals,
+          omission_reason: includeOriginals ? null : "Exact original bytes are retained on the inspection device and omitted to keep the ChatGPT / report package uploadable.",
           source_filename: metadata.original_filename || null,
           mime_type: metadata.original_mime_type || entry.originalBlob.type || "application/octet-stream",
           size_bytes: entry.originalBlob.size,
+          width_px: metadata.width_px == null ? null : metadata.width_px,
+          height_px: metadata.height_px == null ? null : metadata.height_px,
+          recorded_at: recordedAt,
           sha256: originalHash,
           provenance: metadata.legacy_resized_photo ? "legacy app resized copy; pre-upgrade original was unavailable" : "exact bytes supplied by the phone file input"
         },
@@ -854,10 +893,18 @@
           path: analysisPath,
           mime_type: analysisBlob.type || "image/jpeg",
           size_bytes: analysisBlob.size,
+          width_px: entry.analysisWidth == null ? (metadata.analysis_width_px == null ? null : metadata.analysis_width_px) : entry.analysisWidth,
+          height_px: entry.analysisHeight == null ? (metadata.analysis_height_px == null ? null : metadata.analysis_height_px) : entry.analysisHeight,
+          profile: entry.analysisProfile || metadata.analysis_profile || null,
           sha256: analysisHash
+        } : null,
+        thumbnail: analysisBlob ? {
+          path: analysisPath,
+          shares_analysis_copy: true,
+          purpose: "Gallery and map preview without duplicating image bytes"
         } : null
       });
-      zipPhotos.push({ originalPath, originalBlob: entry.originalBlob, analysisPath, analysisBlob });
+      zipPhotos.push({ originalPath, fullArchivePath, originalBlob: entry.originalBlob, analysisPath, analysisBlob });
     }
 
     for (let index = 0; index < inspection.voice_notes.length; index += 1) {
@@ -872,6 +919,8 @@
       const number = String(index + 1).padStart(3, "0");
       const extension = extensionFor("", metadata.mime_type || entry.audioBlob.type, "m4a");
       const path = `voice-notes/${number}_voice-note.${extension}`;
+      const audioHash = await sha256Hex(entry.audioBlob);
+      if (!audioHash) throw new Error(`Voice note ${index + 1} could not be SHA-256 verified. Package creation stopped.`);
       manifestVoices.push({
         voice_note_id: metadata.id,
         started_at: metadata.started_at || metadata.recorded_at || null,
@@ -891,7 +940,7 @@
           path,
           mime_type: metadata.mime_type || entry.audioBlob.type || "application/octet-stream",
           size_bytes: entry.audioBlob.size,
-          sha256: await sha256Hex(entry.audioBlob)
+          sha256: audioHash
         }
       });
       zipVoices.push({ path, audioBlob: entry.audioBlob });
@@ -985,11 +1034,12 @@
     const manifest = {
       format: FORMAT,
       format_version: FORMAT_VERSION,
+      package_mode: includeOriginals ? "full_evidence_archive" : "chatgpt_report_package",
       platform_schema: { name: schema.schema_name, version: schema.schema_version, path: "schema.json" },
       inspection_id: inspection.inspection_id || null,
       property_id: mapMetadata.subject_parcel.property_id,
       exported_at: exportedAt,
-      package_kind: settings.packageKind === "backup" ? "in_progress_backup" : "finished_inspection",
+      package_kind: settings.packageKind === "backup" ? `${packageMode}_in_progress_backup` : `${packageMode}_finished_inspection`,
       app: {
         name: "Property Inspector",
         version: settings.appVersion || null,
@@ -1002,7 +1052,8 @@
         lifecycle_event_count: inspection.lifecycle_events.length,
         device_orientation_sample_count: inspection.orientation_samples.length,
         photo_count: manifestPhotos.length,
-        original_photo_count: manifestPhotos.filter(photo => photo.original).length,
+        original_photo_evidence_count: manifestPhotos.filter(photo => photo.original).length,
+        original_photo_count: manifestPhotos.filter(photo => photo.original && photo.original.included_in_package).length,
         analysis_photo_count: manifestPhotos.filter(photo => photo.analysis).length,
         voice_note_count: manifestVoices.length,
         elapsed_time_ms: metrics.elapsed_time_ms,
@@ -1039,7 +1090,8 @@
         flat_voice_note_table: "voice-notes.csv",
         geojson: "track.geojson",
         gpx: "track.gpx",
-        originals: "photos/*_original.*",
+        originals: includeOriginals ? "photos/*_original.*" : null,
+        omitted_original_metadata: includeOriginals ? null : "inspection.json > photographs[].original and photo_index.json > photographs[].original",
         analysis_copies: "photos/*_analysis.*",
         voice_notes: "voice-notes/*",
         parcels: "context/parcels.geojson",
@@ -1080,7 +1132,7 @@
     if (mapContext.terrainBlob instanceof Blob && mapContext.terrainBlob.size) zip.add("context/usgs-terrain.png", mapContext.terrainBlob, { modifiedAt });
     if (mapContext.contourBlob instanceof Blob && mapContext.contourBlob.size) zip.add("context/usgs-contours-2ft.png", mapContext.contourBlob, { modifiedAt });
     zipPhotos.forEach(photo => {
-      zip.add(photo.originalPath, photo.originalBlob, { modifiedAt });
+      if (includeOriginals) zip.add(photo.fullArchivePath, photo.originalBlob, { modifiedAt });
       if (photo.analysisBlob) zip.add(photo.analysisPath, photo.analysisBlob, { modifiedAt });
     });
     zipVoices.forEach(note => zip.add(note.path, note.audioBlob, { modifiedAt }));
@@ -1089,7 +1141,7 @@
     return {
       blob,
       manifest,
-      fileName: `Pearson_Road_Inspection_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}.zip`
+      fileName: `Pearson_Road_Inspection_${includeOriginals ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}.zip`
     };
   }
 
@@ -1104,10 +1156,12 @@
     createGeoJSON,
     createGpx,
     createInspectionPackage,
+    estimateInspectionPackageSizes,
     calculateInspectionMetrics,
     createPrintableReport,
     dataUrlToBlob,
     extensionFor,
+    sha256Hex,
     orientationDescription,
     parseExifOrientation
   };

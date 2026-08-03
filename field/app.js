@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.1.0";
+  const APP_VERSION = "3.2.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -16,6 +16,8 @@
   const voiceChunkStoreName = "voiceChunks";
   const gpsStoreName = "gpsPoints";
   const packageTools = window.InspectionPackage;
+  const dbRecoveryTools = window.IndexedDbRecovery;
+  const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
   const statusEl = document.getElementById("status");
@@ -34,6 +36,8 @@
   const offlineState = document.getElementById("offlineState");
   const nextStep = document.getElementById("nextStep");
   const voiceBtn = document.getElementById("voice");
+  const fullArchiveBtn = document.getElementById("fullArchive");
+  const retryPendingPhotoBtn = document.getElementById("retryPendingPhoto");
   const observationDialog = document.getElementById("observationDialog");
   const moreCategories = document.getElementById("moreCategories");
   const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "photo", "voice", "more"].map(id => document.getElementById(id));
@@ -52,7 +56,7 @@
   let lastOrientationProcessedAt = 0;
   let lastOrientationSavedAt = 0;
   let parcelFeatures = [];
-  let photoDbPromise = null;
+  let evidenceDb = null;
   let pendingPhotoRequestedAt = null;
   let photoBusy = false;
   let packageBusy = false;
@@ -69,6 +73,13 @@
   let gpsStorageFailed = false;
   let activeObservationType = null;
   let pendingPhotoContext = null;
+  let pendingPhotoQueue = [];
+  let galleryPage = 0;
+  const galleryPageSize = 12;
+  let packageEstimates = null;
+  let estimateRefreshTimer = null;
+  let lastSavedOrientation = null;
+  let photoHealthPromise = null;
 
   function emptyInspection() {
     return {
@@ -108,7 +119,9 @@
   }
 
   function updateNextStep() {
-    if (!packageReady.hidden) {
+    if (pendingPhotoQueue.length) {
+      nextStep.textContent = "NEXT: Tap Retry Pending Photo. Keep this page open.";
+    } else if (!packageReady.hidden) {
       nextStep.textContent = sharePackageBtn.hidden ? "NEXT: Tap Download Inspection Package. Do not clear the inspection yet." : "NEXT: Tap Send Package to ChatGPT. Do not clear the inspection yet.";
     } else if (mediaRecorder && mediaRecorder.state === "recording") {
       nextStep.textContent = "NEXT: Speak now. Tap Stop Voice Note when you are finished.";
@@ -160,9 +173,8 @@
     }
   }
 
-  function openPhotoDb() {
-    if (photoDbPromise) return photoDbPromise;
-    photoDbPromise = new Promise((resolve, reject) => {
+  function openPhotoDbConnection() {
+    return new Promise((resolve, reject) => {
       if (!("indexedDB" in window)) {
         reject(new Error("IndexedDB is unavailable."));
         return;
@@ -181,140 +193,186 @@
           gps.createIndex("inspection_id", "inspection_id", { unique: false });
         }
       };
-      request.onsuccess = () => {
-        request.result.onversionchange = () => request.result.close();
-        resolve(request.result);
-      };
-      request.onerror = () => reject(request.error || new Error("Photo database could not be opened."));
-      request.onblocked = () => reject(new Error("Photo database is blocked by another open app tab."));
-    });
-    photoDbPromise.catch(() => { photoDbPromise = null; });
-    return photoDbPromise;
-  }
-
-  async function photoStorePut(record) {
-    const db = await openPhotoDb();
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(photoStoreName, "readwrite");
-      transaction.objectStore(photoStoreName).put(record);
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("Photograph could not be stored."));
-      transaction.onabort = () => reject(transaction.error || new Error("Photograph storage was aborted."));
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("Evidence database could not be opened."));
+      request.onblocked = () => reject(new Error("Evidence database is blocked by another open Property Inspector tab."));
     });
   }
 
-  async function photoStoreGet(id) {
-    const db = await openPhotoDb();
+  function ensureEvidenceDbManager() {
+    if (!dbRecoveryTools) throw new Error("IndexedDB recovery code failed to load.");
+    if (!evidenceDb) evidenceDb = dbRecoveryTools.createConnectionManager({ openConnection: openPhotoDbConnection });
+    return evidenceDb;
+  }
+
+  function openPhotoDb() {
+    return ensureEvidenceDbManager().open();
+  }
+
+  function withEvidenceTransaction(storeNames, mode, operation) {
+    return ensureEvidenceDbManager().transaction(storeNames, mode, operation);
+  }
+
+  function transactionRequest(transaction, request, message, transform) {
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(photoStoreName, "readonly");
+      let value;
+      request.onsuccess = () => { value = typeof transform === "function" ? transform(request.result) : request.result; };
+      request.onerror = () => reject(request.error || new Error(message));
+      transaction.oncomplete = () => resolve(value);
+      transaction.onerror = () => reject(transaction.error || new Error(message));
+      transaction.onabort = () => reject(transaction.error || new DOMException(message, "AbortError"));
+    });
+  }
+
+  function transactionCompletion(transaction, message) {
+    return new Promise((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error || new Error(message));
+      transaction.onabort = () => reject(transaction.error || new DOMException(message, "AbortError"));
+    });
+  }
+
+  function photoStorePut(record) {
+    return withEvidenceTransaction(photoStoreName, "readwrite", transaction => {
+      const request = transaction.objectStore(photoStoreName).put(record);
+      return transactionRequest(transaction, request, "Photograph could not be stored.");
+    });
+  }
+
+  function photoStoreGet(id) {
+    return withEvidenceTransaction(photoStoreName, "readonly", transaction => {
       const request = transaction.objectStore(photoStoreName).get(id);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error("Photograph could not be read."));
+      return transactionRequest(transaction, request, "Photograph could not be read.", result => result || null);
     });
   }
 
-  async function photoStoreGetAll() {
-    const db = await openPhotoDb();
-    return new Promise((resolve, reject) => {
-      const request = db.transaction(photoStoreName, "readonly").objectStore(photoStoreName).getAll();
-      request.onsuccess = () => resolve(request.result || []);
+  function photoStoreGetAll() {
+    return withEvidenceTransaction(photoStoreName, "readonly", transaction => new Promise((resolve, reject) => {
+      const records = [];
+      const request = transaction.objectStore(photoStoreName).openCursor();
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        const value = cursor.value || {};
+        records.push({ id: value.id, inspection_id: value.inspection_id, metadata: value.metadata, event: value.event });
+        cursor.continue();
+      };
       request.onerror = () => reject(request.error || new Error("Stored photographs could not be inventoried."));
-    });
+      transaction.oncomplete = () => resolve(records);
+      transaction.onerror = () => reject(transaction.error || new Error("Stored photographs could not be inventoried."));
+      transaction.onabort = () => reject(transaction.error || new DOMException("Stored photograph inventory was aborted.", "AbortError"));
+    }));
   }
 
-  async function photoStoreClear() {
-    const db = await openPhotoDb();
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction([photoStoreName, voiceStoreName, voiceChunkStoreName, gpsStoreName], "readwrite");
+  function photoStoreSizeInventory(inspectionId) {
+    return withEvidenceTransaction(photoStoreName, "readonly", transaction => new Promise((resolve, reject) => {
+      const records = [];
+      const request = transaction.objectStore(photoStoreName).openCursor();
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        const value = cursor.value || {};
+        if (String(value.inspection_id || "") === String(inspectionId || "")) {
+          records.push({
+            id: value.id,
+            originalBlob: { size: value.originalBlob ? Number(value.originalBlob.size) || 0 : 0 },
+            analysisBlob: { size: value.analysisBlob ? Number(value.analysisBlob.size) || 0 : 0 }
+          });
+        }
+        cursor.continue();
+      };
+      request.onerror = () => reject(request.error || new Error("Photograph sizes could not be inventoried."));
+      transaction.oncomplete = () => resolve(records);
+      transaction.onerror = () => reject(transaction.error || new Error("Photograph sizes could not be inventoried."));
+      transaction.onabort = () => reject(transaction.error || new DOMException("Photograph size inventory was aborted.", "AbortError"));
+    }));
+  }
+
+  function photoStoreClear() {
+    return withEvidenceTransaction([photoStoreName, voiceStoreName, voiceChunkStoreName, gpsStoreName], "readwrite", transaction => {
       transaction.objectStore(photoStoreName).clear();
       transaction.objectStore(voiceStoreName).clear();
       transaction.objectStore(voiceChunkStoreName).clear();
       transaction.objectStore(gpsStoreName).clear();
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("Evidence attachments could not be cleared."));
+      return transactionCompletion(transaction, "Evidence attachments could not be cleared.");
     });
   }
 
-  async function voiceStorePut(record) {
-    const db = await openPhotoDb();
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(voiceStoreName, "readwrite");
-      transaction.objectStore(voiceStoreName).put(record);
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("Voice note could not be stored."));
+  function voiceStorePut(record) {
+    return withEvidenceTransaction(voiceStoreName, "readwrite", transaction => {
+      const request = transaction.objectStore(voiceStoreName).put(record);
+      return transactionRequest(transaction, request, "Voice note could not be stored.");
     });
   }
 
-  async function voiceStoreGet(id) {
-    const db = await openPhotoDb();
-    return new Promise((resolve, reject) => {
-      const request = db.transaction(voiceStoreName, "readonly").objectStore(voiceStoreName).get(id);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error || new Error("Voice note could not be read."));
+  function voiceStoreGet(id) {
+    return withEvidenceTransaction(voiceStoreName, "readonly", transaction => {
+      const request = transaction.objectStore(voiceStoreName).get(id);
+      return transactionRequest(transaction, request, "Voice note could not be read.", result => result || null);
     });
   }
 
-  async function voiceStoreGetAll() {
-    const db = await openPhotoDb();
-    return new Promise((resolve, reject) => {
-      const request = db.transaction(voiceStoreName, "readonly").objectStore(voiceStoreName).getAll();
-      request.onsuccess = () => resolve(request.result || []);
+  function voiceStoreGetAll() {
+    return withEvidenceTransaction(voiceStoreName, "readonly", transaction => new Promise((resolve, reject) => {
+      const records = [];
+      const request = transaction.objectStore(voiceStoreName).openCursor();
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        const value = cursor.value || {};
+        records.push({ id: value.id, inspection_id: value.inspection_id, metadata: value.metadata, event: value.event });
+        cursor.continue();
+      };
       request.onerror = () => reject(request.error || new Error("Stored voice notes could not be inventoried."));
+      transaction.oncomplete = () => resolve(records);
+      transaction.onerror = () => reject(transaction.error || new Error("Stored voice notes could not be inventoried."));
+      transaction.onabort = () => reject(transaction.error || new DOMException("Stored voice-note inventory was aborted.", "AbortError"));
+    }));
+  }
+
+  function voiceChunkPut(voiceId, sequence, chunk) {
+    const record = { key: `${voiceId}:${String(sequence).padStart(8, "0")}`, voice_id: voiceId, sequence, chunk };
+    return withEvidenceTransaction(voiceChunkStoreName, "readwrite", transaction => {
+      const request = transaction.objectStore(voiceChunkStoreName).put(record);
+      return transactionRequest(transaction, request, "Voice-note recovery chunk could not be stored.");
     });
   }
 
-  async function voiceChunkPut(voiceId, sequence, chunk) {
-    const db = await openPhotoDb();
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(voiceChunkStoreName, "readwrite");
-      transaction.objectStore(voiceChunkStoreName).put({ key: `${voiceId}:${String(sequence).padStart(8, "0")}`, voice_id: voiceId, sequence, chunk });
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("Voice-note recovery chunk could not be stored."));
-    });
-  }
-
-  async function voiceChunksGet(voiceId) {
-    const db = await openPhotoDb();
-    return new Promise((resolve, reject) => {
-      const store = db.transaction(voiceChunkStoreName, "readonly").objectStore(voiceChunkStoreName);
-      const index = store.index("voice_id");
+  function voiceChunksGet(voiceId) {
+    return withEvidenceTransaction(voiceChunkStoreName, "readonly", transaction => {
+      const index = transaction.objectStore(voiceChunkStoreName).index("voice_id");
       const request = index.getAll(IDBKeyRange.only(voiceId));
-      request.onsuccess = () => resolve((request.result || []).sort((a, b) => a.sequence - b.sequence));
-      request.onerror = () => reject(request.error || new Error("Voice-note recovery chunks could not be read."));
+      return transactionRequest(transaction, request, "Voice-note recovery chunks could not be read.", result => (result || []).sort((a, b) => a.sequence - b.sequence));
     });
   }
 
   async function voiceChunksDelete(voiceId) {
-    const db = await openPhotoDb();
     const chunks = await voiceChunksGet(voiceId);
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(voiceChunkStoreName, "readwrite");
+    return withEvidenceTransaction(voiceChunkStoreName, "readwrite", transaction => {
       const store = transaction.objectStore(voiceChunkStoreName);
       chunks.forEach(chunk => store.delete(chunk.key));
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("Voice-note recovery chunks could not be cleared."));
+      return transactionCompletion(transaction, "Voice-note recovery chunks could not be cleared.");
     });
   }
 
-  async function gpsPointPut(inspectionId, point) {
-    const db = await openPhotoDb();
+  function gpsPointPut(inspectionId, point) {
     const record = { key: `${inspectionId}:${String(point.sequence).padStart(10, "0")}`, inspection_id: inspectionId, point };
-    await new Promise((resolve, reject) => {
-      const transaction = db.transaction(gpsStoreName, "readwrite");
-      transaction.objectStore(gpsStoreName).put(record);
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error || new Error("GPS point could not be stored."));
+    return withEvidenceTransaction(gpsStoreName, "readwrite", transaction => {
+      const request = transaction.objectStore(gpsStoreName).put(record);
+      return transactionRequest(transaction, request, "GPS point could not be stored.");
     });
   }
 
-  async function gpsPointsGet(inspectionId) {
-    const db = await openPhotoDb();
-    return new Promise((resolve, reject) => {
-      const index = db.transaction(gpsStoreName, "readonly").objectStore(gpsStoreName).index("inspection_id");
+  function gpsPointsGet(inspectionId) {
+    return withEvidenceTransaction(gpsStoreName, "readonly", transaction => {
+      const index = transaction.objectStore(gpsStoreName).index("inspection_id");
       const request = index.getAll(IDBKeyRange.only(inspectionId));
-      request.onsuccess = () => resolve((request.result || []).map(record => record.point).sort((a, b) => (a.sequence || 0) - (b.sequence || 0) || String(a.time).localeCompare(String(b.time))));
-      request.onerror = () => reject(request.error || new Error("GPS recovery points could not be read."));
+      return transactionRequest(transaction, request, "GPS recovery points could not be read.", result => (result || []).map(record => record.point).sort((a, b) => (a.sequence || 0) - (b.sequence || 0) || String(a.time).localeCompare(String(b.time))));
     });
+  }
+
+  function revalidatePhotoDb() {
+    return ensureEvidenceDbManager().healthCheck(photoStoreName);
   }
 
   async function reconcileGpsPoints() {
@@ -574,14 +632,26 @@
       empty.className = "small";
       empty.textContent = "No photographs recorded yet. At least one photograph is required to finish an inspection.";
       gallery.appendChild(empty);
+      document.getElementById("galleryPager").hidden = true;
       return;
     }
-    for (let index = 0; index < data.photos.length; index += 1) {
+    const totalPages = Math.ceil(data.photos.length / galleryPageSize);
+    galleryPage = Math.max(0, Math.min(galleryPage, totalPages - 1));
+    const start = galleryPage * galleryPageSize;
+    const end = Math.min(data.photos.length, start + galleryPageSize);
+    const pager = document.getElementById("galleryPager");
+    pager.hidden = totalPages <= 1;
+    document.getElementById("galleryPageInfo").textContent = `${start + 1}–${end} of ${data.photos.length}`;
+    document.getElementById("galleryPrevious").disabled = galleryPage === 0;
+    document.getElementById("galleryNext").disabled = galleryPage >= totalPages - 1;
+    for (let index = start; index < end; index += 1) {
       const metadata = data.photos[index];
       const card = document.createElement("div");
       card.className = "thumb";
       const image = document.createElement("img");
       image.alt = `Inspection photograph ${index + 1}`;
+      image.loading = "lazy";
+      image.decoding = "async";
       const caption = document.createElement("div");
       caption.textContent = `${metadata.photo_number || `P${index + 1}`} · ${metadata.category || "Other"} · ${new Date(metadata.recorded_at || metadata.time).toLocaleString()}`;
       const location = document.createElement("div");
@@ -646,11 +716,19 @@
     finishBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     clearBtn.disabled = photoBusy || packageBusy || recordingVoice;
     document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
+    fullArchiveBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
+    retryPendingPhotoBtn.disabled = photoBusy || packageBusy || recordingVoice;
     updateNextStep();
   }
 
   function orientationNumber(value) {
     return Number.isFinite(value) ? value : null;
+  }
+
+  function angularDifference(a, b) {
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return 0;
+    const difference = Math.abs(a - b) % 360;
+    return Math.min(difference, 360 - difference);
   }
 
   function onDeviceOrientation(event) {
@@ -672,12 +750,19 @@
       lon: lastPosition ? lastPosition.lon : null,
       gps_accuracy_m: lastPosition ? lastPosition.accuracy_m : null
     };
-    if (now - lastOrientationSavedAt >= 5000) {
+    const elapsedSinceSave = now - lastOrientationSavedAt;
+    const headingChanged = lastSavedOrientation && angularDifference(compassHeading, lastSavedOrientation.compass_heading_deg) >= 15;
+    const tiltChanged = lastSavedOrientation && (
+      Math.abs((latestOrientation.beta_deg || 0) - (lastSavedOrientation.beta_deg || 0)) >= 20 ||
+      Math.abs((latestOrientation.gamma_deg || 0) - (lastSavedOrientation.gamma_deg || 0)) >= 20
+    );
+    if (!lastSavedOrientation || elapsedSinceSave >= 30000 || (elapsedSinceSave >= 5000 && (headingChanged || tiltChanged))) {
       lastOrientationSavedAt = now;
       data.orientation_samples.push(latestOrientation);
+      lastSavedOrientation = Object.assign({}, latestOrientation);
       saveState();
-      document.getElementById("heading").textContent = compassHeading == null ? "—" : `${Math.round(compassHeading)}°`;
     }
+    document.getElementById("heading").textContent = compassHeading == null ? "—" : `${Math.round(compassHeading)}°`;
   }
 
   async function requestOrientationAccess() {
@@ -766,7 +851,7 @@
     }
     const orientationPermission = requestOrientationAccess();
     try {
-      await openPhotoDb();
+      await revalidatePhotoDb();
     } catch (error) {
       setStatus("Durable photograph storage is unavailable. Inspection cannot begin safely in this browser.", "error");
       return;
@@ -865,6 +950,7 @@
       return;
     }
     activeObservationType = type;
+    preparePhotoStorage();
     document.getElementById("observationTitle").textContent = `Record ${buttonLabels[type]}`;
     document.getElementById("wetFields").hidden = type !== "wet";
     document.getElementById("dryFields").hidden = type !== "dry";
@@ -1037,6 +1123,7 @@
       saveState();
       await voiceChunksDelete(metadata.id);
       redraw();
+      schedulePackageEstimateRefresh();
       setStatus(`Voice note ${data.voice_notes.length} saved with audio, GPS, time, and heading.`, "active");
     } catch (error) {
       setStatus(`VOICE NOTE NOT SAVED: ${error.message} Record it again.`, "error");
@@ -1084,6 +1171,143 @@
     setStatus("A voice note interrupted by the previous app close was recovered.", "warning");
   }
 
+  function pendingPhotoUrl(id, part) {
+    return new URL(`./pending-photo/${encodeURIComponent(id)}/${part}`, location.href).href;
+  }
+
+  function updatePendingPhotoButton() {
+    retryPendingPhotoBtn.hidden = pendingPhotoQueue.length === 0;
+    retryPendingPhotoBtn.textContent = pendingPhotoQueue.length === 1 ? "Retry Pending Photo" : `Retry Pending Photos (${pendingPhotoQueue.length})`;
+  }
+
+  async function persistPendingPhoto(record) {
+    pendingPhotoQueue = pendingPhotoQueue.filter(item => String(item.id) !== String(record.id));
+    pendingPhotoQueue.push(record);
+    updatePendingPhotoButton();
+    if (!("caches" in window)) return false;
+    try {
+      const cache = await caches.open(pendingPhotoCacheName);
+      const metadata = {
+        id: record.id,
+        inspection_id: record.inspection_id,
+        metadata: record.metadata,
+        event: record.event,
+        original_type: record.originalBlob.type,
+        analysis_type: record.analysisBlob.type
+      };
+      await Promise.all([
+        cache.put(pendingPhotoUrl(record.id, "record.json"), new Response(JSON.stringify(metadata), { headers: { "content-type": "application/json" } })),
+        cache.put(pendingPhotoUrl(record.id, "original"), new Response(record.originalBlob, { headers: { "content-type": record.originalBlob.type || "application/octet-stream" } })),
+        cache.put(pendingPhotoUrl(record.id, "analysis"), new Response(record.analysisBlob, { headers: { "content-type": record.analysisBlob.type || "image/jpeg" } }))
+      ]);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async function removePendingPhoto(id) {
+    pendingPhotoQueue = pendingPhotoQueue.filter(item => String(item.id) !== String(id));
+    updatePendingPhotoButton();
+    if (!("caches" in window)) return;
+    try {
+      const cache = await caches.open(pendingPhotoCacheName);
+      await Promise.all(["record.json", "original", "analysis"].map(part => cache.delete(pendingPhotoUrl(id, part))));
+    } catch (error) {
+      // The canonical IndexedDB record is already verified; stale fallback entries are harmless.
+    }
+  }
+
+  async function loadPendingPhotos() {
+    if (!("caches" in window)) {
+      updatePendingPhotoButton();
+      return;
+    }
+    try {
+      const cache = await caches.open(pendingPhotoCacheName);
+      const keys = await cache.keys();
+      const metadataKeys = keys.filter(request => /\/pending-photo\/[^/]+\/record\.json$/.test(new URL(request.url).pathname));
+      for (const key of metadataKeys) {
+        const metadataResponse = await cache.match(key);
+        const saved = metadataResponse && await metadataResponse.json();
+        if (!saved || String(saved.inspection_id || "") !== String(data.inspection_id || "")) continue;
+        const originalResponse = await cache.match(pendingPhotoUrl(saved.id, "original"));
+        const analysisResponse = await cache.match(pendingPhotoUrl(saved.id, "analysis"));
+        if (!originalResponse || !analysisResponse) continue;
+        const record = Object.assign({}, saved, {
+          originalBlob: await originalResponse.blob(),
+          analysisBlob: await analysisResponse.blob()
+        });
+        if (!pendingPhotoQueue.some(item => String(item.id) === String(record.id))) pendingPhotoQueue.push(record);
+      }
+    } catch (error) {
+      // Memory-only pending records can still be retried while this page remains open.
+    }
+    updatePendingPhotoButton();
+  }
+
+  async function finalizeCommittedPhoto(record) {
+    const metadata = record.metadata;
+    const event = record.event;
+    if (!data.photos.some(photo => String(photo.id) === String(metadata.id))) data.photos.push(metadata);
+    if (!data.markers.some(marker => String(marker.id) === String(event.id))) data.markers.push(event);
+    if (metadata.associated_observation_id) {
+      const associatedObservation = data.markers.find(marker => String(marker.id) === String(metadata.associated_observation_id));
+      if (associatedObservation) associatedObservation.photo_id = metadata.id;
+    }
+    data.photos.sort((a, b) => String(a.recorded_at || a.time).localeCompare(String(b.recorded_at || b.time)));
+    data.markers.sort((a, b) => String(a.time).localeCompare(String(b.time)));
+    await removePendingPhoto(record.id);
+    saveState();
+    redraw();
+    galleryPage = Math.max(0, Math.ceil(data.photos.length / galleryPageSize) - 1);
+    await renderGallery();
+    schedulePackageEstimateRefresh();
+  }
+
+  async function commitPhotoRecord(record, queueOnFailure) {
+    try {
+      await dbRecoveryTools.commitPhotoEvidence(record, {
+        put: photoStorePut,
+        get: photoStoreGet,
+        queueOnFailure: queueOnFailure ? persistPendingPhoto : null
+      });
+      await finalizeCommittedPhoto(record);
+      return true;
+    } catch (error) {
+      if (queueOnFailure && !pendingPhotoQueue.some(item => String(item.id) === String(record.id))) await persistPendingPhoto(record);
+      throw error;
+    }
+  }
+
+  async function retryPendingPhotos(options) {
+    const settings = options || {};
+    if (!pendingPhotoQueue.length) return true;
+    photoBusy = true;
+    updateControls();
+    const queue = pendingPhotoQueue.slice();
+    let savedCount = 0;
+    try {
+      await revalidatePhotoDb();
+      for (let index = 0; index < queue.length; index += 1) {
+        setStatus(`Retrying pending photograph ${index + 1} of ${queue.length}…`, "active");
+        try {
+          await commitPhotoRecord(queue[index], false);
+          savedCount += 1;
+        } catch (error) {
+          if (!settings.silent) setStatus("Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo.", "error");
+          if (settings.throwOnFailure) throw error;
+          return false;
+        }
+      }
+      if (!settings.silent) setStatus(`${countLabel(savedCount, "pending photograph")} recovered and verified.`, "success");
+      return true;
+    } finally {
+      photoBusy = false;
+      updateControls();
+    }
+  }
+
   function currentScreenOrientation() {
     const orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
     const type = orientation && orientation.type ? orientation.type : null;
@@ -1128,7 +1352,7 @@
   async function createAnalysisJpeg(file) {
     const decoded = await loadImageSource(file);
     try {
-      const maxDimension = 2048;
+      const maxDimension = 1900;
       const scale = Math.min(1, maxDimension / Math.max(decoded.width, decoded.height));
       const width = Math.max(1, Math.round(decoded.width * scale));
       const height = Math.max(1, Math.round(decoded.height * scale));
@@ -1140,9 +1364,9 @@
       context.fillRect(0, 0, width, height);
       context.drawImage(decoded.source, 0, 0, width, height);
       const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob(value => value ? resolve(value) : reject(new Error("The analysis JPEG could not be created.")), "image/jpeg", 0.9);
+        canvas.toBlob(value => value ? resolve(value) : reject(new Error("The analysis JPEG could not be created.")), "image/jpeg", 0.8);
       });
-      return { blob, width: decoded.width, height: decoded.height };
+      return { blob, width: decoded.width, height: decoded.height, analysisWidth: width, analysisHeight: height, maxDimension, jpegQuality: 0.8 };
     } finally {
       decoded.close();
     }
@@ -1164,14 +1388,28 @@
     });
   }
 
-  function takePhoto(context) {
+  function preparePhotoStorage() {
+    photoHealthPromise = revalidatePhotoDb();
+    photoHealthPromise.catch(() => {});
+    return photoHealthPromise;
+  }
+
+  async function takePhoto(context) {
     if (!lastPosition) {
       setStatus("Waiting for the first current GPS location. Camera was not opened.", "warning");
       return;
     }
     pendingPhotoContext = context && context.category ? context : null;
     pendingPhotoRequestedAt = new Date().toISOString();
-    photoInput.click();
+    try {
+      await (photoHealthPromise || preparePhotoStorage());
+      photoInput.click();
+    } catch (error) {
+      pendingPhotoRequestedAt = null;
+      pendingPhotoContext = null;
+      setStatus("Photo storage is reconnecting. Tap Take Photo again. No existing inspection data was changed.", "warning");
+      try { await preparePhotoStorage(); } catch (retryError) { /* The next tap will report the health state again. */ }
+    }
   }
 
   async function checkPhotoStorageCapacity(fileSize) {
@@ -1202,6 +1440,7 @@
     photoBusy = true;
     updateControls();
     setStatus("Saving original photograph and analysis copy…", "active");
+    let photoRecord = null;
     try {
       const storageEstimate = await checkPhotoStorageCapacity(file.size);
       const [position, exif, analysis] = await Promise.all([
@@ -1245,7 +1484,11 @@
         original_filename: file.name || null,
         original_mime_type: file.type || "application/octet-stream",
         original_size_bytes: file.size,
-        photo_number: `P${data.photos.length + 1}`,
+        analysis_size_bytes: analysis.blob.size,
+        analysis_width_px: analysis.analysisWidth,
+        analysis_height_px: analysis.analysisHeight,
+        analysis_profile: { format: "image/jpeg", max_dimension_px: analysis.maxDimension, jpeg_quality: analysis.jpegQuality },
+        photo_number: `P${data.photos.length + pendingPhotoQueue.length + 1}`,
         category: photoContext.category || "Other",
         note: photoContext.note || "",
         associated_observation_id: photoContext.associatedObservationId || null,
@@ -1262,26 +1505,27 @@
         }
       });
       metadata.associated_marker_id = photoEvent.id;
-      if (metadata.associated_observation_id) {
-        const associatedObservation = data.markers.find(marker => String(marker.id) === String(metadata.associated_observation_id));
-        if (associatedObservation) associatedObservation.photo_id = id;
+      if (typeof packageTools.sha256Hex === "function") {
+        const hashes = await Promise.all([packageTools.sha256Hex(file), packageTools.sha256Hex(analysis.blob)]);
+        metadata.original_sha256 = hashes[0];
+        metadata.analysis_sha256 = hashes[1];
       }
-      await photoStorePut({
+      photoRecord = {
         id,
         inspection_id: data.inspection_id,
         metadata,
         event: photoEvent,
         originalBlob: file,
         analysisBlob: analysis.blob
-      });
-      data.photos.push(metadata);
-      data.markers.push(photoEvent);
-      saveState();
-      redraw();
-      await renderGallery();
+      };
+      await commitPhotoRecord(photoRecord, true);
       setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
     } catch (error) {
-      setStatus(`PHOTO NOT RECORDED: ${error.message} Retake the photograph before continuing.`, "error");
+      if (photoRecord && pendingPhotoQueue.some(item => String(item.id) === String(photoRecord.id))) {
+        setStatus("Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo.", "error");
+      } else {
+        setStatus(`PHOTO NOT RECORDED: ${error.message} The captured file could not be converted into recoverable evidence.`, "error");
+      }
     } finally {
       photoBusy = false;
       pendingPhotoRequestedAt = null;
@@ -1308,16 +1552,17 @@
   }
 
   async function presentPackage(name, blob, manifest) {
+    const reportPackage = manifest.package_mode === "chatgpt_report_package";
     if (lastPackageUrl) URL.revokeObjectURL(lastPackageUrl);
     lastPackageUrl = URL.createObjectURL(blob);
     lastPackageFile = typeof File === "function" ? new File([blob], name, { type: "application/zip", lastModified: Date.now() }) : null;
     packageLink.href = lastPackageUrl;
     packageLink.download = name;
-    packageLink.textContent = "Download Inspection Package";
+    packageLink.textContent = reportPackage ? "Download CHATGPT / REPORT PACKAGE" : "Download FULL EVIDENCE ARCHIVE";
     packageLink.hidden = false;
     packageFilename.textContent = name;
-    packageInstruction.textContent = `Inspection package downloaded. In ChatGPT, tap +, tap Upload files, and select the file named ${name}.`;
-    packageSummary.textContent = `One file contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
+    packageInstruction.textContent = reportPackage ? `Report package downloaded. In ChatGPT, tap +, tap Upload files, and select the file named ${name}.` : `Full evidence archive downloaded. Store the file named ${name} in a permanent, backed-up location. The saved inspection remains unchanged on this phone.`;
+    packageSummary.textContent = `${reportPackage ? "CHATGPT / REPORT PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one file contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
     packageReady.hidden = false;
     let canShareFile = false;
     try {
@@ -1340,7 +1585,52 @@
     }
   }
 
-  async function recoverEveryPhoto() {
+  async function refreshPackageEstimates() {
+    const reportEstimate = document.getElementById("reportEstimate");
+    const fullEstimate = document.getElementById("fullEstimate");
+    const warning = document.getElementById("estimateWarning");
+    if (!data.started || !data.inspection_id || !data.photos.length) {
+      packageEstimates = packageTools.estimateInspectionPackageSizes({ inspection: data, photoEntries: [], voiceEntries: [] });
+    } else {
+      try {
+        const inventory = await photoStoreSizeInventory(data.inspection_id);
+        const byId = new Map(inventory.map(entry => [String(entry.id), entry]));
+        const photoEntries = data.photos.map(metadata => byId.get(String(metadata.id)) || {
+          id: metadata.id,
+          originalBlob: { size: Number(metadata.original_size_bytes) || 0 },
+          analysisBlob: { size: Number(metadata.analysis_size_bytes) || 0 }
+        });
+        const voiceEntries = data.voice_notes.map(metadata => ({ id: metadata.id, audioBlob: { size: Number(metadata.size_bytes) || 0 } }));
+        packageEstimates = packageTools.estimateInspectionPackageSizes({
+          inspection: data,
+          photoEntries,
+          voiceEntries,
+          mapContext: { terrainBlob: { size: 2500000 }, contourBlob: { size: 100000 }, parcelsText: " ".repeat(9000) }
+        });
+      } catch (error) {
+        reportEstimate.textContent = "Estimate unavailable";
+        fullEstimate.textContent = "Estimate unavailable";
+        warning.hidden = false;
+        warning.textContent = "Saved evidence is intact. Package size will be calculated during export.";
+        return null;
+      }
+    }
+    reportEstimate.textContent = `About ${formatBytes(packageEstimates.reportBytes)}`;
+    fullEstimate.textContent = `About ${formatBytes(packageEstimates.fullArchiveBytes)}`;
+    const overLimit = [];
+    if (packageEstimates.reportBytes > 500 * 1024 * 1024) overLimit.push("CHATGPT / REPORT PACKAGE");
+    if (packageEstimates.fullArchiveBytes > 500 * 1024 * 1024) overLimit.push("FULL EVIDENCE ARCHIVE");
+    warning.hidden = overLimit.length === 0;
+    warning.textContent = overLimit.length ? `WARNING: ${overLimit.join(" and ")} ${overLimit.length === 1 ? "is" : "are"} estimated to exceed 500 MB. Keep Safari open during creation and save directly to a destination with enough space.` : "";
+    return packageEstimates;
+  }
+
+  function schedulePackageEstimateRefresh() {
+    clearTimeout(estimateRefreshTimer);
+    estimateRefreshTimer = setTimeout(() => { refreshPackageEstimates().catch(() => {}); }, 600);
+  }
+
+  async function recoverEveryPhoto(packageMode) {
     const entries = [];
     for (let index = 0; index < data.photos.length; index += 1) {
       setStatus(`Verifying photograph ${index + 1} of ${data.photos.length}…`, "active");
@@ -1355,7 +1645,24 @@
       if (metadata.original_size_bytes != null && stored.originalBlob.size !== Number(metadata.original_size_bytes)) {
         throw new Error(`Photograph ${index + 1} failed its stored byte-size check.`);
       }
-      entries.push({ id: metadata.id, originalBlob: stored.originalBlob, analysisBlob: stored.analysisBlob });
+      let analysisBlob = stored.analysisBlob;
+      let analysisWidth = metadata.analysis_width_px || null;
+      let analysisHeight = metadata.analysis_height_px || null;
+      let analysisProfile = metadata.analysis_profile || null;
+      const reportReady = analysisProfile && Number(analysisProfile.max_dimension_px) <= 2000 && Number(analysisProfile.jpeg_quality) >= 0.75 && Number(analysisProfile.jpeg_quality) <= 0.82;
+      if (packageMode === "report" && !reportReady) {
+        setStatus(`Optimizing report photograph ${index + 1} of ${data.photos.length} for upload…`, "active");
+        try {
+          const optimized = await createAnalysisJpeg(stored.analysisBlob);
+          analysisBlob = optimized.blob;
+          analysisWidth = optimized.analysisWidth;
+          analysisHeight = optimized.analysisHeight;
+          analysisProfile = { format: "image/jpeg", max_dimension_px: optimized.maxDimension, jpeg_quality: optimized.jpegQuality, generated_for_report_at: new Date().toISOString() };
+        } catch (error) {
+          analysisProfile = { retained_existing_analysis_copy: true, optimization_error: error.message };
+        }
+      }
+      entries.push({ id: metadata.id, originalBlob: stored.originalBlob, analysisBlob, analysisWidth, analysisHeight, analysisProfile });
     }
     return entries;
   }
@@ -1403,44 +1710,86 @@
     return { terrainBlob, contourBlob, parcelsText };
   }
 
+  function validatePackageEvidence(result, packageMode) {
+    if (result.manifest.summary.original_photo_evidence_count !== data.photos.length || result.manifest.summary.analysis_photo_count !== data.photos.length) {
+      throw new Error("Package photograph counts did not reconcile. No package was released.");
+    }
+    const expectedOriginalFiles = packageMode === "full_archive" ? data.photos.length : 0;
+    if (result.manifest.summary.original_photo_count !== expectedOriginalFiles) throw new Error("Package original-file count did not reconcile. No package was released.");
+    if (result.manifest.summary.voice_note_count !== data.voice_notes.length) throw new Error("Package voice-note counts did not reconcile. No package was released.");
+  }
+
+  async function buildPackageWithRecovery(packageMode, packageKind) {
+    let lastError = null;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        await gpsWriteQueue;
+        await voiceChunkWrites;
+        await revalidatePhotoDb();
+        if (pendingPhotoQueue.length) await retryPendingPhotos({ silent: true, throwOnFailure: true });
+        await reconcileGpsPoints();
+        await revalidatePhotoDb();
+        const photoEntries = await recoverEveryPhoto(packageMode);
+        const voiceEntries = await recoverEveryVoiceNote();
+        const mapContext = await recoverMapContext();
+        setStatus(packageMode === "full_archive" ? "Building the FULL EVIDENCE ARCHIVE. Keep Safari open…" : "Building the CHATGPT / REPORT PACKAGE. Keep Safari open…", "active");
+        const result = await packageTools.createInspectionPackage({
+          inspection: data,
+          photoEntries,
+          voiceEntries,
+          mapContext,
+          packageMode,
+          packageKind,
+          appVersion: APP_VERSION,
+          sourceUrl: location.href.split(/[?#]/)[0]
+        });
+        validatePackageEvidence(result, packageMode);
+        return result;
+      } catch (error) {
+        lastError = error;
+        if (attempt === 0 && dbRecoveryTools.isRetryableConnectionError(error)) {
+          ensureEvidenceDbManager().invalidate();
+          await openPhotoDb();
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError || new Error("Package recovery failed.");
+  }
+
+  async function confirmLargePackage(mode) {
+    const estimates = await refreshPackageEstimates();
+    const bytes = estimates && (mode === "full_archive" ? estimates.fullArchiveBytes : estimates.reportBytes);
+    if (!bytes || bytes <= 500 * 1024 * 1024) return true;
+    return confirm(`${mode === "full_archive" ? "FULL EVIDENCE ARCHIVE" : "CHATGPT / REPORT PACKAGE"} is estimated at ${formatBytes(bytes)}, which exceeds 500 MB. Keep Safari open and confirm the destination has enough free space. Continue?`);
+  }
+
   async function finishInspection() {
     if (packageBusy || photoBusy) return;
     if (!data.started || !data.points.length) {
       setStatus("INSPECTION INCOMPLETE: at least one recorded GPS point is required.", "error");
       return;
     }
-    if (!data.photos.length) {
+    if (!data.photos.length && !pendingPhotoQueue.length) {
       setStatus("INSPECTION INCOMPLETE: at least one photograph is required. Photo markers alone are unacceptable.", "error");
       return;
     }
+    if (!(await confirmLargePackage("report"))) return;
     packageBusy = true;
     updateControls();
     if (watchId !== null) stopTracking({ silent: true, reason: "finish" });
-    else {
+    else if (!data.stopped) {
       data.stopped = new Date().toISOString();
       data.lifecycle_events.push({ type: "inspection_finished", time: data.stopped, source: "button_press" });
       saveState();
     }
     try {
-      await gpsWriteQueue;
-      const [photoEntries, voiceEntries, mapContext] = await Promise.all([recoverEveryPhoto(), recoverEveryVoiceNote(), recoverMapContext()]);
-      setStatus("Building the complete inspection package. Keep Safari open…", "active");
-      const result = await packageTools.createInspectionPackage({
-        inspection: data,
-        photoEntries,
-        voiceEntries,
-        mapContext,
-        appVersion: APP_VERSION,
-        sourceUrl: location.href.split(/[?#]/)[0]
-      });
-      if (result.manifest.summary.original_photo_count !== data.photos.length || result.manifest.summary.analysis_photo_count !== data.photos.length) {
-        throw new Error("Package photograph counts did not reconcile. No package was released.");
-      }
-      if (result.manifest.summary.voice_note_count !== data.voice_notes.length) throw new Error("Package voice-note counts did not reconcile. No package was released.");
+      const result = await buildPackageWithRecovery("report", null);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`COMPLETE: one package created with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "observation")}, ${countLabel(data.orientation_samples.length, "orientation sample")}, all ${countLabel(data.photos.length, "photograph")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}).`, "success");
+      setStatus(`REPORT PACKAGE COMPLETE: every photograph is viewable, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "observation")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
     } catch (error) {
-      setStatus(`PACKAGE NOT CREATED: ${error.message} The inspection remains saved on this phone.`, "error");
+      setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
     } finally {
       packageBusy = false;
       updateControls();
@@ -1449,28 +1798,15 @@
 
   async function exportBackupNow() {
     if (packageBusy || photoBusy || !data.started) return;
+    if (!(await confirmLargePackage("full_archive"))) return;
     packageBusy = true;
     updateControls();
     try {
-      await gpsWriteQueue;
-      const [photoEntries, voiceEntries, mapContext] = await Promise.all([recoverEveryPhoto(), recoverEveryVoiceNote(), recoverMapContext()]);
-      setStatus("Building a complete recovery package without stopping GPS…", "active");
-      const result = await packageTools.createInspectionPackage({
-        inspection: data,
-        photoEntries,
-        voiceEntries,
-        mapContext,
-        appVersion: APP_VERSION,
-        sourceUrl: location.href.split(/[?#]/)[0],
-        packageKind: "backup"
-      });
-      if (result.manifest.summary.original_photo_count !== data.photos.length || result.manifest.summary.analysis_photo_count !== data.photos.length) {
-        throw new Error("Backup photograph counts did not reconcile. No backup was released.");
-      }
+      const result = await buildPackageWithRecovery("full_archive", watchId !== null ? "backup" : null);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`BACKUP READY: all saved evidence is in ${result.fileName}. GPS tracking was not stopped.`, "success");
+      setStatus(`FULL ARCHIVE READY: every original photograph byte is in ${result.fileName}.${watchId !== null ? " GPS tracking was not stopped." : ""}`, "success");
     } catch (error) {
-      setStatus(`BACKUP NOT CREATED: ${error.message} The inspection remains saved on this phone.`, "error");
+      setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
     } finally {
       packageBusy = false;
       updateControls();
@@ -1505,6 +1841,7 @@
     try {
       await gpsWriteQueue;
       await photoStoreClear();
+      for (const pending of pendingPhotoQueue.slice()) await removePendingPhoto(pending.id);
       data = emptyInspection();
       lastPosition = null;
       latestOrientation = null;
@@ -1570,7 +1907,7 @@
   }
 
   async function initialize() {
-    if (!packageTools) {
+    if (!packageTools || !dbRecoveryTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -1581,9 +1918,12 @@
       return;
     }
     loadState();
+    lastSavedOrientation = data.orientation_samples.length ? data.orientation_samples[data.orientation_samples.length - 1] : null;
     if (data.started && !data.inspection_id) data.inspection_id = makeId("inspection");
     try {
       await openPhotoDb();
+      await revalidatePhotoDb();
+      await loadPendingPhotos();
       await reconcileGpsPoints();
       await migrateLegacyPhotos();
       await reconcileStoredPhotos();
@@ -1598,8 +1938,9 @@
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
     if (statusEl.dataset.kind !== "error") {
-      setStatus(data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location.", "normal");
+      setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
     }
+    schedulePackageEstimateRefresh();
   }
 
   startBtn.addEventListener("click", startTracking);
@@ -1622,6 +1963,7 @@
   document.getElementById("other").addEventListener("click", () => addMarker("other"));
   document.getElementById("note").addEventListener("click", () => addMarker("note"));
   document.getElementById("photo").addEventListener("click", () => takePhoto(null));
+  document.getElementById("photo").addEventListener("pointerdown", preparePhotoStorage);
   document.getElementById("more").addEventListener("click", () => {
     moreCategories.hidden = !moreCategories.hidden;
     document.getElementById("more").textContent = moreCategories.hidden ? "More Categories" : "Hide Categories";
@@ -1636,6 +1978,10 @@
   sharePackageBtn.addEventListener("click", shareLastPackage);
   clearBtn.addEventListener("click", clearInspection);
   document.getElementById("backup").addEventListener("click", exportBackupNow);
+  fullArchiveBtn.addEventListener("click", exportBackupNow);
+  retryPendingPhotoBtn.addEventListener("click", () => retryPendingPhotos());
+  document.getElementById("galleryPrevious").addEventListener("click", () => { galleryPage = Math.max(0, galleryPage - 1); renderGallery(); });
+  document.getElementById("galleryNext").addEventListener("click", () => { galleryPage += 1; renderGallery(); });
   Object.keys(conditionBindings).forEach(id => {
     const element = document.getElementById(id);
     element.addEventListener("change", saveConditionsFromUi);
@@ -1651,7 +1997,10 @@
     setStatus("A background map image is unavailable. GPS, observations, photos, and notes still work; continue using the parcel and route overlay.", "warning");
   }));
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && watchId !== null && !wakeLock) keepAwake();
+    if (document.visibilityState === "visible") {
+      if (watchId !== null && !wakeLock) keepAwake();
+      preparePhotoStorage();
+    }
   });
   window.addEventListener("beforeunload", event => {
     if (photoBusy || packageBusy) {

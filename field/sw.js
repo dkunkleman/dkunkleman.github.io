@@ -1,10 +1,11 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-02-v3";
+const CACHE_NAME = "property-inspector-field-2026-08-03-v4";
 const CORE_OFFLINE_FILES = [
   "./",
   "./index.html",
   "./app.js",
+  "./idb-recovery.js",
   "./inspection-package.js",
   "./manifest.webmanifest",
   "./assets/parcels.json"
