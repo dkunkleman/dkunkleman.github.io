@@ -2,7 +2,7 @@
 
 The field release deliberately remains offline-first and account-free. These items are deferred so they cannot delay reliable iPhone use:
 
-- Import completed inspection packages into a central cross-property database.
+- Deploy the authenticated repository upload API and connect the existing one-tap share workflow to it without placing repository credentials in the field app.
 - User accounts, team permissions, cloud synchronization, and billing.
 - Cross-property queries, comparison, similarity search, and prediction models.
 - AI-generated recommendations and report drafting after package ingestion.

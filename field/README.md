@@ -1,6 +1,6 @@
 # Property Inspector
 
-Production, offline-first field evidence collection for the subject rural parcel. The iPhone workflow is deliberately simple: confirm **Offline ready**, tap **Start Inspection**, record observations while walking, then tap **Finish Inspection** and send the one resulting package to ChatGPT.
+Production, offline-first field evidence collection for the subject rural parcel. The iPhone workflow is deliberately simple: confirm **Offline ready**, tap **Start Inspection**, record observations while walking, then tap **Finish Inspection** and save the one resulting package to the Property Intelligence Repository. ChatGPT analyzes the permanent repository record rather than acting as file storage.
 
 ## Reliability model
 
@@ -15,13 +15,15 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 ## Two one-file package modes
 
-`Finish Inspection` creates a standards-compliant `REPORT_PACKAGE` ZIP for ChatGPT. **Create FULL EVIDENCE ARCHIVE** creates the permanent evidentiary ZIP without clearing or altering the saved inspection.
+`Finish Inspection` creates a standards-compliant `REPORT_PACKAGE` ZIP for repository ingestion and ChatGPT analysis. **Create FULL EVIDENCE ARCHIVE** creates the permanent evidentiary ZIP without clearing or altering the saved inspection.
 
 - **CHATGPT / REPORT PACKAGE** includes every analysis-quality photograph, voice note, raw GPS point, orientation sample, observation, report, map layer, and reconstruction file. Images use a 1,900-pixel maximum dimension and JPEG quality 0.80; older stored analysis copies are optimized sequentially during export without altering the saved evidence. Exact originals are not duplicated, but their SHA-256, source name, dimensions, size, timestamp, and metadata remain in the manifest.
 - **FULL EVIDENCE ARCHIVE** additionally includes every exact original photograph byte-for-byte. Its larger size is intentional.
 
 Both modes contain:
 
+- `repository-import.json`, which assigns an immutable property folder, inspection folder, export ID, extraction map, and reject-on-collision policy;
+- `repository-comparison.json`, a compact normalized record for future comparisons of standing water, trees, construction, improvements, and recurring observations;
 - canonical `inspection.json` and a versioned `schema.json`;
 - `chatgpt-reconstruction.json`, which requires automatic map, report, timeline, gallery, answered/remaining questions, next-visit, and missed-area outputs without asking the field user to match files;
 - every GPS point with time, accuracy, altitude, speed, heading, and device orientation when available;
@@ -34,7 +36,9 @@ Both modes contain:
 - subject and neighboring parcel geometry;
 - georeferenced USGS terrain and 2-foot contour context.
 
-The package schema uses stable property, inspection, observation, GPS-point, attachment, lifecycle, conditions, and map-context entities. New observation taxonomies and namespaced attributes can be added without repurposing existing fields.
+The package schema uses stable property, inspection, export, observation, GPS-point, attachment, lifecycle, conditions, and map-context entities. New observation taxonomies and namespaced attributes can be added without repurposing existing fields. `property_id` joins repeated visits to the same property, `inspection_id` joins report/full artifacts from one visit, and `export_id` preserves every package revision.
+
+The reference append-only importer is documented in [`../repository/README.md`](../repository/README.md). It permanently stores each source ZIP, extracts versioned maps and records, content-addresses photo/voice/map evidence by SHA-256, and refuses to overwrite an existing export.
 
 ## Automated verification
 
@@ -44,11 +48,12 @@ From the repository root:
 node --check field\inspection-package.js
 node --check field\app.js
 node --check field\idb-recovery.js
+node --check repository\import-package.js
 node tests\idb-recovery.test.js
 node tests\inspection-package.test.js
 ```
 
-The recovery tests simulate stale cached connections, close events, transaction-creation failures, asynchronous aborts between image-copy serialization, read-back closure, pending-photo recovery, and later package inventory. Package tests independently parse and CRC-check both modes, recover exact originals from the full archive, display every analysis photograph from the report package, and exercise the recorded field scale of 190 photos, 4,964 GPS points, 252 observations, 944 existing orientation samples, and two voice notes.
+The recovery tests simulate stale cached connections, close events, transaction-creation failures, asynchronous aborts between image-copy serialization, read-back closure, pending-photo recovery, and later package inventory. Package tests independently parse and CRC-check both modes, recover exact originals, exercise the recorded 190-photo field scale, import report/full packages into the same inspection folder, verify content-addressed evidence, and prove that importing the same export twice is rejected instead of overwritten.
 
 ## Required real-iPhone acceptance test
 
@@ -58,8 +63,8 @@ The recovery tests simulate stale cached connections, close events, transaction-
 4. Record Wet, High Ground, a Free Note, one Voice Note, and at least one photo. Use **Take a photograph after saving** on one structured observation to verify the relationship.
 5. Close Safari after saving one observation, reopen it, and confirm the counters and photographs return.
 6. Take 20 photos over several minutes. Background and reopen Safari twice, rotate between portrait and landscape, and continue taking photos. If a pending-photo button appears, tap it and confirm recovery.
-7. Still offline, tap **Finish Inspection**. Send the single `REPORT_PACKAGE` ZIP to ChatGPT from the iOS share sheet.
-8. Upload that one ZIP to ChatGPT. It should follow `chatgpt-reconstruction.json` and produce the interactive map, printable report, inspection timeline, photo gallery, questions answered, questions remaining, suggested next visit, and areas not yet inspected.
-9. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Preserve it in a backed-up permanent location and confirm its photo count matches the report package.
+7. Still offline, tap **Finish Inspection**. Use **Save to Property Intelligence Repository** in the iOS share sheet for the single `REPORT_PACKAGE` ZIP.
+8. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. ChatGPT should then analyze that repository record and produce the map, report, timeline, gallery, questions, next visit, and uninspected areas.
+9. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Save it to the same repository inspection; it must create a second export version and add exact originals without replacing the report package.
 
-Do not clear the inspection until ChatGPT confirms the package was received and every photo can be displayed.
+Do not clear the inspection until the repository confirms both packages were received and every photo can be displayed.

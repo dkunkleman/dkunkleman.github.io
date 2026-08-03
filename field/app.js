@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.2.2";
+  const APP_VERSION = "3.3.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -122,7 +122,7 @@
     if (pendingPhotoQueue.length) {
       nextStep.textContent = "NEXT: Tap Retry Pending Photo. Keep this page open.";
     } else if (!packageReady.hidden) {
-      nextStep.textContent = sharePackageBtn.hidden ? "NEXT: Tap Download Inspection Package. Do not clear the inspection yet." : "NEXT: Tap Send Package to ChatGPT. Do not clear the inspection yet.";
+      nextStep.textContent = sharePackageBtn.hidden ? "NEXT: Tap Save Inspection Package for the Property Intelligence Repository. Do not clear the inspection yet." : "NEXT: Tap Save to Property Intelligence Repository. Do not clear the inspection yet.";
     } else if (mediaRecorder && mediaRecorder.state === "recording") {
       nextStep.textContent = "NEXT: Speak now. Tap Stop Voice Note when you are finished.";
     } else if (!data.started) {
@@ -1540,13 +1540,13 @@
     try {
       await navigator.share({
         files: [lastPackageFile],
-        title: "Property inspection package",
-        text: "Analyze this complete property inspection package. Reconstruct the inspection, map every observation and photo, identify uninspected areas, and summarize findings."
+        title: "Save property inspection to repository",
+        text: "Store this immutable inspection package in the Property Intelligence Repository. Use repository-import.json for its permanent property, inspection, and export paths."
       });
-      setStatus("Package handed to the selected app. Keep this inspection until ChatGPT confirms receipt.", "success");
+      setStatus("Package handed to the selected repository destination. Keep this inspection until the repository confirms receipt.", "success");
       return true;
     } catch (error) {
-      if (error && error.name !== "AbortError") setStatus("The share sheet did not accept the package. Tap Send Package to ChatGPT and try again.", "warning");
+      if (error && error.name !== "AbortError") setStatus("The share sheet did not accept the package. Tap Save to Property Intelligence Repository and try again.", "warning");
       return false;
     }
   }
@@ -1561,8 +1561,8 @@
     packageLink.textContent = reportPackage ? "Download CHATGPT / REPORT PACKAGE" : "Download FULL EVIDENCE ARCHIVE";
     packageLink.hidden = false;
     packageFilename.textContent = name;
-    packageInstruction.textContent = reportPackage ? `Report package downloaded. In ChatGPT, tap +, tap Upload files, and select the file named ${name}.` : `Full evidence archive downloaded. Store the file named ${name} in a permanent, backed-up location. The saved inspection remains unchanged on this phone.`;
-    packageSummary.textContent = `${reportPackage ? "CHATGPT / REPORT PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one file contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
+    packageInstruction.textContent = reportPackage ? `Save ${name} to the Property Intelligence Repository. It will be filed permanently at ${manifest.repository.inspection_path} without overwriting an older export.` : `Save ${name} to the Property Intelligence Repository as permanent original evidence. The saved inspection remains unchanged on this phone.`;
+    packageSummary.textContent = `${reportPackage ? "CHATGPT / REPORT PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one immutable repository export contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
     packageReady.hidden = false;
     let canShareFile = false;
     try {

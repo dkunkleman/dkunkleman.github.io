@@ -12,7 +12,7 @@ Every proposed feature must materially accomplish at least one of these outcomes
 
 If a feature does not accomplish one of those outcomes, it should not be added.
 
-Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The application collects durable, reusable observations; the post-inspection analyst turns those observations into maps, reports, remaining questions, next-visit priorities, and decisions.
+Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The phone collects durable observations, the append-only Property Intelligence Repository stores every inspection and version permanently, and ChatGPT analyzes repository records into maps, reports, comparisons, remaining questions, next-visit priorities, and decisions. These responsibilities stay separate.
 
 ## Version 10 north star
 

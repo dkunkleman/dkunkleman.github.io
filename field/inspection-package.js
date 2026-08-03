@@ -7,7 +7,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.2";
+  const FORMAT_VERSION = "1.3";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -476,7 +476,124 @@
     const date = new Date(value || Date.now());
     const safe = Number.isNaN(date.valueOf()) ? new Date() : date;
     const pad = number => String(number).padStart(2, "0");
-    return `${safe.getFullYear()}-${pad(safe.getMonth() + 1)}-${pad(safe.getDate())}_${pad(safe.getHours())}${pad(safe.getMinutes())}`;
+    return `${safe.getFullYear()}-${pad(safe.getMonth() + 1)}-${pad(safe.getDate())}_${pad(safe.getHours())}${pad(safe.getMinutes())}${pad(safe.getSeconds())}_${String(safe.getMilliseconds()).padStart(3, "0")}`;
+  }
+
+  function safeRepositoryName(value, fallback) {
+    const normalized = String(value || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+    const safe = normalized.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 96);
+    return safe || fallback;
+  }
+
+  function repositoryDate(inspection, exportedAt) {
+    const conditionDate = inspection && inspection.conditions && inspection.conditions.inspection_date;
+    const candidate = /^\d{4}-\d{2}-\d{2}$/.test(String(conditionDate || "")) ? String(conditionDate) : String((inspection && inspection.started) || exportedAt || "").slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(candidate) ? candidate : "Date_Unknown";
+  }
+
+  function createExportId(settings) {
+    if (settings.exportId) return safeRepositoryName(settings.exportId, "export");
+    const randomPart = globalThis.crypto && typeof globalThis.crypto.randomUUID === "function" ? globalThis.crypto.randomUUID().replaceAll("-", "").slice(0, 12) : Math.random().toString(16).slice(2, 14);
+    return safeRepositoryName(`export_${settings.packageMode}_${packageTimestamp(settings.exportedAt)}_${randomPart}`, "export");
+  }
+
+  function createRepositoryImportManifest(manifest, fileName) {
+    const repository = manifest.repository;
+    const exportId = repository.export_id;
+    const versionPath = `versions/${exportId}`;
+    return {
+      schema_name: "property-intelligence-repository-import",
+      schema_version: "1.0",
+      created_at: manifest.exported_at,
+      property_id: manifest.property_id,
+      inspection_id: manifest.inspection_id,
+      export_id: exportId,
+      repository_path: repository.inspection_path,
+      artifact: {
+        role: manifest.package_mode,
+        source_filename: fileName,
+        repository_filename: `${manifest.package_mode === "full_evidence_archive" ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${exportId}.zip`,
+        package_sha256: "COMPUTE_DURING_INGESTION",
+        package_size_bytes: "COMPUTE_DURING_INGESTION"
+      },
+      identity: {
+        property_folder: repository.property_folder,
+        inspection_folder: repository.inspection_folder,
+        merge_key: manifest.inspection_id,
+        comparison_key: manifest.property_id
+      },
+      immutability: {
+        append_only: true,
+        collision_policy: "REJECT_IF_EXPORT_ID_OR_ARTIFACT_PATH_ALREADY_EXISTS",
+        allow_overwrite: false,
+        preserve_source_package: true,
+        preserve_every_version: true
+      },
+      extraction: {
+        canonical_record: { source: "inspection.json", destination: `${versionPath}/inspection.json` },
+        repository_contract: { source: "repository-import.json", destination: `${versionPath}/repository-import.json` },
+        observations: { source: "observations.csv", destination: `${versionPath}/observations.csv` },
+        gps_geojson: { source: "track.geojson", destination: `maps/${exportId}/track.geojson` },
+        gps_gpx: { source: "track.gpx", destination: `maps/${exportId}/track.gpx` },
+        map_context: { source: "context/map-context.json", destination: `maps/${exportId}/map-context.json` },
+        property_boundary: { source: "context/parcels.geojson", destination: `property_boundary/${exportId}/parcels.geojson` },
+        property_boundary_source: { source: "context/parcels.arcgis.json", destination: `property_boundary/${exportId}/parcels.arcgis.json` },
+        terrain: { source: "context/usgs-terrain.png", destination: "terrain/content-addressed/" },
+        contours: { source: "context/usgs-contours-2ft.png", destination: "contours/content-addressed/" },
+        photos: { source: "photos/*", destination: "photos/content-addressed/" },
+        voice: { source: "voice-notes/*", destination: "voice/content-addressed/" },
+        weather: { source: "inspection.json > inspection.conditions", destination: `weather/${exportId}/conditions.json` },
+        reconstruction: { source: "chatgpt-reconstruction.json", destination: `analysis/${exportId}/chatgpt-reconstruction.json` },
+        comparison_record: { source: "repository-comparison.json", destination: `analysis/${exportId}/repository-comparison.json` },
+        printable_html: { source: "printable-report.html", destination: `analysis/${exportId}/printable-report.html` }
+      },
+      derived_artifacts: {
+        printable_pdf: { destination: `analysis/${exportId}/printable_report.pdf`, status: "GENERATE_IN_REPOSITORY_FROM_PRINTABLE_HTML" },
+        chatgpt_analysis: { destination: `analysis/${exportId}/`, status: "GENERATE_AFTER_INGESTION" }
+      },
+      responsibilities: {
+        phone: "Collect and package complete immutable field evidence.",
+        repository: "Store every source package and extracted revision permanently without overwriting.",
+        chatgpt: "Analyze repository records, compare inspections, and create derived reports without modifying source evidence."
+      },
+      future_comparison_dimensions: ["standing_water", "tree_growth", "construction_progress", "property_improvements", "recurring_observations"]
+    };
+  }
+
+  function createRepositoryComparisonRecord(manifest) {
+    const observations = manifest.inspection.observations || [];
+    const counts = {};
+    observations.forEach(observation => {
+      const key = observation.observation_type || "field.unknown";
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return {
+      schema_name: "property-intelligence-comparison-record",
+      schema_version: "1.0",
+      property_id: manifest.property_id,
+      inspection_id: manifest.inspection_id,
+      export_id: manifest.repository.export_id,
+      inspected_at: manifest.inspection.started_at,
+      finished_at: manifest.inspection.finished_at,
+      conditions: manifest.inspection.conditions,
+      metrics: manifest.inspection.metrics,
+      observation_counts_by_type: counts,
+      recurring_observations: observations.map(observation => ({
+        observation_id: observation.observation_id,
+        observation_type: observation.observation_type,
+        observed_at: observation.observed_at,
+        geometry: observation.geometry,
+        evidence_classification: observation.evidence_classification,
+        attributes: observation.attributes,
+        attachments: observation.attachments
+      })),
+      evidence_counts: {
+        photographs: manifest.summary.photo_count,
+        voice_notes: manifest.summary.voice_note_count,
+        gps_points: manifest.summary.gps_track_point_count
+      },
+      comparison_rule: "Compare records by property_id across distinct inspection_id values. Preserve evidence classifications and never treat an unrecorded observation as proof of absence."
+    };
   }
 
   function estimateInspectionPackageSizes(options) {
@@ -699,10 +816,11 @@
     return [
       fullArchive ? "PROPERTY INSPECTOR — FULL EVIDENCE ARCHIVE" : "PROPERTY INSPECTOR — CHATGPT / REPORT PACKAGE",
       "",
-      "Upload this ZIP file directly to ChatGPT as one file.",
-      "Start with chatgpt-reconstruction.json, then inspection.json. Reconstruct the inspection automatically without asking the field user to locate separate files.",
+      "Save this ZIP as one immutable upload to the Property Intelligence Repository.",
+      "The repository should start with repository-import.json, preserve the source ZIP, and reject any overwrite. ChatGPT should analyze the extracted repository record beginning with chatgpt-reconstruction.json and inspection.json.",
       "",
       "Contents:",
+      "- repository-import.json: immutable property folder, inspection folder, export ID, extraction map, and responsibility contract for repository ingestion.",
       "- inspection.json: canonical record of the property, GPS track, observations, notes, photos, voice notes, headings, device orientation, and map context.",
       "- chatgpt-reconstruction.json: required automatic analysis outputs and exact relationships between track, observations, photographs, timeline, and parcel coverage.",
       "- schema.json: stable, extensible observation contract for future cross-property analysis.",
@@ -719,6 +837,8 @@
       "- context/: subject and neighboring parcel geometry, USGS terrain, 2-foot contours, bounds, acreage, and source metadata.",
       "",
       `Inspection ID: ${manifest.inspection_id}`,
+      `Repository path: ${manifest.repository.inspection_path}`,
+      `Export ID: ${manifest.repository.export_id}`,
       `Started: ${manifest.inspection.started_at || "not recorded"}`,
       `Finished: ${manifest.inspection.finished_at || "not recorded"}`,
       `GPS points: ${manifest.summary.gps_track_point_count}`,
@@ -814,6 +934,13 @@
     if (!parcels || !Array.isArray(parcels.features)) throw new Error("Parcel geometry does not contain a feature collection.");
 
     const exportedAt = settings.exportedAt || new Date().toISOString();
+    const propertyName = settings.propertyName || "Pearson Road";
+    const propertyFolder = safeRepositoryName(propertyName, "Property");
+    const inspectionId = inspection.inspection_id || null;
+    if (!inspectionId) throw new Error("An immutable inspection ID is required before repository packaging.");
+    const inspectionFolder = `Inspection_${repositoryDate(inspection, exportedAt)}_${safeRepositoryName(inspectionId, "inspection").slice(-16)}`;
+    const exportId = createExportId({ exportId: settings.exportId, packageMode, exportedAt });
+    const fileName = `${propertyFolder}_Inspection_${includeOriginals ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}_${exportId}.zip`;
     const manifestPhotos = [];
     const zipPhotos = [];
     const manifestVoices = [];
@@ -1018,9 +1145,9 @@
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.1",
+      schema_version: "1.2",
       purpose: "Portable observations that can be imported across properties and compared without rewriting the field record.",
-      stable_entities: ["property", "inspection", "inspection_lifecycle_event", "gps_point", "observation", "attachment", "map_context"],
+      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "gps_point", "observation", "attachment", "map_context"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
         classification: ["taxonomy_version", "observation_type", "label", "evidence_classification"],
@@ -1028,7 +1155,8 @@
         optional_measurements: ["attributes", "compass_heading_deg", "device_orientation"],
         evidence_links: ["attachments.photo_id", "attachments.voice_note_id"]
       },
-      extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields."
+      extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
+      repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
 
     const manifest = {
@@ -1044,6 +1172,19 @@
         name: "Property Inspector",
         version: settings.appVersion || null,
         source_url: settings.sourceUrl || null
+      },
+      repository: {
+        contract: "property-intelligence-repository-import/1.0",
+        contract_path: "repository-import.json",
+        property_name: propertyName,
+        property_folder: propertyFolder,
+        inspection_folder: inspectionFolder,
+        inspection_path: `${propertyFolder}/${inspectionFolder}`,
+        export_id: exportId,
+        append_only: true,
+        overwrite_allowed: false,
+        comparison_key: mapMetadata.subject_parcel.property_id,
+        merge_key: inspectionId
       },
       summary: {
         gps_track_point_count: inspection.points.length,
@@ -1080,6 +1221,8 @@
       files: {
         instructions: "README.txt",
         chatgpt_reconstruction: "chatgpt-reconstruction.json",
+        repository_import: "repository-import.json",
+        repository_comparison: "repository-comparison.json",
         schema: "schema.json",
         canonical_record: "inspection.json",
         flat_event_table: "events.csv",
@@ -1111,11 +1254,15 @@
       photographs: manifestPhotos
     };
     const reconstructionGuide = createReconstructionGuide(manifest);
+    const repositoryImport = createRepositoryImportManifest(manifest, fileName);
+    const comparisonRecord = createRepositoryComparisonRecord(manifest);
     const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.map(photo => ({ analysisBlob: photo.analysisBlob })));
     const zip = new ZipBuilder();
     const modifiedAt = new Date(exportedAt);
     zip.add("README.txt", makeReadme(manifest), { modifiedAt });
     zip.add("chatgpt-reconstruction.json", JSON.stringify(reconstructionGuide, null, 2) + "\n", { modifiedAt });
+    zip.add("repository-import.json", JSON.stringify(repositoryImport, null, 2) + "\n", { modifiedAt });
+    zip.add("repository-comparison.json", JSON.stringify(comparisonRecord, null, 2) + "\n", { modifiedAt });
     zip.add("schema.json", JSON.stringify(schema, null, 2) + "\n", { modifiedAt });
     zip.add("inspection.json", JSON.stringify(manifest, null, 2) + "\n", { modifiedAt });
     zip.add("events.csv", createCsv(inspection, manifestPhotos, manifestVoices), { modifiedAt });
@@ -1141,7 +1288,8 @@
     return {
       blob,
       manifest,
-      fileName: `Pearson_Road_Inspection_${includeOriginals ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}.zip`
+      repositoryImport,
+      fileName
     };
   }
 
@@ -1156,6 +1304,8 @@
     createGeoJSON,
     createGpx,
     createInspectionPackage,
+    createRepositoryImportManifest,
+    createRepositoryComparisonRecord,
     estimateInspectionPackageSizes,
     calculateInspectionMetrics,
     createPrintableReport,

@@ -2,8 +2,10 @@
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const Package = require("../field/inspection-package.js");
+const Repository = require("../repository/import-package.js");
 
 function findEndOfCentralDirectory(bytes) {
   for (let offset = bytes.length - 22; offset >= Math.max(0, bytes.length - 65557); offset -= 1) {
@@ -175,16 +177,17 @@ async function main() {
     appVersion: "test",
     sourceUrl: "https://example.test/field/",
     packageMode: "full_archive",
+    exportId: "export-full-test",
     exportedAt: "2026-08-02T15:00:01.000Z"
   });
 
   assert.equal(result.blob.type, "application/zip");
-  assert.match(result.fileName, /^Pearson_Road_Inspection_FULL_ARCHIVE_\d{4}-\d{2}-\d{2}_\d{4}\.zip$/);
+  assert.match(result.fileName, /^Pearson_Road_Inspection_FULL_ARCHIVE_\d{4}-\d{2}-\d{2}_\d{6}_\d{3}_export_full_test\.zip$/);
   const zipBytes = Buffer.from(await result.blob.arrayBuffer());
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "README.txt", "chatgpt-reconstruction.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
+    "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
     "photos/001_original.png", "photos/001_analysis.png", "photos/002_original.png",
@@ -201,6 +204,20 @@ async function main() {
   assert.deepEqual(files.get("context/usgs-contours-2ft.png"), contourBytes, "offline contours recovered exactly");
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
+  const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
+  assert.equal(manifest.format_version, "1.3");
+  assert.equal(manifest.repository.export_id, "export_full_test");
+  assert.equal(manifest.repository.append_only, true);
+  assert.equal(manifest.repository.overwrite_allowed, false);
+  assert.equal(repositoryImport.repository_path, manifest.repository.inspection_path);
+  assert.equal(repositoryImport.immutability.collision_policy, "REJECT_IF_EXPORT_ID_OR_ARTIFACT_PATH_ALREADY_EXISTS");
+  assert.equal(repositoryImport.responsibilities.phone.startsWith("Collect"), true);
+  assert(repositoryImport.future_comparison_dimensions.includes("standing_water"));
+  const comparisonRecord = JSON.parse(files.get("repository-comparison.json").toString("utf8"));
+  assert.equal(comparisonRecord.property_id, manifest.property_id);
+  assert.equal(comparisonRecord.inspection_id, manifest.inspection_id);
+  assert.equal(comparisonRecord.observation_counts_by_type["field.wet"], 1);
+  assert.equal(comparisonRecord.recurring_observations.length, markers.length);
   assert.equal(manifest.summary.gps_track_point_count, points.length);
   assert.equal(manifest.summary.field_event_count, markers.length);
   assert.equal(manifest.summary.photo_count, 2);
@@ -263,6 +280,7 @@ async function main() {
     mapContext: baseMapContext,
     packageMode: "report",
     appVersion: "test",
+    exportId: "export-report-test",
     exportedAt: "2026-08-02T15:02:00.000Z"
   });
   assert.match(reportResult.fileName, /^Pearson_Road_Inspection_REPORT_PACKAGE_/);
@@ -284,6 +302,57 @@ async function main() {
     assert.equal(photo.thumbnail.path, photo.analysis.path, `${photo.photo_number} reuses the analysis image as a no-duplication thumbnail`);
   });
   assert(reportResult.blob.size < result.blob.size, "report package is smaller than the full evidence archive");
+  assert.throws(() => Repository.safeRelativePath("../outside"), /Unsafe repository path/, "repository paths cannot escape their root");
+  assert.throws(() => Repository.safeComponent("photo/escape", "photo ID"), /Unsafe photo ID/, "evidence IDs cannot introduce repository subpaths");
+
+  const repositoryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "property-intelligence-repository-"));
+  try {
+    const incoming = path.join(repositoryRoot, "incoming");
+    fs.mkdirSync(incoming);
+    const reportPath = path.join(incoming, reportResult.fileName);
+    const fullPath = path.join(incoming, result.fileName);
+    fs.writeFileSync(reportPath, Buffer.from(await reportResult.blob.arrayBuffer()));
+    fs.writeFileSync(fullPath, zipBytes);
+    const reportReceipt = Repository.importInspectionPackage(reportPath, repositoryRoot, { ingestedAt: "2026-08-03T12:00:00.000Z" });
+    const fullReceipt = Repository.importInspectionPackage(fullPath, repositoryRoot, { ingestedAt: "2026-08-03T12:01:00.000Z" });
+    assert.equal(reportReceipt.repositoryPath, fullReceipt.repositoryPath, "report and full artifacts from one visit merge under one inspection folder");
+    const storedInspection = path.join(repositoryRoot, ...reportReceipt.repositoryPath.split("/"));
+    assert(fs.existsSync(path.join(storedInspection, "inspection.json")), "inspection folder has a canonical inspection record");
+    assert(fs.existsSync(path.join(storedInspection, "versions", "export_report_test", "inspection.json")), "report export remains an immutable version");
+    assert(fs.existsSync(path.join(storedInspection, "versions", "export_full_test", "inspection.json")), "full archive remains a separate immutable version");
+    assert.equal(fs.readdirSync(path.join(storedInspection, "packages")).length, 2, "both source ZIP packages are permanently retained");
+    assert.equal(fs.readdirSync(path.join(storedInspection, "photos", "analysis")).length, 2, "analysis photos are content-addressed without duplicate bytes");
+    assert.equal(fs.readdirSync(path.join(storedInspection, "photos", "original")).length, 2, "full-resolution originals are retained separately");
+    assert.equal(fs.readdirSync(path.join(storedInspection, "voice")).length, 1, "voice evidence is recovered into the repository");
+    assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "conditions.json")), "inspection weather is preserved in its repository evidence folder per export");
+    assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
+    assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
+    await assert.rejects(async () => Repository.importInspectionPackage(reportPath, repositoryRoot), /already exists/, "reimporting an export never overwrites its earlier version");
+
+    const followupInspection = JSON.parse(JSON.stringify(inspection));
+    followupInspection.inspection_id = "inspection-test-followup";
+    followupInspection.started = "2026-09-02T15:00:00.000Z";
+    followupInspection.stopped = "2026-09-02T16:00:00.000Z";
+    followupInspection.conditions.inspection_date = "2026-09-02";
+    const followupPackage = await Package.createInspectionPackage({
+      inspection: followupInspection,
+      photoEntries: basePhotoEntries,
+      voiceEntries: baseVoiceEntries,
+      mapContext: baseMapContext,
+      packageMode: "report",
+      exportId: "export-followup-test",
+      exportedAt: "2026-09-02T16:01:00.000Z"
+    });
+    const followupPath = path.join(incoming, followupPackage.fileName);
+    fs.writeFileSync(followupPath, Buffer.from(await followupPackage.blob.arrayBuffer()));
+    const followupReceipt = Repository.importInspectionPackage(followupPath, repositoryRoot, { ingestedAt: "2026-09-02T16:02:00.000Z" });
+    assert.notEqual(followupReceipt.repositoryPath, reportReceipt.repositoryPath, "a later visit receives its own immutable inspection folder");
+    assert.equal(followupReceipt.repositoryPath.split("/")[0], reportReceipt.repositoryPath.split("/")[0], "inspection A and B join through the same property folder for comparison");
+    const propertyFolder = path.join(repositoryRoot, reportReceipt.repositoryPath.split("/")[0]);
+    assert.equal(fs.readdirSync(propertyFolder).filter(name => name.startsWith("Inspection_")).length, 2, "the property repository retains both inspection visits");
+  } finally {
+    fs.rmSync(repositoryRoot, { recursive: true, force: true });
+  }
 
   await assert.rejects(
     () => Package.createInspectionPackage({ inspection, photoEntries: [], voiceEntries: [], mapContext: { terrainBlob: new Blob([terrainBytes]), contourBlob: new Blob([contourBytes]), parcelsText } }),
@@ -431,7 +500,7 @@ async function main() {
   assert.equal([...largeFullFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo full archive contains every analysis copy");
   assert(largeFullArchive.blob.size > largeReport.blob.size, "full archive is larger because it preserves exact originals");
 
-  process.stdout.write(`PASS: verified full and report exports, exact photo recovery, and 190-photo scale with 4,964 GPS points, 252 observations, 944 orientations, and 2 voice notes.\n`);
+  process.stdout.write(`PASS: verified append-only repository ingestion, full and report exports, exact photo recovery, and 190-photo scale with 4,964 GPS points, 252 observations, 944 orientations, and 2 voice notes.\n`);
 }
 
 main().catch(error => {
