@@ -92,16 +92,17 @@ async function main() {
     { time: "2026-08-02T14:00:16.000Z", lat: 30.4895, lon: -87.0932, accuracy_m: 2.9, altitude_m: 18.8, altitude_accuracy_m: 4.0, speed_mps: 1.2, heading_deg: 88, device_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2 } },
     { time: "2026-08-02T14:00:31.000Z", lat: 30.4901, lon: -87.0922, accuracy_m: 3.5, altitude_m: 20.1, altitude_accuracy_m: 4.3, speed_mps: 1.0, heading_deg: 44, device_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0 } }
   ];
-  const types = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "note"];
+  const types = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "thick", "open", "ditch", "timber", "hazard", "other", "wildlife", "note"];
   const markers = types.map((type, index) => ({
     id: `event-${index + 1}`,
     source: "button_press",
     type,
     observation_type: `field.${type}`,
     taxonomy_version: "property-observation-1.0",
+    evidence_classification: type === "tree" ? "Measured" : "Observed",
     button_label: type === "tree" ? "Specimen Tree" : type,
     note: type === "note" ? "Standing water reaches the flagged pine." : "",
-    attributes: type === "tree" ? { species: "live_oak", diameter_in: 38 } : {},
+    attributes: type === "tree" ? { species: "live_oak", diameter_in: 38 } : (type === "wet" ? { water_depth: "1–3 inches", water_depth_basis: "Estimated", water_condition: "Still" } : {}),
     time: `2026-08-02T14:01:${String(index).padStart(2, "0")}.000Z`,
     lat: 30.4892 + (index * 0.00005),
     lon: -87.094 + (index * 0.00005),
@@ -114,21 +115,21 @@ async function main() {
   }));
   markers.push({
     id: "event-photo-1", source: "button_press", type: "photo", observation_type: "field.photo",
-    taxonomy_version: "property-observation-1.0", button_label: "Photo", note: "", attributes: {},
+    taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Photo", note: "Standing water at wet marker", attributes: { photo_number: "P1", category: "Wet", associated_observation_id: "event-1" },
     time: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9,
     gps_position_at: points[1].time, compass_heading_deg: 88, device_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2 },
     photo_id: "photo-1", voice_note_id: null
   });
   markers.push({
     id: "event-photo-2", source: "button_press", type: "photo", observation_type: "field.photo",
-    taxonomy_version: "property-observation-1.0", button_label: "Photo", note: "", attributes: {},
+    taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Photo", note: "High-ground view", attributes: { photo_number: "P2", category: "High Ground", associated_observation_id: "event-4" },
     time: "2026-08-02T14:04:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5,
     gps_position_at: points[2].time, compass_heading_deg: 44, device_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0 },
     photo_id: "photo-2", voice_note_id: null
   });
   markers.push({
     id: "event-voice-1", source: "button_press", type: "voice_note", observation_type: "field.voice_note",
-    taxonomy_version: "property-observation-1.0", button_label: "Voice Note", note: "", attributes: { duration_ms: 4500 },
+    taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Voice Note", note: "", attributes: { duration_ms: 4500 },
     time: "2026-08-02T14:05:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5,
     gps_position_at: points[2].time, compass_heading_deg: 44, device_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0 },
     photo_id: null, voice_note_id: "voice-1"
@@ -136,7 +137,7 @@ async function main() {
 
   const inspection = {
     schema_name: "property-intelligence-inspection",
-    schema_version: "1.0",
+    schema_version: "1.1",
     property_id: "parcel:221S280000001010000",
     inspection_id: "inspection-acceptance-test",
     started,
@@ -148,9 +149,10 @@ async function main() {
     points,
     markers,
     orientation_samples: [{ time: "2026-08-02T14:00:05.000Z", alpha_deg: 270, beta_deg: 1, gamma_deg: -1, absolute: true, compass_heading_deg: 90, compass_accuracy_deg: 5, lat: 30.4891, lon: -87.0941, gps_accuracy_m: 3.2 }],
+    conditions: { inspection_date: "2026-08-02", weather_summary: "Cloudy", rainfall_previous_24_hours: "2 inches", rainfall_previous_7_days: "3.1 inches", rainfall_previous_30_days: "6 inches", temperature: "84 F", ground_condition: "Mixed", rain_during_inspection: "no", evidence_classification: "Estimated" },
     photos: [
-      { id: "photo-1", camera_opened_at: "2026-08-02T14:02:55.000Z", recorded_at: "2026-08-02T14:03:00.000Z", source_file_last_modified_at: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9, gps_position_at: points[1].time, gps_position_age_ms: 100, location_source: "live_browser_geolocation", compass_heading_deg: 88, sensor_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2, absolute: true }, device_screen_orientation: "portrait-primary", device_screen_angle_deg: 0, width_px: 192, height_px: 192, pixel_orientation: "square", exif_orientation: 1, exif_orientation_description: "normal", original_filename: "field-one.png", original_mime_type: "image/png", original_size_bytes: photoOneBytes.length },
-      { id: "photo-2", camera_opened_at: "2026-08-02T14:03:55.000Z", recorded_at: "2026-08-02T14:04:00.000Z", source_file_last_modified_at: "2026-08-02T14:04:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, gps_position_age_ms: 150, location_source: "live_browser_geolocation", compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, device_screen_orientation: "landscape-primary", device_screen_angle_deg: 90, width_px: 512, height_px: 512, pixel_orientation: "square", exif_orientation: 6, exif_orientation_description: "rotated 90 degrees clockwise", original_filename: "field-two.png", original_mime_type: "image/png", original_size_bytes: photoTwoBytes.length }
+      { id: "photo-1", photo_number: "P1", associated_marker_id: "event-photo-1", associated_observation_id: "event-1", category: "Wet", note: "Standing water at wet marker", evidence_classification: "Observed", observation_attributes: { water_depth: "1–3 inches", water_depth_basis: "Estimated" }, camera_opened_at: "2026-08-02T14:02:55.000Z", recorded_at: "2026-08-02T14:03:00.000Z", source_file_last_modified_at: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9, gps_position_at: points[1].time, gps_position_age_ms: 100, location_source: "live_browser_geolocation", compass_heading_deg: 88, sensor_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2, absolute: true }, device_screen_orientation: "portrait-primary", device_screen_angle_deg: 0, width_px: 192, height_px: 192, pixel_orientation: "square", exif_orientation: 1, exif_orientation_description: "normal", original_filename: "field-one.png", original_mime_type: "image/png", original_size_bytes: photoOneBytes.length },
+      { id: "photo-2", photo_number: "P2", associated_marker_id: "event-photo-2", associated_observation_id: "event-4", category: "High Ground", note: "High-ground view", evidence_classification: "Observed", observation_attributes: {}, camera_opened_at: "2026-08-02T14:03:55.000Z", recorded_at: "2026-08-02T14:04:00.000Z", source_file_last_modified_at: "2026-08-02T14:04:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, gps_position_age_ms: 150, location_source: "live_browser_geolocation", compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, device_screen_orientation: "landscape-primary", device_screen_angle_deg: 90, width_px: 512, height_px: 512, pixel_orientation: "square", exif_orientation: 6, exif_orientation_description: "rotated 90 degrees clockwise", original_filename: "field-two.png", original_mime_type: "image/png", original_size_bytes: photoTwoBytes.length }
     ],
     voice_notes: [{ id: "voice-1", started_at: "2026-08-02T14:05:00.000Z", finished_at: "2026-08-02T14:05:04.500Z", duration_ms: 4500, mime_type: "audio/mp4", size_bytes: voiceBytes.length, lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, recovered_after_interruption: false }]
   };
@@ -173,11 +175,12 @@ async function main() {
   });
 
   assert.equal(result.blob.type, "application/zip");
-  assert.match(result.fileName, /^Property_Inspection_.*\.zip$/);
+  assert.match(result.fileName, /^Pearson_Road_Inspection_\d{4}-\d{2}-\d{2}_\d{4}\.zip$/);
   const zipBytes = Buffer.from(await result.blob.arrayBuffer());
+  if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "README.txt", "schema.json", "inspection.json", "events.csv", "photos.csv", "voice-notes.csv",
+    "README.txt", "chatgpt-reconstruction.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
     "photos/001_original.png", "photos/001_analysis.png", "photos/002_original.png",
@@ -202,11 +205,17 @@ async function main() {
   assert.equal(manifest.summary.voice_note_count, 1);
   assert.equal(manifest.summary.device_orientation_sample_count, 1);
   assert.equal(manifest.summary.lifecycle_event_count, 2);
+  assert.equal(manifest.summary.elapsed_time_ms, 3600000);
+  assert(manifest.summary.active_movement_time_ms > 0, "active movement time is calculated from GPS movement");
+  assert(manifest.summary.distance_walked_m > 100, "distance summary is calculated");
   assert.equal(manifest.property.recorded_acres, 86.7464918);
   assert.equal(manifest.inspection.gps_track.length, points.length);
   assert(manifest.inspection.gps_track.every(point => point.time && Number.isFinite(point.accuracy_m)), "every GPS point has time and accuracy");
   assert(types.every(type => manifest.inspection.observations.some(observation => observation.observation_type === `field.${type}`)), "all field-button observation types reconstruct");
   assert.equal(manifest.photographs[0].location.latitude, inspection.photos[0].lat);
+  assert.equal(manifest.photographs[0].photo_number, "P1");
+  assert.equal(manifest.photographs[0].associated_marker_id, "event-photo-1");
+  assert.equal(manifest.photographs[0].category, "Wet");
   assert.equal(manifest.photographs[0].compass_heading_deg, 88);
   assert.equal(manifest.photographs[1].orientation.exif_value, 6);
   assert.equal(manifest.voice_notes[0].audio.path, "voice-notes/001_voice-note.m4a");
@@ -223,12 +232,46 @@ async function main() {
   const parcelGeoJson = JSON.parse(files.get("context/parcels.geojson").toString("utf8"));
   assert(parcelGeoJson.features.some(feature => String(feature.properties.PAR_NUM) === "221S280000001010000"), "subject parcel supports inspected/missed-area analysis");
   assert(files.get("events.csv").toString("utf8").includes("Standing water reaches the flagged pine."), "free note is recoverable");
+  assert(files.get("observations.csv").toString("utf8").includes("evidence_classification"), "observation evidence classifications are tabular");
+  const photoIndex = JSON.parse(files.get("photo_index.json").toString("utf8"));
+  assert.deepEqual(photoIndex.photographs.map(photo => photo.photo_number), ["P1", "P2"], "photo index uses stable P numbers");
+  const reconstruction = JSON.parse(files.get("chatgpt-reconstruction.json").toString("utf8"));
+  assert.equal(reconstruction.user_questions_required_before_analysis, false, "reconstruction begins without asking the field user questions");
+  ["Interactive map", "Printable report", "Inspection timeline", "Photo gallery", "Questions answered", "Questions remaining", "Suggested next visit", "Areas not yet inspected"].forEach(output => assert(reconstruction.required_outputs_in_order.includes(output), `${output} reconstruction output is required`));
+  assert.equal(reconstruction.integrity_expectations.expected_photo_count, 2);
+  const report = files.get("printable-report.html").toString("utf8");
+  assert(report.includes('src="photos/001_analysis.png"'), "printable report resolves actual photo 1 from the package");
+  assert(report.includes('src="photos/002_analysis.png"'), "printable report resolves actual photo 2 from the package");
+  ["Complete Route", "Water and Drainage", "Dry Ground and Homesites", "Access and Obstacles", "Trees and Timber", "Photos", "Inspection Conditions"].forEach(section => assert(report.includes(section), `${section} report section exists`));
+  assert(report.indexOf("Complete Route") < report.indexOf("Pearson Road Property Inspection"), "complete parcel route is report page 1");
+  assert(report.includes("miles walked") && report.includes("elapsed") && report.includes("numbered detail zone"), "page 1 carries date, distance, duration, and numbered zones");
+  assert(report.includes("not a boundary survey"), "required preliminary-field-report disclaimer exists");
+  assert(report.includes("Conditions documented in this report reflect the inspection date"), "conditions limitation statement exists");
+  assert(!report.includes("â") && !report.includes("Â"), "printable report contains no mojibake text");
+  assert(!/<(?:script|img)[^>]+src=["']https?:/i.test(report), "printable report has no live external dependencies");
 
   await assert.rejects(
     () => Package.createInspectionPackage({ inspection, photoEntries: [], voiceEntries: [], mapContext: { terrainBlob: new Blob([terrainBytes]), contourBlob: new Blob([contourBytes]), parcelsText } }),
     /Photo storage mismatch/,
     "package creation fails closed when actual photograph files are missing"
   );
+
+  const noImagery = await Package.createInspectionPackage({
+    inspection,
+    photoEntries: [
+      { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
+      { id: "photo-2", originalBlob: new Blob([photoTwoBytes], { type: "image/png" }), analysisBlob: new Blob([photoTwoBytes], { type: "image/png" }) }
+    ],
+    voiceEntries: [{ id: "voice-1", audioBlob: new Blob([voiceBytes], { type: "audio/mp4" }) }],
+    mapContext: { terrainBlob: null, contourBlob: null, parcelsText },
+    packageKind: "backup",
+    exportedAt: "2026-08-02T15:10:00.000Z"
+  });
+  assert.match(noImagery.fileName, /^Pearson_Road_Inspection_Backup_/);
+  const noImageryFiles = extractStoredZip(Buffer.from(await noImagery.blob.arrayBuffer()));
+  assert(noImageryFiles.has("printable-report.html"), "printable report still exists when raster imagery fails");
+  assert(!noImageryFiles.has("context/usgs-terrain.png"), "missing terrain is honestly omitted");
+  assert(!noImageryFiles.has("context/usgs-contours-2ft.png"), "missing contours are honestly omitted");
 
   const missingAnalysis = [
     { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: null },

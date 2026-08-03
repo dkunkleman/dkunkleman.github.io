@@ -7,7 +7,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.0";
+  const FORMAT_VERSION = "1.1";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -310,7 +310,7 @@
 
   function createPhotoCsv(photos) {
     const rows = [[
-      "photo_id", "recorded_at", "source_file_last_modified_at", "latitude", "longitude",
+      "photo_number", "photo_id", "associated_marker_id", "associated_observation_id", "category", "note", "evidence_classification", "recorded_at", "source_file_last_modified_at", "latitude", "longitude",
       "gps_accuracy_m", "gps_position_at", "gps_position_age_ms", "original_path", "original_name",
       "original_mime_type", "original_size_bytes", "original_sha256", "analysis_path",
       "analysis_mime_type", "analysis_size_bytes", "analysis_sha256", "width_px", "height_px",
@@ -319,7 +319,8 @@
       "sensor_alpha_deg", "sensor_beta_deg", "sensor_gamma_deg"
     ]];
     (photos || []).forEach(photo => rows.push([
-      photo.photo_id, photo.recorded_at, photo.source_file_last_modified_at,
+      photo.photo_number, photo.photo_id, photo.associated_marker_id, photo.associated_observation_id,
+      photo.category, photo.note, photo.evidence_classification, photo.recorded_at, photo.source_file_last_modified_at,
       photo.location.latitude, photo.location.longitude, photo.location.gps_accuracy_m,
       photo.location.gps_position_at, photo.location.gps_position_age_ms,
       photo.original.path, photo.original.source_filename, photo.original.mime_type,
@@ -387,12 +388,16 @@
           record_type: "field_event",
           event_type: event.type,
           button_label: event.button_label || event.type,
+          evidence_classification: event.evidence_classification || "Observed",
+          attributes: event.attributes || {},
           note: event.note || "",
           time: event.time,
           gps_accuracy_m: event.gps_accuracy_m,
           compass_heading_deg: event.compass_heading_deg == null ? null : event.compass_heading_deg,
           device_orientation: event.device_orientation || null,
           photo_id: event.photo_id || null,
+          photo_number: photo ? photo.photo_number : null,
+          photo_category: photo ? photo.category : null,
           photo_original_path: photo ? photo.original.path : null,
           photo_analysis_path: photo && photo.analysis ? photo.analysis.path : null,
           voice_note_id: event.voice_note_id || null,
@@ -467,10 +472,201 @@
     }
   }
 
-  function compactTimestamp(value) {
+  function packageTimestamp(value) {
     const date = new Date(value || Date.now());
     const safe = Number.isNaN(date.valueOf()) ? new Date() : date;
-    return safe.toISOString().replaceAll("-", "").replaceAll(":", "").replace(".000", "");
+    const pad = number => String(number).padStart(2, "0");
+    return `${safe.getFullYear()}-${pad(safe.getMonth() + 1)}-${pad(safe.getDate())}_${pad(safe.getHours())}${pad(safe.getMinutes())}`;
+  }
+
+  function distanceMeters(a, b) {
+    const radius = 6371000;
+    const radians = Math.PI / 180;
+    const deltaLat = (Number(b.lat) - Number(a.lat)) * radians;
+    const deltaLon = (Number(b.lon) - Number(a.lon)) * radians;
+    const lat1 = Number(a.lat) * radians;
+    const lat2 = Number(b.lat) * radians;
+    const h = Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2;
+    return 2 * radius * Math.asin(Math.sqrt(Math.max(0, h)));
+  }
+
+  function calculateInspectionMetrics(inspection, liveEndTime) {
+    const points = Array.isArray(inspection && inspection.points) ? inspection.points : [];
+    const started = new Date(inspection && inspection.started ? inspection.started : NaN);
+    const finished = new Date((inspection && inspection.stopped) || liveEndTime || NaN);
+    const elapsed = Number.isNaN(started.valueOf()) || Number.isNaN(finished.valueOf()) ? 0 : Math.max(0, finished - started);
+    let active = 0;
+    let distance = 0;
+    for (let index = 1; index < points.length; index += 1) {
+      const previous = points[index - 1];
+      const point = points[index];
+      const segmentDistance = distanceMeters(previous, point);
+      if (Number.isFinite(segmentDistance)) distance += segmentDistance;
+      const delta = Math.max(0, new Date(point.time) - new Date(previous.time));
+      if (!delta || delta > 120000) continue;
+      const calculatedSpeed = segmentDistance / (delta / 1000);
+      const reportedSpeed = Number(point.speed_mps);
+      if ((Number.isFinite(reportedSpeed) && reportedSpeed >= 0.45) || calculatedSpeed >= 0.45) active += delta;
+    }
+    active = Math.min(active, elapsed || active);
+    return {
+      elapsed_time_ms: elapsed,
+      active_movement_time_ms: active,
+      stopped_time_ms: Math.max(0, elapsed - active),
+      distance_walked_m: distance,
+      distance_walked_miles: distance / 1609.344,
+      gps_point_count: points.length,
+      photograph_count: Array.isArray(inspection && inspection.photos) ? inspection.photos.length : 0,
+      observation_count: Array.isArray(inspection && inspection.markers) ? inspection.markers.length : 0
+    };
+  }
+
+  function createObservationsCsv(observations) {
+    const rows = [[
+      "observation_id", "inspection_id", "property_id", "observed_at", "observation_type", "label",
+      "evidence_classification", "latitude", "longitude", "gps_accuracy_m", "compass_heading_deg",
+      "note", "attributes_json", "photo_id", "voice_note_id"
+    ]];
+    (observations || []).forEach(item => rows.push([
+      item.observation_id, item.inspection_id, item.property_id, item.observed_at, item.observation_type,
+      item.label, item.evidence_classification, item.gps.latitude, item.gps.longitude, item.gps.accuracy_m,
+      item.compass_heading_deg, item.note, JSON.stringify(item.attributes || {}),
+      item.attachments.photo_id, item.attachments.voice_note_id
+    ]));
+    return rows.map(row => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  }
+
+  function htmlEscape(value) {
+    return String(value == null ? "" : value)
+      .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+  }
+
+  function formatReportDuration(milliseconds) {
+    if (milliseconds > 0 && milliseconds < 60000) return "<1 min";
+    const totalMinutes = Math.max(0, Math.floor((milliseconds || 0) / 60000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours ? `${hours} hr ${minutes} min` : `${minutes} min`;
+  }
+
+  function reportProjection(lon, lat) {
+    return {
+      x: (Number(lon) + 87.1) / 0.017 * 1800,
+      y: 1500 - ((Number(lat) - 30.4825) / 0.0145 * 1500)
+    };
+  }
+
+  function reportPath(coordinates) {
+    return (coordinates || []).map((point, index) => {
+      const projected = reportProjection(point[0], point[1]);
+      return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
+    }).join(" ") + " Z";
+  }
+
+  function markerGroup(type) {
+    if (["wet", "ditch", "culvert"].includes(type)) return "water";
+    if (["dry", "high", "homesite", "open"].includes(type)) return "dry";
+    if (["blocked", "thick", "entrance", "hazard"].includes(type)) return "access";
+    if (["tree", "timber"].includes(type)) return "trees";
+    if (type === "photo") return "photos";
+    return "other";
+  }
+
+  function detailRegions(observations) {
+    const points = (observations || []).map((item, index) => Object.assign({ index }, reportProjection(item.gps.longitude, item.gps.latitude)));
+    const visited = new Set();
+    const regions = [];
+    points.forEach(point => {
+      if (visited.has(point.index)) return;
+      const queue = [point];
+      const cluster = [];
+      visited.add(point.index);
+      while (queue.length) {
+        const current = queue.shift();
+        cluster.push(current);
+        points.forEach(candidate => {
+          if (visited.has(candidate.index)) return;
+          if (Math.hypot(candidate.x - current.x, candidate.y - current.y) <= 190) {
+            visited.add(candidate.index);
+            queue.push(candidate);
+          }
+        });
+      }
+      if (cluster.length < 3) return;
+      const minX = Math.max(0, Math.min(...cluster.map(item => item.x)) - 170);
+      const minY = Math.max(0, Math.min(...cluster.map(item => item.y)) - 170);
+      const maxX = Math.min(1800, Math.max(...cluster.map(item => item.x)) + 170);
+      const maxY = Math.min(1500, Math.max(...cluster.map(item => item.y)) + 170);
+      regions.push({ minX, minY, width: Math.max(350, maxX - minX), height: Math.max(300, maxY - minY), count: cluster.length });
+    });
+    return regions.sort((a, b) => b.count - a.count).slice(0, 6);
+  }
+
+  function createReportMapSvg(options) {
+    const settings = options || {};
+    const manifest = settings.manifest;
+    const parcels = settings.parcels;
+    const observations = manifest.inspection.observations || [];
+    const acceptedGroups = settings.groups || null;
+    const selected = acceptedGroups ? observations.filter(item => acceptedGroups.includes(markerGroup(String(item.observation_type || "").replace(/^field\./, "")))) : observations;
+    const view = settings.view || { minX: 0, minY: 0, width: 1800, height: 1500 };
+    const parcelPaths = (parcels.features || []).flatMap(feature => {
+      const subject = String((feature.attributes || {}).PAR_NUM || "") === String(manifest.property.parcel_number);
+      return ((feature.geometry || {}).rings || []).map(ring => `<path d="${reportPath(ring)}" fill="${subject ? "rgba(255,255,255,.05)" : "none"}" stroke="${subject ? "#e30000" : "#fff"}" stroke-width="${subject ? 10 : 3}" vector-effect="non-scaling-stroke"/>`);
+    }).join("");
+    const track = (manifest.inspection.gps_track || []).map((point, index) => {
+      const projected = reportProjection(point.lon, point.lat);
+      return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
+    }).join(" ");
+    const photoIndex = new Map((manifest.photographs || []).map(photo => [String(photo.photo_id), photo]));
+    const markerSvg = selected.map((item, index) => {
+      const projected = reportProjection(item.gps.longitude, item.gps.latitude);
+      const type = String(item.observation_type || "").replace(/^field\./, "");
+      const photo = item.attachments && item.attachments.photo_id ? photoIndex.get(String(item.attachments.photo_id)) : null;
+      const label = photo ? photo.photo_number : String((manifest.inspection.observations || []).indexOf(item) + 1);
+      const fill = { water: "#1768c4", dry: "#8b6a12", access: "#c92727", trees: "#2c6d1a", photos: "#67379a" }[markerGroup(type)] || "#555";
+      return `<g class="${photo ? "photo-marker" : "map-marker"}"${photo ? ` data-photo-id="${htmlEscape(photo.photo_number)}" tabindex="0"` : ""}><circle cx="${projected.x}" cy="${projected.y}" r="22" fill="${fill}" stroke="#fff" stroke-width="5" vector-effect="non-scaling-stroke"/><text x="${projected.x}" y="${projected.y + 7}" text-anchor="middle" fill="#fff" stroke="#111" stroke-width="2" paint-order="stroke" font-size="18" font-weight="900">${htmlEscape(label)}</text><title>${htmlEscape(item.label)} ${htmlEscape(item.note || "")}</title></g>`;
+    }).join("");
+    const zones = (settings.zones || []).map((zone, index) => `<g><rect x="${zone.minX}" y="${zone.minY}" width="${zone.width}" height="${zone.height}" fill="none" stroke="#ffea00" stroke-width="8" stroke-dasharray="24 12"/><circle cx="${zone.minX + 35}" cy="${zone.minY + 35}" r="30" fill="#111"/><text x="${zone.minX + 35}" y="${zone.minY + 45}" text-anchor="middle" fill="#fff" font-size="30" font-weight="900">${index + 1}</text></g>`).join("");
+    const baseImage = settings.terrainDataUrl ? `<use href="#reportTerrainRaster" x="0" y="0" width="1800" height="1500"/>` : `<rect width="1800" height="1500" fill="#d8d1bd"/>`;
+    const contours = settings.contourDataUrl ? `<use href="#reportContourRaster" x="0" y="0" width="1800" height="1500" opacity=".8"/>` : "";
+    return `<svg class="report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(settings.title || "Inspection map")}" xmlns="http://www.w3.org/2000/svg">${baseImage}${contours}${parcelPaths}${track ? `<path d="${track}" fill="none" stroke="#111" stroke-width="13" vector-effect="non-scaling-stroke"/><path d="${track}" fill="none" stroke="#ffe600" stroke-width="7" vector-effect="non-scaling-stroke"/>` : ""}${markerSvg}${zones}<g transform="translate(${view.minX + 70} ${view.minY + 70})"><path d="M0 65 L28 0 L56 65 L28 50 Z" fill="#111"/><text x="28" y="-12" text-anchor="middle" font-size="34" font-weight="900">N</text></g><g transform="translate(${view.minX + 90} ${view.minY + view.height - 75})"><path d="M0 0 H336" stroke="#111" stroke-width="12"/><path d="M0 -16 V16 M336 -16 V16" stroke="#111" stroke-width="8"/><text x="168" y="-20" text-anchor="middle" font-size="28" font-weight="900">about 1,000 ft</text></g></svg>`;
+  }
+
+  async function createPrintableReport(manifest, parcels, mapContext, photoEntries) {
+    const terrainDataUrl = mapContext.terrainBlob instanceof Blob && mapContext.terrainBlob.size ? manifest.map_context.layers.terrain.path : null;
+    const contourDataUrl = mapContext.contourBlob instanceof Blob && mapContext.contourBlob.size ? manifest.map_context.layers.contours.path : null;
+    const photoDataUrls = (manifest.photographs || []).map(photo => photo.analysis.path);
+    const metrics = manifest.inspection.metrics;
+    const conditions = manifest.inspection.conditions || {};
+    const zones = detailRegions(manifest.inspection.observations);
+    const rasterDefinitions = `<svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs>${terrainDataUrl ? `<image id="reportTerrainRaster" href="${terrainDataUrl}" width="1800" height="1500" preserveAspectRatio="none"/>` : ""}${contourDataUrl ? `<image id="reportContourRaster" href="${contourDataUrl}" width="1800" height="1500" preserveAspectRatio="none"/>` : ""}</defs></svg>`;
+    const mapPage = (title, groups, extra) => `<section class="page landscape${extra && extra.summary ? " route-page" : ""}"><h1>${htmlEscape(title)}</h1>${extra && extra.summary ? `<div class="route-summary"><strong>${htmlEscape(conditions.inspection_date || manifest.inspection.started_at || "Date not recorded")}</strong><span>${metrics.distance_walked_miles.toFixed(2)} miles walked</span><span>${formatReportDuration(metrics.elapsed_time_ms)} elapsed</span><span>${zones.length} numbered detail zone${zones.length === 1 ? "" : "s"}</span></div>` : ""}${createReportMapSvg({ manifest, parcels, groups, terrainDataUrl, contourDataUrl, zones: extra && extra.zones ? zones : [], view: extra && extra.view, title })}<p class="map-note">Numbered symbols match the observation and photograph records. Red line: subject parcel. Yellow/black line: walked route.</p></section>`;
+    const mapPages = [
+      mapPage("Complete Route", null, { zones: true, summary: true }),
+      mapPage("Water and Drainage", ["water"]),
+      mapPage("Dry Ground and Homesites", ["dry"]),
+      mapPage("Access and Obstacles", ["access"]),
+      mapPage("Trees and Timber", ["trees"]),
+      mapPage("Photos", ["photos"])
+    ].join("");
+    const detailPages = zones.map((zone, index) => mapPage(`Detail Zone ${index + 1} — ${zone.count} nearby observations`, null, { view: zone })).join("");
+    const photoPages = (manifest.photographs || []).map((photo, index) => {
+      const linked = (manifest.inspection.observations || []).find(item => String(item.attachments && item.attachments.photo_id) === String(photo.photo_id));
+      const attributes = photo.observation_attributes || (linked ? linked.attributes : {}) || {};
+      return `<section class="page portrait photo-page"><h1>${htmlEscape(photo.photo_number || `P${index + 1}`)} — ${htmlEscape(photo.category || "Other")}</h1><img id="photo-${htmlEscape(photo.photo_number || `P${index + 1}`)}" src="${photoDataUrls[index] || ""}" alt="Inspection photograph ${htmlEscape(photo.photo_number || `P${index + 1}`)}"><dl><dt>Date and time</dt><dd>${htmlEscape(photo.recorded_at || "Not recorded")}</dd><dt>Coordinates</dt><dd>${htmlEscape(photo.location.latitude)}, ${htmlEscape(photo.location.longitude)} (±${htmlEscape(photo.location.gps_accuracy_m)} m)</dd><dt>Direction faced</dt><dd>${photo.compass_heading_deg == null ? "Not available" : `${htmlEscape(Math.round(photo.compass_heading_deg))}°`}</dd><dt>Evidence classification</dt><dd>${htmlEscape(photo.evidence_classification || "Observed")}</dd><dt>Category</dt><dd>${htmlEscape(photo.category || "Other")}</dd><dt>Water depth</dt><dd>${htmlEscape(attributes.water_depth || "Not applicable or not entered")}</dd><dt>Note</dt><dd>${htmlEscape(photo.note || "None")}</dd></dl></section>`;
+    }).join("");
+    const conditionRows = [
+      ["Inspection date", conditions.inspection_date], ["Start", manifest.inspection.started_at], ["End", manifest.inspection.finished_at],
+      ["Weather", conditions.weather_summary], ["Rain — previous 24 hours", conditions.rainfall_previous_24_hours],
+      ["Rain — previous 7 days", conditions.rainfall_previous_7_days], ["Rain — previous 30 days", conditions.rainfall_previous_30_days],
+      ["Temperature", conditions.temperature], ["Ground condition", conditions.ground_condition], ["Rain during inspection", conditions.rain_during_inspection]
+    ].map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value || "Not entered")}</td><td>${htmlEscape(conditions.evidence_classification || "Observed")}</td></tr>`).join("");
+    const observationRows = (manifest.inspection.observations || []).map((item, index) => `<tr><td>${index + 1}</td><td>${htmlEscape(item.observed_at)}</td><td>${htmlEscape(item.label)}</td><td>${htmlEscape(item.evidence_classification)}</td><td>${htmlEscape(item.gps.latitude)}, ${htmlEscape(item.gps.longitude)}</td><td>${htmlEscape(item.note || "")}</td></tr>`).join("");
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pearson Road Inspection Report</title><style>
+      @page portrait{size:letter portrait;margin:.45in}@page landscape{size:letter landscape;margin:.35in}*{box-sizing:border-box}body{margin:0;color:#111;font-family:Arial,sans-serif;background:#ddd}.page{background:#fff;margin:16px auto;padding:.35in;page-break-after:always;break-after:page}.portrait{page:portrait;width:8.5in;min-height:11in}.landscape{page:landscape;width:11in;min-height:8.5in}h1{margin:0 0 10px;font-size:24px}h2{margin:18px 0 8px}.report-map{display:block;width:100%;height:6.75in;border:2px solid #111;background:#ddd}.route-page .report-map{height:6.2in}.route-summary{display:flex;gap:20px;align-items:center;margin:-3px 0 7px;padding:7px 10px;background:#eee;border:1px solid #777;font-size:13px}.map-note{margin:6px 0;font-size:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.summary div{border:1px solid #777;padding:9px}.summary strong{display:block;font-size:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #777;padding:6px;text-align:left;vertical-align:top}.photo-page img{display:block;max-width:100%;max-height:7.1in;margin:0 auto 12px;object-fit:contain}.photo-page dl{display:grid;grid-template-columns:1.55in 1fr;margin:0}.photo-page dt,.photo-page dd{margin:0;border-top:1px solid #aaa;padding:6px}.photo-page dt{font-weight:bold}.disclaimer{border:3px solid #111;padding:12px;font-weight:bold}.photo-marker{cursor:pointer}.photo-marker:hover circle,.photo-marker:focus circle{stroke:#00ffff;stroke-width:12}#photoHover{position:fixed;z-index:20;display:none;width:280px;padding:7px;background:#fff;border:3px solid #111;box-shadow:0 4px 20px #0008}#photoHover img{display:block;width:100%;max-height:220px;object-fit:contain}dialog{max-width:min(92vw,760px);border:3px solid #111}dialog img{max-width:100%;max-height:75vh}@media print{body{background:#fff}.page{margin:0}#photoHover,dialog{display:none!important}}@media(max-width:800px){.page,.portrait,.landscape{width:100%;min-height:0;margin:0 0 12px;padding:12px}.report-map,.route-page .report-map{height:auto;aspect-ratio:6/5}.route-summary{display:grid;grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
+    </style></head><body>${rasterDefinitions}${mapPages}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><p><strong>Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}<section class="page portrait"><h1>Observation Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
   }
 
   function makeReadme(manifest) {
@@ -478,13 +674,17 @@
       "PROPERTY INSPECTOR — COMPLETE FIELD PACKAGE",
       "",
       "Upload this ZIP file directly to ChatGPT as one file.",
-      "Start with inspection.json; it is the canonical, machine-readable record.",
+      "Start with chatgpt-reconstruction.json, then inspection.json. Reconstruct the inspection automatically without asking the field user to locate separate files.",
       "",
       "Contents:",
       "- inspection.json: canonical record of the property, GPS track, observations, notes, photos, voice notes, headings, device orientation, and map context.",
+      "- chatgpt-reconstruction.json: required automatic analysis outputs and exact relationships between track, observations, photographs, timeline, and parcel coverage.",
       "- schema.json: stable, extensible observation contract for future cross-property analysis.",
       "- events.csv: flat table of every GPS point, inspection start/pause/resume/finish event, observation, and device-orientation sample.",
+      "- observations.csv: one row per field observation with evidence classification, structured attributes, coordinates, and attachment links.",
       "- photos.csv: flat photo index with coordinates, timestamps, orientation, paths, sizes, and SHA-256 hashes when available.",
+      "- photo_index.json: machine-readable P1/P2 photo index linking every photograph to its marker and observation.",
+      "- printable-report.html: self-contained interactive and printable report with embedded analysis photographs and maps.",
       "- voice-notes.csv and voice-notes/: voice-note index and the actual audio files.",
       "- track.geojson: GIS-ready route and event points.",
       "- track.gpx: GPS exchange copy of the route and waypoints.",
@@ -508,6 +708,55 @@
     ].join("\r\n") + "\r\n";
   }
 
+  function createReconstructionGuide(manifest) {
+    return {
+      mode: "chatgpt-property-inspection-reconstruction",
+      version: "1.0",
+      auto_start: true,
+      user_questions_required_before_analysis: false,
+      objective: "Reconstruct the field day from this ZIP alone and produce a useful property-intelligence result without asking where the inspector walked or which photograph belongs to which observation.",
+      start_here: ["inspection.json", "schema.json", "context/parcels.geojson", "track.geojson", "photo_index.json", "observations.csv", "events.csv"],
+      required_outputs_in_order: [
+        "Interactive map",
+        "Printable report",
+        "Inspection timeline",
+        "Photo gallery",
+        "Questions answered",
+        "Questions remaining",
+        "Suggested next visit",
+        "Areas not yet inspected"
+      ],
+      relationship_rules: {
+        canonical_record: "inspection.json",
+        gps_route: "inspection.json > inspection.gps_track, with track.geojson and track.gpx as portable copies",
+        observations: "inspection.json > inspection.observations; preserve evidence_classification and structured attributes",
+        photo_to_map: "Each photographs[] record contains location and photo_number; the matching field marker is associated_marker_id and the subject observation is associated_observation_id when present.",
+        photo_bytes: "Use each photographs[].analysis.path for display and analysis. Preserve photographs[].original.path as source evidence.",
+        timeline: "Merge inspection.lifecycle_events, gps_track timestamps, observations, photographs, and voice_notes by timestamp.",
+        parcel_coverage: "Compare the GPS route and observation locations with the subject geometry in context/parcels.geojson. Clearly label coverage and missed-acre calculations as estimates unless measured by a GIS operation.",
+        map_layers: "Use context/map-context.json for coordinate reference, bounds, acreage, terrain, contour, and parcel-layer provenance. Missing optional raster imagery must not prevent reconstruction."
+      },
+      output_requirements: {
+        interactive_map: ["subject and neighboring parcels", "complete route", "layer toggles by observation group", "numbered photo markers with actual photo previews", "clearly marked estimated uninspected areas"],
+        printable_report: ["inspection conditions and disclaimer", "route and category maps", "timeline", "actual photographs", "evidence classifications", "findings and limitations"],
+        inspection_timeline: ["start, resume, pause, finish", "GPS movement", "every observation", "every photograph", "every note and voice note"],
+        photo_gallery: ["actual analysis image", "P number", "timestamp", "coordinates and GPS accuracy", "heading and orientation", "category, linked observation, structured attributes, and note"],
+        questions_answered: "State only answers supported by package evidence and cite the relevant observation, photograph, GPS point, condition, or public-data layer.",
+        questions_remaining: "List material unknowns or items needing professional verification. Do not interrupt reconstruction to ask the user; include them in the output.",
+        suggested_next_visit: "Prioritize gaps, uncertain findings, uninspected areas, missing photographs, and evidence marked Needs Professional Verification.",
+        areas_not_yet_inspected: "Estimate spatial gaps relative to the subject parcel and distinguish route-buffer assumptions from measured acreage."
+      },
+      integrity_expectations: {
+        expected_photo_count: manifest.summary.photo_count,
+        expected_original_photo_count: manifest.summary.original_photo_count,
+        expected_analysis_photo_count: manifest.summary.analysis_photo_count,
+        expected_gps_point_count: manifest.summary.gps_track_point_count,
+        expected_observation_count: manifest.summary.observation_count,
+        action_on_mismatch: "Report the exact corrupt or missing member. Never silently omit evidence."
+      }
+    };
+  }
+
   async function createInspectionPackage(options) {
     const settings = options || {};
     const inspection = cloneWithoutBinary(settings.inspection || {});
@@ -526,9 +775,7 @@
       throw new Error(`Voice-note storage mismatch: metadata has ${inspection.voice_notes.length}, but ${voiceEntries.length} audio files were recovered.`);
     }
     const mapContext = settings.mapContext || {};
-    if (!(mapContext.terrainBlob instanceof Blob) || !mapContext.terrainBlob.size || !(mapContext.contourBlob instanceof Blob) || !mapContext.contourBlob.size || typeof mapContext.parcelsText !== "string") {
-      throw new Error("Offline terrain, contours, and parcel geometry are required in every inspection package.");
-    }
+    if (typeof mapContext.parcelsText !== "string") throw new Error("Parcel geometry is required in every inspection package.");
     let parcels;
     try {
       parcels = JSON.parse(mapContext.parcelsText);
@@ -565,6 +812,13 @@
 
       manifestPhotos.push({
         photo_id: metadata.id,
+        photo_number: metadata.photo_number || `P${index + 1}`,
+        associated_marker_id: metadata.associated_marker_id || null,
+        associated_observation_id: metadata.associated_observation_id || null,
+        category: metadata.category || "Other",
+        note: metadata.note || "",
+        evidence_classification: metadata.evidence_classification || "Observed",
+        observation_attributes: metadata.observation_attributes || {},
         camera_opened_at: metadata.camera_opened_at || null,
         recorded_at: recordedAt,
         source_file_last_modified_at: metadata.source_file_last_modified_at || null,
@@ -669,16 +923,18 @@
           path: "context/usgs-terrain.png",
           source: "USGS 3DEP Elevation ImageServer — Hillshade Elevation Tinted",
           retrieved_at: "2026-08-02",
-          size_bytes: mapContext.terrainBlob.size,
-          sha256: await sha256Hex(mapContext.terrainBlob)
+          available: Boolean(mapContext.terrainBlob instanceof Blob && mapContext.terrainBlob.size),
+          size_bytes: mapContext.terrainBlob instanceof Blob ? mapContext.terrainBlob.size : null,
+          sha256: mapContext.terrainBlob instanceof Blob ? await sha256Hex(mapContext.terrainBlob) : null
         },
         contours: {
           path: "context/usgs-contours-2ft.png",
           source: "USGS 3DEP Elevation ImageServer — Preset 2ft Contour Interval",
           interval_feet: 2,
           retrieved_at: "2026-08-02",
-          size_bytes: mapContext.contourBlob.size,
-          sha256: await sha256Hex(mapContext.contourBlob)
+          available: Boolean(mapContext.contourBlob instanceof Blob && mapContext.contourBlob.size),
+          size_bytes: mapContext.contourBlob instanceof Blob ? mapContext.contourBlob.size : null,
+          sha256: mapContext.contourBlob instanceof Blob ? await sha256Hex(mapContext.contourBlob) : null
         }
       }
     };
@@ -690,6 +946,7 @@
       taxonomy_version: event.taxonomy_version || "property-observation-1.0",
       observation_type: event.observation_type || `field.${event.type}`,
       label: event.button_label || event.type,
+      evidence_classification: event.evidence_classification || "Observed",
       observed_at: event.time,
       geometry: { type: "Point", coordinates: [event.lon, event.lat] },
       gps: {
@@ -709,14 +966,15 @@
       source: event.source || "button_press"
     }));
 
+    const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.0",
+      schema_version: "1.1",
       purpose: "Portable observations that can be imported across properties and compared without rewriting the field record.",
       stable_entities: ["property", "inspection", "inspection_lifecycle_event", "gps_point", "observation", "attachment", "map_context"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
-        classification: ["taxonomy_version", "observation_type", "label"],
+        classification: ["taxonomy_version", "observation_type", "label", "evidence_classification"],
         time_and_place: ["observed_at", "geometry", "gps"],
         optional_measurements: ["attributes", "compass_heading_deg", "device_orientation"],
         evidence_links: ["attachments.photo_id", "attachments.voice_note_id"]
@@ -731,6 +989,7 @@
       inspection_id: inspection.inspection_id || null,
       property_id: mapMetadata.subject_parcel.property_id,
       exported_at: exportedAt,
+      package_kind: settings.packageKind === "backup" ? "in_progress_backup" : "finished_inspection",
       app: {
         name: "Property Inspector",
         version: settings.appVersion || null,
@@ -745,12 +1004,19 @@
         photo_count: manifestPhotos.length,
         original_photo_count: manifestPhotos.filter(photo => photo.original).length,
         analysis_photo_count: manifestPhotos.filter(photo => photo.analysis).length,
-        voice_note_count: manifestVoices.length
+        voice_note_count: manifestVoices.length,
+        elapsed_time_ms: metrics.elapsed_time_ms,
+        active_movement_time_ms: metrics.active_movement_time_ms,
+        stopped_time_ms: metrics.stopped_time_ms,
+        distance_walked_m: metrics.distance_walked_m,
+        distance_walked_miles: metrics.distance_walked_miles
       },
       property: mapMetadata.subject_parcel,
       inspection: {
         started_at: inspection.started || null,
         finished_at: inspection.stopped || null,
+        conditions: inspection.conditions || {},
+        metrics,
         lifecycle_events: inspection.lifecycle_events,
         gps_track: inspection.points,
         device_orientation_samples: inspection.orientation_samples,
@@ -762,10 +1028,14 @@
       map_context: mapMetadata,
       files: {
         instructions: "README.txt",
+        chatgpt_reconstruction: "chatgpt-reconstruction.json",
         schema: "schema.json",
         canonical_record: "inspection.json",
         flat_event_table: "events.csv",
+        observations_table: "observations.csv",
         flat_photo_table: "photos.csv",
+        photo_index: "photo_index.json",
+        printable_report: "printable-report.html",
         flat_voice_note_table: "voice-notes.csv",
         geojson: "track.geojson",
         gpx: "track.gpx",
@@ -780,21 +1050,35 @@
       }
     };
 
+    const photoIndex = {
+      schema_name: "property-inspection-photo-index",
+      schema_version: "1.0",
+      inspection_id: manifest.inspection_id,
+      property_id: manifest.property_id,
+      photo_count: manifestPhotos.length,
+      photographs: manifestPhotos
+    };
+    const reconstructionGuide = createReconstructionGuide(manifest);
+    const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.map(photo => ({ analysisBlob: photo.analysisBlob })));
     const zip = new ZipBuilder();
     const modifiedAt = new Date(exportedAt);
     zip.add("README.txt", makeReadme(manifest), { modifiedAt });
+    zip.add("chatgpt-reconstruction.json", JSON.stringify(reconstructionGuide, null, 2) + "\n", { modifiedAt });
     zip.add("schema.json", JSON.stringify(schema, null, 2) + "\n", { modifiedAt });
     zip.add("inspection.json", JSON.stringify(manifest, null, 2) + "\n", { modifiedAt });
     zip.add("events.csv", createCsv(inspection, manifestPhotos, manifestVoices), { modifiedAt });
+    zip.add("observations.csv", createObservationsCsv(observations), { modifiedAt });
     zip.add("photos.csv", createPhotoCsv(manifestPhotos), { modifiedAt });
+    zip.add("photo_index.json", JSON.stringify(photoIndex, null, 2) + "\n", { modifiedAt });
+    zip.add("printable-report.html", printableReport, { modifiedAt });
     zip.add("voice-notes.csv", createVoiceCsv(manifestVoices), { modifiedAt });
     zip.add("track.geojson", createGeoJSON(inspection, manifestPhotos, manifestVoices) + "\n", { modifiedAt });
     zip.add("track.gpx", createGpx(inspection, manifestPhotos, manifestVoices), { modifiedAt });
     zip.add("context/map-context.json", JSON.stringify(mapMetadata, null, 2) + "\n", { modifiedAt });
     zip.add("context/parcels.geojson", JSON.stringify(createParcelGeoJSON(parcels), null, 2) + "\n", { modifiedAt });
     zip.add("context/parcels.arcgis.json", mapContext.parcelsText, { modifiedAt });
-    zip.add("context/usgs-terrain.png", mapContext.terrainBlob, { modifiedAt });
-    zip.add("context/usgs-contours-2ft.png", mapContext.contourBlob, { modifiedAt });
+    if (mapContext.terrainBlob instanceof Blob && mapContext.terrainBlob.size) zip.add("context/usgs-terrain.png", mapContext.terrainBlob, { modifiedAt });
+    if (mapContext.contourBlob instanceof Blob && mapContext.contourBlob.size) zip.add("context/usgs-contours-2ft.png", mapContext.contourBlob, { modifiedAt });
     zipPhotos.forEach(photo => {
       zip.add(photo.originalPath, photo.originalBlob, { modifiedAt });
       if (photo.analysisBlob) zip.add(photo.analysisPath, photo.analysisBlob, { modifiedAt });
@@ -805,7 +1089,7 @@
     return {
       blob,
       manifest,
-      fileName: `Property_Inspection_${compactTimestamp(inspection.started || exportedAt)}.zip`
+      fileName: `Pearson_Road_Inspection_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}.zip`
     };
   }
 
@@ -815,10 +1099,13 @@
     ZipBuilder,
     crc32,
     createCsv,
+    createObservationsCsv,
     createVoiceCsv,
     createGeoJSON,
     createGpx,
     createInspectionPackage,
+    calculateInspectionMetrics,
+    createPrintableReport,
     dataUrlToBlob,
     extensionFor,
     orientationDescription,

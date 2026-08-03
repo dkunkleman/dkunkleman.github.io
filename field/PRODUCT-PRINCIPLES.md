@@ -1,0 +1,30 @@
+# Rural Property Intelligence Product Gate
+
+The goal is not merely to build an inspection app. The goal is to build the operating system for understanding rural property.
+
+Every proposed feature must materially accomplish at least one of these outcomes:
+
+1. Reduce uncertainty.
+2. Reduce inspection time.
+3. Reduce professional cost.
+4. Increase report credibility.
+5. Improve decision-making.
+
+If a feature does not accomplish one of those outcomes, it should not be added.
+
+Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The application collects durable, reusable observations; the post-inspection analyst turns those observations into maps, reports, remaining questions, next-visit priorities, and decisions.
+
+## Version 10 north star
+
+One button: **Teach me this property.**
+
+It should answer from accumulated property evidence:
+
+- What did I learn today?
+- What changed my opinion?
+- What still worries me?
+- What should I investigate next?
+- What is the cheapest way to reduce uncertainty?
+- What would I do if I owned it?
+
+Do not add this button until the evidence, reconstruction, comparison, uncertainty, and recommendation systems can answer those questions credibly.

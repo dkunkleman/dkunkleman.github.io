@@ -66,6 +66,7 @@
     button.voice { background: #9b1e58; }
     button.voice.recording { animation: recordPulse 1.25s infinite; background: #d0063b; }
     button.note { background: #4d5960; }
+    button.more { background: #273238; }
     @keyframes recordPulse { 50% { box-shadow: 0 0 0 6px rgba(208,6,59,.25); } }
     #mapFrame { position: relative; width: calc(100% - 20px); margin: 10px auto 0; background: #d8d1bd; overflow: hidden; aspect-ratio: 1800/1500; border: 2px solid #777; border-radius: 8px; touch-action: pan-x pan-y; }
     #mapFrame img, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -76,6 +77,25 @@
     .metric { min-width: 0; background: #f5f5f0; border-radius: 6px; padding: 8px; }
     .metric span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
     .metric strong { display: block; margin-top: 3px; overflow-wrap: anywhere; font-size: 17px; }
+    .condition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+    .condition-grid label { margin-top: 4px; }
+    .condition-grid input, .condition-grid select, .condition-grid textarea,
+    dialog input, dialog select, dialog textarea { width: 100%; min-height: 48px; margin-top: 5px; border: 2px solid #777; border-radius: 7px; padding: 9px; background: #fff; color: #111; font: 16px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    .condition-grid textarea, dialog textarea { min-height: 78px; resize: vertical; }
+    .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 6px; }
+    .choice-grid label { min-height: 50px; margin: 0; border: 2px solid #8a8a82; border-radius: 7px; padding: 8px; background: #f6f6f1; display: flex; align-items: center; gap: 7px; }
+    .choice-grid input { width: 24px; min-height: 24px; margin: 0; flex: 0 0 auto; }
+    dialog { width: min(560px, calc(100vw - 18px)); max-height: calc(100vh - 24px); border: 3px solid #111; border-radius: 10px; padding: 0; overflow: auto; }
+    dialog::backdrop { background: rgba(0,0,0,.72); }
+    .dialog-body { padding: 14px; }
+    .dialog-body h2 { margin: 0 0 6px; }
+    .dialog-actions { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px max(10px, env(safe-area-inset-bottom)); background: #fff; border-top: 2px solid #bbb; }
+    .dialog-actions .cancel { background: #59615c; }
+    #moreCategories[hidden], .structured-fields[hidden] { display: none; }
+    #moreCategories { margin-top: 10px; border-top: 2px solid #aaa; padding-top: 10px; }
+    #moreCategories h3 { margin: 0 0 8px; font-size: 16px; }
+    #moreButtons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    #moreButtons button { min-height: 60px; background: #425148; }
     #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 10px; }
     .thumb { border: 2px solid #bcbcb4; border-radius: 7px; padding: 6px; font-size: 11px; line-height: 1.4; }
     .thumb img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
@@ -90,6 +110,7 @@
     #packageReady { border: 3px solid #0b762f; background: #ecfff2; }
     #packageReady[hidden], #packageLink[hidden], #sharePackage[hidden] { display: none; }
     #packageReady p { font-weight: 700; }
+    #packageFilename { display: block; padding: 9px; border: 2px dashed #0b762f; background: #fff; overflow-wrap: anywhere; font: 800 15px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
     #packageLink, #sharePackage { display: block; width: 100%; margin-top: 8px; text-decoration: none; background: #0b762f; }
     #sharePackage { background: #111; border: 3px solid var(--focus); }
     details summary { min-height: 44px; padding: 10px 0; font-weight: 800; cursor: pointer; }
@@ -100,6 +121,7 @@
       #fieldButtons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #fieldButtons button { min-height: 64px; font-size: 16px; }
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .condition-grid { grid-template-columns: 1fr; }
       #nextStep { font-size: 15px; }
       button, .button-link { font-size: 15px; }
     }
@@ -130,18 +152,47 @@
       <div id="fieldButtons">
         <button id="wet" class="wet" disabled>Wet</button>
         <button id="dry" class="dry" disabled>Dry</button>
-        <button id="blocked" class="blocked" disabled>Blocked</button>
+        <button id="blocked" class="blocked" disabled>Blocked Access</button>
         <button id="high" class="high" disabled>High Ground</button>
-        <button id="homesite" class="homesite" disabled>Homesite</button>
+        <button id="homesite" class="homesite" disabled>Potential Homesite</button>
         <button id="culvert" class="culvert" disabled>Culvert</button>
         <button id="tree" class="tree" disabled>Specimen Tree</button>
-        <button id="entrance" class="entrance" disabled>Entrance</button>
-        <button id="wildlife" class="wildlife" disabled>Wildlife</button>
+        <button id="entrance" class="entrance" disabled>Road / Entrance</button>
         <button id="photo" class="photo" disabled>Take Photo</button>
         <button id="voice" class="voice" disabled>Start Voice Note</button>
         <button id="note" class="note" disabled>Free Note</button>
+        <button id="more" class="more" disabled>More Categories</button>
+      </div>
+      <div id="moreCategories" hidden>
+        <h3>More field observations</h3>
+        <div id="moreButtons">
+          <button id="thick" disabled>Thick Brush</button>
+          <button id="open" disabled>Open Area</button>
+          <button id="ditch" disabled>Ditch</button>
+          <button id="timber" disabled>Timber Sample</button>
+          <button id="hazard" disabled>Hazard</button>
+          <button id="wildlife" disabled>Wildlife</button>
+          <button id="other" disabled>Other</button>
+        </div>
       </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+    </section>
+
+    <section class="card" aria-labelledby="conditions-heading">
+      <h2 id="conditions-heading">Inspection conditions</h2>
+      <p class="small">Optional. Enter what you know; entries save automatically on this phone and are included in the package.</p>
+      <div class="condition-grid">
+        <label>Inspection date<input id="conditionDate" type="date"></label>
+        <label>Weather summary<input id="conditionWeather" type="text" placeholder="Clear, cloudy, light rain…"></label>
+        <label>Rainfall — previous 24 hours<input id="conditionRain24" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Rainfall — previous 7 days<input id="conditionRain7" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Rainfall — previous 30 days<input id="conditionRain30" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Temperature<input id="conditionTemperature" type="text" inputmode="decimal" placeholder="°F or unknown"></label>
+        <label>Ground condition<select id="conditionGround"><option value="">Not entered</option><option>Dry</option><option>Firm</option><option>Soft</option><option>Spongy</option><option>Muddy</option><option>Standing water</option><option>Mixed</option><option>Unknown</option></select></label>
+        <label>Rain during inspection<select id="conditionRainDuring"><option value="">Not entered</option><option value="no">No</option><option value="yes">Yes</option><option value="unknown">Unknown</option></select></label>
+        <label>Conditions evidence<select id="conditionEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
+      </div>
+      <p class="small">Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</p>
     </section>
 
     <div id="mapFrame" aria-label="Offline terrain, contours, parcels, GPS track, and markers">
@@ -159,6 +210,9 @@
       <div class="metric"><span>Photos</span><strong id="photoCount">0</strong></div>
       <div class="metric"><span>Observations</span><strong id="eventCount">0</strong></div>
       <div class="metric"><span>Voice notes</span><strong id="voiceCount">0</strong></div>
+      <div class="metric"><span>Elapsed time</span><strong id="elapsedTime">0 min</strong></div>
+      <div class="metric"><span>Active movement</span><strong id="activeTime">0 min</strong></div>
+      <div class="metric"><span>Stopped time</span><strong id="stoppedTime">0 min</strong></div>
     </section>
 
     <section class="card" aria-labelledby="photo-heading">
@@ -170,8 +224,10 @@
     <section id="packageReady" class="card" hidden>
       <h2>Inspection package ready</h2>
       <p id="packageSummary">Everything is in one file.</p>
+      <strong id="packageFilename"></strong>
       <button id="sharePackage" hidden>Send Package to ChatGPT</button>
       <a id="packageLink" class="button-link" hidden>Save Inspection Package</a>
+      <p id="packageInstruction" class="small"></p>
       <p class="small">Do not clear the inspection until ChatGPT confirms it received the package.</p>
     </section>
 
@@ -192,6 +248,7 @@
       <summary>Troubleshooting and recovery</summary>
       <p class="small">The Finish Inspection button is the normal workflow. These individual data exports are only for technical recovery; they do not include photographs and are not a complete inspection package.</p>
       <div class="utilityButtons">
+        <button id="backup">Export Backup Now</button>
         <button id="csv">Recovery CSV</button>
         <button id="geojson">Recovery GeoJSON</button>
         <button id="gpx">Recovery GPX</button>
@@ -199,6 +256,44 @@
       </div>
     </details>
   </main>
+
+  <dialog id="observationDialog">
+    <form method="dialog">
+      <div class="dialog-body">
+        <h2 id="observationTitle">Record observation</h2>
+        <p class="small">Choose any useful details, then tap Save Observation.</p>
+        <div id="wetFields" class="structured-fields" hidden>
+          <label>Water depth</label>
+          <div class="choice-grid" id="wetDepthChoices">
+            <label><input type="radio" name="wetDepth" value="less than 1 inch">Less than 1 inch</label>
+            <label><input type="radio" name="wetDepth" value="1–3 inches">1–3 inches</label>
+            <label><input type="radio" name="wetDepth" value="4–6 inches">4–6 inches</label>
+            <label><input type="radio" name="wetDepth" value="7–12 inches">7–12 inches</label>
+            <label><input type="radio" name="wetDepth" value="more than 12 inches">More than 12 inches</label>
+            <label><input type="radio" name="wetDepth" value="exact">Exact number</label>
+            <label><input type="radio" name="wetDepth" value="unknown" checked>Unknown</label>
+          </div>
+          <label id="wetExactLabel" hidden>Exact depth in inches<input id="wetExactDepth" type="number" min="0" step="0.25" inputmode="decimal"></label>
+          <label>Depth basis<select id="wetDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+          <label>Water condition<select id="wetWaterType"><option value="">Not entered</option><option>Still</option><option>Flowing</option><option>Ditch water</option><option>Across roadway</option><option>Behind berm</option></select></label>
+          <label>Extent note<input id="wetExtent" type="text" placeholder="Approximate area or limits"></label>
+        </div>
+        <div id="dryFields" class="structured-fields" hidden>
+          <label>Dry-ground detail<select id="dryCondition"><option value="">Not entered</option><option>Dry surface</option><option>Firm</option><option>Soft or spongy</option><option>Pine-needle floor</option><option>Possible homesite</option></select></label>
+        </div>
+        <div id="blockedFields" class="structured-fields" hidden>
+          <label>Blocked by<select id="blockedReason"><option value="">Not entered</option><option>Water</option><option>Brush</option><option>Ditch</option><option>Fence</option><option>Unsafe</option><option>Boundary</option><option>Other</option></select></label>
+        </div>
+        <label>Evidence classification<select id="observationEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
+        <label>Optional note<textarea id="observationNote" placeholder="Short field note"></textarea></label>
+        <div class="choice-grid"><label><input id="observationPhoto" type="checkbox">Take a photograph after saving</label></div>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelObservation" class="cancel" value="cancel">Cancel</button>
+        <button id="saveObservation" type="button">Save Observation</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="./inspection-package.js"></script>
   <script src="./app.js"></script>

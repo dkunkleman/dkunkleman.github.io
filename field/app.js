@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.0.0";
+  const APP_VERSION = "3.1.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -29,13 +29,19 @@
   const sharePackageBtn = document.getElementById("sharePackage");
   const packageReady = document.getElementById("packageReady");
   const packageSummary = document.getElementById("packageSummary");
+  const packageFilename = document.getElementById("packageFilename");
+  const packageInstruction = document.getElementById("packageInstruction");
   const offlineState = document.getElementById("offlineState");
   const nextStep = document.getElementById("nextStep");
   const voiceBtn = document.getElementById("voice");
-  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "note", "photo", "voice"].map(id => document.getElementById(id));
+  const observationDialog = document.getElementById("observationDialog");
+  const moreCategories = document.getElementById("moreCategories");
+  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "photo", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
-    wet: "Wet", dry: "Dry", blocked: "Blocked", high: "High Ground", homesite: "Homesite",
-    culvert: "Culvert", tree: "Specimen Tree", entrance: "Entrance", wildlife: "Wildlife",
+    wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
+    culvert: "Culvert", tree: "Tree", entrance: "Road or Entrance", wildlife: "Wildlife",
+    thick: "Thick Brush", open: "Open Area", ditch: "Ditch", timber: "Timber Sample",
+    hazard: "Hazard", other: "Other",
     note: "Free Note", photo: "Photo", voice_note: "Voice Note"
   };
 
@@ -61,11 +67,13 @@
   let voiceChunkWrites = Promise.resolve();
   let gpsWriteQueue = Promise.resolve();
   let gpsStorageFailed = false;
+  let activeObservationType = null;
+  let pendingPhotoContext = null;
 
   function emptyInspection() {
     return {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.0",
+      schema_version: "1.1",
       property_id: "parcel:221S280000001010000",
       inspection_id: null,
       started: null,
@@ -76,7 +84,18 @@
       voice_notes: [],
       pending_voice_note: null,
       lifecycle_events: [],
-      orientation_samples: []
+      orientation_samples: [],
+      conditions: {
+        inspection_date: "",
+        weather_summary: "",
+        rainfall_previous_24_hours: "",
+        rainfall_previous_7_days: "",
+        rainfall_previous_30_days: "",
+        temperature: "",
+        ground_condition: "",
+        rain_during_inspection: "",
+        evidence_classification: "Observed"
+      }
     };
   }
 
@@ -90,7 +109,7 @@
 
   function updateNextStep() {
     if (!packageReady.hidden) {
-      nextStep.textContent = sharePackageBtn.hidden ? "NEXT: Tap Save Inspection Package. Do not clear the inspection yet." : "NEXT: Tap Send Package to ChatGPT. Do not clear the inspection yet.";
+      nextStep.textContent = sharePackageBtn.hidden ? "NEXT: Tap Download Inspection Package. Do not clear the inspection yet." : "NEXT: Tap Send Package to ChatGPT. Do not clear the inspection yet.";
     } else if (mediaRecorder && mediaRecorder.state === "recording") {
       nextStep.textContent = "NEXT: Speak now. Tap Stop Voice Note when you are finished.";
     } else if (!data.started) {
@@ -124,6 +143,7 @@
     data.voice_notes = Array.isArray(data.voice_notes) ? data.voice_notes : [];
     data.lifecycle_events = Array.isArray(data.lifecycle_events) ? data.lifecycle_events : [];
     data.orientation_samples = Array.isArray(data.orientation_samples) ? data.orientation_samples : [];
+    data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
   }
 
   function saveState() {
@@ -421,6 +441,49 @@
     return meters;
   }
 
+  function formatDuration(milliseconds) {
+    if (milliseconds > 0 && milliseconds < 60000) return "<1 min";
+    const totalMinutes = Math.max(0, Math.floor((milliseconds || 0) / 60000));
+    if (totalMinutes < 60) return `${totalMinutes} min`;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours} hr ${minutes} min`;
+  }
+
+  function updateTimeMetrics() {
+    const metrics = packageTools.calculateInspectionMetrics(data, watchId !== null ? new Date().toISOString() : null);
+    document.getElementById("elapsedTime").textContent = formatDuration(metrics.elapsed_time_ms);
+    document.getElementById("activeTime").textContent = formatDuration(metrics.active_movement_time_ms);
+    document.getElementById("stoppedTime").textContent = formatDuration(metrics.stopped_time_ms);
+  }
+
+  const conditionBindings = {
+    conditionDate: "inspection_date",
+    conditionWeather: "weather_summary",
+    conditionRain24: "rainfall_previous_24_hours",
+    conditionRain7: "rainfall_previous_7_days",
+    conditionRain30: "rainfall_previous_30_days",
+    conditionTemperature: "temperature",
+    conditionGround: "ground_condition",
+    conditionRainDuring: "rain_during_inspection",
+    conditionEvidence: "evidence_classification"
+  };
+
+  function renderConditions() {
+    Object.entries(conditionBindings).forEach(([id, key]) => {
+      const element = document.getElementById(id);
+      if (element) element.value = data.conditions[key] || "";
+    });
+  }
+
+  function saveConditionsFromUi() {
+    Object.entries(conditionBindings).forEach(([id, key]) => {
+      const element = document.getElementById(id);
+      if (element) data.conditions[key] = element.value.trim();
+    });
+    saveState();
+  }
+
   function markerStyle(type) {
     return {
       wet: { fill: "#1c6bd1", label: "WET" },
@@ -432,6 +495,12 @@
       tree: { fill: "#327019", label: "TREE" },
       entrance: { fill: "#75551c", label: "ENTRY" },
       wildlife: { fill: "#5b4d1b", label: "WILD" },
+      thick: { fill: "#3d6424", label: "BRUSH" },
+      open: { fill: "#758f35", label: "OPEN" },
+      ditch: { fill: "#2e6684", label: "DITCH" },
+      timber: { fill: "#214f16", label: "TIMBER" },
+      hazard: { fill: "#aa1818", label: "HAZ" },
+      other: { fill: "#555", label: "OTHER" },
       note: { fill: "#555", label: "NOTE" },
       photo: { fill: "#6a3fa0", label: "PIC" },
       voice_note: { fill: "#9b1e58", label: "VOICE" }
@@ -491,6 +560,7 @@
     document.getElementById("voiceCount").textContent = data.voice_notes.length;
     const feet = totalDistance() * 3.280839895;
     document.getElementById("distance").textContent = feet < 5280 ? `${Math.round(feet)} ft` : `${(feet / 5280).toFixed(2)} mi`;
+    updateTimeMetrics();
     updateControls();
   }
 
@@ -513,7 +583,7 @@
       const image = document.createElement("img");
       image.alt = `Inspection photograph ${index + 1}`;
       const caption = document.createElement("div");
-      caption.textContent = `Photo ${index + 1} · ${new Date(metadata.recorded_at || metadata.time).toLocaleString()}`;
+      caption.textContent = `${metadata.photo_number || `P${index + 1}`} · ${metadata.category || "Other"} · ${new Date(metadata.recorded_at || metadata.time).toLocaleString()}`;
       const location = document.createElement("div");
       location.textContent = `${Number(metadata.lat).toFixed(6)}, ${Number(metadata.lon).toFixed(6)} · ±${Math.round(metadata.gps_accuracy_m)} m`;
       card.append(image, caption, location);
@@ -545,7 +615,9 @@
       parcelFeatures = parcelData.features;
       redraw();
     } catch (error) {
-      setStatus("Offline parcel geometry could not be loaded. Do not begin until the app is repaired.", "error");
+      parcelFeatures = [];
+      redraw();
+      setStatus("Parcel map could not be displayed. Evidence capture remains available, but restore the parcel data before Finish Inspection.", "warning");
     }
   }
 
@@ -566,13 +638,14 @@
   function updateControls() {
     const tracking = watchId !== null;
     const recordingVoice = Boolean(mediaRecorder && mediaRecorder.state === "recording");
-    startBtn.textContent = data.started && !tracking ? "Resume Inspection" : "Start Inspection";
+    startBtn.textContent = data.started && !tracking ? "Resume Existing Inspection" : "Start Inspection";
     startBtn.disabled = !offlineReady || tracking || photoBusy || packageBusy || recordingVoice;
     stopBtn.disabled = !tracking || photoBusy || packageBusy || recordingVoice;
     markerButtons.forEach(button => { button.disabled = !tracking || photoBusy || packageBusy || recordingVoice; });
     voiceBtn.disabled = !tracking || photoBusy || packageBusy;
     finishBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     clearBtn.disabled = photoBusy || packageBusy || recordingVoice;
+    document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     updateNextStep();
   }
 
@@ -704,10 +777,15 @@
     const startedAt = new Date().toISOString();
     const resuming = Boolean(data.started);
     data.started = data.started || startedAt;
+    if (!data.conditions.inspection_date) {
+      data.conditions.inspection_date = startedAt.slice(0, 10);
+      renderConditions();
+    }
     data.stopped = null;
     data.lifecycle_events.push({ type: resuming ? "inspection_resumed" : "inspection_started", time: startedAt, source: "button_press" });
     lastPosition = null;
     saveState();
+    updateTimeMetrics();
     await reconcileGpsPoints();
     watchId = navigator.geolocation.watchPosition(onPosition, onGpsError, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
     updateControls();
@@ -728,8 +806,9 @@
     if (!settings.silent) setStatus("Tracking stopped. Use Finish Inspection to create the complete one-file package.", "normal");
   }
 
-  function markerFromPosition(type, note, photoId, time, positionOverride) {
+  function markerFromPosition(type, note, photoId, time, positionOverride, details) {
     const position = positionOverride || lastPosition;
+    const settings = details || {};
     return {
       id: makeId("event"),
       source: "button_press",
@@ -738,7 +817,8 @@
       taxonomy_version: "property-observation-1.0",
       button_label: buttonLabels[type] || type,
       note: note || "",
-      attributes: {},
+      evidence_classification: settings.evidenceClassification || "Observed",
+      attributes: Object.assign({}, settings.attributes || {}),
       time: time || new Date().toISOString(),
       lat: position.lat,
       lon: position.lon,
@@ -755,21 +835,93 @@
     };
   }
 
-  function addMarker(type) {
+  function addMarker(type, options) {
     if (!lastPosition) {
       setStatus("Waiting for the first current GPS location. Marker was not recorded.", "warning");
       return;
     }
-    let note = "";
+    const settings = options || {};
+    let note = settings.note || "";
     if (type === "note") {
       const response = prompt("Type the field note:");
       if (response === null) return;
       note = response;
+    } else if (type === "other" && !note) {
+      const response = prompt("What did you observe?");
+      if (response === null) return;
+      note = response;
     }
-    data.markers.push(markerFromPosition(type, note));
+    const marker = markerFromPosition(type, note, null, null, null, settings);
+    data.markers.push(marker);
     saveState();
     redraw();
     setStatus(`${buttonLabels[type]} recorded at the current location.`, "active");
+    return marker;
+  }
+
+  function openObservationDialog(type) {
+    if (!lastPosition) {
+      setStatus("Waiting for the first current GPS location. Observation was not recorded.", "warning");
+      return;
+    }
+    activeObservationType = type;
+    document.getElementById("observationTitle").textContent = `Record ${buttonLabels[type]}`;
+    document.getElementById("wetFields").hidden = type !== "wet";
+    document.getElementById("dryFields").hidden = type !== "dry";
+    document.getElementById("blockedFields").hidden = type !== "blocked";
+    document.getElementById("observationNote").value = "";
+    document.getElementById("observationEvidence").value = "Observed";
+    document.getElementById("observationPhoto").checked = false;
+    if (type === "wet") {
+      const unknown = document.querySelector('input[name="wetDepth"][value="unknown"]');
+      if (unknown) unknown.checked = true;
+      document.getElementById("wetExactDepth").value = "";
+      document.getElementById("wetExactLabel").hidden = true;
+      document.getElementById("wetDepthBasis").value = "Unknown";
+      document.getElementById("wetWaterType").value = "";
+      document.getElementById("wetExtent").value = "";
+    }
+    if (type === "dry") document.getElementById("dryCondition").value = "";
+    if (type === "blocked") document.getElementById("blockedReason").value = "";
+    observationDialog.showModal();
+  }
+
+  function selectedRadioValue(name) {
+    const selected = document.querySelector(`input[name="${name}"]:checked`);
+    return selected ? selected.value : "";
+  }
+
+  function saveStructuredObservation() {
+    if (!activeObservationType || !lastPosition) return;
+    const type = activeObservationType;
+    const attributes = {};
+    if (type === "wet") {
+      const depthChoice = selectedRadioValue("wetDepth") || "unknown";
+      attributes.water_depth = depthChoice === "exact" ? document.getElementById("wetExactDepth").value.trim() : depthChoice;
+      attributes.water_depth_unit = depthChoice === "exact" ? "inch" : null;
+      attributes.water_depth_basis = document.getElementById("wetDepthBasis").value;
+      attributes.water_condition = document.getElementById("wetWaterType").value;
+      attributes.extent_note = document.getElementById("wetExtent").value.trim();
+    } else if (type === "dry") {
+      attributes.dry_ground_condition = document.getElementById("dryCondition").value;
+    } else if (type === "blocked") {
+      attributes.blocked_by = document.getElementById("blockedReason").value;
+    }
+    const note = document.getElementById("observationNote").value.trim();
+    const evidenceClassification = document.getElementById("observationEvidence").value;
+    const takeAssociatedPhoto = document.getElementById("observationPhoto").checked;
+    const marker = addMarker(type, { note, attributes, evidenceClassification });
+    observationDialog.close();
+    activeObservationType = null;
+    if (takeAssociatedPhoto && marker) {
+      takePhoto({
+        category: buttonLabels[type],
+        note,
+        associatedObservationId: marker.id,
+        evidenceClassification,
+        observationAttributes: attributes
+      });
+    }
   }
 
   function preferredAudioMimeType() {
@@ -1012,19 +1164,38 @@
     });
   }
 
-  function takePhoto() {
+  function takePhoto(context) {
     if (!lastPosition) {
       setStatus("Waiting for the first current GPS location. Camera was not opened.", "warning");
       return;
     }
+    pendingPhotoContext = context && context.category ? context : null;
     pendingPhotoRequestedAt = new Date().toISOString();
     photoInput.click();
+  }
+
+  async function checkPhotoStorageCapacity(fileSize) {
+    if (!navigator.storage || typeof navigator.storage.estimate !== "function") return { warning: false, remaining: null };
+    try {
+      const estimate = await navigator.storage.estimate();
+      const quota = Number(estimate.quota);
+      const usage = Number(estimate.usage || 0);
+      if (!Number.isFinite(quota)) return { warning: false, remaining: null };
+      const remaining = Math.max(0, quota - usage);
+      const required = Math.max(fileSize * 2.25, 25 * 1024 * 1024);
+      if (remaining < required) throw new Error(`Storage is nearly full (${formatBytes(remaining)} available). Free iPhone storage before taking more evidence photographs.`);
+      return { warning: remaining < 250 * 1024 * 1024 || usage / quota > 0.85, remaining };
+    } catch (error) {
+      if (/Storage is nearly full/.test(error.message)) throw error;
+      return { warning: false, remaining: null };
+    }
   }
 
   async function handlePhotoFile() {
     const file = photoInput.files && photoInput.files[0];
     if (!file) {
       pendingPhotoRequestedAt = null;
+      pendingPhotoContext = null;
       return;
     }
     const recordedAt = new Date().toISOString();
@@ -1032,6 +1203,7 @@
     updateControls();
     setStatus("Saving original photograph and analysis copy…", "active");
     try {
+      const storageEstimate = await checkPhotoStorageCapacity(file.size);
       const [position, exif, analysis] = await Promise.all([
         getFreshPositionForPhoto(),
         readExifOrientation(file),
@@ -1041,6 +1213,7 @@
       if (!analysis || !(analysis.blob instanceof Blob) || !analysis.blob.size) throw new Error("No analysis-safe image copy was created.");
       const id = makeId("photo");
       const screenState = currentScreenOrientation();
+      const photoContext = pendingPhotoContext || {};
       const sourceModified = Number.isFinite(file.lastModified) && file.lastModified > 0 ? new Date(file.lastModified).toISOString() : null;
       const metadata = {
         id,
@@ -1071,9 +1244,28 @@
         exif_orientation_description: exif.description,
         original_filename: file.name || null,
         original_mime_type: file.type || "application/octet-stream",
-        original_size_bytes: file.size
+        original_size_bytes: file.size,
+        photo_number: `P${data.photos.length + 1}`,
+        category: photoContext.category || "Other",
+        note: photoContext.note || "",
+        associated_observation_id: photoContext.associatedObservationId || null,
+        evidence_classification: photoContext.evidenceClassification || "Observed",
+        observation_attributes: Object.assign({}, photoContext.observationAttributes || {})
       };
-      const photoEvent = markerFromPosition("photo", "", id, recordedAt, position);
+      const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
+        evidenceClassification: metadata.evidence_classification,
+        attributes: {
+          photo_number: metadata.photo_number,
+          category: metadata.category,
+          associated_observation_id: metadata.associated_observation_id,
+          observation_attributes: metadata.observation_attributes
+        }
+      });
+      metadata.associated_marker_id = photoEvent.id;
+      if (metadata.associated_observation_id) {
+        const associatedObservation = data.markers.find(marker => String(marker.id) === String(metadata.associated_observation_id));
+        if (associatedObservation) associatedObservation.photo_id = id;
+      }
       await photoStorePut({
         id,
         inspection_id: data.inspection_id,
@@ -1087,12 +1279,13 @@
       saveState();
       redraw();
       await renderGallery();
-      setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.`, "active");
+      setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
     } catch (error) {
       setStatus(`PHOTO NOT RECORDED: ${error.message} Retake the photograph before continuing.`, "error");
     } finally {
       photoBusy = false;
       pendingPhotoRequestedAt = null;
+      pendingPhotoContext = null;
       photoInput.value = "";
       updateControls();
     }
@@ -1120,8 +1313,10 @@
     lastPackageFile = typeof File === "function" ? new File([blob], name, { type: "application/zip", lastModified: Date.now() }) : null;
     packageLink.href = lastPackageUrl;
     packageLink.download = name;
-    packageLink.textContent = "Save Inspection Package";
+    packageLink.textContent = "Download Inspection Package";
     packageLink.hidden = false;
+    packageFilename.textContent = name;
+    packageInstruction.textContent = `Inspection package downloaded. In ChatGPT, tap +, tap Upload files, and select the file named ${name}.`;
     packageSummary.textContent = `One file contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
     packageReady.hidden = false;
     let canShareFile = false;
@@ -1179,15 +1374,32 @@
   }
 
   async function recoverMapContext() {
-    const [terrainResponse, contourResponse, parcelResponse] = await Promise.all([
-      fetch("./assets/usgs-terrain.png", { cache: "force-cache" }),
-      fetch("./assets/usgs-contours-2ft.png", { cache: "force-cache" }),
-      fetch("./assets/parcels.json", { cache: "force-cache" })
+    const fetchBlob = async path => {
+      try {
+        const response = await fetch(path, { cache: "force-cache" });
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        return blob.size ? blob : null;
+      } catch (error) {
+        return null;
+      }
+    };
+    const fetchParcels = async () => {
+      try {
+        const response = await fetch("./assets/parcels.json", { cache: "force-cache" });
+        if (response.ok) return await response.text();
+      } catch (error) {
+        // Fall back to the already-loaded in-memory parcel record below.
+      }
+      return JSON.stringify({ features: parcelFeatures });
+    };
+    const [terrainBlob, contourBlob, parcelsText] = await Promise.all([
+      fetchBlob("./assets/usgs-terrain.png"),
+      fetchBlob("./assets/usgs-contours-2ft.png"),
+      fetchParcels()
     ]);
-    if (!terrainResponse.ok || !contourResponse.ok || !parcelResponse.ok) throw new Error("Offline parcel, terrain, or contour context could not be recovered.");
-    const [terrainBlob, contourBlob, parcelsText] = await Promise.all([terrainResponse.blob(), contourResponse.blob(), parcelResponse.text()]);
     const parsed = JSON.parse(parcelsText);
-    if (!terrainBlob.size || !contourBlob.size || !Array.isArray(parsed.features)) throw new Error("Offline map context failed its completeness check.");
+    if (!Array.isArray(parsed.features)) throw new Error("Offline parcel geometry could not be recovered.");
     return { terrainBlob, contourBlob, parcelsText };
   }
 
@@ -1205,7 +1417,7 @@
     updateControls();
     if (watchId !== null) stopTracking({ silent: true, reason: "finish" });
     else {
-      data.stopped = data.stopped || new Date().toISOString();
+      data.stopped = new Date().toISOString();
       data.lifecycle_events.push({ type: "inspection_finished", time: data.stopped, source: "button_press" });
       saveState();
     }
@@ -1229,6 +1441,36 @@
       setStatus(`COMPLETE: one package created with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "observation")}, ${countLabel(data.orientation_samples.length, "orientation sample")}, all ${countLabel(data.photos.length, "photograph")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}).`, "success");
     } catch (error) {
       setStatus(`PACKAGE NOT CREATED: ${error.message} The inspection remains saved on this phone.`, "error");
+    } finally {
+      packageBusy = false;
+      updateControls();
+    }
+  }
+
+  async function exportBackupNow() {
+    if (packageBusy || photoBusy || !data.started) return;
+    packageBusy = true;
+    updateControls();
+    try {
+      await gpsWriteQueue;
+      const [photoEntries, voiceEntries, mapContext] = await Promise.all([recoverEveryPhoto(), recoverEveryVoiceNote(), recoverMapContext()]);
+      setStatus("Building a complete recovery package without stopping GPS…", "active");
+      const result = await packageTools.createInspectionPackage({
+        inspection: data,
+        photoEntries,
+        voiceEntries,
+        mapContext,
+        appVersion: APP_VERSION,
+        sourceUrl: location.href.split(/[?#]/)[0],
+        packageKind: "backup"
+      });
+      if (result.manifest.summary.original_photo_count !== data.photos.length || result.manifest.summary.analysis_photo_count !== data.photos.length) {
+        throw new Error("Backup photograph counts did not reconcile. No backup was released.");
+      }
+      await presentPackage(result.fileName, result.blob, result.manifest);
+      setStatus(`BACKUP READY: all saved evidence is in ${result.fileName}. GPS tracking was not stopped.`, "success");
+    } catch (error) {
+      setStatus(`BACKUP NOT CREATED: ${error.message} The inspection remains saved on this phone.`, "error");
     } finally {
       packageBusy = false;
       updateControls();
@@ -1276,7 +1518,10 @@
       packageLink.hidden = true;
       sharePackageBtn.hidden = true;
       packageReady.hidden = true;
+      packageFilename.textContent = "";
+      packageInstruction.textContent = "";
       redraw();
+      renderConditions();
       await renderGallery();
       document.getElementById("accuracy").textContent = "—";
       document.getElementById("location").textContent = "—";
@@ -1330,6 +1575,11 @@
       startBtn.disabled = true;
       return;
     }
+    if (!window.isSecureContext) {
+      setStatus("GPS, camera storage, and offline recovery require the secure HTTPS version of this page. Do not begin from an insecure address.", "error");
+      startBtn.disabled = true;
+      return;
+    }
     loadState();
     if (data.started && !data.inspection_id) data.inspection_id = makeId("inspection");
     try {
@@ -1344,36 +1594,62 @@
       startBtn.disabled = true;
     }
     redraw();
+    renderConditions();
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
     if (statusEl.dataset.kind !== "error") {
-      setStatus(data.started ? "Saved inspection loaded. Tap Resume Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location.", "normal");
+      setStatus(data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location.", "normal");
     }
   }
 
   startBtn.addEventListener("click", startTracking);
   stopBtn.addEventListener("click", () => stopTracking());
   finishBtn.addEventListener("click", finishInspection);
-  document.getElementById("wet").addEventListener("click", () => addMarker("wet"));
-  document.getElementById("dry").addEventListener("click", () => addMarker("dry"));
-  document.getElementById("blocked").addEventListener("click", () => addMarker("blocked"));
+  document.getElementById("wet").addEventListener("click", () => openObservationDialog("wet"));
+  document.getElementById("dry").addEventListener("click", () => openObservationDialog("dry"));
+  document.getElementById("blocked").addEventListener("click", () => openObservationDialog("blocked"));
   document.getElementById("high").addEventListener("click", () => addMarker("high"));
   document.getElementById("homesite").addEventListener("click", () => addMarker("homesite"));
   document.getElementById("culvert").addEventListener("click", () => addMarker("culvert"));
   document.getElementById("tree").addEventListener("click", () => addMarker("tree"));
   document.getElementById("entrance").addEventListener("click", () => addMarker("entrance"));
   document.getElementById("wildlife").addEventListener("click", () => addMarker("wildlife"));
+  document.getElementById("thick").addEventListener("click", () => addMarker("thick"));
+  document.getElementById("open").addEventListener("click", () => addMarker("open"));
+  document.getElementById("ditch").addEventListener("click", () => addMarker("ditch"));
+  document.getElementById("timber").addEventListener("click", () => addMarker("timber"));
+  document.getElementById("hazard").addEventListener("click", () => addMarker("hazard"));
+  document.getElementById("other").addEventListener("click", () => addMarker("other"));
   document.getElementById("note").addEventListener("click", () => addMarker("note"));
-  document.getElementById("photo").addEventListener("click", takePhoto);
+  document.getElementById("photo").addEventListener("click", () => takePhoto(null));
+  document.getElementById("more").addEventListener("click", () => {
+    moreCategories.hidden = !moreCategories.hidden;
+    document.getElementById("more").textContent = moreCategories.hidden ? "More Categories" : "Hide Categories";
+  });
+  document.getElementById("saveObservation").addEventListener("click", saveStructuredObservation);
+  document.getElementById("cancelObservation").addEventListener("click", () => { activeObservationType = null; });
+  document.querySelectorAll('input[name="wetDepth"]').forEach(input => input.addEventListener("change", () => {
+    document.getElementById("wetExactLabel").hidden = selectedRadioValue("wetDepth") !== "exact";
+  }));
   voiceBtn.addEventListener("click", toggleVoiceNote);
   photoInput.addEventListener("change", handlePhotoFile);
   sharePackageBtn.addEventListener("click", shareLastPackage);
   clearBtn.addEventListener("click", clearInspection);
+  document.getElementById("backup").addEventListener("click", exportBackupNow);
+  Object.keys(conditionBindings).forEach(id => {
+    const element = document.getElementById(id);
+    element.addEventListener("change", saveConditionsFromUi);
+    element.addEventListener("blur", saveConditionsFromUi);
+  });
   document.getElementById("csv").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.csv", "text/csv", packageTools.createCsv(data, [])));
   document.getElementById("geojson").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.geojson", "application/geo+json", packageTools.createGeoJSON(data, [])));
   document.getElementById("gpx").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.gpx", "application/gpx+xml", packageTools.createGpx(data, [])));
   document.getElementById("contourOpacity").addEventListener("input", event => { document.getElementById("contours").style.opacity = event.target.value; });
   document.getElementById("terrainOpacity").addEventListener("input", event => { document.getElementById("hillshade").style.opacity = event.target.value; });
+  [document.getElementById("hillshade"), document.getElementById("contours")].forEach(image => image.addEventListener("error", () => {
+    image.hidden = true;
+    setStatus("A background map image is unavailable. GPS, observations, photos, and notes still work; continue using the parcel and route overlay.", "warning");
+  }));
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && watchId !== null && !wakeLock) keepAwake();
   });
@@ -1383,6 +1659,7 @@
       event.returnValue = "";
     }
   });
+  setInterval(updateTimeMetrics, 30000);
 
   initialize();
 })();

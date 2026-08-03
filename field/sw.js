@@ -1,13 +1,15 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-02-v2";
-const OFFLINE_FILES = [
+const CACHE_NAME = "property-inspector-field-2026-08-02-v3";
+const CORE_OFFLINE_FILES = [
   "./",
   "./index.html",
   "./app.js",
   "./inspection-package.js",
   "./manifest.webmanifest",
-  "./assets/parcels.json",
+  "./assets/parcels.json"
+];
+const OPTIONAL_MAP_FILES = [
   "./assets/usgs-terrain.png",
   "./assets/usgs-contours-2ft.png",
   "../icon-192.png",
@@ -15,7 +17,14 @@ const OFFLINE_FILES = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_FILES)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(async cache => {
+        await cache.addAll(CORE_OFFLINE_FILES);
+        await Promise.allSettled(OPTIONAL_MAP_FILES.map(path => cache.add(path)));
+      })
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
