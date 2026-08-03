@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.2.1";
+  const APP_VERSION = "3.2.2";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;

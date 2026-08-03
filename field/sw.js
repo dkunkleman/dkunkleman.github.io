@@ -1,12 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-03-v5";
+const CACHE_NAME = "property-inspector-field-2026-08-03-v6";
+const INDEX_URL = "./index.html?v=3.2.2";
 const CORE_OFFLINE_FILES = [
-  "./",
-  "./index.html",
-  "./app.js?v=3.2.1",
-  "./idb-recovery.js?v=3.2.1",
-  "./inspection-package.js?v=3.2.1",
+  INDEX_URL,
+  "./app.js?v=3.2.2",
+  "./idb-recovery.js?v=3.2.2",
+  "./inspection-package.js?v=3.2.2",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];
@@ -44,13 +44,13 @@ self.addEventListener("fetch", event => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(INDEX_URL)
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(INDEX_URL, copy));
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(() => caches.match(INDEX_URL))
     );
     return;
   }

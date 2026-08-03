@@ -46,6 +46,8 @@ function fakeDatabase(name, options) {
 
 async function main() {
   const appSource = fs.readFileSync(path.resolve(__dirname, "../field/app.js"), "utf8");
+  const indexSource = fs.readFileSync(path.resolve(__dirname, "../field/index.html"), "utf8");
+  const workerSource = fs.readFileSync(path.resolve(__dirname, "../field/sw.js"), "utf8");
   assert.equal((appSource.match(/\.transaction\(/g) || []).length, 1, "app.js routes every IndexedDB transaction through the shared manager");
   assert(appSource.includes("await gpsWriteQueue;") && appSource.includes("await voiceChunkWrites;") && appSource.includes("await revalidatePhotoDb();"), "package creation drains writes and revalidates IndexedDB before inventory");
   assert(appSource.includes("Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo."), "second photo failure exposes the required recoverable queue message");
@@ -55,6 +57,9 @@ async function main() {
   assert(appSource.includes("elapsedSinceSave >= 30000") && appSource.includes("headingChanged || tiltChanged"), "orientation samples are retained on meaningful change instead of every five seconds");
   assert(!appSource.includes("indexedDB.deleteDatabase"), "the repair never deletes the existing evidence database");
   assert(appSource.includes('const photoDbName = "pearson-road-field-photos"') && appSource.includes("indexedDB.open(photoDbName, 3)"), "database name and schema version remain unchanged for the existing field inspection");
+  const appVersion = appSource.match(/APP_VERSION = "([^"]+)"/)[1];
+  assert(indexSource.includes(`app.js?v=${appVersion}`) && indexSource.includes(`idb-recovery.js?v=${appVersion}`) && indexSource.includes(`inspection-package.js?v=${appVersion}`), "HTML loads versioned application assets so Safari cannot mix old code with a new shell");
+  assert(workerSource.includes(`const INDEX_URL = "./index.html?v=${appVersion}"`) && workerSource.includes("fetch(INDEX_URL)") && workerSource.includes("caches.match(INDEX_URL)"), "the service worker installs and serves a versioned offline HTML shell");
   assert(Recovery.isRetryableConnectionError(namedError("InvalidStateError", "closed")));
   assert(Recovery.isRetryableConnectionError(namedError("AbortError", "aborted")));
   assert(Recovery.isRetryableConnectionError(namedError("TransactionInactiveError", "inactive")));
