@@ -17,6 +17,24 @@ Production, offline-first field evidence collection for the subject rural parcel
 - **Undo / Correct Last Record** is always visible. It can mark an observation, button press, photograph, category, area assignment, or voice note Correct, Accidental, Wrong Category, Wrong Area, Duplicate, Needs Clarification, or Withdrawn.
 - Corrections are append-only. The original entry, correction time, reason, corrected value, inspector identity, and active/corrected/voided status are preserved. Voided records are excluded from maps, findings, decision briefs, and active counts while remaining recoverable under `EVIDENCE_AUDIT_HISTORY.json` and `audit/` attachment paths.
 - The Pearson Road Entrance press at `2026-08-03T13:04:01.864Z` is automatically and non-destructively marked accidental when that saved inspection is loaded or packaged.
+- **UNDO LAST** is permanently visible and creates a `user_undo` audit correction instead of deleting evidence. **REVIEW / CORRECT RECORDS** can correct older observations, photographs, voice notes, thoughts, areas, questions, photo classifications, and group assignments.
+- The accidental Pearson Homesite press near P44 is voided non-destructively. P44 is corrected in the effective view to Water Measurement, explicitly separated from the Homesite source record, while both originals remain in the audit.
+
+## Multi-photo Evidence Sets
+
+- **START PHOTO GROUP** begins one inspector-confirmed subject. While active, photographs, voice notes, measurements, and observations attach to that subject until **FINISH THIS SUBJECT**.
+- Individual Tree sets receive permanent property-level `tree_id` values and collect species confidence, DBH basis, height estimates, condition, purpose, explanation, and the whole-tree/bark/base/crown photo pattern.
+- Water, tree/canopy, homesite, drainage, access, boundary, view, vegetation, and other sets retain every exact photo point and role while reports describe the set once.
+- Automatic grouping is suggestion-only. The app offers **Yes, same subject**, **No, separate subjects**, **Select which photos**, and **Ask me later**; it never activates a group silently.
+- `EVIDENCE_SETS.json` contains effective set summaries, pending suggestions, and append-only relationship events. Printable reports use one group marker and list individual photo roles and locations under the subject.
+- Pearson P45-P59, P64-P67, P68-P72, and P73 review patterns are preloaded only as pending inspector-confirmation suggestions. P72 is suggested as Measurement and P73 as Transition.
+
+## Post-inspection Chat Review
+
+- Every inspection package contains `CHAT_REVIEW_RETURN_INSTRUCTIONS.md` and `schemas/property-intelligence-review-annotation.schema.json` so ChatGPT can return one standard `CHAT_REVIEW_PACKAGE.zip` after photo-by-photo review.
+- Review annotations are discrete, versioned records. Whole conversations and assistant language never become facts. Only inspector-approved `Active` annotations affect derived findings.
+- `POST_INSPECTION_REVIEW.json` separates active approved annotations from Draft, Rejected, and Superseded audit history.
+- Repository import is two-stage: `node repository/chat-review.js CHAT_REVIEW_PACKAGE.zip <repository-root>` validates and stages proposals; rerun with `--approve "Inspector Name" 2026-08-03T20:30:00.000Z` only after the inspector reviews them.
 - A photograph is never assigned to a nearby prior observation as fact. Unconfirmed proximity is labeled `nearest_by_location_unconfirmed`; only an inspector-confirmed direct relationship becomes `observation_id`.
 - After the voice explanation, the app records what the photo shows, whether anything was measured or estimated, the area represented, why it matters, and whether it supplies Context, Evidence, Measurement, or Relationship coverage. The gallery displays the missing roles.
 - **Inspector Hypothesis** records interpretation separately from facts, with triggering observations, supporting photographs, contradictions, an exact verification question, professional type, and cheapest next evidence step.
@@ -44,6 +62,19 @@ Production, offline-first field evidence collection for the subject rural parcel
 - Package export fails closed if any original photo, analysis copy, voice note, GPS record, or parcel geometry cannot be recovered. A missing optional terrain or contour raster is disclosed but does not block evidence capture or export.
 - The original photograph is never replaced by the analysis copy.
 
+## Adaptive tree-identification evidence
+
+- Individual Tree and Tree Group sets first ask whether most of the subject can be photographed from a safe standing position. Canopy, nearby trees, brush, water or unsafe ground, boundaries, and access restrictions are valid limitations.
+- If the whole subject is unavailable, the app stops requesting that view and switches to purpose-specific obtainable evidence: base/ground, bark, lower trunk, visible crown, connected branch, leaf surfaces, twig/bud, reproductive material, opposite-side trunk, or a slow panorama when safe.
+- Species-identification, timber, landscape/preserve, hazard, and forest-character purposes each receive a different evidence sequence. The app never directs the inspector across water, into unsafe brush, outside authorized property, up a tree, or into traffic.
+- AI species suggestions retain alternatives, visible features, missing features, and a confidence level, but remain explicitly **AI suggestion — not confirmed**. Only Inspector confirmed, Probable, Possible, Unknown, or Professional identification requested may become the recorded determination.
+- A leaf photograph records whether it was traced to the tree, probably belongs to it, or is uncertain. An uncertain fallen leaf is never silently treated as subject-tree evidence.
+
+## Weather context
+
+- Each inspection can record a named storm/event, event dates, elapsed days, authoritative rainfall total and source, station distance, inspector-reported local rain, and whether rainfall, surge, or both may be relevant.
+- `WEATHER_CONTEXT.json`, `AI_ANALYSIS.json`, and the printable report keep weather context, observed site conditions, inferred causes, and year-round conditions not established as separate analytical categories.
+
 ## Two one-file package modes
 
 `Finish Inspection` creates an AI-ready `AI_ANALYSIS_REPORT_PACKAGE` ZIP for repository ingestion and immediate ChatGPT analysis. **Create FULL EVIDENCE ARCHIVE** creates the permanent evidentiary ZIP without clearing or altering the saved inspection.
@@ -66,6 +97,7 @@ Both modes contain:
 - `REPORT_TEMPLATE.md`, with the required professional Property Intelligence Report sections;
 - `INSPECTOR_THOUGHTS.md`, which preserves the inspector's judgment, theories, concerns, and preferences while explicitly separating them from observed facts;
 - `EVIDENCE_RELATIONSHIPS.json`, which directly joins observations, photographs, voice notes, and stable GPS-point IDs;
+- `WEATHER_CONTEXT.json`, which preserves named-event and rainfall context with station-distance and causation limitations;
 - `SUGGESTED_INSPECTION_QUESTIONS.md`, which distinguishes questions answerable from the package from questions requiring additional evidence;
 - `repository-import.json`, which assigns an immutable property folder, inspection folder, export ID, extraction map, and reject-on-collision policy;
 - `repository-comparison.json`, a compact normalized record for future comparisons of standing water, trees, construction, improvements, and recurring observations;
@@ -101,6 +133,8 @@ node tests\idb-recovery.test.js
 node tests\inspection-coaching.test.js
 node tests\water-intelligence.test.js
 node tests\evidence-governance.test.js
+node tests\evidence-sets.test.js
+node tests\chat-review.test.js
 node tests\inspection-package.test.js
 ```
 

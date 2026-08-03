@@ -31,7 +31,9 @@ Pearson_Road/
     photos/audit/
     voice/
     voice/audit/
-    weather/<export-id>/conditions.json
+    weather/<export-id>/
+      WEATHER_CONTEXT.json
+      conditions.json
     terrain/
     contours/
     property_boundary/<export-id>/
@@ -53,6 +55,26 @@ Pearson_Road/
 Photo, voice, terrain, and contour filenames are content-addressed with SHA-256. Repeated identical evidence is accepted without rewriting it; a different byte sequence at an existing immutable path stops ingestion.
 
 Correction-aware packages keep active evidence in the normal photo and voice collections. Voided attachments are separately integrity-checked and retained under `photos/audit/` and `voice/audit/`. The correction therefore changes findings without destroying the original record or bytes.
+
+## Import Chat Review
+
+Post-inspection conversations return one `CHAT_REVIEW_PACKAGE.zip`. Stage it first:
+
+```text
+node repository/chat-review.js CHAT_REVIEW_PACKAGE.zip PROPERTY_INTELLIGENCE_REPOSITORY
+```
+
+The importer validates `property_id`, `inspection_id`, and every photograph, observation, voice-note, and GPS reference. It permanently stores the source ZIP and seven required review files under `reviews/<review_session_id>/`, writes the proposed annotations, and stops at `APPROVAL_REQUIRED.json`.
+
+After the inspector reviews the proposal, activate it explicitly:
+
+```text
+node repository/chat-review.js CHAT_REVIEW_PACKAGE.zip PROPERTY_INTELLIGENCE_REPOSITORY --approve "Inspector Name" 2026-08-03T20:30:00.000Z
+```
+
+Approval appends an immutable approved annotation version and regenerates traceable current findings, report updates, and map annotations. Every material report update cites its annotation ID, supporting photograph or observation IDs, and inspector approval date. Draft, Rejected, and Superseded annotations remain in audit history and are excluded from current findings.
+
+Tree evidence remains purpose- and safety-aware after ingestion. Whole-tree obstruction, the alternative-view plan, AI suggestions, inspector determination, missing features, and leaf provenance remain part of the evidence-set history. Weather ingestion likewise preserves the explicit separation between weather context, inspection-time site observations, inferred causes, and year-round conditions not established.
 
 `printable_report.pdf.pending.json` tells the future repository service to render `printable-report.html` into a PDF. PDF rendering and ChatGPT analysis are deliberately repository responsibilities rather than field-phone work.
 

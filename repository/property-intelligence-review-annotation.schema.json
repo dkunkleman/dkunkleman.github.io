@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "property-intelligence-review-annotation",
+  "title": "property-intelligence-review-annotation",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_name", "schema_version", "annotation_id", "property_id", "inspection_id",
+    "review_session_id", "created_at", "created_by", "approved_by_inspector",
+    "source_conversation_reference", "photograph_ids", "observation_ids", "voice_note_ids",
+    "gps_point_ids", "report_sections_affected", "exact_inspector_statement",
+    "concise_approved_finding", "record_type", "evidence_classification", "confidence",
+    "status", "supporting_evidence", "contradicting_evidence", "unanswered_questions",
+    "main_report_or_appendix"
+  ],
+  "properties": {
+    "schema_name": { "const": "property-intelligence-review-annotation" },
+    "schema_version": { "const": "1.0" },
+    "annotation_id": { "type": "string", "minLength": 1 },
+    "property_id": { "type": "string", "minLength": 1 },
+    "inspection_id": { "type": "string", "minLength": 1 },
+    "review_session_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "created_by": { "type": "string", "minLength": 1 },
+    "approved_by_inspector": { "type": "boolean" },
+    "approval_time": { "type": ["string", "null"], "format": "date-time" },
+    "source_conversation_reference": { "type": "string", "minLength": 1 },
+    "photograph_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "observation_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "voice_note_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "gps_point_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "inspection_area_id": { "type": ["string", "null"] },
+    "report_sections_affected": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "exact_inspector_statement": { "type": "string", "minLength": 1 },
+    "concise_approved_finding": { "type": "string", "minLength": 1 },
+    "record_type": { "enum": ["Inspector clarification", "Correction", "Accidental button press", "Observed fact", "Measurement", "Estimate", "Inspector interpretation", "Personal preference", "Report wording", "Professional-verification item", "Unanswered question", "Photo-value classification", "Area assignment", "Inspection-phase assignment"] },
+    "evidence_classification": { "type": "string", "minLength": 1 },
+    "confidence": { "type": ["string", "number"] },
+    "status": { "enum": ["Draft", "Inspector approved", "Rejected", "Superseded", "Active"] },
+    "supersedes_annotation_id": { "type": ["string", "null"] },
+    "supporting_evidence": { "type": "array" },
+    "contradicting_evidence": { "type": "array" },
+    "unanswered_questions": { "type": "array" },
+    "professional_verification_question": { "type": ["string", "null"] },
+    "main_report_or_appendix": { "enum": ["main-report", "appendix"] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["Inspector approved", "Active"] } } },
+      "then": { "properties": { "approved_by_inspector": { "const": true } }, "required": ["approval_time"] }
+    }
+  ]
+}

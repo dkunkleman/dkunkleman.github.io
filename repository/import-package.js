@@ -162,6 +162,11 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["FIELD_COACHING.json", `analysis/${contract.export_id}/FIELD_COACHING.json`],
     ["FIELD_EVIDENCE_REVIEW.json", `analysis/${contract.export_id}/FIELD_EVIDENCE_REVIEW.json`],
     ["EVIDENCE_AUDIT_HISTORY.json", `analysis/${contract.export_id}/EVIDENCE_AUDIT_HISTORY.json`],
+    ["EVIDENCE_SETS.json", `analysis/${contract.export_id}/EVIDENCE_SETS.json`],
+    ["POST_INSPECTION_REVIEW.json", `analysis/${contract.export_id}/POST_INSPECTION_REVIEW.json`],
+    ["WEATHER_CONTEXT.json", `weather/${contract.export_id}/WEATHER_CONTEXT.json`],
+    ["CHAT_REVIEW_RETURN_INSTRUCTIONS.md", `analysis/${contract.export_id}/CHAT_REVIEW_RETURN_INSTRUCTIONS.md`],
+    ["schemas/property-intelligence-review-annotation.schema.json", `analysis/${contract.export_id}/schemas/property-intelligence-review-annotation.schema.json`],
     ["PROFESSIONAL_HANDOFF_CARDS.json", `analysis/${contract.export_id}/PROFESSIONAL_HANDOFF_CARDS.json`],
     ["PROFESSIONAL_HANDOFF_CARDS.md", `analysis/${contract.export_id}/PROFESSIONAL_HANDOFF_CARDS.md`],
     ["professional-handoff-cards.html", `analysis/${contract.export_id}/professional-handoff-cards.html`],
@@ -177,7 +182,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
   ]) {
     if (entries.has(source)) addWrite(writes, inspectionRoot, destination, entries.get(source));
   }
-  addWrite(writes, inspectionRoot, `weather/${contract.export_id}/conditions.json`, JSON.stringify({ inspection_id: manifest.inspection_id, export_id: contract.export_id, conditions: manifest.inspection.conditions || {} }, null, 2) + "\n");
+  addWrite(writes, inspectionRoot, `weather/${contract.export_id}/conditions.json`, JSON.stringify({ inspection_id: manifest.inspection_id, export_id: contract.export_id, conditions: manifest.inspection.conditions || {}, weather_context: manifest.inspection.weather_context || {} }, null, 2) + "\n");
 
   for (const photo of manifest.photographs || []) {
     for (const kind of ["original", "analysis"]) {

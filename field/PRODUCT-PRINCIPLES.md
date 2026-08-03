@@ -30,6 +30,14 @@ The app must communicate inspection intent, not merely coordinates. A photograph
 
 Professional evidence must be correctable without becoming erasable. The original record is immutable; every correction is a dated, attributed audit event. Voided evidence remains recoverable but must never influence active findings. Spatial or temporal proximity is not a confirmed evidence relationship.
 
+Several photographs may document one subject. Evidence Sets preserve each image, location, timestamp, and role while preventing one tree or water area from becoming several findings. Automatic grouping is always a proposal requiring inspector confirmation.
+
+Tree coaching must adapt to purpose, visibility, and safety. Canopy obstruction is legitimate field evidence, not inspector failure. Never require a whole-tree photograph that cannot be obtained safely, never silently attach an uncertain fallen leaf, and never present an AI species suggestion as confirmed.
+
+Weather context is not a site observation, and either one may inform but cannot prove causation or year-round behavior. Reports must keep those four categories distinct.
+
+Post-inspection conversation is interpretation, not source evidence. Import only discrete review annotations, preserve the inspector's exact words, and require explicit inspector approval before a finding can affect a report or map.
+
 Teach the repeatable four-photo pattern: Context, Evidence, Measurement, and Relationship. Report what is present and what is missing. Separate Inspector Hypotheses from observed facts and route each professional issue through an exact question, supporting and contradicting evidence, remaining unknowns, and the cheapest credible next step. The package may save licensed professionals reconnaissance time, but it must never claim to replace their judgment or recommend unverified construction.
 
 Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The phone collects durable observations, the append-only Property Intelligence Repository stores every inspection and version permanently, and ChatGPT analyzes repository records into maps, reports, comparisons, remaining questions, next-visit priorities, and decisions. These responsibilities stay separate.

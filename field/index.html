@@ -171,437 +171,15 @@
     #waterPhotoDialog audio { width:100%; margin-top:10px; }
     #photoExplanationDialog[open] { border-color:#9b1e58; }
     #photoExplanationPrompt { padding:12px; background:#fff2f7; border:3px solid #9b1e58; font-size:22px; font-weight:900; }
-    #correctRecord { width:100%; margin-top:10px; min-height:64px; background:#7a3900; border:3px solid var(--focus); }
-    .audit-card { border-left:8px solid #7a3900; }
-    .training-prompts { padding-left:24px; }
-    .training-prompts li { margin:8px 0; font-weight:700; }
-    .evidence-role-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .evidence-role-grid label { display:flex; align-items:center; min-height:58px; border:2px solid #777; border-radius:7px; padding:8px; font-weight:800; }
-    .evidence-role-grid input { width:26px; height:26px; margin-right:8px; }
-    #departureDialog .dialog-actions { grid-template-columns: 1fr 1fr; }
-    #clear { background: #a31616; }
-    @media (max-width: 430px) {
-      #fieldButtons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #fieldButtons button { min-height: 64px; font-size: 16px; }
-      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .condition-grid { grid-template-columns: 1fr; }
-      .export-modes { grid-template-columns: 1fr; }
-      .coach-grid, .evidence-mode { grid-template-columns: 1fr; }
-      .coach-grid button { width: 100%; }
-      #nextStep { font-size: 15px; }
-      button, .button-link { font-size: 15px; }
-    }
-    @media (prefers-reduced-motion: reduce) { button.voice.recording { animation: none; } }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Property Inspector</h1>
-    <p>Offline field evidence for real rural property inspections.</p>
-    <span id="offlineState" data-ready="false">Preparing offline useâ€¦</span>
-  </header>
-
-  <section id="workflow" aria-label="Inspection controls">
-    <div id="nextStep">NEXT: Wait for â€œOffline ready,â€ then tap Start Inspection.</div>
-    <div id="primaryControls">
-      <button id="start" disabled>Start Inspection</button>
-      <button id="finish" disabled>Finish Inspection</button>
-      <button id="stop" disabled>Pause GPS</button>
-    </div>
-    <button id="correctRecord" type="button">Undo / Correct Last Record</button>
-    <div id="status" role="status" aria-live="polite">Loading the offline field toolâ€¦</div>
-  </section>
-
-  <main>
-    <section class="card coach-card" aria-labelledby="coach-heading">
-      <h2 id="coach-heading">Inspection Coaching</h2>
-      <p class="small"><strong>Choose the area and questions before recording evidence.</strong> New photos, observations, notes, and voice recordings attach automatically.</p>
-      <div class="coach-grid">
-        <label>Current inspection area<select id="activeArea"></select></label>
-        <span></span>
-      </div>
-      <div class="coach-grid" style="margin-top:10px">
-        <label>New area name<input id="newArea" type="text" placeholder="Example: Large Tract â€“ Northwest"></label>
-        <button id="addArea" type="button">Add Area</button>
-      </div>
-      <div class="coach-grid" style="margin-top:10px">
-        <label>Investigation question<input id="newQuestion" type="text" placeholder="Example: Does the road berm trap water?"></label>
-        <button id="addQuestion" type="button">Add Question</button>
-      </div>
-      <div id="questionList"><p class="small">No investigation questions yet. Add the most important uncertainty before walking.</p></div>
-      <div class="evidence-mode">
-        <label>Next evidence relationship<select id="evidenceRelationship"><option value="supports">Supports the question</option><option value="contradicts">Contradicts the question</option><option value="context">Context only</option></select></label>
-        <label>Next photo value<select id="nextPhotoValue"><option>Critical</option><option selected>Helpful</option><option>Reference</option><option>Duplicate</option></select></label>
-      </div>
-      <p id="coachNextAction">NEXT BEST EVIDENCE: Add an investigation question, then collect evidence that could answer it.</p>
-      <details>
-        <summary>Professional evidence checklist</summary>
-        <ul class="training-prompts">
-          <li>What decision will this evidence help someone make?</li>
-          <li>What fact would a professional otherwise have to visit the site to collect?</li>
-          <li>Can I measure it rather than merely describe it?</li>
-          <li>Have I shown context as well as the close-up?</li>
-          <li>Am I recording a fact, estimate, or hypothesis?</li>
-          <li>Is another photograph adding information or merely repeating the last one?</li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="card" aria-labelledby="record-heading">
-      <h2 id="record-heading">Record what you see</h2>
-      <p class="small">One tap records the current GPS, time, accuracy, heading, and orientation. Photo and Voice Note also preserve the actual evidence.</p>
-      <div id="fieldButtons">
-        <button id="wet" class="wet" disabled>Wet</button>
-        <button id="dry" class="dry" disabled>Dry</button>
-        <button id="blocked" class="blocked" disabled>Blocked Access</button>
-        <button id="high" class="high" disabled>High Ground</button>
-        <button id="homesite" class="homesite" disabled>Potential Homesite</button>
-        <button id="culvert" class="culvert" disabled>Culvert</button>
-        <button id="tree" class="tree" disabled>Specimen Tree</button>
-        <button id="entrance" class="entrance" disabled>Road / Entrance</button>
-        <button id="photo" class="photo" disabled>Take Photo</button>
-        <button id="voice" class="voice" disabled>Start Voice Note</button>
-        <button id="note" class="note" disabled>Free Note</button>
-        <button id="more" class="more" disabled>More Categories</button>
-      </div>
-      <div id="moreCategories" hidden>
-        <h3>More field observations</h3>
-        <div id="moreButtons">
-          <button id="thick" disabled>Thick Brush</button>
-          <button id="open" disabled>Open Area</button>
-          <button id="ditch" disabled>Ditch</button>
-          <button id="timber" disabled>Timber Sample</button>
-          <button id="hazard" disabled>Hazard</button>
-          <button id="wildlife" disabled>Wildlife</button>
-          <button id="other" disabled>Other</button>
-          <button id="thought" class="thought" disabled>Inspector Thought</button>
-          <button id="hypothesis" class="thought" disabled>Inspector Hypothesis</button>
-        </div>
-        <p class="small"><strong>Inspector Thought</strong> records your judgment or theory separately from observed evidence.</p>
-      </div>
-      <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
-    </section>
-
-    <section class="card audit-card" aria-labelledby="audit-heading">
-      <h2 id="audit-heading">Corrections &amp; audit history</h2>
-      <p class="small">Corrections never erase the original. Voided records are excluded from findings but remain permanently recoverable in the package audit history.</p>
-      <p id="auditSummary">No corrections recorded.</p>
-      <div id="auditHistory"></div>
-    </section>
-
-    <section class="card" aria-labelledby="conditions-heading">
-      <h2 id="conditions-heading">Inspection conditions</h2>
-      <p class="small">Optional. Enter what you know; entries save automatically on this phone and are included in the package.</p>
-      <div class="condition-grid">
-        <label>Inspection date<input id="conditionDate" type="date"></label>
-        <label>Weather summary<input id="conditionWeather" type="text" placeholder="Clear, cloudy, light rainâ€¦"></label>
-        <label>Rainfall â€” previous 24 hours<input id="conditionRain24" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
-        <label>Rainfall â€” previous 7 days<input id="conditionRain7" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
-        <label>Rainfall â€” previous 30 days<input id="conditionRain30" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
-        <label>Temperature<input id="conditionTemperature" type="text" inputmode="decimal" placeholder="Â°F or unknown"></label>
-        <label>Ground condition<select id="conditionGround"><option value="">Not entered</option><option>Dry</option><option>Firm</option><option>Soft</option><option>Spongy</option><option>Muddy</option><option>Standing water</option><option>Mixed</option><option>Unknown</option></select></label>
-        <label>Rain during inspection<select id="conditionRainDuring"><option value="">Not entered</option><option value="no">No</option><option value="yes">Yes</option><option value="unknown">Unknown</option></select></label>
-        <label>Conditions evidence<select id="conditionEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
-      </div>
-      <p class="small">Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</p>
-      <label class="water-rule"><input id="allWaterPhotographed" type="checkbox">I photographed every standing-water location I personally observed.</label>
-      <p class="small">This applies only to the walked and visually observed corridor at inspection time. It does not mean unvisited ground or year-round conditions were dry.</p>
-    </section>
-
-    <div id="mapFrame" aria-label="Offline terrain, contours, parcels, GPS track, and markers">
-      <img id="hillshade" src="./assets/usgs-terrain.png" alt="Offline USGS terrain hillshade">
-      <img id="contours" src="./assets/usgs-contours-2ft.png" alt="Offline USGS 2-foot contours">
-      <svg id="overlay" viewBox="0 0 1800 1500" preserveAspectRatio="none" aria-hidden="true"></svg>
-    </div>
-
-    <section class="card" aria-labelledby="coverage-heading">
-      <h2 id="coverage-heading">Coverage estimate</h2>
-      <p class="small">Route proximity estimates where you have been. It never proves conditions in unvisited acreage.</p>
-      <div class="coverage-key">
-        <div class="coverage-well"><span>Well inspected</span><strong id="coverageWell">0%</strong></div>
-        <div class="coverage-light"><span>Lightly inspected</span><strong id="coverageLight">0%</strong></div>
-        <div class="coverage-none"><span>Not inspected</span><strong id="coverageNone">100%</strong></div>
-      </div>
-      <p id="coverageMethod" class="small">Start GPS to calculate parcel coverage.</p>
-    </section>
-
-    <section class="card" aria-labelledby="small-water-heading">
-      <h2 id="small-water-heading">SMALL TRACT â€” OBSERVED WATER CONDITIONS</h2>
-      <p id="smallWaterSummary" class="water-summary">Water evidence will appear here after parcel geometry loads.</p>
-      <details><summary>Map layers</summary><div class="water-layer-controls" aria-label="Small tract water map layers">
-        <label><input type="checkbox" data-water-layer="route" checked>Walked route</label>
-        <label><input type="checkbox" data-water-layer="standing" checked>Standing water</label>
-        <label><input type="checkbox" data-water-layer="flowing" checked>Flowing water</label>
-        <label><input type="checkbox" data-water-layer="minor" checked>Minor depressions</label>
-        <label><input type="checkbox" data-water-layer="larger" checked>Larger pooled areas</label>
-        <label><input type="checkbox" data-water-layer="outlines" checked>Estimated outlines</label>
-        <label><input type="checkbox" data-water-layer="avoidance" checked>Building avoidance</label>
-        <label><input type="checkbox" data-water-layer="dry" checked>High / dry evidence</label>
-        <label><input type="checkbox" data-water-layer="homesites" checked>Candidate homesites</label>
-        <label><input type="checkbox" data-water-layer="terrain" checked>Terrain</label>
-        <label><input type="checkbox" data-water-layer="contours" checked>2-foot contours</label>
-        <label><input type="checkbox" data-water-layer="unknown" checked>Uninspected / unknown</label>
-      </div></details>
-      <div id="smallWaterMapFrame"><svg id="smallWaterMap" viewBox="0 0 1800 1500" role="img" aria-label="Small tract observed water conditions"></svg></div>
-      <p class="small"><strong>Solid blue points are actual photographed water locations.</strong> Shaded or dashed shapes are estimates and are never surveyed wetland boundaries.</p>
-    </section>
-
-    <section class="card field-warning" aria-labelledby="missing-heading">
-      <h2 id="missing-heading">Before you leave</h2>
-      <p class="small">The coach identifies the cheapest evidence that would most increase confidence.</p>
-      <ul id="missingEvidenceList"><li>Add an investigation question.</li></ul>
-      <button id="reviewEvidence" type="button">Review Missing Evidence</button>
-    </section>
-
-    <section class="card metrics" aria-label="Inspection status">
-      <div class="metric"><span>GPS points</span><strong id="pointCount">0</strong></div>
-      <div class="metric"><span>Distance walked</span><strong id="distance">0 ft</strong></div>
-      <div class="metric"><span>GPS accuracy</span><strong id="accuracy">â€”</strong></div>
-      <div class="metric"><span>Current location</span><strong id="location">â€”</strong></div>
-      <div class="metric"><span>Compass</span><strong id="heading">â€”</strong></div>
-      <div class="metric"><span>Photos</span><strong id="photoCount">0</strong></div>
-      <div class="metric"><span>Observations</span><strong id="eventCount">0</strong></div>
-      <div class="metric"><span>Voice notes</span><strong id="voiceCount">0</strong></div>
-      <div class="metric"><span>Elapsed time</span><strong id="elapsedTime">0 min</strong></div>
-      <div class="metric"><span>Active movement</span><strong id="activeTime">0 min</strong></div>
-      <div class="metric"><span>Stopped time</span><strong id="stoppedTime">0 min</strong></div>
-      <div class="metric"><span>Documenting</span><strong id="documentingTime">0 min</strong></div>
-      <div class="metric"><span>Avg. observation spacing</span><strong id="observationSpacing">â€”</strong></div>
-      <div class="metric"><span>Photos / acre</span><strong id="photosPerAcre">â€”</strong></div>
-      <div class="metric"><span>Observations / acre</span><strong id="observationsPerAcre">â€”</strong></div>
-      <div class="metric"><span>Questions answered</span><strong id="questionsAnswered">0</strong></div>
-      <div class="metric"><span>Questions remaining</span><strong id="questionsRemaining">0</strong></div>
-    </section>
-
-    <section class="card" aria-labelledby="export-heading">
-      <h2 id="export-heading">Inspection packages</h2>
-      <p class="small">Nothing is removed after either export. <strong>Finish Inspection</strong> creates the smaller ChatGPT package. The full archive remains available afterward from the saved originals.</p>
-      <div class="export-modes">
-        <div class="export-mode recommended">
-          <h3>CHATGPT ANALYSIS PACKAGE</h3>
-          <p class="small">Decision-ready evidence organized around access, buildability, economic potential, cost and risk, and what makes the property special. Includes strengths, weaknesses, unknowns, confidence rules, cheapest next investigations, and every photo at analysis quality.</p>
-          <span id="reportEstimate" class="package-estimate">Estimatingâ€¦</span>
-          <p class="small">Created when you tap <strong>Finish Inspection</strong>.</p>
-        </div>
-        <div class="export-mode">
-          <h3>FULL EVIDENCE ARCHIVE</h3>
-          <p class="small">Every original photo byte-for-byte, analysis copies, voice notes, raw GPS, orientations, observations, hashes, and map context. Intended for permanent and professional evidence storage.</p>
-          <span id="fullEstimate" class="package-estimate">Estimatingâ€¦</span>
-          <button id="fullArchive" disabled>Create FULL EVIDENCE ARCHIVE</button>
-        </div>
-      </div>
-      <p id="estimateWarning" class="small" hidden></p>
-    </section>
-
-    <section class="card" aria-labelledby="photo-heading">
-      <h2 id="photo-heading">Photographs</h2>
-      <p class="small">Every shown photo has original image bytes stored on this iPhone. Finish Inspection is blocked if any photo cannot be recovered.</p>
-      <button id="retryPendingPhoto" hidden>Retry Pending Photo</button>
-      <div id="gallery"></div>
-      <div id="galleryPager" hidden><button id="galleryPrevious">Previous Photos</button><span id="galleryPageInfo"></span><button id="galleryNext">Next Photos</button></div>
-    </section>
-
-    <section id="packageReady" class="card" hidden>
-      <h2>Inspection package ready</h2>
-      <p id="packageSummary">Everything is in one file.</p>
-      <strong id="packageFilename"></strong>
-      <button id="sharePackage" hidden>Save to Property Intelligence Repository</button>
-      <a id="packageLink" class="button-link" hidden>Save Inspection Package</a>
-      <p id="packageInstruction" class="small"></p>
-      <p class="small">The repository stores the permanent record. ChatGPT analyzes it there. Do not clear the inspection until the repository confirms receipt.</p>
-    </section>
-
-    <section class="card">
-      <h2>Map key</h2>
-      <p><span class="lineKey subjectKey"></span><strong>Red:</strong> subject parcel</p>
-      <p><span class="lineKey neighborKey"></span><strong>White/black:</strong> neighboring parcels</p>
-      <label>2-foot contours <input id="contourOpacity" type="range" min="0" max="1" step=".05" value=".90"></label>
-      <label>USGS terrain <input id="terrainOpacity" type="range" min="0" max="1" step=".05" value="1"></label>
-    </section>
-
-    <section class="card field-warning">
-      <h2>Before entering the property</h2>
-      <p class="small"><strong>Confirm â€œOffline ready.â€</strong> Keep Safari open and keep the iPhone charged. Low Power Mode and a locked screen can pause browser GPS. Carry a battery pack for large parcels.</p>
-    </section>
-
-    <details class="card">
-      <summary>Troubleshooting and recovery</summary>
-      <p class="small">The Finish Inspection button is the normal workflow. These individual data exports are only for technical recovery; they do not include photographs and are not a complete inspection package.</p>
-      <div class="utilityButtons">
-        <button id="backup">Full Archive Backup Now</button>
-        <button id="csv">Recovery CSV</button>
-        <button id="geojson">Recovery GeoJSON</button>
-        <button id="gpx">Recovery GPX</button>
-        <button id="clear">Clear Inspection</button>
-      </div>
-    </details>
-  </main>
-
-  <dialog id="observationDialog">
-    <form method="dialog">
-      <div class="dialog-body">
-        <h2 id="observationTitle">Record observation</h2>
-        <p class="small">Choose any useful details, then tap Save Observation.</p>
-        <div id="wetFields" class="structured-fields" hidden>
-          <label>Water depth</label>
-          <div class="choice-grid" id="wetDepthChoices">
-            <label><input type="radio" name="wetDepth" value="less than 1 inch">Less than 1 inch</label>
-            <label><input type="radio" name="wetDepth" value="1â€“3 inches">1â€“3 inches</label>
-            <label><input type="radio" name="wetDepth" value="4â€“6 inches">4â€“6 inches</label>
-            <label><input type="radio" name="wetDepth" value="7â€“12 inches">7â€“12 inches</label>
-            <label><input type="radio" name="wetDepth" value="more than 12 inches">More than 12 inches</label>
-            <label><input type="radio" name="wetDepth" value="exact">Exact number</label>
-            <label><input type="radio" name="wetDepth" value="unknown" checked>Unknown</label>
-          </div>
-          <label id="wetExactLabel" hidden>Exact depth in inches<input id="wetExactDepth" type="number" min="0" step="0.25" inputmode="decimal"></label>
-          <label>Depth basis<select id="wetDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
-          <label>Water condition<select id="wetWaterType"><option value="">Not entered</option><option>Still</option><option>Flowing</option><option>Ditch water</option><option>Across roadway</option><option>Behind berm</option></select></label>
-          <label>Extent note<input id="wetExtent" type="text" placeholder="Approximate area or limits"></label>
-        </div>
-        <div id="dryFields" class="structured-fields" hidden>
-          <label>Dry-ground detail<select id="dryCondition"><option value="">Not entered</option><option>Dry surface</option><option>Firm</option><option>Soft or spongy</option><option>Pine-needle floor</option><option>Possible homesite</option></select></label>
-        </div>
-        <div id="blockedFields" class="structured-fields" hidden>
-          <label>Blocked by<select id="blockedReason"><option value="">Not entered</option><option>Water</option><option>Brush</option><option>Ditch</option><option>Fence</option><option>Unsafe</option><option>Boundary</option><option>Other</option></select></label>
-        </div>
-        <label>Evidence classification<select id="observationEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
-        <label>Optional note<textarea id="observationNote" placeholder="Short field note"></textarea></label>
-        <div class="choice-grid"><label><input id="observationPhoto" type="checkbox">Take a photograph after saving</label></div>
-      </div>
-      <div class="dialog-actions">
-        <button id="cancelObservation" class="cancel" value="cancel">Cancel</button>
-        <button id="saveObservation" type="button">Save Observation</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="departureDialog">
-    <form method="dialog">
-      <div class="dialog-body">
-        <h2>Before you leave the property</h2>
-        <p id="departureSummary" class="small"></p>
-        <ol id="departureActions"></ol>
-        <p class="small"><strong>Finish anyway only when returning is safer or the remaining uncertainty is acceptable.</strong> Unknown acreage will remain labeled unknown in the report.</p>
-      </div>
-      <div class="dialog-actions">
-        <button id="continueInspecting" class="cancel" value="cancel">Return to Inspection</button>
-        <button id="finishAfterReview" type="button">Finish &amp; Create Package</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="photoExplanationDialog">
-    <div class="dialog-body">
-      <h2>Explain this photograph</h2>
-      <p id="photoExplanationPrompt">Why did you take this picture?</p>
-      <p id="photoExplanationState" class="small">Starting voice recordingâ€¦</p>
-    </div>
-    <div class="dialog-actions">
-      <button id="stopPhotoExplanation" type="button">Stop &amp; Save Explanation</button>
-      <button id="retryPhotoExplanation" class="cancel" type="button" hidden>Retry Voice Explanation</button>
-      <button id="skipPhotoExplanation" class="cancel" type="button">Skip</button>
-      <button id="laterPhotoExplanation" class="cancel" type="button">Explain Later</button>
-    </div>
-  </dialog>
-
-  <dialog id="photoMeaningDialog">
-    <div class="dialog-body">
-      <h2>What does this photograph mean?</h2>
-      <p class="small">Use short answers. These prevent a nearby button press from being mistaken for the photograph's meaning.</p>
-      <label>What does it show?<select id="photoMeaningSubject"><option value="">Choose one</option><option>Access or road</option><option>Drainage or water</option><option>Homesite or buildability</option><option>Timber or tree</option><option>Hazard or cost concern</option><option>Boundary or relationship</option><option>General context</option><option>Other</option></select></label>
-      <label>Measurement status<select id="photoMeaningMeasurement"><option>Not measured</option><option>Measured</option><option>Estimated</option><option>Scale visible in photograph</option><option>Unknown</option></select></label>
-      <label>Area represented<select id="photoMeaningExtent"><option>Single point or object</option><option>Small localized area</option><option>Part of the tract</option><option>Broad site condition</option><option>Unknown</option></select></label>
-      <label>Why might it matter?<select id="photoMeaningImportance"><option>Access decision</option><option>Buildability decision</option><option>Economic or timber decision</option><option>Cost or risk decision</option><option>Distinctive property feature</option><option>Professional verification</option><option>General reference</option></select></label>
-      <fieldset><legend>Four-photo evidence role</legend><div class="evidence-role-grid">
-        <label><input type="checkbox" name="photoEvidenceRole" value="context">Context</label>
-        <label><input type="checkbox" name="photoEvidenceRole" value="evidence">Evidence</label>
-        <label><input type="checkbox" name="photoEvidenceRole" value="measurement">Measurement</label>
-        <label><input type="checkbox" name="photoEvidenceRole" value="relationship">Relationship</label>
-      </div></fieldset>
-      <label>Optional short clarification<textarea id="photoMeaningNote" placeholder="What should another person understand immediately?"></textarea></label>
-    </div>
-    <div class="dialog-actions">
-      <button id="savePhotoMeaning" type="button">Save Photo Meaning</button>
-      <button id="photoMeaningLater" class="cancel" type="button">Complete Later</button>
-    </div>
-  </dialog>
-
-  <dialog id="correctionDialog">
-    <div class="dialog-body">
-      <h2>Undo or correct a record</h2>
-      <p class="small"><strong>The original will remain unchanged.</strong> This creates a dated audit entry and changes only how reports interpret the record.</p>
-      <label>Record<select id="correctionTarget"></select></label>
-      <label>Status or reason<select id="correctionReason"><option>Correct</option><option>Accidental button press</option><option>Wrong category</option><option>Wrong inspection area</option><option>Duplicate</option><option>Needs clarification</option><option>Withdrawn</option></select></label>
-      <label>Correct category<select id="correctionCategory"><option value="">No category change</option><option value="wet">Wet</option><option value="dry">Dry</option><option value="blocked">Blocked Access</option><option value="high">High Ground</option><option value="homesite">Potential Homesite</option><option value="culvert">Culvert</option><option value="tree">Specimen Tree</option><option value="entrance">Road / Entrance</option><option value="ditch">Ditch</option><option value="timber">Timber</option><option value="hazard">Hazard</option><option value="other">Other</option></select></label>
-      <label>Correct inspection area<select id="correctionArea"></select></label>
-      <label>Clarification<textarea id="correctionClarification" placeholder="What should the corrected record mean?"></textarea></label>
-      <label>Inspector identity<input id="correctionInspector" type="text" autocomplete="name" value="Field Inspector"></label>
-    </div>
-    <div class="dialog-actions">
-      <button id="cancelCorrection" class="cancel" type="button">Cancel</button>
-      <button id="saveCorrection" type="button">Save Permanent Correction</button>
-    </div>
-  </dialog>
-
-  <dialog id="hypothesisDialog">
-    <div class="dialog-body">
-      <h2>Inspector Hypothesis</h2>
-      <p class="small">A hypothesis is your interpretation, not an observed fact and not a construction recommendation.</p>
-      <label>Hypothesis statement<textarea id="hypothesisStatement" placeholder="What do you think may be happening?"></textarea></label>
-      <label>Triggering observations<select id="hypothesisObservations" multiple size="5"></select></label>
-      <label>Supporting photographs<select id="hypothesisPhotos" multiple size="5"></select></label>
-      <label>Contradicting evidence records<select id="hypothesisContradictions" multiple size="4"></select></label>
-      <label>Exact question needing verification<textarea id="hypothesisQuestion" placeholder="What exact question should a professional answer?"></textarea></label>
-      <label>Professional type<select id="hypothesisProfessional"><option>civil/drainage engineer</option><option>surveyor</option><option>builder</option><option>forester</option><option>soil/septic professional</option><option>other professional</option></select></label>
-      <label>Cheapest next evidence-gathering step<textarea id="hypothesisNextStep" placeholder="Measurement, record check, targeted return visit, or narrow professional question"></textarea></label>
-      <label>Contradicting evidence note, if any<textarea id="hypothesisContradiction" placeholder="Record what could disprove this idea"></textarea></label>
-    </div>
-    <div class="dialog-actions">
-      <button id="cancelHypothesis" class="cancel" type="button">Cancel</button>
-      <button id="saveHypothesis" type="button">Save as Hypothesis</button>
-    </div>
-  </dialog>
-
-  <dialog id="waterClassificationDialog">
-    <div class="dialog-body">
-      <h2>Does this photograph show water?</h2>
-      <p class="small">Confirm what you personally observed. The app will never silently classify water.</p>
-      <div id="waterTypeChoices" class="water-choice-grid">
-        <button type="button" data-water-choice="standing">Yes â€” Standing Water</button>
-        <button type="button" data-water-choice="flowing">Yes â€” Flowing Water</button>
-        <button type="button" data-water-choice="ditch">Yes â€” Ditch</button>
-        <button type="button" data-water-choice="creek_stream">Yes â€” Creek or Stream</button>
-        <button type="button" data-water-choice="other">Yes â€” Other Water</button>
-        <button type="button" data-water-choice="no" class="cancel">No</button>
-        <button type="button" data-water-choice="unsure" class="cancel">Unsure</button>
-      </div>
-      <div id="waterMeasurementFields" class="structured-fields" hidden>
-        <label>Depth<select id="photoWaterDepth"><option value="unknown">Unknown</option><option value="less_than_1_inch">Less than 1 inch</option><option value="1-3_inches">1â€“3 inches</option><option value="3-7_inches">3â€“7 inches</option><option value="8-12_inches">8â€“12 inches</option><option value="more_than_12_inches">More than 12 inches</option><option value="exact">Exact entry</option></select></label>
-        <label id="photoWaterExactLabel" hidden>Exact depth in inches<input id="photoWaterExact" type="number" min="0" step="0.25" inputmode="decimal"></label>
-        <label>Measurement basis<select id="photoWaterBasis"><option>Unknown</option><option>Estimated</option><option>Measured</option></select></label>
-        <label>Approximate width in feet<input id="photoWaterWidth" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
-        <label>Approximate length in feet<input id="photoWaterLength" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
-        <label>Water behavior<select id="photoWaterBehavior"><option value="unknown">Unknown</option><option value="isolated_depression">Isolated depression</option><option value="connected_pooling">Connected pooling</option><option value="flowing">Flowing</option><option value="apparent_creek_channel">Apparent creek channel</option><option value="ditch">Ditch</option></select></label>
-        <button id="saveWaterClassification" type="button">Save Water Evidence</button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="waterPhotoDialog">
-    <div class="dialog-body">
-      <button id="closeWaterPhoto" class="cancel" type="button">Close</button>
-      <h2 id="waterPhotoTitle">Water photograph</h2>
-      <img id="waterPhotoImage" alt="Water evidence photograph">
-      <p id="waterPhotoDetails" class="small"></p>
-      <audio id="waterPhotoAudio" controls hidden></audio>
-    </div>
-  </dialog>
-
-  <script src="./inspection-coaching.js?v=3.8.0"></script>
-  <script src="./water-intelligence.js?v=3.8.0"></script>
-  <script src="./evidence-governance.js?v=3.8.0"></script>
-  <script src="./inspection-package.js?v=3.8.0"></script>
-  <script src="./idb-recovery.js?v=3.8.0"></script>
-  <script src="./app.js?v=3.8.0"></script>
-</body>
-</html>
+    #correctionControls { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+    #undoLast, #correctRecord { width:100%; min-height:64px; border:3px solid var(--focus); }
+    #undoLast { background:#9a1f16; }
+    #correctRecord { background:#7a3900; }
+    #evidenceSetBanner { margin-top:10px; padding:12px; border:4px solid #ffe34f; border-radius:8px; background:#162f48; color:#fff; }
+    #evidenceSetBanner[hidden] { display:none; }
+    #evidenceSetBanner strong, #evidenceSetBanner span { display:block; }
+    #finishEvidenceSet { width:100%; margin-top:8px; background:#111; border:3px solid var(--focus); }
+    #startPhotoGroup { background:#153f67; }
+    #evidenceSetList { display:grid; gap:8px; margin-top:8px; }
+    .evidence-set-row { border:2px solid #65727c; border-radius:8px; padding:9px; background:#f1f6fa; }
+    .suggestion-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; marginóÎõ¶‰Ëkºwµç}½ÁÑ¥½¸øñ½ÁÑ¥½¸ù¥ÍÑ¥¹Ñ¥Ù”ÁÉ½Á•ÉÑä™•…ÑÕÉ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùAÉ½™•ÍÍ¥½¹…°Ù•É¥™¥…Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù•¹•É…°É•™•É•¹”ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ™¥•±‘Í•Ğøñ±••¹ù½ÕÈµÁ¡½Ñ¼•Ù¥‘•¹”É½±”ğ½±••¹øñ‘¥Ø±…ÍÌô‰•Ù¥‘•¹”µÉ½±”µÉ¥ˆø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕĞÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰Á¡½Ñ½Ù¥‘•¹•I½±”ˆÙ…±Õ”ô‰½¹Ñ•áĞˆù½¹Ñ•áĞğ½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕĞÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰Á¡½Ñ½Ù¥‘•¹•I½±”ˆÙ…±Õ”ô‰•Ù¥‘•¹”ˆùÙ¥‘•¹”ğ½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕĞÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰Á¡½Ñ½Ù¥‘•¹•I½±”ˆÙ…±Õ”ô‰µ•…ÍÕÉ•µ•¹Ğˆù5•…ÍÕÉ•µ•¹Ğğ½±…‰•°ø(€€€€€€€€ñ±…‰•°øñ¥¹ÁÕĞÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰Á¡½Ñ½Ù¥‘•¹•I½±”ˆÙ…±Õ”ô‰É•±…Ñ¥½¹Í¡¥ÀˆùI•±…Ñ¥½¹Í¡¥Àğ½±…‰•°ø(€€€€€€ğ½‘¥Øøğ½™¥•±‘Í•Ğø(€€€€€€ñ±…‰•°ù=ÁÑ¥½¹…°Í¡½ÉĞ±…É¥™¥…Ñ¥½¸ñÑ•áÑ…É•„¥ô‰Á¡½Ñ½5•…¹¥¹9½Ñ”ˆÁ±…•¡½±‘•Èô‰]¡…ĞÍ¡½Õ±…¹½Ñ¡•ÈÁ•ÉÍ½¸Õ¹‘•ÉÍÑ…¹¥µµ•‘¥…Ñ•±äüˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ìˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰Í…Ù•A¡½Ñ½5•…¹¥¹œˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùM…Ù”A¡½Ñ¼5•…¹¥¹œğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰Á¡½Ñ½5•…¹¥¹1…Ñ•Èˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù½µÁ±•Ñ”1…Ñ•Èğ½‰ÕÑÑ½¸ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰½ÉÉ•Ñ¥½¹¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ ÈùU¹‘¼½È½ÉÉ•Ğ„É•½Éğ½ Èø(€€€€€€ñÀ±…ÍÌô‰Íµ…±°ˆøñÍÑÉ½¹œùQ¡”½É¥¥¹…°İ¥±°É•µ…¥¸Õ¹¡…¹•¸ğ½ÍÑÉ½¹œøQ¡¥ÌÉ•…Ñ•Ì„‘…Ñ•…Õ‘¥Ğ•¹ÑÉä…¹¡…¹•Ì½¹±ä¡½ÜÉ•Á½ÉÑÌ¥¹Ñ•ÉÁÉ•ĞÑ¡”É•½É¸ğ½Àø(€€€€€€ñ±…‰•°ùI•½ÉñÍ•±•Ğ¥ô‰½ÉÉ•Ñ¥½¹Q…É•Ğˆøğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ùMÑ…ÑÕÌ½ÈÉ•…Í½¸ñÍ•±•Ğ¥ô‰½ÉÉ•Ñ¥½¹I•…Í½¸ˆøñ½ÁÑ¥½¸ù½ÉÉ•Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù½ÉÉ•Ñ•Ù…±Õ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù¥‘•¹Ñ…°‰ÕÑÑ½¸ÁÉ•ÍÌğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]É½¹œ…Ñ•½Éäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]É½¹œ¥¹ÍÁ•Ñ¥½¸…É•„ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]É½¹œÅÕ•ÍÑ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÕÁ±¥…Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9••‘Ì±…É¥™¥…Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]¥Ñ¡‘É…İ¸ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù½ÉÉ•Ğ…Ñ•½ÉäñÍ•±•Ğ¥ô‰½ÉÉ•Ñ¥½¹…Ñ•½Éäˆøñ½ÁÑ¥½¸Ù…±Õ”ôˆˆù9¼…Ñ•½Éä¡…¹”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰İ•Ğˆù]•Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰‘ÉäˆùÉäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰‰±½­•ˆù	±½­••ÍÌğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰¡¥ ˆù!¥ É½Õ¹ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰¡½µ•Í¥Ñ”ˆùA½Ñ•¹Ñ¥…°!½µ•Í¥Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰Õ±Ù•ÉĞˆùÕ±Ù•ÉĞğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰ÑÉ•”ˆùMÁ•¥µ•¸QÉ•”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰•¹ÑÉ…¹”ˆùI½…€¼¹ÑÉ…¹”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰‘¥Ñ ˆù¥Ñ ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰Ñ¥µ‰•ÈˆùQ¥µ‰•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰¡…é…Éˆù!…é…Éğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰½Ñ¡•Èˆù=Ñ¡•Èğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù½ÉÉ•Ğ¥¹ÍÁ•Ñ¥½¸…É•„ñÍ•±•Ğ¥ô‰½ÉÉ•Ñ¥½¹É•„ˆøğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù½ÉÉ•Ğ¥¹Ù•ÍÑ¥…Ñ¥½¸ÅÕ•ÍÑ¥½¸ñÍ•±•Ğ¥ô‰½ÉÉ•Ñ¥½¹EÕ•ÍÑ¥½¸ˆøñ½ÁÑ¥½¸Ù…±Õ”ôˆˆù9¼ÅÕ•ÍÑ¥½¸¡…¹”ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù±…É¥™¥…Ñ¥½¸ñÑ•áÑ…É•„¥ô‰½ÉÉ•Ñ¥½¹±…É¥™¥…Ñ¥½¸ˆÁ±…•¡½±‘•Èô‰]¡…ĞÍ¡½Õ±Ñ¡”½ÉÉ•Ñ•É•½Éµ•…¸üˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ñ±…‰•°ù%¹ÍÁ•Ñ½È¥‘•¹Ñ¥Ñäñ¥¹ÁÕĞ¥ô‰½ÉÉ•Ñ¥½¹%¹ÍÁ•Ñ½ÈˆÑåÁ”ô‰Ñ•áĞˆ…ÕÑ½½µÁ±•Ñ”ô‰¹…µ”ˆÙ…±Õ”ô‰¥•±%¹ÍÁ•Ñ½Èˆøğ½±…‰•°ø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ìˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰…¹•±½ÉÉ•Ñ¥½¸ˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰Í…Ù•½ÉÉ•Ñ¥½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùM…Ù”A•Éµ…¹•¹Ğ½ÉÉ•Ñ¥½¸ğ½‰ÕÑÑ½¸ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰Õ¹‘½¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ ÈùU¹‘¼±…ÍĞ…Ñ¥½¸üğ½ Èø(€€€€€€ñÀ¥ô‰Õ¹‘½•ÍÉ¥ÁÑ¥½¸ˆù9½Ñ¡¥¹œİ¥±°‰”‘•±•Ñ•¸Q¡”½É¥¥¹…°É•µ…¥¹Ì¥¸…Õ‘¥Ğ¡¥ÍÑ½Éä¸ğ½Àø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ìˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰­••Á1…ÍÑÑ¥½¸ˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù9¼°­••À¥Ğğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰½¹™¥ÉµU¹‘½1…ÍĞˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùe•Ì°Õ¹‘¼¥Ğğ½‰ÕÑÑ½¸ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰•Ù¥‘•¹•M•Ñ¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ ÈùMÑ…ÉĞA¡½Ñ¼É½ÕÀğ½ Èø(€€€€€€ñÀ±…ÍÌô‰Íµ…±°ˆù¡½½Í”Ñ¡”½¹”ÍÕ‰©•ĞÑ¡•Í”Á¡½Ñ½É…Á¡Ìİ¥±°‘½Õµ•¹Ğ¸ğ½Àø(€€€€€€ñ±…‰•°ùMÕ‰©•ĞÑåÁ”ñÍ•±•Ğ¥ô‰•Ù¥‘•¹•M•ÑQåÁ”ˆøñ½ÁÑ¥½¸ù]…Ñ•ÈÉ•„ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù%¹‘¥Ù¥‘Õ…°QÉ•”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùQÉ•”É½ÕÀ€¼…¹½Áäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùA½Ñ•¹Ñ¥…°!½µ•Í¥Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÉ…¥¹…”•…ÑÕÉ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùI½…€¼•ÍÌğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù	½Õ¹‘…Éä5…É­•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùY¥•Üğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùY••Ñ…Ñ¥½¸€¼±•…É¥¹œğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù=Ñ¡•Èğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù=ÁÑ¥½¹…°ÍÕ‰©•Ğ¹…µ”ñ¥¹ÁÕĞ¥ô‰•Ù¥‘•¹•M•Ñ9…µ”ˆÁ±…•¡½±‘•Èô‰Q¡”…ÁÀİ¥±°É•…Ñ”„Á•Éµ…¹•¹ĞÉ½ÕÀ¹…µ”ˆøğ½±…‰•°ø(€€€€€€ñ‘¥Ø¥ô‰ÑÉ••M•Ñ¥•±‘Ìˆ±…ÍÌô‰ÍÑÉÕÑÕÉ•µ™¥•±‘Ìˆ¡¥‘‘•¸ø(€€€€€€€€ñ±…‰•°ù1¥­•±äÍÁ•¥•Ìñ¥¹ÁÕĞ¥ô‰ÑÉ••MÁ•¥•ÌˆÁ±…•¡½±‘•Èô‰U¹­¹½İ¸¥Ì…•ÁÑ…‰±”ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùMÁ•¥•Ì½¹™¥‘•¹”ñÍ•±•Ğ¥ô‰ÑÉ••MÁ•¥•Í½¹™¥‘•¹”ˆøñ½ÁÑ¥½¸ù±½Üğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùµ•‘¥Õ´ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù¡¥ ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù%‘•¹Ñ¥™¥…Ñ¥½¸ÍÑ…ÑÕÌñÍ•±•Ğ¥ô‰ÑÉ••MÁ•¥•ÍMÑ…ÑÕÌˆøñ½ÁÑ¥½¸ùU¹­¹½İ¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù%¹ÍÁ•Ñ½È½¹™¥Éµ•ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùAÉ½‰…‰±”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùA½ÍÍ¥‰±”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùAÉ½™•ÍÍ¥½¹…°¥‘•¹Ñ¥™¥…Ñ¥½¸É•ÅÕ•ÍÑ•ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù…¸å½Ô±•…É±äÁ¡½Ñ½É…Á µ½ÍĞ½˜Ñ¡¥ÌÑÉ•”™É½´İ¡•É”å½Ô…¸Í…™•±äÍÑ…¹üñÍ•±•Ğ¥ô‰ÑÉ••Y¥Í¥‰¥±¥Ñäˆøñ½ÁÑ¥½¸ùe•Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9¼ƒŠP…¹½Áä‰±½­Ì¥Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9¼ƒŠP¹•…É‰äÑÉ••Ì‰±½¬¥Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9¼ƒŠP‰ÉÕÍ ‰±½­Ì¥Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9¼ƒŠPİ…Ñ•È½ÈÕ¹Í…™”É½Õ¹‰±½­Ì¥Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù9¼ƒŠPÁÉ½Á•ÉÑä‰½Õ¹‘…Éä½È…•ÍÌÁÉ•Ù•¹ÑÌ¥Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùU¹ÍÕÉ”ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù	 ¥¸¥¹¡•Ìñ¥¹ÁÕĞ¥ô‰ÑÉ••‰ ˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÀ¸Äˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù	 ‰…Í¥ÌñÍ•±•Ğ¥ô‰ÑÉ••‰¡	…Í¥Ìˆøñ½ÁÑ¥½¸ù9½Ğ•¹Ñ•É•ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù5•…ÍÕÉ•ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÍÑ¥µ…Ñ•ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùQ½Ñ…°µ¡•¥¡Ğ•ÍÑ¥µ…Ñ”€¡™••Ğ¤ñ¥¹ÁÕĞ¥ô‰ÑÉ••!•¥¡ĞˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÄˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùUÍ…‰±”µ±½œ•ÍÑ¥µ…Ñ”€¡™••Ğ¤ñ¥¹ÁÕĞ¥ô‰ÑÉ••1½!•¥¡ĞˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÄˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù½¹‘¥Ñ¥½¸ñÍ•±•Ğ¥ô‰ÑÉ••½¹‘¥Ñ¥½¸ˆøñ½ÁÑ¥½¸ù±¥Ù”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù‘•…ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù‘…µ…•ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù±•…¹¥¹œğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù™½É­•ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùAÕÉÁ½Í”ñÍ•±•Ğ¥ô‰ÑÉ••AÕÉÁ½Í”ˆøñ½ÁÑ¥½¸ùÍÁ•¥•Ì¥‘•¹Ñ¥™¥…Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÑ¥µ‰•ÈÍ…µÁ±”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù±…¹‘Í…Á”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÁÉ•Í•ÉÙ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù¡…é…Éğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù™½É•ÍĞ¡…É…Ñ•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÕ¹­¹½İ¸ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù%¹ÍÁ•Ñ½È•áÁ±…¹…Ñ¥½¸ñÑ•áÑ…É•„¥ô‰ÑÉ••áÁ±…¹…Ñ¥½¸ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ‘¥Ø¥ô‰ÑÉ••Ù¥‘•¹•A±…¸ˆ±…ÍÌô‰™¥•±µİ…É¹¥¹œÍµ…±°ˆøğ½‘¥Øø(€€€€€€ğ½‘¥Øø(€€€€€€ñ‘¥Ø¥ô‰™½É•ÍÑM•Ñ¥•±‘Ìˆ±…ÍÌô‰ÍÑÉÕÑÕÉ•µ™¥•±‘Ìˆ¡¥‘‘•¸ø(€€€€€€€€ñ±…‰•°ù…¹½ÁäñÍ•±•Ğ¥ô‰™½É•ÍÑ…¹½Áäˆøñ½ÁÑ¥½¸ù½Á•¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùµ½‘•É…Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù±½Í•ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùQÉ•”ÍÁ…¥¹œñ¥¹ÁÕĞ¥ô‰™½É•ÍÑMÁ…¥¹œˆÁ±…•¡½±‘•Èô‰ÁÁÉ½á¥µ…Ñ”ÍÁ…¥¹œˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù½µ¥¹…¹ĞÑÉÕ¹¬µÍ¥é”±…ÍÌñ¥¹ÁÕĞ¥ô‰™½É•ÍÑQÉÕ¹­M¥é”ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùU¹‘•ÉÍÑ½ÉäñÍ•±•Ğ¥ô‰™½É•ÍÑU¹‘•ÉÍÑ½Éäˆøñ½ÁÑ¥½¸ù±¥¡Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùµ½‘•É…Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù‘•¹Í”ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù]…±­…‰¥±¥ÑäñÍ•±•Ğ¥ô‰™½É•ÍÑ]…±­…‰¥±¥Ñäˆøñ½ÁÑ¥½¸ù•…Íäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùµ½‘•É…Ñ”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù‘¥™™¥Õ±Ğğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù5…ÑÕÉ”ÑÉ••ÌÑ¡…Ğ½Õ±É•µ…¥¸ñÑ•áÑ…É•„¥ô‰™½É•ÍÑAÉ•Í•ÉÙ”ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù	ÉÕÍ ½Íµ…±°ÍÑ•µÌ±¥­•±äÑ¼É•ÅÕ¥É”±•…É¥¹œñÑ•áÑ…É•„¥ô‰™½É•ÍÑ±•…É¥¹œˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ğ½‘¥Øø(€€€€€€ñ‘¥Ø¥ô‰¡½µ•Í¥Ñ•M•Ñ¥•±‘Ìˆ±…ÍÌô‰ÍÑÉÕÑÕÉ•µ™¥•±‘Ìˆ¡¥‘‘•¸ø(€€€€€€€€ñ±…‰•°ùÍÑ¥µ…Ñ•™½½ÑÁÉ¥¹Ğ½È½ÕÑ±¥¹”ñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•½½ÑÁÉ¥¹Ğˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùY¥•Ü‘¥É•Ñ¥½¸ñ¥¹ÁÕĞ¥ô‰¡½µ•Í¥Ñ•Y¥•İ¥É•Ñ¥½¸ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù•ÍÌ‘¥É•Ñ¥½¸ñ¥¹ÁÕĞ¥ô‰¡½µ•Í¥Ñ••ÍÍ¥É•Ñ¥½¸ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùÉ½Õ¹½‰Í•ÉÙ…Ñ¥½¹ÌñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•É½Õ¹ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù5…ÑÕÉ”ÑÉ••ÌÑ¼ÁÉ•Í•ÉÙ”ñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•AÉ•Í•ÉÙ”ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù	ÉÕÍ ½ÈÑÉ••ÌÑ¼É•µ½Ù”ñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•I•µ½Ù”ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù9•…É‰äİ…Ñ•È•Ù¥‘•¹”ñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•]…Ñ•Èˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù]¡äÑ¡¥Ì±½…Ñ¥½¸İ…ÌÍ•±•Ñ•ñÑ•áÑ…É•„¥ô‰¡½µ•Í¥Ñ•áÁ±…¹…Ñ¥½¸ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ğ½‘¥Øø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ìˆøñ‰ÕÑÑ½¸¥ô‰…¹•±Ù¥‘•¹•M•Ğˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ğ½‰ÕÑÑ½¸øñ‰ÕÑÑ½¸¥ô‰É•…Ñ•Ù¥‘•¹•M•ĞˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùMÑ…ÉĞQ¡¥ÌMÕ‰©•Ğğ½‰ÕÑÑ½¸øğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰É½ÕÁA¡½Ñ½¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ ÈùM…µ”ÍÕ‰©•Ğüğ½ Èø(€€€€€€ñÀ¥ô‰É½ÕÁA¡½Ñ½AÉ½µÁĞˆù¡½½Í”Ñ¡¥ÌÁ¡½Ñ½É…Á ÌÉ½±”…¹İ¡…ĞÑ¼‘¼¹•áĞ¸ğ½Àø(€€€€€€ñ±…‰•°ùA¡½Ñ½É…Á É½±”ñÍ•±•Ğ¥ô‰É½ÕÁA¡½Ñ½I½±”ˆøñ½ÁÑ¥½¸ù½¹Ñ•áĞğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù±½Í”µÕÀğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù5•…ÍÕÉ•µ•¹Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùI•±…Ñ¥½¹Í¡¥ÀÑ¼ÍÕÉÉ½Õ¹‘¥¹Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù=ÁÁ½Í¥Ñ”‘¥É•Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]¡½±”ÍÕ‰©•Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù•Ñ…¥°ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù	•™½É”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù™Ñ•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù]¡½±”ÑÉ•”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù	…É¬ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù	…Í”€¼É½Õ¹ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù1½İ•ÈÑÉÕ¹¬Ñ¼™¥ÉÍĞ™½É¬ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÉ½İ¸€¼…¹½Áäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùY¥Í¥‰±”É½İ¸Í•µ•¹Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù½¹¹•Ñ•‰É…¹ ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù1•…˜ÕÁÁ•ÈÍÕÉ™…”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù1•…˜Õ¹‘•ÉÍ¥‘”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùQİ¥œ€¼Ñ•Éµ¥¹…°‰Õğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÉÕ¥Ğ€¼Í••€¼½¹”€¼™±½İ•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùM…±”Á¡½Ñ½É…Á ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùY¥Í¥‰±”‘•™•Ğğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùI½½Ğ½¹‘¥Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùQ…É•ÑÌğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùMÕÉÉ½Õ¹‘¥¹œ…¹½Áäğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸øÌØÀµ‘•É•”Á…¹½É…µ„ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùQÉ…¹Í¥Ñ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù=Ñ¡•Èğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°¥ô‰±•…™AÉ½Ù•¹…¹•1…‰•°ˆ¡¥‘‘•¸ùÉ”å½Ô½¹™¥‘•¹ĞÑ¡¥Ì±•…˜…µ”™É½´Ñ¡¥ÌÑÉ•”üñÍ•±•Ğ¥ô‰±•…™AÉ½Ù•¹…¹”ˆøñ½ÁÑ¥½¸ùe•ÌƒŠPİ…Ñ¡•¥Ğ™…±°½ÈÑÉ…•¥ĞÑ¼Ñ¡¥ÌÑÉ•”ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùAÉ½‰…‰±äğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùU¹ÍÕÉ”ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹ÌˆÍÑå±”ô‰É¥µÑ•µÁ±…Ñ”µ½±Õµ¹ÌèÅ™È€Å™Èˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰½¹Ñ¥¹Õ•Ù¥‘•¹•M•ĞˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùM…µ”ÍÕ‰©•Ğğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰™¥¹¥Í¡™Ñ•ÉÉ½ÕÁA¡½Ñ¼ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù¹ÍÕ‰©•Ğğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰¹•İ™Ñ•ÉÉ½ÕÁA¡½Ñ¼ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù9•ÜÍÕ‰©•Ğğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰É•µ½Ù•É½µÙ¥‘•¹•M•Ğˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùI•µ½Ù”™É½´É½ÕÀğ½‰ÕÑÑ½¸ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰¡åÁ½Ñ¡•Í¥Í¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ Èù%¹ÍÁ•Ñ½È!åÁ½Ñ¡•Í¥Ìğ½ Èø(€€€€€€ñÀ±…ÍÌô‰Íµ…±°ˆù¡åÁ½Ñ¡•Í¥Ì¥Ìå½ÕÈ¥¹Ñ•ÉÁÉ•Ñ…Ñ¥½¸°¹½Ğ…¸½‰Í•ÉÙ•™…Ğ…¹¹½Ğ„½¹ÍÑÉÕÑ¥½¸É•½µµ•¹‘…Ñ¥½¸¸ğ½Àø(€€€€€€ñ±…‰•°ù!åÁ½Ñ¡•Í¥ÌÍÑ…Ñ•µ•¹ĞñÑ•áÑ…É•„¥ô‰¡åÁ½Ñ¡•Í¥ÍMÑ…Ñ•µ•¹ĞˆÁ±…•¡½±‘•Èô‰]¡…Ğ‘¼å½ÔÑ¡¥¹¬µ…ä‰”¡…ÁÁ•¹¥¹œüˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ñ±…‰•°ùQÉ¥•É¥¹œ½‰Í•ÉÙ…Ñ¥½¹ÌñÍ•±•Ğ¥ô‰¡åÁ½Ñ¡•Í¥Í=‰Í•ÉÙ…Ñ¥½¹ÌˆµÕ±Ñ¥Á±”Í¥é”ôˆÔˆøğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ùMÕÁÁ½ÉÑ¥¹œÁ¡½Ñ½É…Á¡ÌñÍ•±•Ğ¥ô‰¡åÁ½Ñ¡•Í¥ÍA¡½Ñ½ÌˆµÕ±Ñ¥Á±”Í¥é”ôˆÔˆøğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù½¹ÑÉ…‘¥Ñ¥¹œ•Ù¥‘•¹”É•½É‘ÌñÍ•±•Ğ¥ô‰¡åÁ½Ñ¡•Í¥Í½¹ÑÉ…‘¥Ñ¥½¹ÌˆµÕ±Ñ¥Á±”Í¥é”ôˆĞˆøğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ùá…ĞÅÕ•ÍÑ¥½¸¹••‘¥¹œÙ•É¥™¥…Ñ¥½¸ñÑ•áÑ…É•„¥ô‰¡åÁ½Ñ¡•Í¥ÍEÕ•ÍÑ¥½¸ˆÁ±…•¡½±‘•Èô‰]¡…Ğ•á…ĞÅÕ•ÍÑ¥½¸Í¡½Õ±„ÁÉ½™•ÍÍ¥½¹…°…¹Íİ•Èüˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ñ±…‰•°ùAÉ½™•ÍÍ¥½¹…°ÑåÁ”ñÍ•±•Ğ¥ô‰¡åÁ½Ñ¡•Í¥ÍAÉ½™•ÍÍ¥½¹…°ˆøñ½ÁÑ¥½¸ù¥Ù¥°½‘É…¥¹…”•¹¥¹••Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÍÕÉÙ•å½Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù‰Õ¥±‘•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù™½É•ÍÑ•Èğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÍ½¥°½Í•ÁÑ¥ŒÁÉ½™•ÍÍ¥½¹…°ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù½Ñ¡•ÈÁÉ½™•ÍÍ¥½¹…°ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€ñ±…‰•°ù¡•…Á•ÍĞ¹•áĞ•Ù¥‘•¹”µ…Ñ¡•É¥¹œÍÑ•ÀñÑ•áÑ…É•„¥ô‰¡åÁ½Ñ¡•Í¥Í9•áÑMÑ•ÀˆÁ±…•¡½±‘•Èô‰5•…ÍÕÉ•µ•¹Ğ°É•½É¡•¬°Ñ…É•Ñ•É•ÑÕÉ¸Ù¥Í¥Ğ°½È¹…ÉÉ½ÜÁÉ½™•ÍÍ¥½¹…°ÅÕ•ÍÑ¥½¸ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€€€ñ±…‰•°ù½¹ÑÉ…‘¥Ñ¥¹œ•Ù¥‘•¹”¹½Ñ”°¥˜…¹äñÑ•áÑ…É•„¥ô‰¡åÁ½Ñ¡•Í¥Í½¹ÑÉ…‘¥Ñ¥½¸ˆÁ±…•¡½±‘•Èô‰I•½Éİ¡…Ğ½Õ±‘¥ÍÁÉ½Ù”Ñ¡¥Ì¥‘•„ˆøğ½Ñ•áÑ…É•„øğ½±…‰•°ø(€€€€ğ½‘¥Øø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ…Ñ¥½¹Ìˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰…¹•±!åÁ½Ñ¡•Í¥Ìˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù…¹•°ğ½‰ÕÑÑ½¸ø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰Í…Ù•!åÁ½Ñ¡•Í¥ÌˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùM…Ù”…Ì!åÁ½Ñ¡•Í¥Ìğ½‰ÕÑÑ½¸ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰İ…Ñ•É±…ÍÍ¥™¥…Ñ¥½¹¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ Èù½•ÌÑ¡¥ÌÁ¡½Ñ½É…Á Í¡½Üİ…Ñ•Èüğ½ Èø(€€€€€€ñÀ±…ÍÌô‰Íµ…±°ˆù½¹™¥É´İ¡…Ğå½ÔÁ•ÉÍ½¹…±±ä½‰Í•ÉÙ•¸Q¡”…ÁÀİ¥±°¹•Ù•ÈÍ¥±•¹Ñ±ä±…ÍÍ¥™äİ…Ñ•È¸ğ½Àø(€€€€€€ñ‘¥Ø¥ô‰İ…Ñ•ÉQåÁ•¡½¥•Ìˆ±…ÍÌô‰İ…Ñ•Èµ¡½¥”µÉ¥ˆø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰ÍÑ…¹‘¥¹œˆùe•ÌƒŠPMÑ…¹‘¥¹œ]…Ñ•Èğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰™±½İ¥¹œˆùe•ÌƒŠP±½İ¥¹œ]…Ñ•Èğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰‘¥Ñ ˆùe•ÌƒŠP¥Ñ ğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰É••­}ÍÑÉ•…´ˆùe•ÌƒŠPÉ••¬½ÈMÑÉ•…´ğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰½Ñ¡•Èˆùe•ÌƒŠP=Ñ¡•È]…Ñ•Èğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰¹¼ˆ±…ÍÌô‰…¹•°ˆù9¼ğ½‰ÕÑÑ½¸ø(€€€€€€€€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ‘…Ñ„µİ…Ñ•Èµ¡½¥”ô‰Õ¹ÍÕÉ”ˆ±…ÍÌô‰…¹•°ˆùU¹ÍÕÉ”ğ½‰ÕÑÑ½¸ø(€€€€€€ğ½‘¥Øø(€€€€€€ñ‘¥Ø¥ô‰İ…Ñ•É5•…ÍÕÉ•µ•¹Ñ¥•±‘Ìˆ±…ÍÌô‰ÍÑÉÕÑÕÉ•µ™¥•±‘Ìˆ¡¥‘‘•¸ø(€€€€€€€€ñ±…‰•°ù•ÁÑ ñÍ•±•Ğ¥ô‰Á¡½Ñ½]…Ñ•É•ÁÑ ˆøñ½ÁÑ¥½¸Ù…±Õ”ô‰Õ¹­¹½İ¸ˆùU¹­¹½İ¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰±•ÍÍ}Ñ¡…¹|Å}¥¹ ˆù1•ÍÌÑ¡…¸€Ä¥¹ ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ôˆÄ´Í}¥¹¡•ÌˆøÇŠLÌ¥¹¡•Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ôˆÌ´İ}¥¹¡•ÌˆøÏŠLÜ¥¹¡•Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ôˆà´ÄÉ}¥¹¡•ÌˆøãŠLÄÈ¥¹¡•Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰µ½É•}Ñ¡…¹|ÄÉ}¥¹¡•Ìˆù5½É”Ñ¡…¸€ÄÈ¥¹¡•Ìğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰•á…Ğˆùá…Ğ•¹ÑÉäğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°¥ô‰Á¡½Ñ½]…Ñ•Éá…Ñ1…‰•°ˆ¡¥‘‘•¸ùá…Ğ‘•ÁÑ ¥¸¥¹¡•Ìñ¥¹ÁÕĞ¥ô‰Á¡½Ñ½]…Ñ•Éá…ĞˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÀ¸ÈÔˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù5•…ÍÕÉ•µ•¹Ğ‰…Í¥ÌñÍ•±•Ğ¥ô‰Á¡½Ñ½]…Ñ•É	…Í¥Ìˆøñ½ÁÑ¥½¸ùU¹­¹½İ¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ùÍÑ¥µ…Ñ•ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸ù5•…ÍÕÉ•ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùÁÁÉ½á¥µ…Ñ”İ¥‘Ñ ¥¸™••Ğñ¥¹ÁÕĞ¥ô‰Á¡½Ñ½]…Ñ•É]¥‘Ñ ˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÀ¸Ôˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆÁ±…•¡½±‘•Èô‰U¹­¹½İ¸¥˜‰±…¹¬ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ùÁÁÉ½á¥µ…Ñ”±•¹Ñ ¥¸™••Ğñ¥¹ÁÕĞ¥ô‰Á¡½Ñ½]…Ñ•É1•¹Ñ ˆÑåÁ”ô‰¹Õµ‰•Èˆµ¥¸ôˆÀˆÍÑ•ÀôˆÀ¸Ôˆ¥¹ÁÕÑµ½‘”ô‰‘•¥µ…°ˆÁ±…•¡½±‘•Èô‰U¹­¹½İ¸¥˜‰±…¹¬ˆøğ½±…‰•°ø(€€€€€€€€ñ±…‰•°ù]…Ñ•È‰•¡…Ù¥½ÈñÍ•±•Ğ¥ô‰Á¡½Ñ½]…Ñ•É	•¡…Ù¥½Èˆøñ½ÁÑ¥½¸Ù…±Õ”ô‰Õ¹­¹½İ¸ˆùU¹­¹½İ¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰¥Í½±…Ñ•‘}‘•ÁÉ•ÍÍ¥½¸ˆù%Í½±…Ñ•‘•ÁÉ•ÍÍ¥½¸ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰½¹¹•Ñ•‘}Á½½±¥¹œˆù½¹¹•Ñ•Á½½±¥¹œğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰™±½İ¥¹œˆù±½İ¥¹œğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰…ÁÁ…É•¹Ñ}É••­}¡…¹¹•°ˆùÁÁ…É•¹ĞÉ••¬¡…¹¹•°ğ½½ÁÑ¥½¸øñ½ÁÑ¥½¸Ù…±Õ”ô‰‘¥Ñ ˆù¥Ñ ğ½½ÁÑ¥½¸øğ½Í•±•Ğøğ½±…‰•°ø(€€€€€€€€ñ‰ÕÑÑ½¸¥ô‰Í…Ù•]…Ñ•É±…ÍÍ¥™¥…Ñ¥½¸ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆùM…Ù”]…Ñ•ÈÙ¥‘•¹”ğ½‰ÕÑÑ½¸ø(€€€€€€ğ½‘¥Øø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñ‘¥…±½œ¥ô‰İ…Ñ•ÉA¡½Ñ½¥…±½œˆø(€€€€ñ‘¥Ø±…ÍÌô‰‘¥…±½œµ‰½‘äˆø(€€€€€€ñ‰ÕÑÑ½¸¥ô‰±½Í•]…Ñ•ÉA¡½Ñ¼ˆ±…ÍÌô‰…¹•°ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆù±½Í”ğ½‰ÕÑÑ½¸ø(€€€€€€ñ È¥ô‰İ…Ñ•ÉA¡½Ñ½Q¥Ñ±”ˆù]…Ñ•ÈÁ¡½Ñ½É…Á ğ½ Èø(€€€€€€ñ¥µœ¥ô‰İ…Ñ•ÉA¡½Ñ½%µ…”ˆ…±Ğô‰]…Ñ•È•Ù¥‘•¹”Á¡½Ñ½É…Á ˆø(€€€€€€ñÀ¥ô‰İ…Ñ•ÉA¡½Ñ½•Ñ…¥±Ìˆ±…ÍÌô‰Íµ…±°ˆøğ½Àø(€€€€€€ñ…Õ‘¥¼¥ô‰İ…Ñ•ÉA¡½Ñ½Õ‘¥¼ˆ½¹ÑÉ½±Ì¡¥‘‘•¸øğ½…Õ‘¥¼ø(€€€€ğ½‘¥Øø(€€ğ½‘¥…±½œø((€€ñÍÉ¥ÁĞÍÉŒôˆ¸½¥¹ÍÁ•Ñ¥½¸µ½…¡¥¹œ¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½İ…Ñ•Èµ¥¹Ñ•±±¥•¹”¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½•Ù¥‘•¹”µ½Ù•É¹…¹”¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½•Ù¥‘•¹”µÍ•ÑÌ¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½¥¹ÍÁ•Ñ¥½¸µÁ…­…”¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½¥‘ˆµÉ•½Ù•Éä¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(€€ñÍÉ¥ÁĞÍÉŒôˆ¸½…ÁÀ¹©ÌıØôÌ¸ä¸Àˆøğ½ÍÉ¥ÁĞø(ğ½‰½‘äø(ğ½¡Ñµ°ø(
