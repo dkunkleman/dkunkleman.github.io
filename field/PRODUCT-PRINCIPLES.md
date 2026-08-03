@@ -28,6 +28,10 @@ The app is a field mentor, not a passive recorder. It should continuously answer
 
 The app must communicate inspection intent, not merely coordinates. A photograph is incomplete field intelligence until its purpose is preserved. Water mapping must keep photographed facts, inspector-confirmed classifications, conservative inferences, inspected corridors, and unvisited unknowns visibly distinct; it must never convert a shallow isolated depression or missing observation into a broad conclusion.
 
+Professional evidence must be correctable without becoming erasable. The original record is immutable; every correction is a dated, attributed audit event. Voided evidence remains recoverable but must never influence active findings. Spatial or temporal proximity is not a confirmed evidence relationship.
+
+Teach the repeatable four-photo pattern: Context, Evidence, Measurement, and Relationship. Report what is present and what is missing. Separate Inspector Hypotheses from observed facts and route each professional issue through an exact question, supporting and contradicting evidence, remaining unknowns, and the cheapest credible next step. The package may save licensed professionals reconnaissance time, but it must never claim to replace their judgment or recommend unverified construction.
+
 Field reliability remains the immediate constraint: offline evidence capture, recoverability, and complete one-file reconstruction take precedence over optional automation. The phone collects durable observations, the append-only Property Intelligence Repository stores every inspection and version permanently, and ChatGPT analyzes repository records into maps, reports, comparisons, remaining questions, next-visit priorities, and decisions. These responsibilities stay separate.
 
 Inspector judgment is a durable data asset, but it is not observed evidence. Capture theories, preferences, concerns, and field intuition as Inspector Thoughts; preserve them beside the evidence with explicit non-factual labeling so later inspections can compare what was observed, what the inspector believed, and what ultimately proved true.

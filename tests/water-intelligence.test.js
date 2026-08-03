@@ -95,7 +95,7 @@ function main() {
 
   const source = fs.readFileSync(path.join(root, "field/app.js"), "utf8");
   assert(source.includes("Why did you take this picture?"), "photo save immediately launches the voice-explanation workflow");
-  assert(source.includes("openWaterClassification(metadata.photo_id)"), "water confirmation follows the saved photo explanation");
+  assert(source.includes("openPhotoMeaning(metadata.photo_id)") && source.includes("openWaterClassification(photoId)"), "explicit photo meaning and water confirmation follow the saved photo explanation");
   assert(source.includes("attachExplanationToPhoto"), "voice notes are permanently linked back to photographs");
   const html = fs.readFileSync(path.join(root, "field/index.html"), "utf8");
   assert(html.includes("SMALL TRACT — OBSERVED WATER CONDITIONS"));
