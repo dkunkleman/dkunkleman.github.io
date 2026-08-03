@@ -20,7 +20,7 @@ Pearson_Road/
     inspection.json
     repository-identity.json
     packages/
-      REPORT_PACKAGE_<export-id>.zip
+      AI_ANALYSIS_REPORT_PACKAGE_<export-id>.zip
       FULL_ARCHIVE_<export-id>.zip
     versions/<export-id>/
     maps/<export-id>/
@@ -32,6 +32,12 @@ Pearson_Road/
     contours/
     property_boundary/<export-id>/
     analysis/<export-id>/
+      AI_README.md
+      AI_ANALYSIS.json
+      REPORT_TEMPLATE.md
+      INSPECTOR_THOUGHTS.md
+      EVIDENCE_RELATIONSHIPS.json
+      SUGGESTED_INSPECTION_QUESTIONS.md
 ```
 
 Photo, voice, terrain, and contour filenames are content-addressed with SHA-256. Repeated identical evidence is accepted without rewriting it; a different byte sequence at an existing immutable path stops ingestion.
@@ -42,4 +48,4 @@ Photo, voice, terrain, and contour filenames are content-addressed with SHA-256.
 
 The current GitHub Pages field app uses the iPhone share sheet as the one-tap handoff. A production repository service should expose an authenticated upload endpoint that accepts one ZIP, runs this same validation and import contract server-side, returns the ingestion receipt, and does not put repository credentials in the browser application.
 
-ChatGPT should receive read-only repository access and use `property_id` for cross-inspection comparison, `inspection_id` to associate artifacts from one visit, and `export_id` for version history.
+ChatGPT should receive read-only repository access and use `property_id` for cross-inspection comparison, `inspection_id` to associate artifacts from one visit, and `export_id` for version history. For a single visit it should read `AI_README.md` first, then analyze `AI_ANALYSIS.json`; inspector thoughts remain available for retrospective reasoning comparison but are never promoted to observed fact.

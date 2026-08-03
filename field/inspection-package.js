@@ -7,7 +7,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.3";
+  const FORMAT_VERSION = "1.4";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -310,7 +310,7 @@
 
   function createPhotoCsv(photos) {
     const rows = [[
-      "photo_number", "photo_id", "associated_marker_id", "associated_observation_id", "category", "note", "evidence_classification", "recorded_at", "source_file_last_modified_at", "latitude", "longitude",
+      "photo_number", "photo_id", "observation_id", "associated_marker_id", "associated_observation_id", "gps_point_id", "direction_cardinal", "weather_record_id", "category", "note", "evidence_classification", "recorded_at", "source_file_last_modified_at", "latitude", "longitude",
       "gps_accuracy_m", "gps_position_at", "gps_position_age_ms", "original_path", "original_name",
       "original_mime_type", "original_size_bytes", "original_sha256", "analysis_path",
       "analysis_mime_type", "analysis_size_bytes", "analysis_sha256", "width_px", "height_px",
@@ -319,7 +319,7 @@
       "sensor_alpha_deg", "sensor_beta_deg", "sensor_gamma_deg"
     ]];
     (photos || []).forEach(photo => rows.push([
-      photo.photo_number, photo.photo_id, photo.associated_marker_id, photo.associated_observation_id,
+      photo.photo_number, photo.photo_id, photo.observation_id, photo.associated_marker_id, photo.associated_observation_id, photo.gps_point_id, photo.direction_faced && photo.direction_faced.cardinal, photo.weather && photo.weather.weather_record_id,
       photo.category, photo.note, photo.evidence_classification, photo.recorded_at, photo.source_file_last_modified_at,
       photo.location.latitude, photo.location.longitude, photo.location.gps_accuracy_m,
       photo.location.gps_position_at, photo.location.gps_position_age_ms,
@@ -340,13 +340,13 @@
 
   function createVoiceCsv(voiceNotes) {
     const rows = [[
-      "voice_note_id", "started_at", "finished_at", "duration_ms", "latitude", "longitude",
+      "voice_note_id", "observation_id", "gps_point_id", "nearest_observation_ids", "started_at", "finished_at", "duration_ms", "latitude", "longitude",
       "gps_accuracy_m", "gps_position_at", "compass_heading_deg", "audio_path", "mime_type",
       "size_bytes", "sha256", "recovered_after_interruption", "sensor_alpha_deg",
       "sensor_beta_deg", "sensor_gamma_deg"
     ]];
     (voiceNotes || []).forEach(note => rows.push([
-      note.voice_note_id, note.started_at, note.finished_at, note.duration_ms,
+      note.voice_note_id, note.observation_id, note.gps_point_id, (note.nearest_observations || []).map(item => item.observation_id).join("|"), note.started_at, note.finished_at, note.duration_ms,
       note.location.latitude, note.location.longitude, note.location.gps_accuracy_m,
       note.location.gps_position_at, note.compass_heading_deg, note.audio.path,
       note.audio.mime_type, note.audio.size_bytes, note.audio.sha256,
@@ -545,6 +545,12 @@
         weather: { source: "inspection.json > inspection.conditions", destination: `weather/${exportId}/conditions.json` },
         reconstruction: { source: "chatgpt-reconstruction.json", destination: `analysis/${exportId}/chatgpt-reconstruction.json` },
         comparison_record: { source: "repository-comparison.json", destination: `analysis/${exportId}/repository-comparison.json` },
+        ai_readme: { source: "AI_README.md", destination: `analysis/${exportId}/AI_README.md` },
+        ai_analysis: { source: "AI_ANALYSIS.json", destination: `analysis/${exportId}/AI_ANALYSIS.json` },
+        report_template: { source: "REPORT_TEMPLATE.md", destination: `analysis/${exportId}/REPORT_TEMPLATE.md` },
+        inspector_thoughts: { source: "INSPECTOR_THOUGHTS.md", destination: `analysis/${exportId}/INSPECTOR_THOUGHTS.md` },
+        evidence_relationships: { source: "EVIDENCE_RELATIONSHIPS.json", destination: `analysis/${exportId}/EVIDENCE_RELATIONSHIPS.json` },
+        suggested_questions: { source: "SUGGESTED_INSPECTION_QUESTIONS.md", destination: `analysis/${exportId}/SUGGESTED_INSPECTION_QUESTIONS.md` },
         printable_html: { source: "printable-report.html", destination: `analysis/${exportId}/printable-report.html` }
       },
       derived_artifacts: {
@@ -587,10 +593,20 @@
         attributes: observation.attributes,
         attachments: observation.attachments
       })),
+      inspector_thoughts: (manifest.inspection.inspector_thoughts || []).map(thought => ({
+        thought_id: thought.thought_id,
+        thought_at: thought.thought_at,
+        text: thought.text,
+        geometry: thought.geometry,
+        gps_point_id: thought.gps_point_id,
+        factual_status: thought.factual_status,
+        future_validation_status: "NOT_YET_EVALUATED"
+      })),
       evidence_counts: {
         photographs: manifest.summary.photo_count,
         voice_notes: manifest.summary.voice_note_count,
-        gps_points: manifest.summary.gps_track_point_count
+        gps_points: manifest.summary.gps_track_point_count,
+        inspector_thoughts: manifest.summary.inspector_thought_count
       },
       comparison_rule: "Compare records by property_id across distinct inspection_id values. Preserve evidence classifications and never treat an unrecorded observation as proof of absence."
     };
@@ -629,6 +645,77 @@
     return 2 * radius * Math.asin(Math.sqrt(Math.max(0, h)));
   }
 
+  function timeDifferenceMs(a, b) {
+    const first = new Date(a || NaN).valueOf();
+    const second = new Date(b || NaN).valueOf();
+    return Number.isFinite(first) && Number.isFinite(second) ? Math.abs(first - second) : null;
+  }
+
+  function cardinalDirection(heading) {
+    if (!Number.isFinite(Number(heading))) return null;
+    const labels = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return labels[Math.round((((Number(heading) % 360) + 360) % 360) / 45) % 8];
+  }
+
+  function normalizedGpsTrack(points) {
+    return (points || []).map((point, index) => Object.assign({}, point, {
+      gps_point_id: point.gps_point_id || `gps-${String(point.sequence || index + 1).padStart(6, "0")}`,
+      sequence: point.sequence || index + 1
+    }));
+  }
+
+  function nearestGpsReference(target, gpsTrack) {
+    if (!target || !gpsTrack.length) return null;
+    let candidates = gpsTrack;
+    if (target.gps_position_at) {
+      const exact = gpsTrack.filter(point => point.time === target.gps_position_at);
+      if (exact.length) candidates = exact;
+    }
+    const ranked = candidates.map(point => ({
+      point,
+      time_delta_ms: timeDifferenceMs(target.time || target.recorded_at || target.started_at, point.time),
+      distance_m: Number.isFinite(Number(target.lat)) && Number.isFinite(Number(target.lon)) ? distanceMeters(target, point) : null
+    })).sort((left, right) => {
+      const leftTime = left.time_delta_ms == null ? Number.POSITIVE_INFINITY : left.time_delta_ms;
+      const rightTime = right.time_delta_ms == null ? Number.POSITIVE_INFINITY : right.time_delta_ms;
+      if (leftTime !== rightTime) return leftTime - rightTime;
+      return (left.distance_m == null ? Number.POSITIVE_INFINITY : left.distance_m) - (right.distance_m == null ? Number.POSITIVE_INFINITY : right.distance_m);
+    });
+    const best = ranked[0];
+    return best ? {
+      gps_point_id: best.point.gps_point_id,
+      sequence: best.point.sequence,
+      recorded_at: best.point.time,
+      time_delta_ms: best.time_delta_ms,
+      distance_m: best.distance_m,
+      path: `AI_ANALYSIS.json > gps_track[${Math.max(0, best.point.sequence - 1)}]`
+    } : null;
+  }
+
+  function nearestEvidence(target, items, options) {
+    const settings = options || {};
+    const targetId = String(settings.targetId || "");
+    const directIds = new Set((settings.directIds || []).filter(Boolean).map(String));
+    return (items || []).map(item => {
+      const itemId = String(item[settings.idField] || "");
+      const direct = directIds.has(itemId) || (settings.linkField && String(item[settings.linkField] || "") === targetId);
+      const location = item.location || item;
+      return {
+        item,
+        itemId,
+        direct,
+        distance_m: Number.isFinite(Number(target.lat)) && Number.isFinite(Number(target.lon)) && Number.isFinite(Number(location.latitude == null ? location.lat : location.latitude)) && Number.isFinite(Number(location.longitude == null ? location.lon : location.longitude)) ? distanceMeters(target, { lat: location.latitude == null ? location.lat : location.latitude, lon: location.longitude == null ? location.lon : location.longitude }) : null,
+        time_delta_ms: timeDifferenceMs(target.time || target.observed_at || target.recorded_at || target.started_at, item.recorded_at || item.started_at || item.time)
+      };
+    }).sort((left, right) => {
+      if (left.direct !== right.direct) return left.direct ? -1 : 1;
+      const leftDistance = left.distance_m == null ? Number.POSITIVE_INFINITY : left.distance_m;
+      const rightDistance = right.distance_m == null ? Number.POSITIVE_INFINITY : right.distance_m;
+      if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+      return (left.time_delta_ms == null ? Number.POSITIVE_INFINITY : left.time_delta_ms) - (right.time_delta_ms == null ? Number.POSITIVE_INFINITY : right.time_delta_ms);
+    }).slice(0, settings.limit || 3);
+  }
+
   function calculateInspectionMetrics(inspection, liveEndTime) {
     const points = Array.isArray(inspection && inspection.points) ? inspection.points : [];
     const started = new Date(inspection && inspection.started ? inspection.started : NaN);
@@ -662,12 +749,12 @@
 
   function createObservationsCsv(observations) {
     const rows = [[
-      "observation_id", "inspection_id", "property_id", "observed_at", "observation_type", "label",
+      "observation_id", "inspection_id", "property_id", "gps_point_id", "nearest_photo_ids", "nearest_voice_note_ids", "observed_at", "observation_type", "label",
       "evidence_classification", "latitude", "longitude", "gps_accuracy_m", "compass_heading_deg",
       "note", "attributes_json", "photo_id", "voice_note_id"
     ]];
     (observations || []).forEach(item => rows.push([
-      item.observation_id, item.inspection_id, item.property_id, item.observed_at, item.observation_type,
+      item.observation_id, item.inspection_id, item.property_id, item.gps_point_id, (item.attachments.nearest_photographs || []).map(photo => photo.photo_id).join("|"), (item.attachments.nearest_voice_notes || []).map(voice => voice.voice_note_id).join("|"), item.observed_at, item.observation_type,
       item.label, item.evidence_classification, item.gps.latitude, item.gps.longitude, item.gps.accuracy_m,
       item.compass_heading_deg, item.note, JSON.stringify(item.attributes || {}),
       item.attachments.photo_id, item.attachments.voice_note_id
@@ -814,12 +901,17 @@
   function makeReadme(manifest) {
     const fullArchive = manifest.package_mode === "full_evidence_archive";
     return [
-      fullArchive ? "PROPERTY INSPECTOR — FULL EVIDENCE ARCHIVE" : "PROPERTY INSPECTOR — CHATGPT / REPORT PACKAGE",
+      fullArchive ? "PROPERTY INSPECTOR — FULL EVIDENCE ARCHIVE" : "PROPERTY INSPECTOR — CHATGPT ANALYSIS PACKAGE",
       "",
       "Save this ZIP as one immutable upload to the Property Intelligence Repository.",
       "The repository should start with repository-import.json, preserve the source ZIP, and reject any overwrite. ChatGPT should analyze the extracted repository record beginning with chatgpt-reconstruction.json and inspection.json.",
       "",
       "Contents:",
+      "- AI_README.md: plain-English first instruction for ChatGPT, including relationships, classifications, maps, weather, reporting, and unanswered-question rules.",
+      "- AI_ANALYSIS.json: analysis-first structure containing property, conditions, statistics, full GPS track, observations, photos, voice notes, thoughts, layers, public data, relationships, questions, and metadata.",
+      "- REPORT_TEMPLATE.md: required professional Property Intelligence Report structure.",
+      "- INSPECTOR_THOUGHTS.md: inspector reasoning kept separate from observed evidence.",
+      "- EVIDENCE_RELATIONSHIPS.json: direct GPS, observation, photo, voice, weather, map, and thought links.",
       "- repository-import.json: immutable property folder, inspection folder, export ID, extraction map, and responsibility contract for repository ingestion.",
       "- inspection.json: canonical record of the property, GPS track, observations, notes, photos, voice notes, headings, device orientation, and map context.",
       "- chatgpt-reconstruction.json: required automatic analysis outputs and exact relationships between track, observations, photographs, timeline, and parcel coverage.",
@@ -845,6 +937,7 @@
       `Field events: ${manifest.summary.field_event_count}`,
       `Photographs: ${manifest.summary.photo_count}`,
       `Voice notes: ${manifest.summary.voice_note_count}`,
+      `Inspector thoughts: ${manifest.summary.inspector_thought_count}`,
       `Subject parcel: ${manifest.property.display_parcel_number || manifest.property.parcel_number}`,
       `Recorded acres: ${manifest.property.recorded_acres}`,
       "",
@@ -861,7 +954,7 @@
       auto_start: true,
       user_questions_required_before_analysis: false,
       objective: "Reconstruct the field day from this ZIP alone and produce a useful property-intelligence result without asking where the inspector walked or which photograph belongs to which observation.",
-      start_here: ["inspection.json", "schema.json", "context/parcels.geojson", "track.geojson", "photo_index.json", "observations.csv", "events.csv"],
+      start_here: ["AI_README.md", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "inspection.json"],
       required_outputs_in_order: [
         "Interactive map",
         "Printable report",
@@ -904,6 +997,240 @@
     };
   }
 
+  const evidenceClassificationDefinitions = {
+    Observed: "Directly seen, heard, or otherwise perceived by the inspector during this visit.",
+    Measured: "Recorded using an instrument, scale, count, or explicit field measurement; report the method and precision when available.",
+    Estimated: "A field estimate rather than a verified measurement. Preserve the estimate and its uncertainty.",
+    "Public Data": "Taken from an identified external public source. Cite the source, retrieval date, and applicable limitations.",
+    Interpretation: "Inspector reasoning, judgment, theory, concern, or preference. It is not an observed fact.",
+    "Needs Professional Verification": "Potentially important but not established; recommend the appropriate qualified professional and explain what should be verified."
+  };
+
+  function createEvidenceRelationships(manifest) {
+    return {
+      schema_name: "property-intelligence-evidence-relationships",
+      schema_version: "1.0",
+      inspection_id: manifest.inspection_id,
+      gps_points: manifest.inspection.gps_track.map(point => ({ gps_point_id: point.gps_point_id, sequence: point.sequence, recorded_at: point.time })),
+      observations: manifest.inspection.observations.map(observation => ({
+        observation_id: observation.observation_id,
+        gps_point_id: observation.gps_point_id,
+        photograph_links: observation.attachments.nearest_photographs,
+        voice_note_links: observation.attachments.nearest_voice_notes,
+        observed_at: observation.observed_at,
+        heading_deg: observation.compass_heading_deg,
+        evidence_classification: observation.evidence_classification
+      })),
+      photographs: manifest.photographs.map(photo => ({
+        photo_id: photo.photo_id,
+        photo_number: photo.photo_number,
+        observation_id: photo.observation_id,
+        nearest_observations: photo.nearest_observations,
+        gps_point_id: photo.gps_point_id,
+        direction_faced: photo.direction_faced,
+        recorded_at: photo.recorded_at,
+        weather: photo.weather,
+        map_location: photo.map_location,
+        analysis_path: photo.analysis && photo.analysis.path
+      })),
+      voice_notes: manifest.voice_notes.map(voice => ({
+        voice_note_id: voice.voice_note_id,
+        observation_id: voice.observation_id,
+        nearest_observations: voice.nearest_observations,
+        gps_point_id: voice.gps_point_id,
+        recorded_at: voice.started_at,
+        audio_path: voice.audio.path
+      })),
+      inspector_thoughts: manifest.inspection.inspector_thoughts.map(thought => ({
+        thought_id: thought.thought_id,
+        gps_point_id: thought.gps_point_id,
+        thought_at: thought.thought_at,
+        nearest_photographs: thought.nearest_photographs,
+        nearest_voice_notes: thought.nearest_voice_notes,
+        factual_status: thought.factual_status
+      }))
+    };
+  }
+
+  function createSuggestedInspectionQuestions(manifest) {
+    const types = new Set(manifest.inspection.observations.map(observation => observation.observation_type));
+    const questions = [
+      { id: "Q-access", category: "Access", question: "What access limitations, entrance constraints, road conditions, or blocked areas are supported by this inspection?", evidence_types: ["field.entrance", "field.blocked", "field.culvert"] },
+      { id: "Q-drainage", category: "Drainage", question: "Where was water observed, what may influence its movement, and what remains unknown about duration or recurrence?", evidence_types: ["field.wet", "field.dry", "field.ditch", "field.culvert"] },
+      { id: "Q-homesites", category: "Homesites", question: "Which locations appear most promising for a homesite, and what evidence or professional verification could change that conclusion?", evidence_types: ["field.homesite", "field.high", "field.dry", "field.wet"] },
+      { id: "Q-timber", category: "Timber", question: "What timber or specimen-tree evidence was collected, and what inventory measurements remain necessary?", evidence_types: ["field.tree", "field.timber"] },
+      { id: "Q-utilities", category: "Utilities", question: "What utility evidence is present, and which utility locations or capacities remain unverified?", evidence_types: ["field.utility"] },
+      { id: "Q-hazards", category: "Hazards", question: "What hazards or material concerns were recorded, and what is the lowest-cost way to reduce uncertainty about each?", evidence_types: ["field.hazard", "field.blocked", "field.wet"] },
+      { id: "Q-coverage", category: "Coverage", question: "Which portions of the subject parcel were not adequately inspected or photographed?", evidence_types: [] }
+    ];
+    return questions.map(item => Object.assign({}, item, {
+      supporting_observation_ids: manifest.inspection.observations.filter(observation => item.evidence_types.includes(observation.observation_type)).map(observation => observation.observation_id),
+      evidence_present: item.evidence_types.length === 0 ? manifest.inspection.gps_track.length > 0 : item.evidence_types.some(type => types.has(type)),
+      instructions: "Answer from package evidence when possible. If evidence is insufficient, place the question under Questions Remaining without asking the user before generating the report."
+    }));
+  }
+
+  function createAiAnalysis(manifest, relationships, questions) {
+    return {
+      schema_name: "property-intelligence-ai-analysis-package",
+      schema_version: "1.0",
+      executive_summary: {
+        status: "GENERATE_FROM_EVIDENCE",
+        instruction: "Write a concise professional summary after reviewing every section and actual media file. Separate facts, public data, estimates, inspector thoughts, and recommendations.",
+        verified_inputs: {
+          inspection_id: manifest.inspection_id,
+          property_id: manifest.property_id,
+          inspection_date: manifest.inspection.conditions.inspection_date || manifest.inspection.started_at,
+          distance_walked_miles: manifest.summary.distance_walked_miles,
+          observation_count: manifest.summary.observation_count,
+          photograph_count: manifest.summary.photo_count,
+          voice_note_count: manifest.summary.voice_note_count,
+          inspector_thought_count: manifest.summary.inspector_thought_count
+        }
+      },
+      property_information: manifest.property,
+      inspection_conditions: manifest.inspection.conditions,
+      inspection_statistics: manifest.inspection.metrics,
+      gps_track: manifest.inspection.gps_track,
+      observations: manifest.inspection.observations,
+      photographs: manifest.photographs,
+      voice_notes: manifest.voice_notes,
+      inspector_thoughts: manifest.inspection.inspector_thoughts,
+      map_layers: manifest.map_context.layers,
+      weather: { weather_record_id: "weather-inspection-conditions", source: "inspector-entered field conditions", values: manifest.inspection.conditions, limitations: "Manual field conditions are not a substitute for an authoritative station history unless a public-data weather record is included." },
+      terrain: manifest.map_context.layers.terrain,
+      contours: manifest.map_context.layers.contours,
+      parcel_boundary: manifest.map_context.subject_parcel,
+      public_data: {
+        parcel_source: manifest.map_context.layers.parcels,
+        terrain_source: manifest.map_context.layers.terrain,
+        contour_source: manifest.map_context.layers.contours,
+        rule: "Treat public layers according to their source, retrieval date, resolution, and stated limitations. Do not present them as a survey or professional determination."
+      },
+      evidence_relationships: relationships,
+      evidence_classifications: evidenceClassificationDefinitions,
+      suggested_inspection_questions: questions,
+      metadata: {
+        package_format: manifest.format,
+        package_format_version: manifest.format_version,
+        package_mode: manifest.package_mode,
+        exported_at: manifest.exported_at,
+        repository: manifest.repository,
+        canonical_record: "inspection.json",
+        actual_photo_paths: manifest.photographs.map(photo => photo.analysis && photo.analysis.path),
+        actual_voice_paths: manifest.voice_notes.map(voice => voice.audio.path)
+      }
+    };
+  }
+
+  function createAiReadme(manifest) {
+    return `# Property Intelligence AI Analysis Package
+
+## Start here
+
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`AI_ANALYSIS.json\` first, then inspect every actual photograph and voice note referenced there. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
+
+## How the evidence fits together
+
+- Every GPS point has a stable \`gps_point_id\`.
+- Every observation directly names its GPS point and lists directly attached or nearest photographs and voice notes with distance and time differences.
+- Every photograph names its observation, GPS point, direction faced, timestamp, weather record, map coordinates, and actual analysis-image path.
+- Every voice note names its observation, GPS point, timestamp, and actual audio path.
+- \`EVIDENCE_RELATIONSHIPS.json\` is the compact relationship graph. \`inspection.json\` remains the canonical record.
+- \`INSPECTOR_THOUGHTS.md\` contains experience, theories, concerns, and preferences. These are useful interpretations, but they are not observed facts and must never be silently converted into facts.
+
+## Evidence classifications
+
+${Object.entries(evidenceClassificationDefinitions).map(([name, meaning]) => `- **${name}:** ${meaning}`).join("\n")}
+
+## Maps and public data
+
+The walked route is in \`track.geojson\` and \`track.gpx\`. Parcel geometry is in \`context/parcels.geojson\`; source parcel records, terrain, contours, coordinate system, bounds, dates, and provenance are documented under \`context/\` and in \`AI_ANALYSIS.json\`. These layers provide context and do not replace a boundary survey, engineering determination, wetland delineation, appraisal, or other professional work.
+
+## Weather
+
+The \`weather\` section identifies the inspection-condition record and its evidence classification. Manual field entries describe conditions during or around this visit. If authoritative weather history is absent, say so under Questions Remaining; do not invent rainfall or station data.
+
+## Generate the report
+
+1. Reconcile counts in \`AI_ANALYSIS.json\` with the actual photo and voice files.
+2. Review the route, parcel, terrain, contours, every observation, every photograph, every voice note, and every inspector thought.
+3. Use \`REPORT_TEMPLATE.md\` in order. Cite observation IDs, photo numbers, voice-note IDs, GPS point IDs, and public-layer sources near material statements.
+4. Separate supported findings from estimates, interpretations, and professional-verification items.
+5. Answer all supported suggested questions. Put unresolved matters under Questions Remaining without interrupting report generation to ask the user.
+6. Recommend the lowest-cost next evidence-gathering step before recommending expensive professional work when reasonable.
+
+## Unanswered-question rule
+
+A question remains unanswered when relevant evidence is absent, conflicting, spatially incomplete, marked Estimated or Needs Professional Verification, dependent on unprovided public data, or outside the capability of a field inspection. Absence of an observation is not proof that a condition does not exist.
+
+Inspection ID: \`${manifest.inspection_id}\`
+
+Property ID: \`${manifest.property_id}\`
+
+Package mode: \`${manifest.package_mode}\`
+`;
+  }
+
+  function createReportTemplate() {
+    return `# Property Intelligence Report
+
+> Generate this report from the package evidence without asking the user to match files. Cite evidence identifiers. Clearly distinguish Observed, Measured, Estimated, Public Data, Interpretation, and Needs Professional Verification.
+
+## Executive Summary
+
+## Property Overview
+
+## Inspection Conditions
+
+## Access
+
+## Drainage
+
+## Homesites
+
+## Timber
+
+## Utilities
+
+## Hazards
+
+## Unique Features
+
+## Inspection Statistics
+
+## Questions Answered
+
+## Questions Remaining
+
+## Lowest-Cost Next Steps
+
+## Recommended Professional Follow-up
+
+## Appendix
+
+Include an evidence index, photograph index, route and map-layer summary, voice-note references, inspector-thought comparison, methodology, sources, assumptions, and limitations.
+`;
+  }
+
+  function createInspectorThoughtsMarkdown(manifest) {
+    const thoughts = manifest.inspection.inspector_thoughts || [];
+    const header = `# Inspector Thoughts
+
+These entries preserve the inspector's judgment, theory, concern, preference, and lived field experience. They are **not observed facts**. Analyze them separately, compare them with the evidence, and preserve them for later validation against subsequent inspections or professional findings.
+`;
+    if (!thoughts.length) return `${header}\nNo explicit inspector thoughts were recorded during this inspection. Do not infer thoughts from ordinary observations or notes.\n`;
+    return `${header}\n${thoughts.map((thought, index) => `## Thought ${index + 1} — ${thought.thought_id}\n\n- Time: ${thought.thought_at || "Not recorded"}\n- Location: ${thought.gps.latitude}, ${thought.gps.longitude} (GPS accuracy ${thought.gps.accuracy_m} m)\n- GPS point: ${thought.gps_point_id || "Not available"}\n- Heading: ${thought.compass_heading_deg == null ? "Not available" : `${Math.round(thought.compass_heading_deg)} degrees`}\n- Classification: Interpretation — NOT AN OBSERVED FACT\n- Thought: ${thought.text || "No text recorded"}\n- Nearby photographs: ${thought.nearest_photographs.map(photo => photo.photo_number).join(", ") || "None"}\n- Nearby voice notes: ${thought.nearest_voice_notes.map(voice => voice.voice_note_id).join(", ") || "None"}\n`).join("\n")}\n`;
+  }
+
+  function createSuggestedQuestionsMarkdown(questions) {
+    return `# Suggested Inspection Questions
+
+Answer supported questions in the report. Move unsupported or incomplete questions to Questions Remaining without asking the user before generating the report.
+
+${questions.map(question => `## ${question.category}\n\n${question.question}\n\n- Evidence present: ${question.evidence_present ? "Yes" : "No or not specifically recorded"}\n- Supporting observations: ${question.supporting_observation_ids.join(", ") || "None specifically linked"}\n`).join("\n")}`;
+  }
+
   async function createInspectionPackage(options) {
     const settings = options || {};
     const packageMode = settings.packageMode === "report" ? "report" : "full_archive";
@@ -940,7 +1267,7 @@
     if (!inspectionId) throw new Error("An immutable inspection ID is required before repository packaging.");
     const inspectionFolder = `Inspection_${repositoryDate(inspection, exportedAt)}_${safeRepositoryName(inspectionId, "inspection").slice(-16)}`;
     const exportId = createExportId({ exportId: settings.exportId, packageMode, exportedAt });
-    const fileName = `${propertyFolder}_Inspection_${includeOriginals ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}_${exportId}.zip`;
+    const fileName = `${propertyFolder}_Inspection_${includeOriginals ? "FULL_ARCHIVE" : "AI_ANALYSIS_REPORT_PACKAGE"}_${settings.packageKind === "backup" ? "Backup_" : ""}${packageTimestamp(exportedAt)}_${exportId}.zip`;
     const manifestPhotos = [];
     const zipPhotos = [];
     const manifestVoices = [];
@@ -1115,7 +1442,10 @@
       }
     };
 
-    const observations = inspection.markers.map(event => ({
+    const gpsTrack = normalizedGpsTrack(inspection.points);
+    const thoughtEvents = inspection.markers.filter(event => event.record_class === "inspector_thought" || event.type === "thought" || event.observation_type === "field.thought");
+    const evidenceEvents = inspection.markers.filter(event => !thoughtEvents.includes(event));
+    const observations = evidenceEvents.map(event => ({
       observation_id: event.id || null,
       inspection_id: inspection.inspection_id || null,
       property_id: mapMetadata.subject_parcel.property_id,
@@ -1137,24 +1467,99 @@
       attributes: event.attributes || {},
       attachments: {
         photo_id: event.photo_id || null,
-        voice_note_id: event.voice_note_id || null
+        voice_note_id: event.voice_note_id || null,
+        nearest_photographs: [],
+        nearest_voice_notes: []
       },
       source: event.source || "button_press"
     }));
+    observations.forEach((observation, index) => {
+      const event = evidenceEvents[index];
+      const gpsReference = nearestGpsReference(event, gpsTrack);
+      observation.gps_point_id = gpsReference ? gpsReference.gps_point_id : null;
+      observation.gps_point_reference = gpsReference;
+      observation.attachments.nearest_photographs = nearestEvidence(event, manifestPhotos, {
+        idField: "photo_id", targetId: event.id, directIds: [event.photo_id], linkField: "associated_observation_id"
+      }).map(match => ({
+        photo_id: match.item.photo_id,
+        photo_number: match.item.photo_number,
+        relationship: match.direct ? "direct" : "nearest_by_location",
+        distance_m: match.distance_m,
+        time_delta_ms: match.time_delta_ms,
+        analysis_path: match.item.analysis && match.item.analysis.path
+      }));
+      observation.attachments.nearest_voice_notes = nearestEvidence(event, manifestVoices, {
+        idField: "voice_note_id", targetId: event.id, directIds: [event.voice_note_id]
+      }).map(match => ({
+        voice_note_id: match.item.voice_note_id,
+        relationship: match.direct ? "direct" : "nearest_by_location",
+        distance_m: match.distance_m,
+        time_delta_ms: match.time_delta_ms,
+        audio_path: match.item.audio.path
+      }));
+    });
+
+    const inspectorThoughts = thoughtEvents.map(event => {
+      const gpsReference = nearestGpsReference(event, gpsTrack);
+      return {
+        thought_id: event.id,
+        inspection_id: inspection.inspection_id,
+        property_id: mapMetadata.subject_parcel.property_id,
+        thought_at: event.time,
+        text: event.note || "",
+        record_class: "inspector_thought",
+        evidence_classification: "Interpretation",
+        factual_status: "NOT_AN_OBSERVED_FACT",
+        geometry: { type: "Point", coordinates: [event.lon, event.lat] },
+        gps: { latitude: event.lat, longitude: event.lon, accuracy_m: event.gps_accuracy_m, position_at: event.gps_position_at || null },
+        gps_point_id: gpsReference ? gpsReference.gps_point_id : null,
+        gps_point_reference: gpsReference,
+        compass_heading_deg: event.compass_heading_deg == null ? null : event.compass_heading_deg,
+        device_orientation: event.device_orientation || null,
+        nearest_photographs: nearestEvidence(event, manifestPhotos, { idField: "photo_id" }).map(match => ({ photo_id: match.item.photo_id, photo_number: match.item.photo_number, distance_m: match.distance_m, time_delta_ms: match.time_delta_ms, analysis_path: match.item.analysis && match.item.analysis.path })),
+        nearest_voice_notes: nearestEvidence(event, manifestVoices, { idField: "voice_note_id" }).map(match => ({ voice_note_id: match.item.voice_note_id, distance_m: match.distance_m, time_delta_ms: match.time_delta_ms, audio_path: match.item.audio.path }))
+      };
+    });
+
+    manifestPhotos.forEach(photo => {
+      const target = { lat: photo.location.latitude, lon: photo.location.longitude, recorded_at: photo.recorded_at, gps_position_at: photo.location.gps_position_at };
+      const gpsReference = nearestGpsReference(target, gpsTrack);
+      const directObservationId = photo.associated_observation_id || photo.associated_marker_id || null;
+      const observationMatches = nearestEvidence(target, evidenceEvents, { idField: "id", directIds: [directObservationId], limit: 3 });
+      photo.observation_id = directObservationId || (observationMatches[0] && observationMatches[0].item.id) || null;
+      photo.nearest_observations = observationMatches.map(match => ({ observation_id: match.item.id, relationship: match.direct ? "direct" : "nearest_by_location", distance_m: match.distance_m, time_delta_ms: match.time_delta_ms }));
+      photo.gps_point_id = gpsReference ? gpsReference.gps_point_id : null;
+      photo.gps_point_reference = gpsReference;
+      photo.direction_faced = { heading_deg: photo.compass_heading_deg, cardinal: cardinalDirection(photo.compass_heading_deg) };
+      photo.weather = { weather_record_id: "weather-inspection-conditions", path: "AI_ANALYSIS.json > weather" };
+      photo.map_location = { property_id: mapMetadata.subject_parcel.property_id, longitude: photo.location.longitude, latitude: photo.location.latitude, parcel_boundary_path: mapMetadata.subject_parcel.geometry_path, track_path: "track.geojson" };
+    });
+
+    manifestVoices.forEach(voice => {
+      const target = { lat: voice.location.latitude, lon: voice.location.longitude, started_at: voice.started_at, gps_position_at: voice.location.gps_position_at };
+      const gpsReference = nearestGpsReference(target, gpsTrack);
+      const directEvent = evidenceEvents.find(event => String(event.voice_note_id || "") === String(voice.voice_note_id));
+      const observationMatches = nearestEvidence(target, evidenceEvents, { idField: "id", directIds: [directEvent && directEvent.id], limit: 3 });
+      voice.observation_id = (directEvent && directEvent.id) || (observationMatches[0] && observationMatches[0].item.id) || null;
+      voice.nearest_observations = observationMatches.map(match => ({ observation_id: match.item.id, relationship: match.direct ? "direct" : "nearest_by_location", distance_m: match.distance_m, time_delta_ms: match.time_delta_ms }));
+      voice.gps_point_id = gpsReference ? gpsReference.gps_point_id : null;
+      voice.gps_point_reference = gpsReference;
+    });
 
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.2",
+      schema_version: "1.3",
       purpose: "Portable observations that can be imported across properties and compared without rewriting the field record.",
-      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "gps_point", "observation", "attachment", "map_context"],
+      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "gps_point", "observation", "inspector_thought", "attachment", "map_context"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
         classification: ["taxonomy_version", "observation_type", "label", "evidence_classification"],
         time_and_place: ["observed_at", "geometry", "gps"],
         optional_measurements: ["attributes", "compass_heading_deg", "device_orientation"],
-        evidence_links: ["attachments.photo_id", "attachments.voice_note_id"]
+        evidence_links: ["gps_point_id", "attachments.photo_id", "attachments.voice_note_id", "attachments.nearest_photographs", "attachments.nearest_voice_notes"]
       },
+      inspector_thought_contract: "Inspector thoughts are interpretations and experience, not observed facts. Keep them separate from observations while preserving their time, place, heading, and nearby evidence.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
@@ -1163,6 +1568,7 @@
       format: FORMAT,
       format_version: FORMAT_VERSION,
       package_mode: includeOriginals ? "full_evidence_archive" : "chatgpt_report_package",
+      analysis_profile: "chatgpt-property-intelligence-1.0",
       platform_schema: { name: schema.schema_name, version: schema.schema_version, path: "schema.json" },
       inspection_id: inspection.inspection_id || null,
       property_id: mapMetadata.subject_parcel.property_id,
@@ -1190,6 +1596,7 @@
         gps_track_point_count: inspection.points.length,
         field_event_count: inspection.markers.length,
         observation_count: observations.length,
+        inspector_thought_count: inspectorThoughts.length,
         lifecycle_event_count: inspection.lifecycle_events.length,
         device_orientation_sample_count: inspection.orientation_samples.length,
         photo_count: manifestPhotos.length,
@@ -1210,15 +1617,22 @@
         conditions: inspection.conditions || {},
         metrics,
         lifecycle_events: inspection.lifecycle_events,
-        gps_track: inspection.points,
+        gps_track: gpsTrack,
         device_orientation_samples: inspection.orientation_samples,
         field_events: inspection.markers,
-        observations
+        observations,
+        inspector_thoughts: inspectorThoughts
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
       map_context: mapMetadata,
       files: {
+        ai_readme: "AI_README.md",
+        ai_analysis: "AI_ANALYSIS.json",
+        report_template: "REPORT_TEMPLATE.md",
+        inspector_thoughts: "INSPECTOR_THOUGHTS.md",
+        evidence_relationships: "EVIDENCE_RELATIONSHIPS.json",
+        suggested_inspection_questions: "SUGGESTED_INSPECTION_QUESTIONS.md",
         instructions: "README.txt",
         chatgpt_reconstruction: "chatgpt-reconstruction.json",
         repository_import: "repository-import.json",
@@ -1254,11 +1668,24 @@
       photographs: manifestPhotos
     };
     const reconstructionGuide = createReconstructionGuide(manifest);
+    const evidenceRelationships = createEvidenceRelationships(manifest);
+    const suggestedQuestions = createSuggestedInspectionQuestions(manifest);
+    const aiAnalysis = createAiAnalysis(manifest, evidenceRelationships, suggestedQuestions);
+    const aiReadme = createAiReadme(manifest);
+    const reportTemplate = createReportTemplate();
+    const inspectorThoughtsMarkdown = createInspectorThoughtsMarkdown(manifest);
+    const suggestedQuestionsMarkdown = createSuggestedQuestionsMarkdown(suggestedQuestions);
     const repositoryImport = createRepositoryImportManifest(manifest, fileName);
     const comparisonRecord = createRepositoryComparisonRecord(manifest);
     const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.map(photo => ({ analysisBlob: photo.analysisBlob })));
     const zip = new ZipBuilder();
     const modifiedAt = new Date(exportedAt);
+    zip.add("AI_README.md", aiReadme, { modifiedAt });
+    zip.add("AI_ANALYSIS.json", JSON.stringify(aiAnalysis, null, 2) + "\n", { modifiedAt });
+    zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
+    zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });
+    zip.add("EVIDENCE_RELATIONSHIPS.json", JSON.stringify(evidenceRelationships, null, 2) + "\n", { modifiedAt });
+    zip.add("SUGGESTED_INSPECTION_QUESTIONS.md", suggestedQuestionsMarkdown, { modifiedAt });
     zip.add("README.txt", makeReadme(manifest), { modifiedAt });
     zip.add("chatgpt-reconstruction.json", JSON.stringify(reconstructionGuide, null, 2) + "\n", { modifiedAt });
     zip.add("repository-import.json", JSON.stringify(repositoryImport, null, 2) + "\n", { modifiedAt });
@@ -1306,6 +1733,12 @@
     createInspectionPackage,
     createRepositoryImportManifest,
     createRepositoryComparisonRecord,
+    createEvidenceRelationships,
+    createSuggestedInspectionQuestions,
+    createAiAnalysis,
+    createAiReadme,
+    createReportTemplate,
+    createInspectorThoughtsMarkdown,
     estimateInspectionPackageSizes,
     calculateInspectionMetrics,
     createPrintableReport,

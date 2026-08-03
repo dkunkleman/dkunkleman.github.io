@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.3.0";
+  const APP_VERSION = "3.4.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -40,13 +40,13 @@
   const retryPendingPhotoBtn = document.getElementById("retryPendingPhoto");
   const observationDialog = document.getElementById("observationDialog");
   const moreCategories = document.getElementById("moreCategories");
-  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "photo", "voice", "more"].map(id => document.getElementById(id));
+  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "photo", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
     wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
     culvert: "Culvert", tree: "Tree", entrance: "Road or Entrance", wildlife: "Wildlife",
     thick: "Thick Brush", open: "Open Area", ditch: "Ditch", timber: "Timber Sample",
     hazard: "Hazard", other: "Other",
-    note: "Free Note", photo: "Photo", voice_note: "Voice Note"
+    note: "Free Note", thought: "Inspector Thought", photo: "Photo", voice_note: "Voice Note"
   };
 
   let watchId = null;
@@ -896,7 +896,8 @@
     const settings = details || {};
     return {
       id: makeId("event"),
-      source: "button_press",
+      source: settings.source || "button_press",
+      record_class: settings.recordClass || "evidence_observation",
       type,
       observation_type: `field.${type}`,
       taxonomy_version: "property-observation-1.0",
@@ -931,6 +932,13 @@
       const response = prompt("Type the field note:");
       if (response === null) return;
       note = response;
+    } else if (type === "thought") {
+      const response = prompt("What are you thinking? Record your judgment, theory, concern, or preference. This will be kept separate from observed evidence.");
+      if (response === null || !response.trim()) return;
+      note = response.trim();
+      settings.evidenceClassification = "Interpretation";
+      settings.source = "inspector_reasoning";
+      settings.recordClass = "inspector_thought";
     } else if (type === "other" && !note) {
       const response = prompt("What did you observe?");
       if (response === null) return;
@@ -940,7 +948,7 @@
     data.markers.push(marker);
     saveState();
     redraw();
-    setStatus(`${buttonLabels[type]} recorded at the current location.`, "active");
+    setStatus(type === "thought" ? "Inspector thought saved separately from observed evidence." : `${buttonLabels[type]} recorded at the current location.`, "active");
     return marker;
   }
 
@@ -1558,11 +1566,11 @@
     lastPackageFile = typeof File === "function" ? new File([blob], name, { type: "application/zip", lastModified: Date.now() }) : null;
     packageLink.href = lastPackageUrl;
     packageLink.download = name;
-    packageLink.textContent = reportPackage ? "Download CHATGPT / REPORT PACKAGE" : "Download FULL EVIDENCE ARCHIVE";
+    packageLink.textContent = reportPackage ? "Download CHATGPT ANALYSIS PACKAGE" : "Download FULL EVIDENCE ARCHIVE";
     packageLink.hidden = false;
     packageFilename.textContent = name;
     packageInstruction.textContent = reportPackage ? `Save ${name} to the Property Intelligence Repository. It will be filed permanently at ${manifest.repository.inspection_path} without overwriting an older export.` : `Save ${name} to the Property Intelligence Repository as permanent original evidence. The saved inspection remains unchanged on this phone.`;
-    packageSummary.textContent = `${reportPackage ? "CHATGPT / REPORT PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one immutable repository export contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "observation")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, and ${countLabel(manifest.summary.voice_note_count, "voice note")}.`;
+    packageSummary.textContent = `${reportPackage ? "CHATGPT ANALYSIS PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one immutable repository export contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "field event")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, ${countLabel(manifest.summary.voice_note_count, "voice note")}, and ${countLabel(manifest.summary.inspector_thought_count, "inspector thought")}.`;
     packageReady.hidden = false;
     let canShareFile = false;
     try {
@@ -1618,7 +1626,7 @@
     reportEstimate.textContent = `About ${formatBytes(packageEstimates.reportBytes)}`;
     fullEstimate.textContent = `About ${formatBytes(packageEstimates.fullArchiveBytes)}`;
     const overLimit = [];
-    if (packageEstimates.reportBytes > 500 * 1024 * 1024) overLimit.push("CHATGPT / REPORT PACKAGE");
+    if (packageEstimates.reportBytes > 500 * 1024 * 1024) overLimit.push("CHATGPT ANALYSIS PACKAGE");
     if (packageEstimates.fullArchiveBytes > 500 * 1024 * 1024) overLimit.push("FULL EVIDENCE ARCHIVE");
     warning.hidden = overLimit.length === 0;
     warning.textContent = overLimit.length ? `WARNING: ${overLimit.join(" and ")} ${overLimit.length === 1 ? "is" : "are"} estimated to exceed 500 MB. Keep Safari open during creation and save directly to a destination with enough space.` : "";
@@ -1732,7 +1740,7 @@
         const photoEntries = await recoverEveryPhoto(packageMode);
         const voiceEntries = await recoverEveryVoiceNote();
         const mapContext = await recoverMapContext();
-        setStatus(packageMode === "full_archive" ? "Building the FULL EVIDENCE ARCHIVE. Keep Safari open…" : "Building the CHATGPT / REPORT PACKAGE. Keep Safari open…", "active");
+        setStatus(packageMode === "full_archive" ? "Building the FULL EVIDENCE ARCHIVE. Keep Safari open…" : "Building the CHATGPT ANALYSIS PACKAGE. Keep Safari open…", "active");
         const result = await packageTools.createInspectionPackage({
           inspection: data,
           photoEntries,
@@ -1762,7 +1770,7 @@
     const estimates = await refreshPackageEstimates();
     const bytes = estimates && (mode === "full_archive" ? estimates.fullArchiveBytes : estimates.reportBytes);
     if (!bytes || bytes <= 500 * 1024 * 1024) return true;
-    return confirm(`${mode === "full_archive" ? "FULL EVIDENCE ARCHIVE" : "CHATGPT / REPORT PACKAGE"} is estimated at ${formatBytes(bytes)}, which exceeds 500 MB. Keep Safari open and confirm the destination has enough free space. Continue?`);
+    return confirm(`${mode === "full_archive" ? "FULL EVIDENCE ARCHIVE" : "CHATGPT ANALYSIS PACKAGE"} is estimated at ${formatBytes(bytes)}, which exceeds 500 MB. Keep Safari open and confirm the destination has enough free space. Continue?`);
   }
 
   async function finishInspection() {
@@ -1787,7 +1795,7 @@
     try {
       const result = await buildPackageWithRecovery("report", null);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`REPORT PACKAGE COMPLETE: every photograph is viewable, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "observation")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
+      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE: every photograph is viewable and every evidence relationship is indexed, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "field event")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
     } catch (error) {
       setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
     } finally {
@@ -1962,6 +1970,7 @@
   document.getElementById("hazard").addEventListener("click", () => addMarker("hazard"));
   document.getElementById("other").addEventListener("click", () => addMarker("other"));
   document.getElementById("note").addEventListener("click", () => addMarker("note"));
+  document.getElementById("thought").addEventListener("click", () => addMarker("thought"));
   document.getElementById("photo").addEventListener("click", () => takePhoto(null));
   document.getElementById("photo").addEventListener("pointerdown", preparePhotoStorage);
   document.getElementById("more").addEventListener("click", () => {

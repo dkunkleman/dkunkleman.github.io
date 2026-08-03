@@ -68,6 +68,7 @@
     button.voice { background: #9b1e58; }
     button.voice.recording { animation: recordPulse 1.25s infinite; background: #d0063b; }
     button.note { background: #4d5960; }
+    button.thought { background: #69468f; }
     button.more { background: #273238; }
     @keyframes recordPulse { 50% { box-shadow: 0 0 0 6px rgba(208,6,59,.25); } }
     #mapFrame { position: relative; width: calc(100% - 20px); margin: 10px auto 0; background: #d8d1bd; overflow: hidden; aspect-ratio: 1800/1500; border: 2px solid #777; border-radius: 8px; touch-action: pan-x pan-y; }
@@ -189,7 +190,9 @@
           <button id="hazard" disabled>Hazard</button>
           <button id="wildlife" disabled>Wildlife</button>
           <button id="other" disabled>Other</button>
+          <button id="thought" class="thought" disabled>Inspector Thought</button>
         </div>
+        <p class="small"><strong>Inspector Thought</strong> records your judgment or theory separately from observed evidence.</p>
       </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
     </section>
@@ -236,8 +239,8 @@
       <p class="small">Nothing is removed after either export. <strong>Finish Inspection</strong> creates the smaller ChatGPT package. The full archive remains available afterward from the saved originals.</p>
       <div class="export-modes">
         <div class="export-mode recommended">
-          <h3>CHATGPT / REPORT PACKAGE</h3>
-          <p class="small">Every photo is viewable at analysis quality. Full-resolution originals are represented by their filename, dimensions, byte size, timestamp, metadata, and SHA-256 hash instead of duplicate image bytes.</p>
+          <h3>CHATGPT ANALYSIS PACKAGE</h3>
+          <p class="small">AI-ready evidence with plain-English instructions, direct GPS/photo/voice relationships, inspector thoughts, suggested questions, a report template, and every photo at analysis quality.</p>
           <span id="reportEstimate" class="package-estimate">Estimating…</span>
           <p class="small">Created when you tap <strong>Finish Inspection</strong>.</p>
         </div>
@@ -333,8 +336,8 @@
     </form>
   </dialog>
 
-  <script src="./inspection-package.js?v=3.3.0"></script>
-  <script src="./idb-recovery.js?v=3.3.0"></script>
-  <script src="./app.js?v=3.3.0"></script>
+  <script src="./inspection-package.js?v=3.4.0"></script>
+  <script src="./idb-recovery.js?v=3.4.0"></script>
+  <script src="./app.js?v=3.4.0"></script>
 </body>
 </html>

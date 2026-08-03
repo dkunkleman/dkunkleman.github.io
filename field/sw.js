@@ -1,12 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-03-v7";
-const INDEX_URL = "./index.html?v=3.3.0";
+const CACHE_NAME = "property-inspector-field-2026-08-03-v8";
+const INDEX_URL = "./index.html?v=3.4.0";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./app.js?v=3.3.0",
-  "./idb-recovery.js?v=3.3.0",
-  "./inspection-package.js?v=3.3.0",
+  "./app.js?v=3.4.0",
+  "./idb-recovery.js?v=3.4.0",
+  "./inspection-package.js?v=3.4.0",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];
