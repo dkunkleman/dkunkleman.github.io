@@ -28,7 +28,9 @@ Pearson_Road/
       small-tract-water-map.html
     photos/analysis/
     photos/original/
+    photos/audit/
     voice/
+    voice/audit/
     weather/<export-id>/conditions.json
     terrain/
     contours/
@@ -39,11 +41,18 @@ Pearson_Road/
       DECISION_BRIEF.json
       REPORT_TEMPLATE.md
       INSPECTOR_THOUGHTS.md
+      INSPECTOR_HYPOTHESES.md
+      EVIDENCE_AUDIT_HISTORY.json
+      FIELD_EVIDENCE_REVIEW.json
+      PROFESSIONAL_HANDOFF_CARDS.json
+      professional-handoff-cards.html
       EVIDENCE_RELATIONSHIPS.json
       SUGGESTED_INSPECTION_QUESTIONS.md
 ```
 
 Photo, voice, terrain, and contour filenames are content-addressed with SHA-256. Repeated identical evidence is accepted without rewriting it; a different byte sequence at an existing immutable path stops ingestion.
+
+Correction-aware packages keep active evidence in the normal photo and voice collections. Voided attachments are separately integrity-checked and retained under `photos/audit/` and `voice/audit/`. The correction therefore changes findings without destroying the original record or bytes.
 
 `printable_report.pdf.pending.json` tells the future repository service to render `printable-report.html` into a PDF. PDF rendering and ChatGPT analysis are deliberately repository responsibilities rather than field-phone work.
 

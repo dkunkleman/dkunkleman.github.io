@@ -103,7 +103,7 @@ function main() {
   assert(appSource.includes("question_links") && appSource.includes("area_id") && appSource.includes("photo_value"), "capture paths retain question, area, and photo-value metadata");
   assert(appSource.includes("showDepartureReview") && indexSource.includes("Before you leave the property"), "Finish Inspection runs the field-coaching review");
   assert(indexSource.includes("Well inspected") && indexSource.includes("Lightly inspected") && indexSource.includes("Not inspected"), "coverage modes are visible in the field UI");
-  assert(workerSource.includes("inspection-coaching.js?v=3.7.0") && workerSource.includes("water-intelligence.js?v=3.7.0"), "coaching and water intelligence work offline from the service-worker cache");
+  assert(workerSource.includes("inspection-coaching.js?v=3.8.0") && workerSource.includes("water-intelligence.js?v=3.8.0") && workerSource.includes("evidence-governance.js?v=3.8.0"), "coaching, water intelligence, and evidence governance work offline from the service-worker cache");
 
   process.stdout.write("PASS: inspection questions, named areas, evidence relationships, photo value, conservative coverage, missing-evidence review, return planning, and field-efficiency metrics are verified.\n");
 }

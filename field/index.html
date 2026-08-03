@@ -171,6 +171,13 @@
     #waterPhotoDialog audio { width:100%; margin-top:10px; }
     #photoExplanationDialog[open] { border-color:#9b1e58; }
     #photoExplanationPrompt { padding:12px; background:#fff2f7; border:3px solid #9b1e58; font-size:22px; font-weight:900; }
+    #correctRecord { width:100%; margin-top:10px; min-height:64px; background:#7a3900; border:3px solid var(--focus); }
+    .audit-card { border-left:8px solid #7a3900; }
+    .training-prompts { padding-left:24px; }
+    .training-prompts li { margin:8px 0; font-weight:700; }
+    .evidence-role-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .evidence-role-grid label { display:flex; align-items:center; min-height:58px; border:2px solid #777; border-radius:7px; padding:8px; font-weight:800; }
+    .evidence-role-grid input { width:26px; height:26px; margin-right:8px; }
     #departureDialog .dialog-actions { grid-template-columns: 1fr 1fr; }
     #clear { background: #a31616; }
     @media (max-width: 430px) {
@@ -201,6 +208,7 @@
       <button id="finish" disabled>Finish Inspection</button>
       <button id="stop" disabled>Pause GPS</button>
     </div>
+    <button id="correctRecord" type="button">Undo / Correct Last Record</button>
     <div id="status" role="status" aria-live="polite">Loading the offline field tool…</div>
   </section>
 
@@ -226,6 +234,17 @@
         <label>Next photo value<select id="nextPhotoValue"><option>Critical</option><option selected>Helpful</option><option>Reference</option><option>Duplicate</option></select></label>
       </div>
       <p id="coachNextAction">NEXT BEST EVIDENCE: Add an investigation question, then collect evidence that could answer it.</p>
+      <details>
+        <summary>Professional evidence checklist</summary>
+        <ul class="training-prompts">
+          <li>What decision will this evidence help someone make?</li>
+          <li>What fact would a professional otherwise have to visit the site to collect?</li>
+          <li>Can I measure it rather than merely describe it?</li>
+          <li>Have I shown context as well as the close-up?</li>
+          <li>Am I recording a fact, estimate, or hypothesis?</li>
+          <li>Is another photograph adding information or merely repeating the last one?</li>
+        </ul>
+      </details>
     </section>
 
     <section class="card" aria-labelledby="record-heading">
@@ -256,10 +275,18 @@
           <button id="wildlife" disabled>Wildlife</button>
           <button id="other" disabled>Other</button>
           <button id="thought" class="thought" disabled>Inspector Thought</button>
+          <button id="hypothesis" class="thought" disabled>Inspector Hypothesis</button>
         </div>
         <p class="small"><strong>Inspector Thought</strong> records your judgment or theory separately from observed evidence.</p>
       </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+    </section>
+
+    <section class="card audit-card" aria-labelledby="audit-heading">
+      <h2 id="audit-heading">Corrections &amp; audit history</h2>
+      <p class="small">Corrections never erase the original. Voided records are excluded from findings but remain permanently recoverable in the package audit history.</p>
+      <p id="auditSummary">No corrections recorded.</p>
+      <div id="auditHistory"></div>
     </section>
 
     <section class="card" aria-labelledby="conditions-heading">
@@ -472,6 +499,66 @@
     <div class="dialog-actions">
       <button id="stopPhotoExplanation" type="button">Stop &amp; Save Explanation</button>
       <button id="retryPhotoExplanation" class="cancel" type="button" hidden>Retry Voice Explanation</button>
+      <button id="skipPhotoExplanation" class="cancel" type="button">Skip</button>
+      <button id="laterPhotoExplanation" class="cancel" type="button">Explain Later</button>
+    </div>
+  </dialog>
+
+  <dialog id="photoMeaningDialog">
+    <div class="dialog-body">
+      <h2>What does this photograph mean?</h2>
+      <p class="small">Use short answers. These prevent a nearby button press from being mistaken for the photograph's meaning.</p>
+      <label>What does it show?<select id="photoMeaningSubject"><option value="">Choose one</option><option>Access or road</option><option>Drainage or water</option><option>Homesite or buildability</option><option>Timber or tree</option><option>Hazard or cost concern</option><option>Boundary or relationship</option><option>General context</option><option>Other</option></select></label>
+      <label>Measurement status<select id="photoMeaningMeasurement"><option>Not measured</option><option>Measured</option><option>Estimated</option><option>Scale visible in photograph</option><option>Unknown</option></select></label>
+      <label>Area represented<select id="photoMeaningExtent"><option>Single point or object</option><option>Small localized area</option><option>Part of the tract</option><option>Broad site condition</option><option>Unknown</option></select></label>
+      <label>Why might it matter?<select id="photoMeaningImportance"><option>Access decision</option><option>Buildability decision</option><option>Economic or timber decision</option><option>Cost or risk decision</option><option>Distinctive property feature</option><option>Professional verification</option><option>General reference</option></select></label>
+      <fieldset><legend>Four-photo evidence role</legend><div class="evidence-role-grid">
+        <label><input type="checkbox" name="photoEvidenceRole" value="context">Context</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="evidence">Evidence</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="measurement">Measurement</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="relationship">Relationship</label>
+      </div></fieldset>
+      <label>Optional short clarification<textarea id="photoMeaningNote" placeholder="What should another person understand immediately?"></textarea></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="savePhotoMeaning" type="button">Save Photo Meaning</button>
+      <button id="photoMeaningLater" class="cancel" type="button">Complete Later</button>
+    </div>
+  </dialog>
+
+  <dialog id="correctionDialog">
+    <div class="dialog-body">
+      <h2>Undo or correct a record</h2>
+      <p class="small"><strong>The original will remain unchanged.</strong> This creates a dated audit entry and changes only how reports interpret the record.</p>
+      <label>Record<select id="correctionTarget"></select></label>
+      <label>Status or reason<select id="correctionReason"><option>Correct</option><option>Accidental button press</option><option>Wrong category</option><option>Wrong inspection area</option><option>Duplicate</option><option>Needs clarification</option><option>Withdrawn</option></select></label>
+      <label>Correct category<select id="correctionCategory"><option value="">No category change</option><option value="wet">Wet</option><option value="dry">Dry</option><option value="blocked">Blocked Access</option><option value="high">High Ground</option><option value="homesite">Potential Homesite</option><option value="culvert">Culvert</option><option value="tree">Specimen Tree</option><option value="entrance">Road / Entrance</option><option value="ditch">Ditch</option><option value="timber">Timber</option><option value="hazard">Hazard</option><option value="other">Other</option></select></label>
+      <label>Correct inspection area<select id="correctionArea"></select></label>
+      <label>Clarification<textarea id="correctionClarification" placeholder="What should the corrected record mean?"></textarea></label>
+      <label>Inspector identity<input id="correctionInspector" type="text" autocomplete="name" value="Field Inspector"></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="cancelCorrection" class="cancel" type="button">Cancel</button>
+      <button id="saveCorrection" type="button">Save Permanent Correction</button>
+    </div>
+  </dialog>
+
+  <dialog id="hypothesisDialog">
+    <div class="dialog-body">
+      <h2>Inspector Hypothesis</h2>
+      <p class="small">A hypothesis is your interpretation, not an observed fact and not a construction recommendation.</p>
+      <label>Hypothesis statement<textarea id="hypothesisStatement" placeholder="What do you think may be happening?"></textarea></label>
+      <label>Triggering observations<select id="hypothesisObservations" multiple size="5"></select></label>
+      <label>Supporting photographs<select id="hypothesisPhotos" multiple size="5"></select></label>
+      <label>Contradicting evidence records<select id="hypothesisContradictions" multiple size="4"></select></label>
+      <label>Exact question needing verification<textarea id="hypothesisQuestion" placeholder="What exact question should a professional answer?"></textarea></label>
+      <label>Professional type<select id="hypothesisProfessional"><option>civil/drainage engineer</option><option>surveyor</option><option>builder</option><option>forester</option><option>soil/septic professional</option><option>other professional</option></select></label>
+      <label>Cheapest next evidence-gathering step<textarea id="hypothesisNextStep" placeholder="Measurement, record check, targeted return visit, or narrow professional question"></textarea></label>
+      <label>Contradicting evidence note, if any<textarea id="hypothesisContradiction" placeholder="Record what could disprove this idea"></textarea></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="cancelHypothesis" class="cancel" type="button">Cancel</button>
+      <button id="saveHypothesis" type="button">Save as Hypothesis</button>
     </div>
   </dialog>
 
@@ -510,10 +597,11 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.7.0"></script>
-  <script src="./water-intelligence.js?v=3.7.0"></script>
-  <script src="./inspection-package.js?v=3.7.0"></script>
-  <script src="./idb-recovery.js?v=3.7.0"></script>
-  <script src="./app.js?v=3.7.0"></script>
+  <script src="./inspection-coaching.js?v=3.8.0"></script>
+  <script src="./water-intelligence.js?v=3.8.0"></script>
+  <script src="./evidence-governance.js?v=3.8.0"></script>
+  <script src="./inspection-package.js?v=3.8.0"></script>
+  <script src="./idb-recovery.js?v=3.8.0"></script>
+  <script src="./app.js?v=3.8.0"></script>
 </body>
 </html>

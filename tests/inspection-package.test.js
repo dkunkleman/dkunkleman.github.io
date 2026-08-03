@@ -223,7 +223,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -242,7 +242,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "1.7");
+  assert.equal(manifest.format_version, "1.8");
   assert.equal(manifest.repository.export_id, "export_full_test");
   assert.equal(manifest.repository.append_only, true);
   assert.equal(manifest.repository.overwrite_allowed, false);
@@ -480,6 +480,76 @@ async function main() {
     /Photo storage mismatch/,
     "package creation fails closed when actual photograph files are missing"
   );
+
+  const correctedInspection = JSON.parse(JSON.stringify(inspection));
+  correctedInspection.corrections = [{
+    correction_id: "void-photo-2", target: { record_type: "photo", record_id: "photo-2" },
+    correction_time: "2026-08-02T15:20:00.000Z", correction_reason: "Duplicate", corrected_value: null,
+    inspector_identity: "Test Inspector", resulting_status: "voided", original_entry: JSON.parse(JSON.stringify(correctedInspection.photos[1])), immutable: true
+  }];
+  const correctedResult = await Package.createInspectionPackage({ inspection: correctedInspection, photoEntries: basePhotoEntries, voiceEntries: baseVoiceEntries, mapContext: baseMapContext, packageMode: "full_archive", exportedAt: "2026-08-02T15:21:00.000Z" });
+  const correctedFiles = extractStoredZip(Buffer.from(await correctedResult.blob.arrayBuffer()));
+  const correctedManifest = JSON.parse(correctedFiles.get("inspection.json").toString("utf8"));
+  assert.equal(correctedManifest.summary.photo_count, 1, "voided photo is excluded from active report evidence");
+  assert.equal(correctedManifest.audit_history.audit_only_photographs.length, 1, "voided photo remains indexed in audit history");
+  assert(correctedFiles.has("audit/photos/002_original.png") && correctedFiles.has("audit/photos/002_analysis.png"), "voided original and analysis bytes remain physically recoverable in the full archive");
+  assert(!correctedFiles.get("printable-report.html").toString("utf8").includes('id="photo-P2"'), "voided photo is excluded from the printable findings report");
+
+  const pearsonPhotoBytes = new Blob([photoOneBytes], { type: "image/png" });
+  const pearsonPhotos = Array.from({ length: 10 }, (_, index) => {
+    const photoNumber = `P${index + 3}`;
+    return {
+      id: `pearson-photo-${index + 3}`, photo_number: photoNumber,
+      associated_marker_id: index === 9 ? null : `pearson-photo-event-${index + 3}`,
+      associated_observation_id: null, category: index < 9 ? "Water / Berm Sequence" : "Other",
+      note: index < 9 ? "Large-tract survey flag, berm, and water sequence" : "Later independent photograph",
+      evidence_classification: "Observed", observation_attributes: {}, explanation_status: "recorded",
+      photo_meaning: { status: "complete", subject: index < 9 ? "Drainage or water" : "General context", measurement_status: "Not measured", represented_extent: "Small localized area", decision_importance: "Professional verification", evidence_roles: index === 0 ? ["context", "evidence", "measurement", "relationship"] : ["evidence"] },
+      recorded_at: new Date(Date.parse("2026-08-03T13:05:00.000Z") + index * 60000).toISOString(),
+      lat: 30.4892 + index * 0.00002, lon: -87.094 + index * 0.00002, gps_accuracy_m: 4,
+      gps_position_at: "2026-08-03T13:04:00.000Z", compass_heading_deg: 90,
+      width_px: 192, height_px: 192, pixel_orientation: "square", original_filename: `${photoNumber}.png`,
+      original_mime_type: "image/png", original_size_bytes: photoOneBytes.length
+    };
+  });
+  const pearsonPhotoMarkers = pearsonPhotos.slice(0, 9).map(photo => ({
+    id: photo.associated_marker_id, source: "button_press", type: "photo", observation_type: "field.photo",
+    taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Photo",
+    note: photo.note, attributes: { photo_number: photo.photo_number }, time: photo.recorded_at,
+    lat: photo.lat, lon: photo.lon, gps_accuracy_m: photo.gps_accuracy_m, gps_position_at: photo.gps_position_at,
+    compass_heading_deg: photo.compass_heading_deg, photo_id: photo.id, voice_note_id: null
+  }));
+  const pearsonInspection = {
+    schema_name: inspection.schema_name, schema_version: inspection.schema_version, property_id: inspection.property_id,
+    inspection_id: "inspection-pearson-road-real-regression", started: "2026-08-03T12:30:00.000Z", stopped: "2026-08-03T15:30:00.000Z",
+    points, lifecycle_events: [{ type: "inspection_started", time: "2026-08-03T12:30:00.000Z" }, { type: "inspection_finished", time: "2026-08-03T15:30:00.000Z" }],
+    markers: [
+      { id: "pearson-accidental-entrance", source: "button_press", type: "entrance", observation_type: "field.entrance", taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Road / Entrance", note: "", attributes: {}, time: "2026-08-03T13:04:01.864Z", lat: 30.4891, lon: -87.0941, gps_accuracy_m: 4, gps_position_at: points[0].time, compass_heading_deg: 90 },
+      { id: "pearson-water-trigger", source: "button_press", type: "wet", observation_type: "field.wet", taxonomy_version: "property-observation-1.0", evidence_classification: "Observed", button_label: "Wet", note: "Water behind apparent road berm", attributes: {}, time: "2026-08-03T13:04:30.000Z", lat: 30.4892, lon: -87.094, gps_accuracy_m: 4, gps_position_at: points[0].time, compass_heading_deg: 90 },
+      ...pearsonPhotoMarkers
+    ],
+    photos: pearsonPhotos, voice_notes: [], orientation_samples: [], inspection_areas: [{ area_id: "large-tract", name: "Large Tract" }],
+    investigation_questions: [], active_question_ids: [], conditions: Object.assign({}, inspection.conditions, { inspection_date: "2026-08-03" })
+  };
+  const pearsonResult = await Package.createInspectionPackage({
+    inspection: pearsonInspection,
+    photoEntries: pearsonPhotos.map(photo => ({ id: photo.id, originalBlob: pearsonPhotoBytes, analysisBlob: pearsonPhotoBytes })),
+    voiceEntries: [], mapContext: baseMapContext, packageMode: "report", exportedAt: "2026-08-03T16:00:00.000Z"
+  });
+  const pearsonFiles = extractStoredZip(Buffer.from(await pearsonResult.blob.arrayBuffer()));
+  const pearsonManifest = JSON.parse(pearsonFiles.get("inspection.json").toString("utf8"));
+  const pearsonAudit = JSON.parse(pearsonFiles.get("EVIDENCE_AUDIT_HISTORY.json").toString("utf8"));
+  assert(!pearsonManifest.inspection.observations.some(item => item.observation_id === "pearson-accidental-entrance"), "accidental Entrance is excluded from findings");
+  assert(pearsonAudit.corrections.some(item => item.target.record_id === "pearson-accidental-entrance" && item.correction_reason === "Accidental button press" && item.original_entry.time === "2026-08-03T13:04:01.864Z"), "Entrance correction retains the exact original in audit history");
+  assert.equal(pearsonManifest.inspection.pearson_road_evidence_sequence.photo_numbers.join(","), "P3,P4,P5,P6,P7,P8,P9,P10,P11", "P3-P11 remain one inspector-directed large-tract sequence");
+  assert.equal(pearsonManifest.photographs.find(photo => photo.photo_number === "P12").observation_id, null, "later unlinked photo is not assigned to a nearby button press");
+  assert(pearsonManifest.photographs.find(photo => photo.photo_number === "P12").nearest_observations.every(link => link.relationship === "nearest_by_location_unconfirmed"), "proximity is explicitly unconfirmed");
+  assert.equal(pearsonManifest.inspection.inspector_hypotheses[0].evidence_classification, "Interpretation / Needs Professional Verification");
+  assert(pearsonManifest.inspection.inspector_hypotheses[0].prohibition.includes("Do not recommend construction"));
+  assert.equal(pearsonManifest.inspection.professional_handoff_cards.cards.length, 7, "all seven professional audience cards are generated");
+  assert(pearsonManifest.inspection.professional_handoff_cards.cards.every(card => card.exact_question.includes("lawful outlet") && card.limitation.includes("does not replace licensed professional work")), "handoffs ask the exact question without an unlicensed conclusion");
+  assert(pearsonFiles.has("professional-handoff-cards.html") && [...pearsonFiles.keys()].filter(name => name.startsWith("professional-handoff/")).length === 7, "one printable handoff is packaged for every audience");
+  assert.equal(JSON.parse(pearsonFiles.get("FIELD_EVIDENCE_REVIEW.json").toString("utf8")).four_photo_pattern_by_photo.find(item => item.photo_number === "P3").pattern.complete, true, "four-photo evidence completeness is reported");
 
   const noImagery = await Package.createInspectionPackage({
     inspection,

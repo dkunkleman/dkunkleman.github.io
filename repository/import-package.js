@@ -160,11 +160,17 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["DECISION_BRIEF.json", `analysis/${contract.export_id}/DECISION_BRIEF.json`],
     ["QUESTION_BRIEF.json", `analysis/${contract.export_id}/QUESTION_BRIEF.json`],
     ["FIELD_COACHING.json", `analysis/${contract.export_id}/FIELD_COACHING.json`],
+    ["FIELD_EVIDENCE_REVIEW.json", `analysis/${contract.export_id}/FIELD_EVIDENCE_REVIEW.json`],
+    ["EVIDENCE_AUDIT_HISTORY.json", `analysis/${contract.export_id}/EVIDENCE_AUDIT_HISTORY.json`],
+    ["PROFESSIONAL_HANDOFF_CARDS.json", `analysis/${contract.export_id}/PROFESSIONAL_HANDOFF_CARDS.json`],
+    ["PROFESSIONAL_HANDOFF_CARDS.md", `analysis/${contract.export_id}/PROFESSIONAL_HANDOFF_CARDS.md`],
+    ["professional-handoff-cards.html", `analysis/${contract.export_id}/professional-handoff-cards.html`],
     ["RETURN_VISIT_PLAN.json", `analysis/${contract.export_id}/RETURN_VISIT_PLAN.json`],
     ["SMALL_TRACT_WATER_MAP.json", `maps/${contract.export_id}/SMALL_TRACT_WATER_MAP.json`],
     ["small-tract-water-map.html", `maps/${contract.export_id}/small-tract-water-map.html`],
     ["REPORT_TEMPLATE.md", `analysis/${contract.export_id}/REPORT_TEMPLATE.md`],
     ["INSPECTOR_THOUGHTS.md", `analysis/${contract.export_id}/INSPECTOR_THOUGHTS.md`],
+    ["INSPECTOR_HYPOTHESES.md", `analysis/${contract.export_id}/INSPECTOR_HYPOTHESES.md`],
     ["EVIDENCE_RELATIONSHIPS.json", `analysis/${contract.export_id}/EVIDENCE_RELATIONSHIPS.json`],
     ["SUGGESTED_INSPECTION_QUESTIONS.md", `analysis/${contract.export_id}/SUGGESTED_INSPECTION_QUESTIONS.md`],
     ["printable-report.html", `analysis/${contract.export_id}/printable-report.html`]
@@ -190,6 +196,26 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     const bytes = entries.get(evidence.path);
     if (!bytes || sha256(bytes) !== evidence.sha256) throw new Error(`Voice-note integrity mismatch: ${evidence.path}`);
     addWrite(writes, inspectionRoot, `voice/${safeComponent(voice.voice_note_id, "voice-note ID")}_${evidence.sha256.slice(0, 20)}.${extension(evidence.path, "bin")}`, bytes);
+  }
+  const audit = manifest.audit_history || {};
+  for (const photo of audit.audit_only_photographs || []) {
+    for (const kind of ["original", "analysis"]) {
+      const evidence = photo[kind];
+      if (!evidence || !evidence.path) continue;
+      const bytes = entries.get(evidence.path);
+      if (!bytes || sha256(bytes) !== evidence.sha256) throw new Error(`Audit photograph integrity mismatch: ${evidence.path}`);
+      addWrite(writes, inspectionRoot, `photos/audit/${kind}/${safeComponent(photo.photo_id, "photo ID")}_${evidence.sha256.slice(0, 20)}.${extension(evidence.path, "bin")}`, bytes);
+    }
+  }
+  for (const voice of audit.audit_only_voice_notes || []) {
+    const evidence = voice.audio;
+    if (!evidence || !evidence.path) continue;
+    const bytes = entries.get(evidence.path);
+    if (!bytes || sha256(bytes) !== evidence.sha256) throw new Error(`Audit voice-note integrity mismatch: ${evidence.path}`);
+    addWrite(writes, inspectionRoot, `voice/audit/${safeComponent(voice.voice_note_id, "voice-note ID")}_${evidence.sha256.slice(0, 20)}.${extension(evidence.path, "bin")}`, bytes);
+  }
+  for (const [name, bytes] of entries.entries()) {
+    if (name.startsWith("professional-handoff/") && name.endsWith(".md")) addWrite(writes, inspectionRoot, `analysis/${contract.export_id}/${name}`, bytes);
   }
   for (const [layer, folder] of [["terrain", "terrain"], ["contours", "contours"]]) {
     const evidence = manifest.map_context && manifest.map_context.layers && manifest.map_context.layers[layer];

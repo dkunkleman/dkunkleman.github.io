@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.7.0";
+  const APP_VERSION = "3.8.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -19,6 +19,7 @@
   const dbRecoveryTools = window.IndexedDbRecovery;
   const coachingTools = window.InspectionCoaching;
   const waterTools = window.WaterIntelligence;
+  const governanceTools = window.EvidenceGovernance;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -51,7 +52,11 @@
   const waterClassificationDialog = document.getElementById("waterClassificationDialog");
   const smallWaterMap = document.getElementById("smallWaterMap");
   const waterPhotoDialog = document.getElementById("waterPhotoDialog");
-  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "photo", "voice", "more"].map(id => document.getElementById(id));
+  const photoMeaningDialog = document.getElementById("photoMeaningDialog");
+  const correctionDialog = document.getElementById("correctionDialog");
+  const hypothesisDialog = document.getElementById("hypothesisDialog");
+  const correctRecordBtn = document.getElementById("correctRecord");
+  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "hypothesis", "photo", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
     wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
     culvert: "Culvert", tree: "Tree", entrance: "Road or Entrance", wildlife: "Wildlife",
@@ -99,6 +104,8 @@
   let coachingStateLastCalculatedAt = 0;
   let pendingPhotoExplanationId = null;
   let pendingWaterPhotoId = null;
+  let pendingPhotoMeaningId = null;
+  let photoExplanationDisposition = null;
   let activeWaterType = null;
   let smallTractWaterModel = null;
   let waterPhotoObjectUrl = null;
@@ -130,6 +137,9 @@
         confirmed_at: null,
         scope: "walked_and_visually_observed_corridor_at_inspection_time"
       },
+      corrections: [],
+      inspector_hypotheses: [],
+      inspector_identity: "Field Inspector",
       conditions: {
         inspection_date: "",
         weather_summary: "",
@@ -198,6 +208,7 @@
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
     if (coachingTools) coachingTools.ensureInspectionModel(data);
+    if (governanceTools) governanceTools.ensureGovernanceModel(data);
   }
 
   function saveState() {
@@ -235,6 +246,7 @@
 
   function calculateCoachingState(force, forceCoverage) {
     if (!coachingTools) return null;
+    const evidenceData = effectiveEvidenceData();
     const now = Date.now();
     let coverageChanged = false;
     const coverageForced = forceCoverage === undefined ? Boolean(force) : Boolean(forceCoverage);
@@ -245,16 +257,16 @@
       coverageChanged = true;
     }
     if (!force && !coverageChanged && coachingStateSnapshot && now - coachingStateLastCalculatedAt < 15000) return coachingStateSnapshot;
-    coachingReview = coachingTools.reviewMissingEvidence(data, coverageSnapshot);
+    coachingReview = coachingTools.reviewMissingEvidence(evidenceData, coverageSnapshot);
     coachingStateSnapshot = {
       schema_name: "property-intelligence-field-coaching",
       schema_version: "1.0",
-      investigation_questions: coachingTools.createQuestionBrief(data),
+      investigation_questions: coachingTools.createQuestionBrief(evidenceData),
       inspection_areas: data.inspection_areas.slice(),
       coverage: coverageSnapshot,
       missing_evidence_review: coachingReview,
-      return_visit_plan: coachingTools.createReturnVisitPlan(data, coverageSnapshot, coachingReview),
-      field_efficiency: coachingTools.calculateFieldEfficiency(data, subjectAcres())
+      return_visit_plan: coachingTools.createReturnVisitPlan(evidenceData, coverageSnapshot, coachingReview),
+      field_efficiency: coachingTools.calculateFieldEfficiency(evidenceData, subjectAcres())
     };
     coachingStateLastCalculatedAt = now;
     return coachingStateSnapshot;
@@ -376,6 +388,183 @@
     renderCoverage();
     renderMissingEvidence();
     updateNextStep();
+  }
+
+  function recordIsActive(recordType, recordId) {
+    return !governanceTools || governanceTools.recordStatus(data, recordType, recordId) !== "voided";
+  }
+
+  function effectiveEvidenceData() {
+    if (!governanceTools) return data;
+    const photos = data.photos.map(item => governanceTools.effectiveRecord(data, "photo", item)).filter(item => !item.excluded_from_findings);
+    const voices = data.voice_notes.map(item => governanceTools.effectiveRecord(data, "voice_note", item)).filter(item => !item.excluded_from_findings);
+    const activePhotoById = new Map(photos.map(item => [String(item.id), item]));
+    const activeVoiceById = new Map(voices.map(item => [String(item.id), item]));
+    const voidPhotoIds = new Set(data.photos.filter(item => !recordIsActive("photo", item.id)).map(item => String(item.id)));
+    const voidVoiceIds = new Set(data.voice_notes.filter(item => !recordIsActive("voice_note", item.id)).map(item => String(item.id)));
+    const markers = data.markers.map(item => governanceTools.effectiveRecord(data, "observation", item)).filter(item => !item.excluded_from_findings && !voidPhotoIds.has(String(item.photo_id || "")) && !voidVoiceIds.has(String(item.voice_note_id || ""))).map(item => {
+      const photo = activePhotoById.get(String(item.photo_id || ""));
+      const voice = activeVoiceById.get(String(item.voice_note_id || ""));
+      if (photo) { item.area_id = photo.area_id || item.area_id || null; item.attributes = Object.assign({}, item.attributes || {}, { category: photo.category || null }); }
+      if (voice) item.area_id = voice.area_id || item.area_id || null;
+      return item;
+    });
+    return Object.assign({}, data, { markers, photos, voice_notes: voices });
+  }
+
+  function renderAuditHistory() {
+    const history = document.getElementById("auditHistory");
+    const summary = document.getElementById("auditSummary");
+    if (!history || !summary || !governanceTools) return;
+    governanceTools.ensureGovernanceModel(data);
+    const corrections = data.corrections || [];
+    const voided = corrections.filter(item => item.resulting_status === "voided").length;
+    summary.textContent = corrections.length ? `${corrections.length} permanent correction${corrections.length === 1 ? "" : "s"}; ${voided} record${voided === 1 ? "" : "s"} excluded from findings.` : "No corrections recorded.";
+    history.innerHTML = "";
+    corrections.slice().reverse().slice(0, 8).forEach(item => {
+      const row = document.createElement("p");
+      row.className = "small";
+      row.textContent = `${item.resulting_status.toUpperCase()} · ${item.correction_reason} · ${item.target.record_type} ${item.target.record_id} · ${new Date(item.correction_time).toLocaleString()} · ${item.inspector_identity}`;
+      history.appendChild(row);
+    });
+  }
+
+  function openCorrectionDialog(preferredTarget) {
+    if (!governanceTools) return;
+    const records = governanceTools.recordsForCorrection(data);
+    if (!records.length) {
+      setStatus("There is no saved record to correct yet.", "warning");
+      return;
+    }
+    const target = document.getElementById("correctionTarget");
+    target.innerHTML = "";
+    records.forEach(record => {
+      const option = document.createElement("option");
+      option.value = JSON.stringify({ record_type: record.record_type, record_id: record.record_id });
+      option.textContent = `${new Date(record.recorded_at).toLocaleTimeString()} · ${record.label}`;
+      target.appendChild(option);
+    });
+    if (preferredTarget) {
+      const preferredValue = JSON.stringify(preferredTarget);
+      if ([...target.options].some(option => option.value === preferredValue)) target.value = preferredValue;
+    }
+    const area = document.getElementById("correctionArea");
+    area.innerHTML = '<option value="">No area change</option>';
+    data.inspection_areas.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.area_id;
+      option.textContent = item.name;
+      area.appendChild(option);
+    });
+    document.getElementById("correctionReason").value = "Correct";
+    document.getElementById("correctionCategory").value = "";
+    document.getElementById("correctionClarification").value = "";
+    document.getElementById("correctionInspector").value = data.inspector_identity || "Field Inspector";
+    correctionDialog.showModal();
+  }
+
+  function savePermanentCorrection() {
+    try {
+      const target = JSON.parse(document.getElementById("correctionTarget").value);
+      const category = document.getElementById("correctionCategory").value;
+      const areaId = document.getElementById("correctionArea").value;
+      const clarification = document.getElementById("correctionClarification").value.trim();
+      const reason = document.getElementById("correctionReason").value;
+      if (reason === "Wrong category" && !category) throw new Error("Choose the corrected category.");
+      if (reason === "Wrong inspection area" && !areaId) throw new Error("Choose the corrected inspection area.");
+      if (reason === "Needs clarification" && !clarification) throw new Error("Enter the clarification.");
+      const correctedValue = {};
+      if (category) {
+        if (target.record_type === "photo") correctedValue.category = buttonLabels[category] || category;
+        else { correctedValue.type = category; correctedValue.label = buttonLabels[category] || category; }
+      }
+      if (areaId) correctedValue.area_id = areaId;
+      if (clarification) correctedValue.clarification = clarification;
+      const correction = governanceTools.addCorrection(data, {
+        record_type: target.record_type,
+        record_id: target.record_id,
+        correction_reason: reason,
+        corrected_value: correctedValue,
+        inspector_identity: document.getElementById("correctionInspector").value
+      });
+      data.lifecycle_events.push({ type: "evidence_correction_recorded", time: correction.correction_time, correction_id: correction.correction_id, target: correction.target, resulting_status: correction.resulting_status, source: "field_control" });
+      saveState();
+      correctionDialog.close();
+      renderAuditHistory();
+      redraw();
+      renderCoaching();
+      renderGallery();
+      setStatus(`${correction.correction_reason} saved. The original remains in the permanent audit history.`, correction.resulting_status === "voided" ? "warning" : "active");
+    } catch (error) {
+      setStatus(`CORRECTION NOT SAVED: ${error.message}`, "error");
+    }
+  }
+
+  function populateHypothesisEvidence() {
+    const observationSelect = document.getElementById("hypothesisObservations");
+    const photoSelect = document.getElementById("hypothesisPhotos");
+    const contradictionSelect = document.getElementById("hypothesisContradictions");
+    [observationSelect, photoSelect, contradictionSelect].forEach(select => { select.innerHTML = ""; });
+    data.markers.filter(item => recordIsActive("observation", item.id) && item.record_class !== "inspector_thought").slice().reverse().forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = `${item.button_label || item.type} · ${new Date(item.time).toLocaleTimeString()}`;
+      observationSelect.appendChild(option);
+      contradictionSelect.appendChild(option.cloneNode(true));
+    });
+    data.photos.filter(item => recordIsActive("photo", item.id)).slice().reverse().forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = `${item.photo_number || "Photo"} · ${item.category || "Other"}`;
+      photoSelect.appendChild(option);
+      const contradiction = option.cloneNode(true);
+      contradiction.value = `photo:${item.id}`;
+      contradictionSelect.appendChild(contradiction);
+    });
+  }
+
+  function openHypothesisDialog() {
+    populateHypothesisEvidence();
+    ["hypothesisStatement", "hypothesisQuestion", "hypothesisNextStep", "hypothesisContradiction"].forEach(id => { document.getElementById(id).value = ""; });
+    hypothesisDialog.showModal();
+  }
+
+  function selectedValues(id) {
+    return [...document.getElementById(id).selectedOptions].map(option => option.value);
+  }
+
+  function saveInspectorHypothesis() {
+    const statement = document.getElementById("hypothesisStatement").value.trim();
+    const question = document.getElementById("hypothesisQuestion").value.trim();
+    if (!statement || !question) {
+      setStatus("A hypothesis statement and exact verification question are required.", "warning");
+      return;
+    }
+    const context = currentEvidenceContext();
+    const hypothesis = {
+      hypothesis_id: makeId("hypothesis"),
+      recorded_at: new Date().toISOString(),
+      statement,
+      evidence_classification: "Interpretation / Needs Professional Verification",
+      factual_status: "NOT_AN_OBSERVED_FACT",
+      triggering_observation_ids: selectedValues("hypothesisObservations"),
+      supporting_photo_ids: selectedValues("hypothesisPhotos"),
+      contradicting_evidence_ids: selectedValues("hypothesisContradictions"),
+      contradicting_evidence_note: document.getElementById("hypothesisContradiction").value.trim(),
+      verification_question: question,
+      professional_type: document.getElementById("hypothesisProfessional").value,
+      cheapest_next_evidence_step: document.getElementById("hypothesisNextStep").value.trim(),
+      area_id: context.area_id,
+      question_ids: context.question_ids,
+      gps: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m, position_at: lastPosition.time } : null,
+      prohibition: "Do not recommend construction or state that the hypothesis will work without professional verification.",
+      immutable: true
+    };
+    data.inspector_hypotheses.push(hypothesis);
+    data.lifecycle_events.push({ type: "inspector_hypothesis_recorded", time: hypothesis.recorded_at, hypothesis_id: hypothesis.hypothesis_id, source: "field_control" });
+    saveState();
+    hypothesisDialog.close();
+    setStatus("Inspector hypothesis saved separately from observed facts.", "active");
   }
 
   function addInspectionArea() {
@@ -884,7 +1073,7 @@
     if (!waterTools || !smallWaterMap) return;
     smallWaterMap.innerHTML = "";
     const subject = subjectParcel();
-    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: data, subjectFeature: subject, statedSmallTractAcres: 5.49 });
+    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: effectiveEvidenceData(), subjectFeature: subject, statedSmallTractAcres: 5.49 });
     const summary = document.getElementById("smallWaterSummary");
     if (!smallTractWaterModel || smallTractWaterModel.status !== "GENERATED") {
       summary.textContent = "The verified small-tract parcel ring is unavailable. Evidence capture remains active.";
@@ -998,7 +1187,8 @@
         fill: index === visiblePoints.length - 1 ? "#00e0ff" : "#ffe54a", stroke: "#111", "stroke-width": 3
       });
     });
-    data.markers.forEach(marker => {
+    const activeEvidence = effectiveEvidenceData();
+    activeEvidence.markers.forEach(marker => {
       if (marker.lon < xmin || marker.lon > xmax || marker.lat < ymin || marker.lat > ymax) return;
       const style = markerStyle(marker.type);
       const x = sx(marker.lon);
@@ -1008,8 +1198,8 @@
     });
     document.getElementById("pointCount").textContent = data.points.length;
     document.getElementById("photoCount").textContent = data.photos.length;
-    document.getElementById("eventCount").textContent = data.markers.length;
-    document.getElementById("voiceCount").textContent = data.voice_notes.length;
+    document.getElementById("eventCount").textContent = activeEvidence.markers.length;
+    document.getElementById("voiceCount").textContent = activeEvidence.voice_notes.length;
     const feet = totalDistance() * 3.280839895;
     document.getElementById("distance").textContent = feet < 5280 ? `${Math.round(feet)} ft` : `${(feet / 5280).toFixed(2)} mi`;
     updateTimeMetrics();
@@ -1044,6 +1234,8 @@
       const metadata = data.photos[index];
       const card = document.createElement("div");
       card.className = "thumb";
+      const recordStatus = governanceTools ? governanceTools.recordStatus(data, "photo", metadata.id) : "active";
+      if (recordStatus === "voided") card.classList.add("photo-error");
       const image = document.createElement("img");
       image.alt = `Inspection photograph ${index + 1}`;
       image.loading = "lazy";
@@ -1068,7 +1260,17 @@
       waterButton.className = "review-water-photo";
       waterButton.textContent = metadata.water_confirmation === "yes" ? `Water: ${metadata.water && metadata.water.water_type ? metadata.water.water_type.replaceAll("_", " ") : "Confirmed"}` : (metadata.water_confirmation === "no" ? "Water: No" : (metadata.water_confirmation === "unsure" ? "Water: Unsure" : "Review for Water"));
       waterButton.addEventListener("click", () => openWaterClassification(metadata.id));
-      card.append(image, caption, location, valueSelect, waterButton);
+      const meaningButton = document.createElement("button");
+      meaningButton.type = "button";
+      const pattern = governanceTools ? governanceTools.photoPattern(metadata) : { missing: [] };
+      meaningButton.textContent = metadata.photo_meaning && metadata.photo_meaning.status === "complete" ? `Photo meaning · ${pattern.missing.length ? `${pattern.missing.length} evidence roles missing` : "4-part pattern complete"}` : "Explain Photo Meaning";
+      meaningButton.addEventListener("click", () => openPhotoMeaning(metadata.id));
+      const correctButton = document.createElement("button");
+      correctButton.type = "button";
+      correctButton.textContent = recordStatus === "voided" ? "View / Correct Audit Status" : "Correct This Photo";
+      correctButton.addEventListener("click", () => openCorrectionDialog({ record_type: "photo", record_id: metadata.id }));
+      if (recordStatus === "voided") caption.textContent += " · VOIDED — audit only";
+      card.append(image, caption, location, valueSelect, meaningButton, waterButton, correctButton);
       gallery.appendChild(card);
       try {
         const stored = await photoStoreGet(metadata.id);
@@ -1148,6 +1350,7 @@
     document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     fullArchiveBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     retryPendingPhotoBtn.disabled = photoBusy || packageBusy || recordingVoice;
+    correctRecordBtn.disabled = photoBusy || packageBusy || recordingVoice || !(data.markers.length || data.photos.length || data.voice_notes.length);
     updateNextStep();
   }
 
@@ -1553,9 +1756,12 @@
   async function beginPhotoExplanation(photoId) {
     pendingPhotoExplanationId = photoId;
     pendingWaterPhotoId = photoId;
+    photoExplanationDisposition = null;
     document.getElementById("photoExplanationState").textContent = "Starting voice recording…";
     document.getElementById("retryPhotoExplanation").hidden = true;
     document.getElementById("stopPhotoExplanation").hidden = false;
+    document.getElementById("skipPhotoExplanation").disabled = true;
+    document.getElementById("laterPhotoExplanation").disabled = true;
     if (!photoExplanationDialog.open) photoExplanationDialog.showModal();
     try {
       if ("speechSynthesis" in window) {
@@ -1575,6 +1781,8 @@
     document.getElementById("photoExplanationState").textContent = started ? "Recording. Explain what matters and why." : "Voice recording did not start. Tap Retry Voice Explanation.";
     document.getElementById("retryPhotoExplanation").hidden = started;
     document.getElementById("stopPhotoExplanation").hidden = !started;
+    document.getElementById("skipPhotoExplanation").disabled = false;
+    document.getElementById("laterPhotoExplanation").disabled = false;
     if (!started) setStatus("The photograph is safe. Its voice explanation is still missing; tap Retry Voice Explanation.", "warning");
   }
 
@@ -1582,8 +1790,18 @@
     const recorder = mediaRecorder;
     const metadata = activeVoiceNote;
     let voiceSaved = false;
+    let explanationHandledWithoutAudio = false;
     try {
       await voiceChunkWrites;
+      if (metadata && metadata.purpose === "photo_explanation" && photoExplanationDisposition) {
+        await voiceChunksDelete(metadata.id);
+        data.pending_voice_note = null;
+        await savePhotoExplanationStatus(metadata.photo_id, photoExplanationDisposition);
+        saveState();
+        explanationHandledWithoutAudio = true;
+        setStatus(photoExplanationDisposition === "explain_later" ? "Photograph is safe. Explanation marked for later." : "Photograph is safe. Voice explanation skipped.", "warning");
+        return;
+      }
       const chunks = await voiceChunksGet(metadata.id);
       if (!chunks.length) throw new Error("No audio bytes were recorded.");
       const mimeType = metadata.mime_type || (chunks[0].chunk && chunks[0].chunk.type) || "audio/mp4";
@@ -1638,12 +1856,103 @@
       if (voiceSaved && metadata && metadata.purpose === "photo_explanation") {
         pendingPhotoExplanationId = null;
         if (photoExplanationDialog.open) photoExplanationDialog.close();
-        openWaterClassification(metadata.photo_id);
+        openPhotoMeaning(metadata.photo_id);
+      } else if (explanationHandledWithoutAudio && metadata && metadata.purpose === "photo_explanation") {
+        pendingPhotoExplanationId = null;
+        photoExplanationDisposition = null;
+        if (photoExplanationDialog.open) photoExplanationDialog.close();
+        openPhotoMeaning(metadata.photo_id);
       } else if (metadata && metadata.purpose === "photo_explanation") {
         document.getElementById("photoExplanationState").textContent = "The photograph is safe, but its explanation did not save. Tap Retry Voice Explanation.";
         document.getElementById("retryPhotoExplanation").hidden = false;
         document.getElementById("stopPhotoExplanation").hidden = true;
       }
+    }
+  }
+
+  async function savePhotoExplanationStatus(photoId, status) {
+    const stored = await photoStoreGet(photoId);
+    if (!stored || !stored.metadata) throw new Error("The photograph could not be read.");
+    stored.metadata.explanation_status = status;
+    stored.metadata.explanation_status_at = new Date().toISOString();
+    if (stored.event) stored.event.attributes = Object.assign({}, stored.event.attributes || {}, { explanation_status: status });
+    await photoStorePut(stored);
+    const metadata = data.photos.find(item => String(item.id) === String(photoId));
+    if (metadata) {
+      metadata.explanation_status = status;
+      metadata.explanation_status_at = stored.metadata.explanation_status_at;
+    }
+    const event = data.markers.find(item => String(item.photo_id || "") === String(photoId));
+    if (event) event.attributes = Object.assign({}, event.attributes || {}, { explanation_status: status });
+  }
+
+  async function requestPhotoExplanationDisposition(disposition) {
+    if (!pendingPhotoExplanationId) return;
+    photoExplanationDisposition = disposition;
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      document.getElementById("photoExplanationState").textContent = disposition === "explain_later" ? "Saving Explain Later status…" : "Saving Skip status…";
+      mediaRecorder.stop();
+      return;
+    }
+    try {
+      const photoId = pendingPhotoExplanationId;
+      await savePhotoExplanationStatus(photoId, disposition);
+      pendingPhotoExplanationId = null;
+      photoExplanationDisposition = null;
+      photoExplanationDialog.close();
+      openPhotoMeaning(photoId);
+    } catch (error) {
+      setStatus(`PHOTO EXPLANATION STATUS NOT SAVED: ${error.message}`, "error");
+    }
+  }
+
+  function openPhotoMeaning(photoId) {
+    pendingPhotoMeaningId = photoId;
+    const photo = data.photos.find(item => String(item.id) === String(photoId));
+    const meaning = photo && photo.photo_meaning || {};
+    document.getElementById("photoMeaningSubject").value = meaning.subject || "";
+    document.getElementById("photoMeaningMeasurement").value = meaning.measurement_status || "Not measured";
+    document.getElementById("photoMeaningExtent").value = meaning.represented_extent || "Single point or object";
+    document.getElementById("photoMeaningImportance").value = meaning.decision_importance || "General reference";
+    document.getElementById("photoMeaningNote").value = meaning.clarification || "";
+    document.querySelectorAll('input[name="photoEvidenceRole"]').forEach(input => { input.checked = (meaning.evidence_roles || []).includes(input.value); });
+    if (!photoMeaningDialog.open) photoMeaningDialog.showModal();
+  }
+
+  async function persistPhotoMeaning(status) {
+    if (!pendingPhotoMeaningId) return;
+    const photoId = pendingPhotoMeaningId;
+    try {
+      const stored = await photoStoreGet(photoId);
+      if (!stored || !stored.metadata) throw new Error("The photograph could not be read.");
+      const meaning = {
+        status,
+        recorded_at: new Date().toISOString(),
+        subject: document.getElementById("photoMeaningSubject").value || null,
+        measurement_status: document.getElementById("photoMeaningMeasurement").value,
+        represented_extent: document.getElementById("photoMeaningExtent").value,
+        decision_importance: document.getElementById("photoMeaningImportance").value,
+        evidence_roles: [...document.querySelectorAll('input[name="photoEvidenceRole"]:checked')].map(input => input.value),
+        clarification: document.getElementById("photoMeaningNote").value.trim()
+      };
+      if (status === "complete" && !meaning.subject) {
+        setStatus("Choose what the photograph shows before saving its meaning.", "warning");
+        return;
+      }
+      stored.metadata.photo_meaning = meaning;
+      if (stored.event) stored.event.attributes = Object.assign({}, stored.event.attributes || {}, { photo_meaning: meaning });
+      await photoStorePut(stored);
+      const metadata = data.photos.find(item => String(item.id) === String(photoId));
+      if (metadata) metadata.photo_meaning = meaning;
+      const event = data.markers.find(item => String(item.photo_id || "") === String(photoId));
+      if (event) event.attributes = Object.assign({}, event.attributes || {}, { photo_meaning: meaning });
+      saveState();
+      photoMeaningDialog.close();
+      pendingPhotoMeaningId = null;
+      await renderGallery();
+      openWaterClassification(photoId);
+    } catch (error) {
+      setStatus(`PHOTO MEANING NOT SAVED: ${error.message}`, "error");
     }
   }
 
@@ -1654,6 +1963,8 @@
     if (!ids.some(id => String(id) === String(voiceId))) ids.push(voiceId);
     stored.metadata.explanation_voice_note_ids = ids;
     stored.metadata.explanation_voice_note_id = ids[0] || null;
+    stored.metadata.explanation_status = "recorded";
+    stored.metadata.explanation_status_at = new Date().toISOString();
     if (stored.event) {
       stored.event.voice_note_ids = ids.slice();
       stored.event.voice_note_id = stored.event.voice_note_id || voiceId;
@@ -1663,6 +1974,8 @@
     if (metadata) {
       metadata.explanation_voice_note_ids = ids.slice();
       metadata.explanation_voice_note_id = ids[0] || null;
+      metadata.explanation_status = "recorded";
+      metadata.explanation_status_at = stored.metadata.explanation_status_at;
     }
     const event = data.markers.find(marker => String(marker.photo_id) === String(photoId));
     if (event) {
@@ -2520,6 +2833,7 @@
       renderConditions();
       await renderGallery();
       renderCoaching();
+      renderAuditHistory();
       document.getElementById("accuracy").textContent = "—";
       document.getElementById("location").textContent = "—";
       document.getElementById("heading").textContent = "—";
@@ -2567,7 +2881,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -2578,6 +2892,8 @@
       return;
     }
     loadState();
+    governanceTools.ensureGovernanceModel(data);
+    saveState();
     lastSavedOrientation = data.orientation_samples.length ? data.orientation_samples[data.orientation_samples.length - 1] : null;
     if (data.started && !data.inspection_id) data.inspection_id = makeId("inspection");
     try {
@@ -2602,6 +2918,7 @@
     coverageDirty = true;
     redraw();
     renderCoaching();
+    renderAuditHistory();
     if (statusEl.dataset.kind !== "error") {
       setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
     }
@@ -2644,6 +2961,7 @@
   document.getElementById("other").addEventListener("click", () => addMarker("other"));
   document.getElementById("note").addEventListener("click", () => addMarker("note"));
   document.getElementById("thought").addEventListener("click", () => addMarker("thought"));
+  document.getElementById("hypothesis").addEventListener("click", openHypothesisDialog);
   document.getElementById("photo").addEventListener("click", () => takePhoto(null));
   document.getElementById("photo").addEventListener("pointerdown", preparePhotoStorage);
   document.getElementById("more").addEventListener("click", () => {
@@ -2668,6 +2986,18 @@
   document.getElementById("retryPhotoExplanation").addEventListener("click", () => {
     if (pendingPhotoExplanationId) beginPhotoExplanation(pendingPhotoExplanationId);
   });
+  document.getElementById("skipPhotoExplanation").addEventListener("click", () => requestPhotoExplanationDisposition("skipped"));
+  document.getElementById("laterPhotoExplanation").addEventListener("click", () => requestPhotoExplanationDisposition("explain_later"));
+  document.getElementById("savePhotoMeaning").addEventListener("click", () => persistPhotoMeaning("complete"));
+  document.getElementById("photoMeaningLater").addEventListener("click", () => persistPhotoMeaning("explain_later"));
+  photoMeaningDialog.addEventListener("cancel", event => event.preventDefault());
+  correctRecordBtn.addEventListener("click", () => openCorrectionDialog());
+  document.getElementById("cancelCorrection").addEventListener("click", () => correctionDialog.close());
+  document.getElementById("saveCorrection").addEventListener("click", savePermanentCorrection);
+  correctionDialog.addEventListener("cancel", event => event.preventDefault());
+  document.getElementById("cancelHypothesis").addEventListener("click", () => hypothesisDialog.close());
+  document.getElementById("saveHypothesis").addEventListener("click", saveInspectorHypothesis);
+  hypothesisDialog.addEventListener("cancel", event => event.preventDefault());
   document.querySelectorAll("[data-water-choice]").forEach(button => button.addEventListener("click", () => chooseWaterType(button.dataset.waterChoice)));
   document.getElementById("saveWaterClassification").addEventListener("click", saveConfirmedWaterClassification);
   document.getElementById("photoWaterDepth").addEventListener("change", event => {
