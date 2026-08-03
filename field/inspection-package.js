@@ -1,14 +1,15 @@
 (function (root, factory) {
   "use strict";
   const coaching = typeof module === "object" && module.exports ? require("./inspection-coaching.js") : (root && root.InspectionCoaching);
-  const api = factory(coaching);
+  const water = typeof module === "object" && module.exports ? require("./water-intelligence.js") : (root && root.WaterIntelligence);
+  const api = factory(coaching, water);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.6";
+  const FORMAT_VERSION = "1.7";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -317,7 +318,7 @@
       "analysis_mime_type", "analysis_size_bytes", "analysis_sha256", "width_px", "height_px",
       "pixel_orientation", "exif_orientation", "exif_orientation_description",
       "device_screen_orientation", "device_screen_angle_deg", "compass_heading_deg",
-      "sensor_alpha_deg", "sensor_beta_deg", "sensor_gamma_deg"
+      "sensor_alpha_deg", "sensor_beta_deg", "sensor_gamma_deg", "explanation_voice_note_ids", "water_confirmation", "water_type", "water_depth_band", "water_depth_exact_in", "water_measurement_basis", "water_width_ft", "water_length_ft", "water_behavior", "water_significance"
     ]];
     (photos || []).forEach(photo => rows.push([
       photo.photo_number, photo.photo_id, photo.photo_value, photo.area_id, (photo.question_ids || []).join("|"), JSON.stringify(photo.question_links || []), photo.observation_id, photo.associated_marker_id, photo.associated_observation_id, photo.gps_point_id, photo.direction_faced && photo.direction_faced.cardinal, photo.weather && photo.weather.weather_record_id,
@@ -334,7 +335,11 @@
       photo.compass_heading_deg,
       photo.orientation.sensor ? photo.orientation.sensor.alpha_deg : "",
       photo.orientation.sensor ? photo.orientation.sensor.beta_deg : "",
-      photo.orientation.sensor ? photo.orientation.sensor.gamma_deg : ""
+      photo.orientation.sensor ? photo.orientation.sensor.gamma_deg : "",
+      (photo.explanation_voice_note_ids || []).join("|"), photo.water_confirmation,
+      photo.water && photo.water.water_type, photo.water && photo.water.water_depth_band, photo.water && photo.water.water_depth_exact_in,
+      photo.water && photo.water.measurement_basis, photo.water && photo.water.water_width_ft, photo.water && photo.water.water_length_ft,
+      photo.water && photo.water.water_behavior, photo.water && photo.water.significance
     ]));
     return rows.map(row => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
   }
@@ -344,7 +349,7 @@
       "voice_note_id", "area_id", "question_ids", "question_links", "observation_id", "gps_point_id", "nearest_observation_ids", "started_at", "finished_at", "duration_ms", "latitude", "longitude",
       "gps_accuracy_m", "gps_position_at", "compass_heading_deg", "audio_path", "mime_type",
       "size_bytes", "sha256", "recovered_after_interruption", "sensor_alpha_deg",
-      "sensor_beta_deg", "sensor_gamma_deg"
+      "sensor_beta_deg", "sensor_gamma_deg", "purpose", "photo_id", "prompt"
     ]];
     (voiceNotes || []).forEach(note => rows.push([
       note.voice_note_id, note.area_id, (note.question_ids || []).join("|"), JSON.stringify(note.question_links || []), note.observation_id, note.gps_point_id, (note.nearest_observations || []).map(item => item.observation_id).join("|"), note.started_at, note.finished_at, note.duration_ms,
@@ -354,7 +359,8 @@
       note.recovered_after_interruption,
       note.device_orientation ? note.device_orientation.alpha_deg : "",
       note.device_orientation ? note.device_orientation.beta_deg : "",
-      note.device_orientation ? note.device_orientation.gamma_deg : ""
+      note.device_orientation ? note.device_orientation.gamma_deg : "",
+      note.purpose, note.photo_id, note.prompt
     ]));
     return rows.map(row => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
   }
@@ -556,6 +562,8 @@
         question_brief: { source: "QUESTION_BRIEF.json", destination: `analysis/${exportId}/QUESTION_BRIEF.json` },
         field_coaching: { source: "FIELD_COACHING.json", destination: `analysis/${exportId}/FIELD_COACHING.json` },
         return_visit_plan: { source: "RETURN_VISIT_PLAN.json", destination: `analysis/${exportId}/RETURN_VISIT_PLAN.json` },
+        small_tract_water_map: { source: "SMALL_TRACT_WATER_MAP.json", destination: `maps/${exportId}/SMALL_TRACT_WATER_MAP.json` },
+        small_tract_water_map_interactive: { source: "small-tract-water-map.html", destination: `maps/${exportId}/small-tract-water-map.html` },
         report_template: { source: "REPORT_TEMPLATE.md", destination: `analysis/${exportId}/REPORT_TEMPLATE.md` },
         inspector_thoughts: { source: "INSPECTOR_THOUGHTS.md", destination: `analysis/${exportId}/INSPECTOR_THOUGHTS.md` },
         evidence_relationships: { source: "EVIDENCE_RELATIONSHIPS.json", destination: `analysis/${exportId}/EVIDENCE_RELATIONSHIPS.json` },
@@ -914,6 +922,15 @@
       mapPage("Trees and Timber", ["trees"]),
       mapPage("Photos", ["photos"])
     ].join("");
+    const waterModel = manifest.small_tract_water_map || {};
+    const waterPage = (title, mode, note) => `<section class="page landscape"><h1>${htmlEscape(title)}</h1>${smallWaterMapSvg(manifest, mode)}<p class="map-note">${htmlEscape(note)} Solid blue points are actual photographed water. Dashed or shaded boundaries are estimates. Gray acreage outside the inspected corridor remains unknown.</p><div class="disclaimer">${htmlEscape((waterModel.limitations || []).join(" "))}</div></section>`;
+    const smallWaterPages = waterModel.status === "GENERATED" ? [
+      waterPage("SMALL TRACT — OBSERVED WATER CONDITIONS", "overview", "Complete 5.49-acre small-tract overview with route, water, dry evidence, estimated extents, and preliminary avoidance areas."),
+      waterPage("Small Tract — Water Evidence Only", "all", "Every confirmed or legacy Wet-linked water photograph within the exact small-tract boundary."),
+      waterPage("Small Tract — Larger Pooled and Flowing Water", "significant", "Minor isolated depressions are de-emphasized; flowing and materially pooled evidence remains."),
+      waterPage("Small Tract — Preliminary Building Avoidance", "avoidance", "This preliminary decision layer does not establish engineering, wetland, soil, septic, or permitting conclusions.")
+    ].join("") : "";
+    const waterDetailPages = waterModel.status === "GENERATED" ? (waterModel.water_area_clusters || []).filter(cluster => cluster.evidence_count > 1).map(cluster => `<section class="page landscape"><h1>${htmlEscape(cluster.water_area_id)} — Enlarged Water Detail</h1>${smallWaterMapSvg(manifest, "all", cluster)}<p class="map-note"><strong>${htmlEscape(cluster.classification)}</strong> · Supporting photographs: ${htmlEscape(cluster.supporting_photo_numbers.join(", "))} · Evidence count: ${htmlEscape(cluster.evidence_count)} · Confidence: ${htmlEscape(cluster.confidence)}.</p><div class="disclaimer">${htmlEscape(cluster.outline_basis)} Review the indexed photo pages and attached voice explanations before relying on this interpretation.</div></section>`).join("") : "";
     const detailPages = zones.map((zone, index) => mapPage(`Detail Zone ${index + 1} — ${zone.count} nearby observations`, null, { view: zone })).join("");
     const photoValueRank = { Critical: 0, Helpful: 1, Reference: 2, Duplicate: 3 };
     const photoPages = (manifest.photographs || []).map((photo, index) => ({ photo, index })).sort((left, right) => {
@@ -934,7 +951,77 @@
     const observationRows = (manifest.inspection.observations || []).map((item, index) => `<tr><td>${index + 1}</td><td>${htmlEscape(item.observed_at)}</td><td>${htmlEscape(item.label)}</td><td>${htmlEscape(item.evidence_classification)}</td><td>${htmlEscape(item.gps.latitude)}, ${htmlEscape(item.gps.longitude)}</td><td>${htmlEscape(item.note || "")}</td></tr>`).join("");
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pearson Road Inspection Report</title><style>
       @page portrait{size:letter portrait;margin:.45in}@page landscape{size:letter landscape;margin:.35in}*{box-sizing:border-box}body{margin:0;color:#111;font-family:Arial,sans-serif;background:#ddd}.page{background:#fff;margin:16px auto;padding:.35in;page-break-after:always;break-after:page}.portrait{page:portrait;width:8.5in;min-height:11in}.landscape{page:landscape;width:11in;min-height:8.5in}h1{margin:0 0 10px;font-size:24px}h2{margin:18px 0 8px}.report-map{display:block;width:100%;height:6.75in;border:2px solid #111;background:#ddd}.route-page .report-map{height:6.2in}.route-summary{display:flex;gap:20px;align-items:center;margin:-3px 0 7px;padding:7px 10px;background:#eee;border:1px solid #777;font-size:13px}.map-note{margin:6px 0;font-size:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.summary div{border:1px solid #777;padding:9px}.summary strong{display:block;font-size:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #777;padding:6px;text-align:left;vertical-align:top}.photo-page img{display:block;max-width:100%;max-height:7.1in;margin:0 auto 12px;object-fit:contain}.photo-page dl{display:grid;grid-template-columns:1.55in 1fr;margin:0}.photo-page dt,.photo-page dd{margin:0;border-top:1px solid #aaa;padding:6px}.photo-page dt{font-weight:bold}.disclaimer{border:3px solid #111;padding:12px;font-weight:bold}.photo-marker{cursor:pointer}.photo-marker:hover circle,.photo-marker:focus circle{stroke:#00ffff;stroke-width:12}#photoHover{position:fixed;z-index:20;display:none;width:280px;padding:7px;background:#fff;border:3px solid #111;box-shadow:0 4px 20px #0008}#photoHover img{display:block;width:100%;max-height:220px;object-fit:contain}dialog{max-width:min(92vw,760px);border:3px solid #111}dialog img{max-width:100%;max-height:75vh}@media print{body{background:#fff}.page{margin:0}#photoHover,dialog{display:none!important}}@media(max-width:800px){.page,.portrait,.landscape{width:100%;min-height:0;margin:0 0 12px;padding:12px}.report-map,.route-page .report-map{height:auto;aspect-ratio:6/5}.route-summary{display:grid;grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
-    </style></head><body>${rasterDefinitions}${mapPages}${decisionPage}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><p><strong>Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}<section class="page portrait"><h1>Evidence Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
+    </style></head><body>${rasterDefinitions}${smallWaterPages}${waterDetailPages}${mapPages}${decisionPage}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><p><strong>Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}<section class="page portrait"><h1>Evidence Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
+  }
+
+  function smallWaterMapSvg(manifest, mode, focusCluster) {
+    const model = manifest.small_tract_water_map || {};
+    if (model.status !== "GENERATED") return `<p>Small-tract water map unavailable: ${htmlEscape(model.reason || "parcel section could not be isolated")}</p>`;
+    const boundary = model.small_tract.boundary || [];
+    const projectedBoundary = boundary.map(point => reportProjection(point[0], point[1]));
+    const focusEvidence = focusCluster ? (model.water_photographs || []).filter(item => (focusCluster.supporting_photo_ids || []).includes(item.photo_id)).map(item => reportProjection(item.longitude, item.latitude)) : [];
+    const focusOutline = focusCluster && focusCluster.estimated_outline ? focusCluster.estimated_outline.map(point => reportProjection(point[0], point[1])) : [];
+    const viewPoints = focusEvidence.length ? focusEvidence.concat(focusOutline) : projectedBoundary;
+    const xs = viewPoints.map(point => point.x);
+    const ys = viewPoints.map(point => point.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+    const minimumFocusSpan = focusCluster ? 180 : 0;
+    const xCenter = (minX + maxX) / 2, yCenter = (minY + maxY) / 2;
+    const xSpan = Math.max(maxX - minX, minimumFocusSpan), ySpan = Math.max(maxY - minY, minimumFocusSpan);
+    const padding = Math.max(35, Math.max(xSpan, ySpan) * .12);
+    const view = { minX: xCenter - xSpan / 2 - padding, minY: yCenter - ySpan / 2 - padding, width: xSpan + padding * 2, height: ySpan + padding * 2 };
+    const pathFor = ring => (ring || []).map((point, index) => {
+      const projected = reportProjection(point[0], point[1]);
+      return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
+    }).join(" ") + " Z";
+    const route = (model.route_segments || []).map(segment => {
+      const d = segment.map((point, index) => {
+        const projected = reportProjection(point.lon, point.lat);
+        return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
+      }).join(" ");
+      if (!d) return "";
+      return `<g class="layer-route">${model.inspected_no_standing_water && model.inspected_no_standing_water.enabled ? `<path class="layer-inspected-dry" d="${d}" fill="none" stroke="rgba(65,155,74,.38)" stroke-width="48" vector-effect="non-scaling-stroke"/>` : ""}<path d="${d}" fill="none" stroke="#111" stroke-width="12" vector-effect="non-scaling-stroke"/><path d="${d}" fill="none" stroke="#ffe600" stroke-width="6" vector-effect="non-scaling-stroke"/></g>`;
+    }).join("");
+    const outlines = (model.water_area_clusters || []).filter(cluster => cluster.estimated_outline && (!focusCluster || cluster.water_area_id === focusCluster.water_area_id)).map(cluster => `<g class="layer-outlines"><path d="${pathFor(cluster.estimated_outline)}" fill="rgba(21,108,205,.25)" stroke="#1768c4" stroke-width="6" stroke-dasharray="16 10" vector-effect="non-scaling-stroke"/><title>${htmlEscape(cluster.water_area_id)}: ${htmlEscape(cluster.outline_basis)}</title></g>`).join("");
+    const avoidance = (model.preliminary_building_avoidance_areas || []).filter(area => area.outline && (!focusCluster || area.water_area_id === focusCluster.water_area_id)).map(area => `<g class="layer-avoidance"><path d="${pathFor(area.outline)}" fill="rgba(190,20,38,.18)" stroke="#c21428" stroke-width="7" stroke-dasharray="22 10" vector-effect="non-scaling-stroke"/><title>${htmlEscape(area.avoidance_id)}: ${htmlEscape(area.reason)}</title></g>`).join("");
+    const dry = (model.high_dry_observations || []).map(item => {
+      const point = reportProjection(item.location.lon, item.location.lat);
+      return `<circle class="layer-dry" cx="${point.x}" cy="${point.y}" r="15" fill="#45a146" stroke="#fff" stroke-width="5" vector-effect="non-scaling-stroke"><title>${htmlEscape(item.type)} ${htmlEscape(item.recorded_at)}</title></circle>`;
+    }).join("");
+    const wetObservations = (model.wet_observations || []).map(item => {
+      const point = reportProjection(item.location.lon, item.location.lat);
+      return `<rect class="layer-standing" x="${point.x - 12}" y="${point.y - 12}" width="24" height="24" transform="rotate(45 ${point.x} ${point.y})" fill="#74c6ff" stroke="#003f8f" stroke-width="5" vector-effect="non-scaling-stroke"><title>Wet observation ${htmlEscape(item.observation_id)} · ${htmlEscape(item.recorded_at)}</title></rect>`;
+    }).join("");
+    const photoById = new Map((manifest.photographs || []).map(photo => [String(photo.photo_id), photo]));
+    const voiceById = new Map((manifest.voice_notes || []).map(voice => [String(voice.voice_note_id), voice]));
+    const markers = (model.water_photographs || []).filter(item => {
+      if (focusCluster && !(focusCluster.supporting_photo_ids || []).includes(item.photo_id)) return false;
+      if (mode === "significant") return item.significance === "Flowing-water corridor" || item.significance === "Larger connected wet area" || item.significance === "Moderate pooled area";
+      if (mode === "avoidance") return (model.preliminary_building_avoidance_areas || []).some(area => (area.supporting_photo_numbers || []).includes(item.photo_number));
+      return true;
+    }).map(item => {
+      const point = reportProjection(item.longitude, item.latitude);
+      const flowing = item.significance === "Flowing-water corridor";
+      const significanceClass = item.significance === "Minor localized depression" ? "minor" : ((item.significance === "Moderate pooled area" || item.significance === "Larger connected wet area") ? "larger" : "other-water");
+      const photo = photoById.get(String(item.photo_id));
+      const voiceId = (item.voice_note_ids || [])[0];
+      const voice = voiceById.get(String(voiceId));
+      const detail = `${item.photo_number || "Photo"} · ${item.significance} · depth ${item.depth && item.depth.label || "unknown"} · ${item.dimensions && item.dimensions.width_ft || "unknown"} ft wide × ${item.dimensions && item.dimensions.length_ft || "unknown"} ft long · ${item.dimensions && item.dimensions.basis || "unknown basis"} · ${item.recorded_at || "time unknown"}`;
+      return `<g class="water-photo layer-${flowing ? "flowing" : "standing"} layer-${significanceClass}" tabindex="0" role="button" data-photo-path="${htmlEscape(photo && photo.analysis && photo.analysis.path || "")}" data-voice-path="${htmlEscape(voice && voice.audio && voice.audio.path || "")}" data-photo-label="${htmlEscape(item.photo_number || "Photo")}" data-detail="${htmlEscape(detail)}"><circle cx="${point.x}" cy="${point.y}" r="23" fill="${flowing ? "#003f8f" : "#1687e0"}" stroke="#fff" stroke-width="6" vector-effect="non-scaling-stroke"/><text x="${point.x}" y="${point.y + 7}" text-anchor="middle" fill="#fff" stroke="#111" stroke-width="2" paint-order="stroke" font-size="17" font-weight="900">${htmlEscape(String(item.photo_number || "P").replace(/^P/, ""))}</text><title>${htmlEscape(detail)}</title></g>`;
+    }).join("");
+    const labels = (model.water_area_clusters || []).filter(cluster => !focusCluster || cluster.water_area_id === focusCluster.water_area_id).map(cluster => {
+      const point = reportProjection(cluster.center.longitude, cluster.center.latitude);
+      return `<text class="layer-outlines" x="${point.x}" y="${point.y - 30}" text-anchor="middle" fill="#052f56" stroke="#fff" stroke-width="5" paint-order="stroke" font-size="24" font-weight="900">${htmlEscape(cluster.water_area_id)}</text>`;
+    }).join("");
+    const showAvoidance = mode === "overview" || mode === "avoidance";
+    const showDry = mode === "overview" || mode === "all";
+    return `<svg class="small-water-map report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(model.title)}" xmlns="http://www.w3.org/2000/svg"><use class="layer-terrain" href="#reportTerrainRaster" x="0" y="0" width="1800" height="1500"/><use class="layer-contours" href="#reportContourRaster" x="0" y="0" width="1800" height="1500" opacity=".8"/><path class="layer-unknown" d="${pathFor(boundary)}" fill="rgba(80,80,80,.27)" stroke="#d71920" stroke-width="9" vector-effect="non-scaling-stroke"/>${route}${showAvoidance ? avoidance : ""}${outlines}${showDry ? dry : ""}${wetObservations}${markers}${labels}<g transform="translate(${view.minX + 50} ${view.minY + 50})"><path d="M0 60 L26 0 L52 60 L26 46 Z" fill="#111"/><text x="26" y="-10" text-anchor="middle" font-size="30" font-weight="900">N</text></g></svg>`;
+  }
+
+  function createSmallTractWaterMapHtml(manifest) {
+    const model = manifest.small_tract_water_map || {};
+    const summaryRows = (model.water_area_clusters || []).map(cluster => `<tr><th>${htmlEscape(cluster.water_area_id)}</th><td>${htmlEscape(cluster.classification)}</td><td>${htmlEscape(cluster.supporting_photo_numbers.join(", "))}</td><td>${htmlEscape(cluster.minimum_depth_in == null ? "Unknown" : `${cluster.minimum_depth_in}–${cluster.maximum_depth_in == null ? "+" : cluster.maximum_depth_in} in`)}</td><td>${htmlEscape(cluster.confidence)}</td></tr>`).join("") || `<tr><td colspan="5">No confirmed small-tract water photographs were present.</td></tr>`;
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${htmlEscape(model.title || "Small Tract Water Map")}</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;background:#ddd;color:#111}main{max-width:1200px;margin:auto;background:#fff;padding:16px}h1{margin:0 0 8px}.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin:10px 0}.controls label{padding:9px;border:2px solid #777;font-weight:800}.controls input{width:22px;height:22px;vertical-align:middle}.small-water-map{display:block;width:100%;height:70vh;min-height:500px;border:3px solid #164b75;background:#d5d5d5}.water-photo{cursor:pointer}.water-photo:hover circle,.water-photo:focus circle{stroke:#00ffff;stroke-width:12}.legend{display:flex;gap:12px;flex-wrap:wrap;padding:8px;background:#f3f3f3}.legend span{white-space:nowrap}.warning{border:3px solid #111;padding:10px;font-weight:800}table{width:100%;border-collapse:collapse}th,td{border:1px solid #777;padding:6px;text-align:left}dialog{max-width:min(92vw,760px);border:3px solid #111}dialog img{display:block;max-width:100%;max-height:65vh;margin:auto}dialog audio{width:100%;margin-top:10px}@media print{@page{size:letter landscape;margin:.35in}body{background:#fff}main{max-width:none;padding:0}.controls,dialog{display:none!important}.small-water-map{height:6.4in}.warning{font-size:11px}}</style></head><body><main><h1>${htmlEscape(model.title || "SMALL TRACT — OBSERVED WATER CONDITIONS")}</h1><p><strong>Small tract:</strong> ${htmlEscape(model.small_tract && model.small_tract.stated_acres)} acres · <strong>Water photographs:</strong> ${htmlEscape((model.water_photographs || []).length)} · <strong>Clusters:</strong> ${htmlEscape((model.water_area_clusters || []).length)}</p><div class="controls"><label><input type="checkbox" data-layer="route" checked>Route / inspected corridor</label><label><input type="checkbox" data-layer="standing" checked>Standing water</label><label><input type="checkbox" data-layer="flowing" checked>Flowing water</label><label><input type="checkbox" data-layer="minor" checked>Minor depressions</label><label><input type="checkbox" data-layer="larger" checked>Larger pooled areas</label><label><input type="checkbox" data-layer="outlines" checked>Estimated outlines</label><label><input type="checkbox" data-layer="avoidance" checked>Building avoidance</label><label><input type="checkbox" data-layer="dry" checked>High / dry evidence</label><label><input type="checkbox" data-layer="terrain" checked>Terrain</label><label><input type="checkbox" data-layer="contours" checked>2-foot contours</label><label><input type="checkbox" data-layer="unknown" checked>Uninspected / unknown</label></div><svg aria-hidden="true" width="0" height="0" style="position:absolute"><defs><image id="reportTerrainRaster" href="context/usgs-terrain.png" width="1800" height="1500"/><image id="reportContourRaster" href="context/usgs-contours-2ft.png" width="1800" height="1500"/></defs></svg>${smallWaterMapSvg(manifest, "overview")}<div class="legend"><span>● Actual photographed water</span><span>◇ Wet observation</span><span>Blue dashed: estimated extent</span><span>Red dashed: preliminary avoidance</span><span>Green corridor: inspected with no standing water observed</span><span>Gray: unknown outside inspected corridor</span></div><p class="warning">${htmlEscape((model.limitations || []).join(" "))}</p><h2>Water-area clusters</h2><table><thead><tr><th>ID</th><th>Classification</th><th>Supporting photos</th><th>Depth</th><th>Confidence</th></tr></thead><tbody>${summaryRows}</tbody></table></main><dialog id="photoDialog"><button id="closeDialog">Close</button><h2 id="dialogTitle"></h2><img id="dialogImage" alt="Water evidence photograph"><p id="dialogDetail"></p><audio id="dialogAudio" controls hidden></audio></dialog><script>(()=>{const dialog=document.getElementById('photoDialog'),image=document.getElementById('dialogImage'),audio=document.getElementById('dialogAudio');function openMarker(event){const marker=event.currentTarget;document.getElementById('dialogTitle').textContent=marker.dataset.photoLabel;document.getElementById('dialogDetail').textContent=marker.dataset.detail;image.src=marker.dataset.photoPath;audio.hidden=!marker.dataset.voicePath;if(marker.dataset.voicePath)audio.src=marker.dataset.voicePath;dialog.showModal()}document.querySelectorAll('.water-photo').forEach(marker=>{marker.addEventListener('click',openMarker);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openMarker(event)}})});document.getElementById('closeDialog').addEventListener('click',()=>dialog.close());document.querySelectorAll('[data-layer]').forEach(input=>input.addEventListener('change',()=>document.querySelectorAll('.layer-'+input.dataset.layer).forEach(item=>item.style.display=input.checked?'':'none')))})()</script></body></html>`;
   }
 
   function makeReadme(manifest) {
@@ -952,6 +1039,8 @@
       "- QUESTION_BRIEF.json: every inspector-created investigation question with supporting, contradicting, and contextual evidence IDs.",
       "- FIELD_COACHING.json: inspection areas, route-proximity coverage, missing-evidence review, return priorities, and field-efficiency estimates.",
       "- RETURN_VISIT_PLAN.json: unvisited-zone waypoints and the highest-value remaining measurements and photographs.",
+      "- SMALL_TRACT_WATER_MAP.json: exact small-tract ring, small-tract-only route and evidence, conservative water clusters, dry-corridor rule, unknown acreage, and preliminary building-avoidance reasoning.",
+      "- small-tract-water-map.html: interactive human-readable map whose water markers open the actual photograph and attached voice explanation.",
       "- REPORT_TEMPLATE.md: required professional Property Intelligence Report structure.",
       "- INSPECTOR_THOUGHTS.md: inspector reasoning kept separate from observed evidence.",
       "- EVIDENCE_RELATIONSHIPS.json: direct GPS, observation, photo, voice, weather, map, and thought links.",
@@ -997,7 +1086,7 @@
       auto_start: true,
       user_questions_required_before_analysis: false,
       objective: "Reconstruct the field day from this ZIP alone, then reduce uncertainty about access, buildability, economic potential, cost/risk, and distinctive value without asking the field user to match evidence.",
-      start_here: ["AI_README.md", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "inspection.json"],
+      start_here: ["AI_README.md", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "inspection.json"],
       required_outputs_in_order: [
         "Decision summary",
         "Strengths, weaknesses, and material unknowns",
@@ -1162,6 +1251,9 @@
         map_location: photo.map_location,
         analysis_path: photo.analysis && photo.analysis.path,
         photo_value: photo.photo_value,
+        explanation_voice_note_ids: photo.explanation_voice_note_ids,
+        water_confirmation: photo.water_confirmation,
+        water: photo.water,
         area_id: photo.area_id,
         question_ids: photo.question_ids,
         question_links: photo.question_links
@@ -1173,6 +1265,8 @@
         gps_point_id: voice.gps_point_id,
         recorded_at: voice.started_at,
         audio_path: voice.audio.path,
+        purpose: voice.purpose,
+        photo_id: voice.photo_id,
         area_id: voice.area_id,
         question_ids: voice.question_ids,
         question_links: voice.question_links
@@ -1319,6 +1413,7 @@
       missing_evidence: fieldCoaching ? fieldCoaching.missing_evidence_review : null,
       return_visit_plan: fieldCoaching ? fieldCoaching.return_visit_plan : null,
       field_efficiency: fieldCoaching ? fieldCoaching.field_efficiency : null,
+      small_tract_water_map: manifest.small_tract_water_map || null,
       stakeholder_questions: questions.reduce((groups, question) => {
         const key = String(question.stakeholder || "Other").toLowerCase().replace(/[^a-z0-9]+/g, "_");
         if (!groups[key]) groups[key] = [];
@@ -1365,7 +1460,7 @@
 
 ## Start here
 
-This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`DECISION_BRIEF.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every actual photograph and voice note referenced there. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every actual photograph and voice note referenced there. Open \`small-tract-water-map.html\` for the human-readable water map. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
 
 The purpose is not to repeat the evidence. The purpose is to reduce uncertainty about five decisions:
 
@@ -1388,6 +1483,8 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`QUESTION_BRIEF.json\` contains the inspector's investigation questions and the evidence explicitly attached to each question.
 - \`FIELD_COACHING.json\` separates well-inspected, lightly-inspected, and not-inspected route-proximity estimates; it also records missing evidence and field-efficiency estimates.
 - \`RETURN_VISIT_PLAN.json\` prioritizes unvisited areas, unanswered questions, measurements, and photographs for the next visit.
+- \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.49-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
+- \`small-tract-water-map.html\` provides layer toggles and opens the actual photograph and photo-linked voice explanation from each water marker.
 - Every observation, photograph, and voice note records its inspection area and optional question relationships. Photographs are labeled Critical, Helpful, Reference, or Duplicate.
 - \`INSPECTOR_THOUGHTS.md\` contains experience, theories, concerns, and preferences. These are useful interpretations, but they are not observed facts and must never be silently converted into facts.
 
@@ -1621,6 +1718,11 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         note: metadata.note || "",
         evidence_classification: metadata.evidence_classification || "Observed",
         observation_attributes: metadata.observation_attributes || {},
+        explanation_voice_note_id: metadata.explanation_voice_note_id || null,
+        explanation_voice_note_ids: Array.isArray(metadata.explanation_voice_note_ids) ? metadata.explanation_voice_note_ids.slice() : (metadata.explanation_voice_note_id ? [metadata.explanation_voice_note_id] : []),
+        water_confirmation: metadata.water_confirmation || null,
+        water_reviewed_at: metadata.water_reviewed_at || null,
+        water: metadata.water || null,
         camera_opened_at: metadata.camera_opened_at || null,
         recorded_at: recordedAt,
         source_file_last_modified_at: metadata.source_file_last_modified_at || null,
@@ -1692,6 +1794,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       if (!audioHash) throw new Error(`Voice note ${index + 1} could not be SHA-256 verified. Package creation stopped.`);
       manifestVoices.push({
         voice_note_id: metadata.id,
+        purpose: metadata.purpose || "general_field_note",
+        photo_id: metadata.photo_id || null,
+        prompt: metadata.prompt || null,
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
@@ -1894,9 +1999,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.5",
+      schema_version: "1.6",
       purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
-      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "attachment", "map_context", "coverage_estimate", "return_visit_plan"],
+      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "attachment", "photo_explanation", "water_evidence", "water_area_cluster", "map_context", "coverage_estimate", "return_visit_plan"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
         classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance", "area_id", "question_ids", "question_links"],
@@ -1906,9 +2011,21 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       },
       inspector_thought_contract: "Inspector thoughts are interpretations and experience, not observed facts. Keep them separate from observations while preserving their time, place, heading, and nearby evidence.",
       coaching_contract: "Coverage is an explicitly limited route-proximity estimate. Questions and areas are permanent evidence relationships. Every recommendation must cite support, contradictions, remaining uncertainty, and the cheapest reliable next investigation.",
+      water_contract: "User-confirmed water photographs are facts about inspection-time observations. Cluster outlines and building-avoidance areas are conservative interpretations, must retain every supporting evidence ID, and never establish surveyed wetland, drainage, soil, septic, groundwater, or year-round conditions.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
+
+    const smallTractWaterMap = waterTools ? waterTools.buildSmallTractWaterMapModel({
+      inspection: Object.assign({}, inspection, {
+        photos: manifestPhotos,
+        observations,
+        water_observation_rule: inspection.water_observation_rule || null
+      }),
+      subjectFeature,
+      statedSmallTractAcres: 5.49,
+      generatedAt: exportedAt
+    }) : { status: "NOT_AVAILABLE", reason: "Water intelligence module was unavailable during packaging." };
 
     const manifest = {
       format: FORMAT,
@@ -1949,6 +2066,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         original_photo_evidence_count: manifestPhotos.filter(photo => photo.original).length,
         original_photo_count: manifestPhotos.filter(photo => photo.original && photo.original.included_in_package).length,
         analysis_photo_count: manifestPhotos.filter(photo => photo.analysis).length,
+        photo_explanation_count: manifestVoices.filter(voice => voice.purpose === "photo_explanation" && voice.photo_id).length,
+        water_reviewed_photo_count: manifestPhotos.filter(photo => photo.water_confirmation).length,
+        confirmed_water_photo_count: manifestPhotos.filter(photo => photo.water_confirmation === "yes").length,
         voice_note_count: manifestVoices.length,
         elapsed_time_ms: metrics.elapsed_time_ms,
         active_movement_time_ms: metrics.active_movement_time_ms,
@@ -1962,6 +2082,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         well_inspected_percent_estimate: coverage.well_inspected ? coverage.well_inspected.percent : null,
         lightly_inspected_percent_estimate: coverage.lightly_inspected ? coverage.lightly_inspected.percent : null,
         not_inspected_percent_estimate: coverage.not_inspected ? coverage.not_inspected.percent : null
+        ,small_tract_water_photo_count: smallTractWaterMap.water_photographs ? smallTractWaterMap.water_photographs.length : 0
+        ,small_tract_water_cluster_count: smallTractWaterMap.water_area_clusters ? smallTractWaterMap.water_area_clusters.length : 0
       },
       property: mapMetadata.subject_parcel,
       inspection: {
@@ -1977,10 +2099,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         inspector_thoughts: inspectorThoughts,
         investigation_questions: inspection.investigation_questions,
         inspection_areas: inspection.inspection_areas,
-        field_coaching: fieldCoaching
+        field_coaching: fieldCoaching,
+        water_observation_rule: inspection.water_observation_rule || null
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
+      small_tract_water_map: smallTractWaterMap,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -1989,6 +2113,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         question_brief: "QUESTION_BRIEF.json",
         field_coaching: "FIELD_COACHING.json",
         return_visit_plan: "RETURN_VISIT_PLAN.json",
+        small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
+        small_tract_water_map_interactive: "small-tract-water-map.html",
         report_template: "REPORT_TEMPLATE.md",
         inspector_thoughts: "INSPECTOR_THOUGHTS.md",
         evidence_relationships: "EVIDENCE_RELATIONSHIPS.json",
@@ -2039,6 +2165,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const repositoryImport = createRepositoryImportManifest(manifest, fileName);
     const comparisonRecord = createRepositoryComparisonRecord(manifest);
     const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.map(photo => ({ analysisBlob: photo.analysisBlob })));
+    const interactiveWaterMap = createSmallTractWaterMapHtml(manifest);
     const zip = new ZipBuilder();
     const modifiedAt = new Date(exportedAt);
     zip.add("AI_README.md", aiReadme, { modifiedAt });
@@ -2047,6 +2174,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("QUESTION_BRIEF.json", JSON.stringify(questionBrief, null, 2) + "\n", { modifiedAt });
     zip.add("FIELD_COACHING.json", JSON.stringify(fieldCoaching, null, 2) + "\n", { modifiedAt });
     zip.add("RETURN_VISIT_PLAN.json", JSON.stringify(returnVisitPlan, null, 2) + "\n", { modifiedAt });
+    zip.add("SMALL_TRACT_WATER_MAP.json", JSON.stringify(smallTractWaterMap, null, 2) + "\n", { modifiedAt });
+    zip.add("small-tract-water-map.html", interactiveWaterMap, { modifiedAt });
     zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
     zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });
     zip.add("EVIDENCE_RELATIONSHIPS.json", JSON.stringify(evidenceRelationships, null, 2) + "\n", { modifiedAt });

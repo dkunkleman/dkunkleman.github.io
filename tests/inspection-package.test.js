@@ -173,10 +173,10 @@ async function main() {
     orientation_samples: [{ time: "2026-08-02T14:00:05.000Z", alpha_deg: 270, beta_deg: 1, gamma_deg: -1, absolute: true, compass_heading_deg: 90, compass_accuracy_deg: 5, lat: 30.4891, lon: -87.0941, gps_accuracy_m: 3.2 }],
     conditions: { inspection_date: "2026-08-02", weather_summary: "Cloudy", rainfall_previous_24_hours: "2 inches", rainfall_previous_7_days: "3.1 inches", rainfall_previous_30_days: "6 inches", temperature: "84 F", ground_condition: "Mixed", rain_during_inspection: "no", evidence_classification: "Estimated" },
     photos: [
-      { id: "photo-1", photo_number: "P1", associated_marker_id: "event-photo-1", associated_observation_id: "event-1", category: "Wet", note: "Standing water at wet marker", evidence_classification: "Observed", observation_attributes: { water_depth: "1–3 inches", water_depth_basis: "Estimated" }, camera_opened_at: "2026-08-02T14:02:55.000Z", recorded_at: "2026-08-02T14:03:00.000Z", source_file_last_modified_at: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9, gps_position_at: points[1].time, gps_position_age_ms: 100, location_source: "live_browser_geolocation", compass_heading_deg: 88, sensor_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2, absolute: true }, device_screen_orientation: "portrait-primary", device_screen_angle_deg: 0, width_px: 192, height_px: 192, pixel_orientation: "square", exif_orientation: 1, exif_orientation_description: "normal", original_filename: "field-one.png", original_mime_type: "image/png", original_size_bytes: photoOneBytes.length },
+      { id: "photo-1", photo_number: "P1", associated_marker_id: "event-photo-1", associated_observation_id: "event-1", category: "Wet", note: "Standing water at wet marker", evidence_classification: "Observed", observation_attributes: { water_depth: "1–3 inches", water_depth_basis: "Estimated" }, explanation_voice_note_id: "voice-1", explanation_voice_note_ids: ["voice-1"], water_confirmation: "yes", water: { water_type: "standing", water_depth_band: "1-3_inches", measurement_basis: "Estimated", water_width_ft: 3, water_length_ft: 5, water_behavior: "isolated_depression", significance: "Minor localized depression" }, camera_opened_at: "2026-08-02T14:02:55.000Z", recorded_at: "2026-08-02T14:03:00.000Z", source_file_last_modified_at: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9, gps_position_at: points[1].time, gps_position_age_ms: 100, location_source: "live_browser_geolocation", compass_heading_deg: 88, sensor_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2, absolute: true }, device_screen_orientation: "portrait-primary", device_screen_angle_deg: 0, width_px: 192, height_px: 192, pixel_orientation: "square", exif_orientation: 1, exif_orientation_description: "normal", original_filename: "field-one.png", original_mime_type: "image/png", original_size_bytes: photoOneBytes.length },
       { id: "photo-2", photo_number: "P2", associated_marker_id: "event-photo-2", associated_observation_id: "event-4", category: "High Ground", note: "High-ground view", evidence_classification: "Observed", observation_attributes: {}, camera_opened_at: "2026-08-02T14:03:55.000Z", recorded_at: "2026-08-02T14:04:00.000Z", source_file_last_modified_at: "2026-08-02T14:04:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, gps_position_age_ms: 150, location_source: "live_browser_geolocation", compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, device_screen_orientation: "landscape-primary", device_screen_angle_deg: 90, width_px: 512, height_px: 512, pixel_orientation: "square", exif_orientation: 6, exif_orientation_description: "rotated 90 degrees clockwise", original_filename: "field-two.png", original_mime_type: "image/png", original_size_bytes: photoTwoBytes.length }
     ],
-    voice_notes: [{ id: "voice-1", started_at: "2026-08-02T14:05:00.000Z", finished_at: "2026-08-02T14:05:04.500Z", duration_ms: 4500, mime_type: "audio/mp4", size_bytes: voiceBytes.length, lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, recovered_after_interruption: false }]
+    voice_notes: [{ id: "voice-1", purpose: "photo_explanation", photo_id: "photo-1", prompt: "Why did you take this picture?", started_at: "2026-08-02T14:05:00.000Z", finished_at: "2026-08-02T14:05:04.500Z", duration_ms: 4500, mime_type: "audio/mp4", size_bytes: voiceBytes.length, lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, recovered_after_interruption: false }]
   };
   inspection.markers.forEach(marker => {
     marker.area_id = marker.type === "entrance" ? "area-road" : "area-northwest";
@@ -242,7 +242,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "1.6");
+  assert.equal(manifest.format_version, "1.7");
   assert.equal(manifest.repository.export_id, "export_full_test");
   assert.equal(manifest.repository.append_only, true);
   assert.equal(manifest.repository.overwrite_allowed, false);
@@ -387,6 +387,8 @@ async function main() {
   });
   assert.match(reportResult.fileName, /^Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_/);
   const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
+  assert(reportFiles.has("SMALL_TRACT_WATER_MAP.json"), "package includes the AI-readable small-tract water model");
+  assert(reportFiles.has("small-tract-water-map.html"), "package includes the interactive human-readable small-tract water map");
   const reportImportContract = JSON.parse(reportFiles.get("repository-import.json").toString("utf8"));
   assert.equal(reportImportContract.artifact.repository_filename, "AI_ANALYSIS_REPORT_PACKAGE_export_report_test.zip", "repository retains the AI package identity after ingestion");
   assert(!reportFiles.has("photos/001_original.png") && !reportFiles.has("photos/002_original.png"), "report package does not duplicate full-resolution originals");
@@ -397,6 +399,18 @@ async function main() {
   assert.equal(reportManifest.summary.original_photo_count, 0);
   assert.equal(reportManifest.summary.original_photo_evidence_count, 2);
   assert.equal(reportManifest.summary.analysis_photo_count, 2);
+  assert.equal(reportManifest.summary.photo_explanation_count, 1, "photo-linked voice explanations are counted separately from general voice notes");
+  assert.deepEqual(reportManifest.photographs[0].explanation_voice_note_ids, ["voice-1"], "the photograph permanently references its voice explanation");
+  assert.equal(reportManifest.voice_notes[0].photo_id, "photo-1", "the explanation points back to the photograph");
+  assert.equal(reportManifest.voice_notes[0].purpose, "photo_explanation");
+  assert.equal(reportManifest.small_tract_water_map.small_tract.ring_index, 1, "package isolates the verified small-tract parcel ring");
+  assert(reportManifest.small_tract_water_map.excluded_large_tract.excluded_water_photo_ids.includes("photo-1"), "large-tract Wet photograph is excluded from small-tract analysis");
+  const interactiveWaterMap = reportFiles.get("small-tract-water-map.html").toString("utf8");
+  assert(interactiveWaterMap.includes("SMALL TRACT — OBSERVED WATER CONDITIONS"));
+  assert(interactiveWaterMap.includes("Actual photographed water"));
+  assert(interactiveWaterMap.includes("Uninspected / unknown"));
+  const packagedAiAnalysis = JSON.parse(reportFiles.get("AI_ANALYSIS.json").toString("utf8"));
+  assert.equal(packagedAiAnalysis.small_tract_water_map.small_tract.stated_acres, 5.49);
   reportManifest.photographs.forEach(photo => {
     assert.equal(photo.original.path, null, `${photo.photo_number} original path is intentionally absent`);
     assert.equal(photo.original.included_in_package, false, `${photo.photo_number} records intentional omission`);

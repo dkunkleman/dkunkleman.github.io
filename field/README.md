@@ -12,6 +12,16 @@ Production, offline-first field evidence collection for the subject rural parcel
 - Before GPS is stopped, **Finish Inspection** presents the most important unanswered questions, missing photographs and measurements, empty inspection areas, and the cheapest next evidence to collect. The inspector may safely return to the inspection or finish with the uncertainty explicitly preserved.
 - The package includes `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, and `RETURN_VISIT_PLAN.json`, plus field-efficiency estimates for walking, stopping, documenting, observation spacing, evidence per acre, and questions answered versus remaining.
 
+## Small-tract water intelligence
+
+- After every saved photograph, the app immediately asks **“Why did you take this picture?”** and starts a voice explanation. The audio inherits the photo's area and questions and is linked back to that photograph in IndexedDB and the exported package.
+- The inspector explicitly confirms Standing Water, Flowing Water, Ditch, Creek or Stream, Other Water, No, or Unsure. The app never silently treats a photograph as water evidence.
+- Confirmed water may record depth, measured/estimated basis, width, length, and behavior. These fields drive a searchable significance classification without treating every small depression as a building constraint.
+- The verified parcel's smaller exterior ring is automatically isolated as the approximately 5.49-acre **Small Tract**. Evidence outside that ring is excluded even when it occurred close in time.
+- Nearby compatible photographs may form a conservative `WA-#` cluster. A single photo without dimensions stays a point. Entered dimensions constrain outlines; flowing water never merges indiscriminately with isolated standing puddles.
+- The live map and package distinguish actual blue photo points, estimated dashed blue outlines, preliminary red building-avoidance areas, inspected corridor with no standing water observed, and uninspected/unknown acreage.
+- `SMALL_TRACT_WATER_MAP.json` is the AI-readable model. `small-tract-water-map.html` is the interactive human-readable map; its markers open the actual photograph and photo-linked voice explanation. The printable report adds four landscape small-tract water pages.
+
 ## Reliability model
 
 - The app shell, parcel geometry, USGS terrain, and USGS 2-foot contour raster are cached under the `/field/` service-worker scope.
@@ -38,6 +48,7 @@ Both modes contain:
 - `QUESTION_BRIEF.json`, every inspector-created question with directly linked supporting, contradicting, and contextual evidence;
 - `FIELD_COACHING.json`, named areas, conservative coverage estimates, missing-evidence review, and field-efficiency measures;
 - `RETURN_VISIT_PLAN.json`, unvisited-zone waypoints and prioritized questions, measurements, and photographs;
+- `SMALL_TRACT_WATER_MAP.json` and `small-tract-water-map.html`, which isolate the small tract, preserve all underlying water evidence, and distinguish observations from conservative inference;
 - `REPORT_TEMPLATE.md`, with the required professional Property Intelligence Report sections;
 - `INSPECTOR_THOUGHTS.md`, which preserves the inspector's judgment, theories, concerns, and preferences while explicitly separating them from observed facts;
 - `EVIDENCE_RELATIONSHIPS.json`, which directly joins observations, photographs, voice notes, and stable GPS-point IDs;
@@ -67,11 +78,13 @@ From the repository root:
 ```powershell
 node --check field\inspection-package.js
 node --check field\inspection-coaching.js
+node --check field\water-intelligence.js
 node --check field\app.js
 node --check field\idb-recovery.js
 node --check repository\import-package.js
 node tests\idb-recovery.test.js
 node tests\inspection-coaching.test.js
+node tests\water-intelligence.test.js
 node tests\inspection-package.test.js
 ```
 
@@ -82,12 +95,12 @@ The recovery tests simulate stale cached connections, close events, transaction-
 1. Open the deployed `/field/` page in iPhone Safari while online and wait for **Offline ready**.
 2. Turn on Airplane Mode. Reload the page and confirm the terrain, 2-foot contours, red subject boundary, and neighboring boundaries still appear.
 3. Tap **Start Inspection**, allow Precise Location and motion/orientation access, then walk at least 20 feet.
-4. Create two named Inspection Areas and two investigation questions. Select both questions, record Wet, High Ground, a Free Note, one Voice Note, and at least one photo. Use **Take a photograph after saving** on one structured observation to verify the relationship.
+4. Create **Large Tract** and **Small Tract** areas plus two investigation questions. Select **Small Tract** and both questions, record Wet, High Ground, a Free Note, one Voice Note, and at least one photo. Use **Take a photograph after saving** on one structured observation to verify the relationship.
 5. Close Safari after saving one observation, reopen it, and confirm the counters and photographs return.
-6. Take 20 photos over several minutes. Background and reopen Safari twice, rotate between portrait and landscape, and continue taking photos. If a pending-photo button appears, tap it and confirm recovery.
+6. Take 20 photos over several minutes. After each save, confirm the voice prompt starts, explain why the photograph matters, stop and save the explanation, then answer the water question. Record at least two nearby 3-by-5-foot isolated depressions and one separately flowing-water photograph. Background and reopen Safari twice, rotate between portrait and landscape, and continue taking photos. If a pending-photo button appears, tap it and confirm recovery.
 7. Mark photos Critical, Helpful, Reference, and Duplicate from the gallery. Confirm the classifications survive backgrounding Safari.
 8. Still offline, tap **Finish Inspection**. Confirm the before-you-leave review identifies unanswered questions, missing evidence, and unvisited coverage before GPS stops. Return once, collect the suggested evidence, then finish and use **Save to Property Intelligence Repository** for the single `AI_ANALYSIS_REPORT_PACKAGE` ZIP.
-9. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. Verify `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, and `RETURN_VISIT_PLAN.json`; every new evidence item must carry its selected area and questions. ChatGPT should answer every investigation question and five property decisions with cited support, contradictions, remaining uncertainty, explained confidence, and the cheapest next investigation.
+9. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. Verify `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, `RETURN_VISIT_PLAN.json`, `SMALL_TRACT_WATER_MAP.json`, and `small-tract-water-map.html`; every new evidence item must carry its selected area and questions. On the water map, verify only the small tract appears, every marker opens its correct photograph and explanation, minor depressions remain small, flowing water is separate, and the uninspected portion remains unknown. ChatGPT should answer every investigation question and five property decisions with cited support, contradictions, remaining uncertainty, explained confidence, and the cheapest next investigation.
 10. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Save it to the same repository inspection; it must create a second export version and add exact originals without replacing the report package.
 
 Do not clear the inspection until the repository confirms both packages were received and every photo can be displayed.

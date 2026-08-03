@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.6.0";
+  const APP_VERSION = "3.7.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -18,6 +18,7 @@
   const packageTools = window.InspectionPackage;
   const dbRecoveryTools = window.IndexedDbRecovery;
   const coachingTools = window.InspectionCoaching;
+  const waterTools = window.WaterIntelligence;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -46,6 +47,10 @@
   const evidenceRelationshipSelect = document.getElementById("evidenceRelationship");
   const nextPhotoValueSelect = document.getElementById("nextPhotoValue");
   const departureDialog = document.getElementById("departureDialog");
+  const photoExplanationDialog = document.getElementById("photoExplanationDialog");
+  const waterClassificationDialog = document.getElementById("waterClassificationDialog");
+  const smallWaterMap = document.getElementById("smallWaterMap");
+  const waterPhotoDialog = document.getElementById("waterPhotoDialog");
   const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "photo", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
     wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
@@ -92,6 +97,12 @@
   let coverageDirty = true;
   let coachingStateSnapshot = null;
   let coachingStateLastCalculatedAt = 0;
+  let pendingPhotoExplanationId = null;
+  let pendingWaterPhotoId = null;
+  let activeWaterType = null;
+  let smallTractWaterModel = null;
+  let waterPhotoObjectUrl = null;
+  let waterVoiceObjectUrl = null;
 
   function emptyInspection() {
     return {
@@ -114,6 +125,11 @@
       active_question_ids: [],
       next_evidence_relationship: "supports",
       next_photo_value: "Helpful",
+      water_observation_rule: {
+        all_observed_standing_water_photographed: false,
+        confirmed_at: null,
+        scope: "walked_and_visually_observed_corridor_at_inspection_time"
+      },
       conditions: {
         inspection_date: "",
         weather_summary: "",
@@ -180,6 +196,7 @@
     data.lifecycle_events = Array.isArray(data.lifecycle_events) ? data.lifecycle_events : [];
     data.orientation_samples = Array.isArray(data.orientation_samples) ? data.orientation_samples : [];
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
+    data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
     if (coachingTools) coachingTools.ensureInspectionModel(data);
   }
 
@@ -403,7 +420,11 @@
       : `${review.important_questions_remaining.length} investigation question(s) still have an evidence or answer gap. Coverage could not be estimated.`;
     const list = document.getElementById("departureActions");
     list.innerHTML = "";
-    const actions = review.highest_value_next_actions.length ? review.highest_value_next_actions : [{ action: "Review the route, questions, and Critical photographs before creating the package." }];
+    const actions = review.highest_value_next_actions.length ? review.highest_value_next_actions.slice() : [{ action: "Review the route, questions, and Critical photographs before creating the package." }];
+    const missingExplanations = data.photos.filter(photo => !(photo.explanation_voice_note_ids || []).length && !photo.explanation_voice_note_id);
+    const unreviewedWater = data.photos.filter(photo => !photo.water_confirmation);
+    if (missingExplanations.length) actions.unshift({ action: `${missingExplanations.length} photograph${missingExplanations.length === 1 ? " lacks" : "s lack"} a voice explanation. Explain the Critical photographs before leaving when safe.` });
+    if (unreviewedWater.length) actions.unshift({ action: `${unreviewedWater.length} photograph${unreviewedWater.length === 1 ? " has" : "s have"} not been reviewed for visible water. Confirm Water, No, or Unsure before leaving.` });
     actions.forEach(action => { const item = document.createElement("li"); item.textContent = action.action; list.appendChild(item); });
     departureDialog.showModal();
   }
@@ -687,8 +708,8 @@
     if (!data.inspection_id) return;
     const records = await voiceStoreGetAll();
     let changed = false;
-    records.forEach(record => {
-      if (!record.metadata || String(record.inspection_id || "") !== String(data.inspection_id)) return;
+    for (const record of records) {
+      if (!record.metadata || String(record.inspection_id || "") !== String(data.inspection_id)) continue;
       if (!data.voice_notes.some(note => String(note.id) === String(record.id))) {
         data.voice_notes.push(record.metadata);
         changed = true;
@@ -697,7 +718,10 @@
         data.markers.push(record.event);
         changed = true;
       }
-    });
+      if (record.metadata.photo_id) {
+        try { await attachExplanationToPhoto(record.metadata.photo_id, record.id); changed = true; } catch (error) { /* Retry on the next safe startup reconciliation. */ }
+      }
+    }
     if (changed) {
       data.voice_notes.sort((a, b) => String(a.started_at).localeCompare(String(b.started_at)));
       data.markers.sort((a, b) => String(a.time).localeCompare(String(b.time)));
@@ -767,6 +791,7 @@
       const element = document.getElementById(id);
       if (element) element.value = data.conditions[key] || "";
     });
+    document.getElementById("allWaterPhotographed").checked = Boolean(data.water_observation_rule && data.water_observation_rule.all_observed_standing_water_photographed);
   }
 
   function saveConditionsFromUi() {
@@ -838,6 +863,121 @@
     });
   }
 
+  function waterLayerEnabled(name) {
+    const control = document.querySelector(`[data-water-layer="${name}"]`);
+    return !control || control.checked;
+  }
+
+  function addWaterSvg(tag, attributes, text) {
+    const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.entries(attributes || {}).forEach(([key, value]) => element.setAttribute(key, String(value)));
+    if (text !== undefined) element.textContent = text;
+    smallWaterMap.appendChild(element);
+    return element;
+  }
+
+  function projectedRingPath(ring) {
+    return (ring || []).map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ") + " Z";
+  }
+
+  function renderSmallTractWaterMap() {
+    if (!waterTools || !smallWaterMap) return;
+    smallWaterMap.innerHTML = "";
+    const subject = subjectParcel();
+    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: data, subjectFeature: subject, statedSmallTractAcres: 5.49 });
+    const summary = document.getElementById("smallWaterSummary");
+    if (!smallTractWaterModel || smallTractWaterModel.status !== "GENERATED") {
+      summary.textContent = "The verified small-tract parcel ring is unavailable. Evidence capture remains active.";
+      return;
+    }
+    const bounds = smallTractWaterModel.small_tract.bounds;
+    const left = sx(bounds.west);
+    const right = sx(bounds.east);
+    const top = sy(bounds.north);
+    const bottom = sy(bounds.south);
+    const padding = Math.max(28, Math.max(right - left, bottom - top) * 0.08);
+    smallWaterMap.setAttribute("viewBox", `${left - padding} ${top - padding} ${right - left + padding * 2} ${bottom - top + padding * 2}`);
+    if (waterLayerEnabled("terrain")) addWaterSvg("image", { href: "./assets/usgs-terrain.png", x: 0, y: 0, width: W, height: H, preserveAspectRatio: "none" });
+    if (waterLayerEnabled("contours")) addWaterSvg("image", { href: "./assets/usgs-contours-2ft.png", x: 0, y: 0, width: W, height: H, preserveAspectRatio: "none", opacity: .78 });
+    const boundaryPath = projectedRingPath(smallTractWaterModel.small_tract.boundary);
+    addWaterSvg("path", { d: boundaryPath, fill: waterLayerEnabled("unknown") ? "rgba(75,75,75,.28)" : "rgba(255,255,255,.04)", stroke: "#d71920", "stroke-width": 8, "vector-effect": "non-scaling-stroke" });
+    if (waterLayerEnabled("route")) {
+      smallTractWaterModel.route_segments.forEach(segment => {
+        const d = segment.map((point, index) => `${index ? "L" : "M"}${sx(point.lon).toFixed(1)} ${sy(point.lat).toFixed(1)}`).join(" ");
+        if (!d) return;
+        if (smallTractWaterModel.inspected_no_standing_water.enabled) addWaterSvg("path", { d, fill: "none", stroke: "rgba(73,180,96,.34)", "stroke-width": 44, "vector-effect": "non-scaling-stroke" });
+        addWaterSvg("path", { d, fill: "none", stroke: "#111", "stroke-width": 11, "vector-effect": "non-scaling-stroke" });
+        addWaterSvg("path", { d, fill: "none", stroke: "#ffe600", "stroke-width": 6, "vector-effect": "non-scaling-stroke" });
+      });
+    }
+    if (waterLayerEnabled("avoidance")) smallTractWaterModel.preliminary_building_avoidance_areas.forEach(area => {
+      if (!area.outline) return;
+      addWaterSvg("path", { d: projectedRingPath(area.outline), fill: "rgba(194,20,40,.16)", stroke: "#c21428", "stroke-width": 7, "stroke-dasharray": "18 10", "vector-effect": "non-scaling-stroke" });
+    });
+    if (waterLayerEnabled("outlines")) smallTractWaterModel.water_area_clusters.forEach(cluster => {
+      if (!cluster.estimated_outline) return;
+      addWaterSvg("path", { d: projectedRingPath(cluster.estimated_outline), fill: "rgba(30,115,220,.25)", stroke: "#1768c4", "stroke-width": 6, "stroke-dasharray": "15 10", "vector-effect": "non-scaling-stroke" });
+      addWaterSvg("text", { x: sx(cluster.center.longitude), y: sy(cluster.center.latitude) - 24, "text-anchor": "middle", "font-size": 22, "font-weight": 900, fill: "#052f56", stroke: "#fff", "stroke-width": 5, "paint-order": "stroke" }, cluster.water_area_id);
+    });
+    if (waterLayerEnabled("dry")) smallTractWaterModel.high_dry_observations.forEach(item => {
+      if (String(item.type || "").includes("homesite") && !waterLayerEnabled("homesites")) return;
+      addWaterSvg("circle", { cx: sx(item.location.lon), cy: sy(item.location.lat), r: 12, fill: "#45a146", stroke: "#fff", "stroke-width": 4, "vector-effect": "non-scaling-stroke" });
+    });
+    if (waterLayerEnabled("standing")) smallTractWaterModel.wet_observations.forEach(item => {
+      const x = sx(item.location.lon), y = sy(item.location.lat);
+      addWaterSvg("rect", { x: x - 10, y: y - 10, width: 20, height: 20, transform: `rotate(45 ${x} ${y})`, fill: "#74c6ff", stroke: "#003f8f", "stroke-width": 4, "vector-effect": "non-scaling-stroke" });
+    });
+    smallTractWaterModel.water_photographs.forEach(item => {
+      const flowing = item.significance === "Flowing-water corridor";
+      if (flowing && !waterLayerEnabled("flowing")) return;
+      if (!flowing && !waterLayerEnabled("standing")) return;
+      if (item.significance === "Minor localized depression" && !waterLayerEnabled("minor")) return;
+      if ((item.significance === "Moderate pooled area" || item.significance === "Larger connected wet area") && !waterLayerEnabled("larger")) return;
+      const marker = addWaterSvg("g", { role: "button", tabindex: 0, "data-photo-id": item.photo_id, "aria-label": `${item.photo_number || "Water photo"}: ${item.significance}` });
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      Object.entries({ cx: sx(item.longitude), cy: sy(item.latitude), r: flowing ? 22 : 17, fill: flowing ? "#003f8f" : "#1687e0", stroke: "#fff", "stroke-width": 5, "vector-effect": "non-scaling-stroke" }).forEach(([key, value]) => circle.setAttribute(key, String(value)));
+      marker.appendChild(circle);
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = `${item.photo_number || "Photo"} · ${item.significance} · ${item.depth.label}`;
+      marker.appendChild(title);
+      const open = () => openWaterPhoto(item.photo_id);
+      marker.addEventListener("click", open);
+      marker.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); } });
+    });
+    const mapped = smallTractWaterModel.water_photographs.length;
+    const clusterCount = smallTractWaterModel.water_area_clusters.length;
+    summary.textContent = `${smallTractWaterModel.small_tract.stated_acres.toFixed(2)} acres · ${mapped} confirmed or legacy water photograph${mapped === 1 ? "" : "s"} · ${clusterCount} conservative water-area cluster${clusterCount === 1 ? "" : "s"}. Evidence outside the small-tract boundary is excluded.`;
+  }
+
+  async function openWaterPhoto(photoId) {
+    const metadata = data.photos.find(photo => String(photo.id) === String(photoId));
+    if (!metadata) return;
+    if (waterPhotoObjectUrl) URL.revokeObjectURL(waterPhotoObjectUrl);
+    if (waterVoiceObjectUrl) URL.revokeObjectURL(waterVoiceObjectUrl);
+    waterPhotoObjectUrl = null;
+    waterVoiceObjectUrl = null;
+    const stored = await photoStoreGet(photoId);
+    if (!stored || !(stored.analysisBlob instanceof Blob)) return;
+    waterPhotoObjectUrl = URL.createObjectURL(stored.analysisBlob);
+    document.getElementById("waterPhotoImage").src = waterPhotoObjectUrl;
+    document.getElementById("waterPhotoTitle").textContent = `${metadata.photo_number || "Photo"} — ${metadata.water && metadata.water.significance || "Water evidence"}`;
+    const water = metadata.water || {};
+    document.getElementById("waterPhotoDetails").textContent = `${water.water_type || "Unknown water type"} · depth ${water.water_depth_band || water.water_depth_exact_in || "unknown"} · ${water.water_width_ft || "unknown"} ft wide × ${water.water_length_ft || "unknown"} ft long · ${water.measurement_basis || "unknown basis"} · ${new Date(metadata.recorded_at).toLocaleString()}`;
+    const voiceId = (metadata.explanation_voice_note_ids || [])[0] || metadata.explanation_voice_note_id;
+    const audio = document.getElementById("waterPhotoAudio");
+    audio.hidden = true;
+    audio.removeAttribute("src");
+    if (voiceId) {
+      const voice = await voiceStoreGet(voiceId);
+      if (voice && voice.audioBlob instanceof Blob) {
+        waterVoiceObjectUrl = URL.createObjectURL(voice.audioBlob);
+        audio.src = waterVoiceObjectUrl;
+        audio.hidden = false;
+      }
+    }
+    waterPhotoDialog.showModal();
+  }
+
   function redraw() {
     svg.innerHTML = "";
     drawPropertyLines();
@@ -874,6 +1014,7 @@
     document.getElementById("distance").textContent = feet < 5280 ? `${Math.round(feet)} ft` : `${(feet / 5280).toFixed(2)} mi`;
     updateTimeMetrics();
     renderCoverage();
+    renderSmallTractWaterMap();
     updateControls();
   }
 
@@ -922,7 +1063,12 @@
       });
       valueSelect.value = metadata.photo_value || "Helpful";
       valueSelect.addEventListener("change", () => updatePhotoValue(metadata.id, valueSelect.value));
-      card.append(image, caption, location, valueSelect);
+      const waterButton = document.createElement("button");
+      waterButton.type = "button";
+      waterButton.className = "review-water-photo";
+      waterButton.textContent = metadata.water_confirmation === "yes" ? `Water: ${metadata.water && metadata.water.water_type ? metadata.water.water_type.replaceAll("_", " ") : "Confirmed"}` : (metadata.water_confirmation === "no" ? "Water: No" : (metadata.water_confirmation === "unsure" ? "Water: Unsure" : "Review for Water"));
+      waterButton.addEventListener("click", () => openWaterClassification(metadata.id));
+      card.append(image, caption, location, valueSelect, waterButton);
       gallery.appendChild(card);
       try {
         const stored = await photoStoreGet(metadata.id);
@@ -1317,15 +1463,16 @@
     return candidates.find(type => MediaRecorder.isTypeSupported(type)) || "";
   }
 
-  async function toggleVoiceNote() {
+  async function startVoiceRecording(options) {
+    const settings = options || {};
     if (mediaRecorder && mediaRecorder.state === "recording") {
       setStatus("Stopping and saving the voice note…", "active");
       mediaRecorder.stop();
-      return;
+      return false;
     }
     if (!lastPosition) {
       setStatus("Waiting for the first current GPS location. Voice note was not started.", "warning");
-      return;
+      return false;
     }
     if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof MediaRecorder === "undefined") {
       setStatus("Voice recording is unavailable in this browser. Use Free Note instead.", "error");
@@ -1354,9 +1501,12 @@
           gamma_deg: latestOrientation.gamma_deg,
           absolute: latestOrientation.absolute
         } : null,
-        area_id: coachingContext.area_id,
-        question_ids: coachingContext.question_ids,
-        question_links: coachingContext.question_links,
+        area_id: settings.area_id || coachingContext.area_id,
+        question_ids: Array.isArray(settings.question_ids) ? settings.question_ids.slice() : coachingContext.question_ids,
+        question_links: Array.isArray(settings.question_links) ? settings.question_links.map(link => Object.assign({}, link)) : coachingContext.question_links,
+        purpose: settings.purpose || "general_field_note",
+        photo_id: settings.photo_id || null,
+        prompt: settings.prompt || null,
         recovered_after_interruption: false
       };
       data.pending_voice_note = activeVoiceNote;
@@ -1377,7 +1527,8 @@
       voiceBtn.textContent = "Stop Voice Note";
       voiceBtn.classList.add("recording");
       updateControls();
-      setStatus("Voice note recording. Speak now, then tap Stop Voice Note.", "active");
+      setStatus(settings.prompt ? `${settings.prompt} Speak now, then tap Stop & Save Explanation.` : "Voice note recording. Speak now, then tap Stop Voice Note.", "active");
+      return true;
     } catch (error) {
       setStatus(`VOICE NOTE NOT STARTED: ${error.message}`, "error");
       if (mediaRecorder && mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(track => track.stop());
@@ -1386,12 +1537,51 @@
       data.pending_voice_note = null;
       saveState();
       updateControls();
+      return false;
     }
+  }
+
+  async function toggleVoiceNote() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      setStatus("Stopping and saving the voice note…", "active");
+      mediaRecorder.stop();
+      return;
+    }
+    await startVoiceRecording({ purpose: "general_field_note" });
+  }
+
+  async function beginPhotoExplanation(photoId) {
+    pendingPhotoExplanationId = photoId;
+    pendingWaterPhotoId = photoId;
+    document.getElementById("photoExplanationState").textContent = "Starting voice recording…";
+    document.getElementById("retryPhotoExplanation").hidden = true;
+    document.getElementById("stopPhotoExplanation").hidden = false;
+    if (!photoExplanationDialog.open) photoExplanationDialog.showModal();
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance("Why did you take this picture?"));
+      }
+    } catch (error) {
+      // The large visual prompt remains available when spoken prompts are unsupported.
+    }
+    const photo = data.photos.find(item => String(item.id) === String(photoId));
+    const started = await startVoiceRecording({
+      purpose: "photo_explanation", photo_id: photoId, prompt: "Why did you take this picture?",
+      area_id: photo && photo.area_id,
+      question_ids: photo && photo.question_ids,
+      question_links: photo && photo.question_links
+    });
+    document.getElementById("photoExplanationState").textContent = started ? "Recording. Explain what matters and why." : "Voice recording did not start. Tap Retry Voice Explanation.";
+    document.getElementById("retryPhotoExplanation").hidden = started;
+    document.getElementById("stopPhotoExplanation").hidden = !started;
+    if (!started) setStatus("The photograph is safe. Its voice explanation is still missing; tap Retry Voice Explanation.", "warning");
   }
 
   async function finalizeVoiceNote() {
     const recorder = mediaRecorder;
     const metadata = activeVoiceNote;
+    let voiceSaved = false;
     try {
       await voiceChunkWrites;
       const chunks = await voiceChunksGet(metadata.id);
@@ -1404,13 +1594,13 @@
       metadata.size_bytes = audioBlob.size;
       const voiceEvent = {
         id: makeId("event"),
-        source: "button_press",
+        source: metadata.purpose === "photo_explanation" ? "photo_explanation" : "button_press",
         type: "voice_note",
         observation_type: "field.voice_note",
         taxonomy_version: "property-observation-1.0",
         button_label: "Voice Note",
-        note: "",
-        attributes: { duration_ms: metadata.duration_ms },
+        note: metadata.prompt || "",
+        attributes: { duration_ms: metadata.duration_ms, purpose: metadata.purpose || "general_field_note", photo_id: metadata.photo_id || null },
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
@@ -1422,18 +1612,20 @@
         compass_heading_deg: metadata.compass_heading_deg,
         device_orientation: metadata.sensor_orientation,
         voice_note_id: metadata.id,
-        photo_id: null
+        photo_id: metadata.photo_id || null
       };
       await voiceStorePut({ id: metadata.id, inspection_id: data.inspection_id, metadata, event: voiceEvent, audioBlob });
+      if (metadata.photo_id) await attachExplanationToPhoto(metadata.photo_id, metadata.id);
       data.voice_notes.push(metadata);
       data.pending_voice_note = null;
       data.markers.push(voiceEvent);
       saveState();
       await voiceChunksDelete(metadata.id);
+      voiceSaved = true;
       redraw();
       renderCoaching();
       schedulePackageEstimateRefresh();
-      setStatus(`Voice note ${data.voice_notes.length} saved with audio, GPS, time, and heading.`, "active");
+      setStatus(metadata.purpose === "photo_explanation" ? "Photo explanation saved with the photograph forever." : `Voice note ${data.voice_notes.length} saved with audio, GPS, time, and heading.`, "active");
     } catch (error) {
       setStatus(`VOICE NOTE NOT SAVED: ${error.message} Record it again.`, "error");
     } finally {
@@ -1443,6 +1635,134 @@
       voiceBtn.textContent = "Start Voice Note";
       voiceBtn.classList.remove("recording");
       updateControls();
+      if (voiceSaved && metadata && metadata.purpose === "photo_explanation") {
+        pendingPhotoExplanationId = null;
+        if (photoExplanationDialog.open) photoExplanationDialog.close();
+        openWaterClassification(metadata.photo_id);
+      } else if (metadata && metadata.purpose === "photo_explanation") {
+        document.getElementById("photoExplanationState").textContent = "The photograph is safe, but its explanation did not save. Tap Retry Voice Explanation.";
+        document.getElementById("retryPhotoExplanation").hidden = false;
+        document.getElementById("stopPhotoExplanation").hidden = true;
+      }
+    }
+  }
+
+  async function attachExplanationToPhoto(photoId, voiceId) {
+    const stored = await photoStoreGet(photoId);
+    if (!stored || !stored.metadata) throw new Error("The photograph for this explanation could not be read.");
+    const ids = Array.isArray(stored.metadata.explanation_voice_note_ids) ? stored.metadata.explanation_voice_note_ids.slice() : [];
+    if (!ids.some(id => String(id) === String(voiceId))) ids.push(voiceId);
+    stored.metadata.explanation_voice_note_ids = ids;
+    stored.metadata.explanation_voice_note_id = ids[0] || null;
+    if (stored.event) {
+      stored.event.voice_note_ids = ids.slice();
+      stored.event.voice_note_id = stored.event.voice_note_id || voiceId;
+    }
+    await photoStorePut(stored);
+    const metadata = data.photos.find(photo => String(photo.id) === String(photoId));
+    if (metadata) {
+      metadata.explanation_voice_note_ids = ids.slice();
+      metadata.explanation_voice_note_id = ids[0] || null;
+    }
+    const event = data.markers.find(marker => String(marker.photo_id) === String(photoId));
+    if (event) {
+      event.voice_note_ids = ids.slice();
+      event.voice_note_id = event.voice_note_id || voiceId;
+    }
+  }
+
+  function resetWaterClassificationForm() {
+    activeWaterType = null;
+    document.getElementById("waterMeasurementFields").hidden = true;
+    document.getElementById("photoWaterDepth").value = "unknown";
+    document.getElementById("photoWaterExact").value = "";
+    document.getElementById("photoWaterExactLabel").hidden = true;
+    document.getElementById("photoWaterBasis").value = "Unknown";
+    document.getElementById("photoWaterWidth").value = "";
+    document.getElementById("photoWaterLength").value = "";
+    document.getElementById("photoWaterBehavior").value = "unknown";
+  }
+
+  function openWaterClassification(photoId) {
+    pendingWaterPhotoId = photoId;
+    resetWaterClassificationForm();
+    if (!waterClassificationDialog.open) waterClassificationDialog.showModal();
+  }
+
+  async function saveWaterMetadata(photoId, confirmation, water) {
+    const stored = await photoStoreGet(photoId);
+    if (!stored || !stored.metadata) throw new Error("The photograph could not be read for water classification.");
+    stored.metadata.water_confirmation = confirmation;
+    stored.metadata.water_reviewed_at = new Date().toISOString();
+    stored.metadata.water = water || null;
+    if (water && waterTools) {
+      const normalized = waterTools.waterEvidenceFromPhoto(stored.metadata, data.markers);
+      if (normalized) stored.metadata.water.significance = normalized.significance;
+    }
+    if (stored.event) {
+      stored.event.attributes = Object.assign({}, stored.event.attributes || {}, {
+        water_confirmation: confirmation,
+        water: stored.metadata.water
+      });
+    }
+    await photoStorePut(stored);
+    const metadata = data.photos.find(photo => String(photo.id) === String(photoId));
+    if (metadata) {
+      metadata.water_confirmation = stored.metadata.water_confirmation;
+      metadata.water_reviewed_at = stored.metadata.water_reviewed_at;
+      metadata.water = stored.metadata.water;
+    }
+    const marker = data.markers.find(item => String(item.photo_id) === String(photoId));
+    if (marker) marker.attributes = Object.assign({}, marker.attributes || {}, { water_confirmation: confirmation, water: stored.metadata.water });
+    saveState();
+    redraw();
+    await renderGallery();
+  }
+
+  async function chooseWaterType(choice) {
+    if (!pendingWaterPhotoId) return;
+    if (choice === "no" || choice === "unsure") {
+      try {
+        await saveWaterMetadata(pendingWaterPhotoId, choice, null);
+        waterClassificationDialog.close();
+        setStatus(choice === "no" ? "Photograph confirmed as not showing water." : "Photograph marked Unsure; the report will not treat it as confirmed water.", "active");
+        pendingWaterPhotoId = null;
+      } catch (error) {
+        setStatus(`WATER CLASSIFICATION NOT SAVED: ${error.message}`, "error");
+      }
+      return;
+    }
+    activeWaterType = choice;
+    const behaviorDefaults = { flowing: "flowing", creek_stream: "apparent_creek_channel", ditch: "ditch", standing: "isolated_depression", other: "unknown" };
+    document.getElementById("photoWaterBehavior").value = behaviorDefaults[choice] || "unknown";
+    document.getElementById("waterMeasurementFields").hidden = false;
+    document.getElementById("saveWaterClassification").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  async function saveConfirmedWaterClassification() {
+    if (!pendingWaterPhotoId || !activeWaterType) return;
+    const depthBand = document.getElementById("photoWaterDepth").value;
+    const exact = Number(document.getElementById("photoWaterExact").value);
+    const width = Number(document.getElementById("photoWaterWidth").value);
+    const length = Number(document.getElementById("photoWaterLength").value);
+    const water = {
+      water_type: activeWaterType,
+      water_depth_band: depthBand,
+      water_depth_exact_in: depthBand === "exact" && Number.isFinite(exact) ? exact : null,
+      measurement_basis: document.getElementById("photoWaterBasis").value,
+      water_width_ft: Number.isFinite(width) && width > 0 ? width : null,
+      water_length_ft: Number.isFinite(length) && length > 0 ? length : null,
+      water_behavior: document.getElementById("photoWaterBehavior").value,
+      significance: null
+    };
+    try {
+      await saveWaterMetadata(pendingWaterPhotoId, "yes", water);
+      const metadata = data.photos.find(photo => String(photo.id) === String(pendingWaterPhotoId));
+      waterClassificationDialog.close();
+      setStatus(`${metadata && metadata.photo_number ? metadata.photo_number : "Photograph"} saved as ${water.water_type.replaceAll("_", " ")} water evidence.`, "active");
+      pendingWaterPhotoId = null;
+    } catch (error) {
+      setStatus(`WATER CLASSIFICATION NOT SAVED: ${error.message}`, "error");
     }
   }
 
@@ -1465,15 +1785,16 @@
       voiceEvent = {
         id: makeId("event"), source: "recovered_voice_note", type: "voice_note",
         observation_type: "field.voice_note", taxonomy_version: "property-observation-1.0",
-        button_label: "Voice Note", note: "", attributes: { duration_ms: pending.duration_ms, recovered_after_interruption: true },
+        button_label: "Voice Note", note: pending.prompt || "", attributes: { duration_ms: pending.duration_ms, recovered_after_interruption: true, purpose: pending.purpose || "general_field_note", photo_id: pending.photo_id || null },
         area_id: pending.area_id || null, question_ids: Array.isArray(pending.question_ids) ? pending.question_ids.slice() : [],
         question_links: Array.isArray(pending.question_links) ? pending.question_links.map(link => Object.assign({}, link)) : [],
         time: pending.started_at, lat: pending.lat, lon: pending.lon, gps_accuracy_m: pending.gps_accuracy_m,
         gps_position_at: pending.gps_position_at, compass_heading_deg: pending.compass_heading_deg,
-        device_orientation: pending.sensor_orientation, voice_note_id: pending.id, photo_id: null
+        device_orientation: pending.sensor_orientation, voice_note_id: pending.id, photo_id: pending.photo_id || null
       };
     }
     await voiceStorePut({ id: pending.id, inspection_id: data.inspection_id, metadata: pending, event: voiceEvent, audioBlob });
+    if (pending.photo_id) await attachExplanationToPhoto(pending.photo_id, pending.id);
     if (!data.voice_notes.some(note => String(note.id) === String(pending.id))) data.voice_notes.push(pending);
     if (!data.markers.some(marker => String(marker.voice_note_id) === String(pending.id))) data.markers.push(voiceEvent);
     data.pending_voice_note = null;
@@ -1845,6 +2166,7 @@
       };
       await commitPhotoRecord(photoRecord, true);
       setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
+      await beginPhotoExplanation(id);
     } catch (error) {
       if (photoRecord && pendingPhotoQueue.some(item => String(item.id) === String(photoRecord.id))) {
         setStatus("Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo.", "error");
@@ -2245,7 +2567,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -2335,6 +2657,34 @@
   }));
   voiceBtn.addEventListener("click", toggleVoiceNote);
   photoInput.addEventListener("change", handlePhotoFile);
+  document.getElementById("stopPhotoExplanation").addEventListener("click", () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      document.getElementById("photoExplanationState").textContent = "Saving the explanation…";
+      mediaRecorder.stop();
+    }
+  });
+  photoExplanationDialog.addEventListener("cancel", event => event.preventDefault());
+  waterClassificationDialog.addEventListener("cancel", event => event.preventDefault());
+  document.getElementById("retryPhotoExplanation").addEventListener("click", () => {
+    if (pendingPhotoExplanationId) beginPhotoExplanation(pendingPhotoExplanationId);
+  });
+  document.querySelectorAll("[data-water-choice]").forEach(button => button.addEventListener("click", () => chooseWaterType(button.dataset.waterChoice)));
+  document.getElementById("saveWaterClassification").addEventListener("click", saveConfirmedWaterClassification);
+  document.getElementById("photoWaterDepth").addEventListener("change", event => {
+    document.getElementById("photoWaterExactLabel").hidden = event.target.value !== "exact";
+  });
+  document.getElementById("closeWaterPhoto").addEventListener("click", () => waterPhotoDialog.close());
+  document.querySelectorAll("[data-water-layer]").forEach(control => control.addEventListener("change", renderSmallTractWaterMap));
+  document.getElementById("allWaterPhotographed").addEventListener("change", event => {
+    data.water_observation_rule = {
+      all_observed_standing_water_photographed: event.target.checked,
+      confirmed_at: event.target.checked ? new Date().toISOString() : null,
+      scope: "walked_and_visually_observed_corridor_at_inspection_time"
+    };
+    saveState();
+    redraw();
+    setStatus(event.target.checked ? "Field rule saved: within the walked and visually observed corridor, unphotographed locations may support ‘no standing water observed at inspection time.’" : "Field rule removed. The report will not infer inspected dry ground from missing water photographs.", "active");
+  });
   sharePackageBtn.addEventListener("click", shareLastPackage);
   clearBtn.addEventListener("click", clearInspection);
   document.getElementById("backup").addEventListener("click", exportBackupNow);

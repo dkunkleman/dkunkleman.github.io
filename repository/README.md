@@ -24,6 +24,8 @@ Pearson_Road/
       FULL_ARCHIVE_<export-id>.zip
     versions/<export-id>/
     maps/<export-id>/
+      SMALL_TRACT_WATER_MAP.json
+      small-tract-water-map.html
     photos/analysis/
     photos/original/
     voice/

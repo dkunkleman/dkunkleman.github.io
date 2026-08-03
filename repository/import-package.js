@@ -161,6 +161,8 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["QUESTION_BRIEF.json", `analysis/${contract.export_id}/QUESTION_BRIEF.json`],
     ["FIELD_COACHING.json", `analysis/${contract.export_id}/FIELD_COACHING.json`],
     ["RETURN_VISIT_PLAN.json", `analysis/${contract.export_id}/RETURN_VISIT_PLAN.json`],
+    ["SMALL_TRACT_WATER_MAP.json", `maps/${contract.export_id}/SMALL_TRACT_WATER_MAP.json`],
+    ["small-tract-water-map.html", `maps/${contract.export_id}/small-tract-water-map.html`],
     ["REPORT_TEMPLATE.md", `analysis/${contract.export_id}/REPORT_TEMPLATE.md`],
     ["INSPECTOR_THOUGHTS.md", `analysis/${contract.export_id}/INSPECTOR_THOUGHTS.md`],
     ["EVIDENCE_RELATIONSHIPS.json", `analysis/${contract.export_id}/EVIDENCE_RELATIONSHIPS.json`],

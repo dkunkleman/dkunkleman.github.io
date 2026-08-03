@@ -157,6 +157,20 @@
     #missingEvidenceList { margin: 8px 0; padding-left: 22px; }
     #reviewEvidence { width: 100%; background: #8a4400; border: 3px solid var(--focus); }
     .photo-value-select { width: 100%; min-height: 42px; margin-top: 6px; border: 2px solid #777; border-radius: 6px; background: #fff; font-size: 14px; }
+    .water-rule { display:block; margin:12px 0; padding:12px; border:3px solid #1768c4; border-radius:8px; background:#edf7ff; font-weight:800; }
+    .water-rule input { width:28px; height:28px; vertical-align:middle; margin-right:8px; }
+    #smallWaterMapFrame { position:relative; width:100%; min-height:420px; border:3px solid #164b75; background:#d9d9d9; overflow:hidden; }
+    #smallWaterMap { display:block; width:100%; min-height:420px; touch-action:manipulation; }
+    .water-layer-controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:6px; margin:10px 0; }
+    .water-layer-controls label { display:flex; align-items:center; min-height:52px; padding:8px; border:2px solid #777; border-radius:7px; background:#fff; font-weight:800; }
+    .water-layer-controls input { width:25px; height:25px; margin-right:8px; }
+    .water-summary { border-left:7px solid #1768c4; padding:9px 12px; background:#edf7ff; }
+    .water-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .water-choice-grid button { min-height:68px; }
+    #waterPhotoDialog img { display:block; width:100%; max-height:55vh; object-fit:contain; background:#111; }
+    #waterPhotoDialog audio { width:100%; margin-top:10px; }
+    #photoExplanationDialog[open] { border-color:#9b1e58; }
+    #photoExplanationPrompt { padding:12px; background:#fff2f7; border:3px solid #9b1e58; font-size:22px; font-weight:900; }
     #departureDialog .dialog-actions { grid-template-columns: 1fr 1fr; }
     #clear { background: #a31616; }
     @media (max-width: 430px) {
@@ -263,6 +277,8 @@
         <label>Conditions evidence<select id="conditionEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
       </div>
       <p class="small">Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</p>
+      <label class="water-rule"><input id="allWaterPhotographed" type="checkbox">I photographed every standing-water location I personally observed.</label>
+      <p class="small">This applies only to the walked and visually observed corridor at inspection time. It does not mean unvisited ground or year-round conditions were dry.</p>
     </section>
 
     <div id="mapFrame" aria-label="Offline terrain, contours, parcels, GPS track, and markers">
@@ -280,6 +296,27 @@
         <div class="coverage-none"><span>Not inspected</span><strong id="coverageNone">100%</strong></div>
       </div>
       <p id="coverageMethod" class="small">Start GPS to calculate parcel coverage.</p>
+    </section>
+
+    <section class="card" aria-labelledby="small-water-heading">
+      <h2 id="small-water-heading">SMALL TRACT — OBSERVED WATER CONDITIONS</h2>
+      <p id="smallWaterSummary" class="water-summary">Water evidence will appear here after parcel geometry loads.</p>
+      <details><summary>Map layers</summary><div class="water-layer-controls" aria-label="Small tract water map layers">
+        <label><input type="checkbox" data-water-layer="route" checked>Walked route</label>
+        <label><input type="checkbox" data-water-layer="standing" checked>Standing water</label>
+        <label><input type="checkbox" data-water-layer="flowing" checked>Flowing water</label>
+        <label><input type="checkbox" data-water-layer="minor" checked>Minor depressions</label>
+        <label><input type="checkbox" data-water-layer="larger" checked>Larger pooled areas</label>
+        <label><input type="checkbox" data-water-layer="outlines" checked>Estimated outlines</label>
+        <label><input type="checkbox" data-water-layer="avoidance" checked>Building avoidance</label>
+        <label><input type="checkbox" data-water-layer="dry" checked>High / dry evidence</label>
+        <label><input type="checkbox" data-water-layer="homesites" checked>Candidate homesites</label>
+        <label><input type="checkbox" data-water-layer="terrain" checked>Terrain</label>
+        <label><input type="checkbox" data-water-layer="contours" checked>2-foot contours</label>
+        <label><input type="checkbox" data-water-layer="unknown" checked>Uninspected / unknown</label>
+      </div></details>
+      <div id="smallWaterMapFrame"><svg id="smallWaterMap" viewBox="0 0 1800 1500" role="img" aria-label="Small tract observed water conditions"></svg></div>
+      <p class="small"><strong>Solid blue points are actual photographed water locations.</strong> Shaded or dashed shapes are estimates and are never surveyed wetland boundaries.</p>
     </section>
 
     <section class="card field-warning" aria-labelledby="missing-heading">
@@ -426,9 +463,57 @@
     </form>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.6.0"></script>
-  <script src="./inspection-package.js?v=3.6.0"></script>
-  <script src="./idb-recovery.js?v=3.6.0"></script>
-  <script src="./app.js?v=3.6.0"></script>
+  <dialog id="photoExplanationDialog">
+    <div class="dialog-body">
+      <h2>Explain this photograph</h2>
+      <p id="photoExplanationPrompt">Why did you take this picture?</p>
+      <p id="photoExplanationState" class="small">Starting voice recording…</p>
+    </div>
+    <div class="dialog-actions">
+      <button id="stopPhotoExplanation" type="button">Stop &amp; Save Explanation</button>
+      <button id="retryPhotoExplanation" class="cancel" type="button" hidden>Retry Voice Explanation</button>
+    </div>
+  </dialog>
+
+  <dialog id="waterClassificationDialog">
+    <div class="dialog-body">
+      <h2>Does this photograph show water?</h2>
+      <p class="small">Confirm what you personally observed. The app will never silently classify water.</p>
+      <div id="waterTypeChoices" class="water-choice-grid">
+        <button type="button" data-water-choice="standing">Yes — Standing Water</button>
+        <button type="button" data-water-choice="flowing">Yes — Flowing Water</button>
+        <button type="button" data-water-choice="ditch">Yes — Ditch</button>
+        <button type="button" data-water-choice="creek_stream">Yes — Creek or Stream</button>
+        <button type="button" data-water-choice="other">Yes — Other Water</button>
+        <button type="button" data-water-choice="no" class="cancel">No</button>
+        <button type="button" data-water-choice="unsure" class="cancel">Unsure</button>
+      </div>
+      <div id="waterMeasurementFields" class="structured-fields" hidden>
+        <label>Depth<select id="photoWaterDepth"><option value="unknown">Unknown</option><option value="less_than_1_inch">Less than 1 inch</option><option value="1-3_inches">1–3 inches</option><option value="3-7_inches">3–7 inches</option><option value="8-12_inches">8–12 inches</option><option value="more_than_12_inches">More than 12 inches</option><option value="exact">Exact entry</option></select></label>
+        <label id="photoWaterExactLabel" hidden>Exact depth in inches<input id="photoWaterExact" type="number" min="0" step="0.25" inputmode="decimal"></label>
+        <label>Measurement basis<select id="photoWaterBasis"><option>Unknown</option><option>Estimated</option><option>Measured</option></select></label>
+        <label>Approximate width in feet<input id="photoWaterWidth" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
+        <label>Approximate length in feet<input id="photoWaterLength" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
+        <label>Water behavior<select id="photoWaterBehavior"><option value="unknown">Unknown</option><option value="isolated_depression">Isolated depression</option><option value="connected_pooling">Connected pooling</option><option value="flowing">Flowing</option><option value="apparent_creek_channel">Apparent creek channel</option><option value="ditch">Ditch</option></select></label>
+        <button id="saveWaterClassification" type="button">Save Water Evidence</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="waterPhotoDialog">
+    <div class="dialog-body">
+      <button id="closeWaterPhoto" class="cancel" type="button">Close</button>
+      <h2 id="waterPhotoTitle">Water photograph</h2>
+      <img id="waterPhotoImage" alt="Water evidence photograph">
+      <p id="waterPhotoDetails" class="small"></p>
+      <audio id="waterPhotoAudio" controls hidden></audio>
+    </div>
+  </dialog>
+
+  <script src="./inspection-coaching.js?v=3.7.0"></script>
+  <script src="./water-intelligence.js?v=3.7.0"></script>
+  <script src="./inspection-package.js?v=3.7.0"></script>
+  <script src="./idb-recovery.js?v=3.7.0"></script>
+  <script src="./app.js?v=3.7.0"></script>
 </body>
 </html>
