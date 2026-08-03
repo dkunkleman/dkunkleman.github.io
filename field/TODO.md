@@ -5,7 +5,7 @@ The field release deliberately remains offline-first and account-free. These ite
 - Deploy the authenticated repository upload API and connect the existing one-tap share workflow to it without placing repository credentials in the field app.
 - User accounts, team permissions, cloud synchronization, and billing.
 - Cross-property queries, comparison, similarity search, and prediction models.
-- Repository-side AI generation of reports, interactive maps, timelines, galleries, answered/remaining questions, next-visit plans, and coverage analysis using the package's completed AI analysis contract.
+- Repository-side AI generation of reports, interactive maps, timelines, galleries, and cross-inspection comparisons using the package's completed questions, named areas, coverage, and return-visit contracts.
 - LiDAR, wetlands, FEMA flood, soils, utility, and aerial-imagery overlays.
 - Timber cruise calculations, clearing-cost models, culvert sizing, driveway design, homesite scoring, and valuation tools.
 - Optional weather/rainfall lookup that never replaces the saved manual inspection conditions.

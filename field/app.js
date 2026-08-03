@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.5.0";
+  const APP_VERSION = "3.6.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -17,6 +17,7 @@
   const gpsStoreName = "gpsPoints";
   const packageTools = window.InspectionPackage;
   const dbRecoveryTools = window.IndexedDbRecovery;
+  const coachingTools = window.InspectionCoaching;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -40,6 +41,11 @@
   const retryPendingPhotoBtn = document.getElementById("retryPendingPhoto");
   const observationDialog = document.getElementById("observationDialog");
   const moreCategories = document.getElementById("moreCategories");
+  const activeAreaSelect = document.getElementById("activeArea");
+  const questionList = document.getElementById("questionList");
+  const evidenceRelationshipSelect = document.getElementById("evidenceRelationship");
+  const nextPhotoValueSelect = document.getElementById("nextPhotoValue");
+  const departureDialog = document.getElementById("departureDialog");
   const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "photo", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
     wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
@@ -80,6 +86,12 @@
   let estimateRefreshTimer = null;
   let lastSavedOrientation = null;
   let photoHealthPromise = null;
+  let coverageSnapshot = null;
+  let coachingReview = null;
+  let coverageLastCalculatedAt = 0;
+  let coverageDirty = true;
+  let coachingStateSnapshot = null;
+  let coachingStateLastCalculatedAt = 0;
 
   function emptyInspection() {
     return {
@@ -96,6 +108,12 @@
       pending_voice_note: null,
       lifecycle_events: [],
       orientation_samples: [],
+      investigation_questions: [],
+      inspection_areas: [],
+      active_area_id: null,
+      active_question_ids: [],
+      next_evidence_relationship: "supports",
+      next_photo_value: "Helpful",
       conditions: {
         inspection_date: "",
         weather_summary: "",
@@ -131,8 +149,13 @@
       nextStep.textContent = "NEXT: Tap Resume Inspection to continue walking, or Finish Inspection if the property is complete.";
     } else if (!lastPosition) {
       nextStep.textContent = "NEXT: Wait here for the first precise GPS location.";
+    } else if (coachingTools && !data.investigation_questions.length) {
+      nextStep.textContent = "NEXT: Add the most important investigation question.";
+    } else if (coachingTools && data.investigation_questions.length && !data.active_question_ids.length) {
+      nextStep.textContent = "NEXT: Select the question your next evidence should answer.";
     } else {
-      nextStep.textContent = "NEXT: Walk the property. Tap one field button whenever you observe it.";
+      const activeArea = data.inspection_areas.find(area => area.area_id === data.active_area_id);
+      nextStep.textContent = `NEXT: Collect the highest-value evidence in ${activeArea ? activeArea.name : "the current area"}.`;
     }
   }
 
@@ -157,6 +180,7 @@
     data.lifecycle_events = Array.isArray(data.lifecycle_events) ? data.lifecycle_events : [];
     data.orientation_samples = Array.isArray(data.orientation_samples) ? data.orientation_samples : [];
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
+    if (coachingTools) coachingTools.ensureInspectionModel(data);
   }
 
   function saveState() {
@@ -171,6 +195,217 @@
       setStatus("LOCAL RECOVERY STORAGE FAILED. Stop walking and finish the inspection now; new field data may not survive an app close.", "error");
       throw error;
     }
+  }
+
+  function subjectParcel() {
+    return parcelFeatures.find(feature => String((feature.attributes || {}).PAR_NUM || "") === "221S280000001010000") || null;
+  }
+
+  function subjectRings() {
+    const subject = subjectParcel();
+    return subject && subject.geometry && Array.isArray(subject.geometry.rings) ? subject.geometry.rings : [];
+  }
+
+  function subjectAcres() {
+    const subject = subjectParcel();
+    const acres = subject && subject.attributes ? Number(subject.attributes.CALC_ACRE) : NaN;
+    return Number.isFinite(acres) && acres > 0 ? acres : null;
+  }
+
+  function currentEvidenceContext() {
+    return coachingTools ? coachingTools.evidenceContext(data) : { area_id: null, question_ids: [], question_links: [] };
+  }
+
+  function calculateCoachingState(force, forceCoverage) {
+    if (!coachingTools) return null;
+    const now = Date.now();
+    let coverageChanged = false;
+    const coverageForced = forceCoverage === undefined ? Boolean(force) : Boolean(forceCoverage);
+    if (coverageForced || !coverageSnapshot || (coverageDirty && now - coverageLastCalculatedAt > 15000)) {
+      coverageSnapshot = coachingTools.calculateCoverage({ points: data.points, rings: subjectRings(), recordedAcres: subjectAcres() });
+      coverageLastCalculatedAt = now;
+      coverageDirty = false;
+      coverageChanged = true;
+    }
+    if (!force && !coverageChanged && coachingStateSnapshot && now - coachingStateLastCalculatedAt < 15000) return coachingStateSnapshot;
+    coachingReview = coachingTools.reviewMissingEvidence(data, coverageSnapshot);
+    coachingStateSnapshot = {
+      schema_name: "property-intelligence-field-coaching",
+      schema_version: "1.0",
+      investigation_questions: coachingTools.createQuestionBrief(data),
+      inspection_areas: data.inspection_areas.slice(),
+      coverage: coverageSnapshot,
+      missing_evidence_review: coachingReview,
+      return_visit_plan: coachingTools.createReturnVisitPlan(data, coverageSnapshot, coachingReview),
+      field_efficiency: coachingTools.calculateFieldEfficiency(data, subjectAcres())
+    };
+    coachingStateLastCalculatedAt = now;
+    return coachingStateSnapshot;
+  }
+
+  function formatMetricNumber(value, suffix) {
+    return value !== null && value !== "" && Number.isFinite(Number(value)) ? `${Number(value).toFixed(1)}${suffix || ""}` : "—";
+  }
+
+  function renderCoverage() {
+    const state = calculateCoachingState(false);
+    if (!state) return;
+    const coverage = state.coverage;
+    document.getElementById("coverageWell").textContent = `${coverage.well_inspected.percent || 0}%`;
+    document.getElementById("coverageLight").textContent = `${coverage.lightly_inspected.percent || 0}%`;
+    document.getElementById("coverageNone").textContent = `${coverage.not_inspected.percent == null ? 100 : coverage.not_inspected.percent}%`;
+    document.getElementById("coverageMethod").textContent = coverage.status === "ESTIMATED"
+      ? `${coverage.method} Estimated not inspected: ${coverage.not_inspected.estimated_acres} acres.`
+      : "Start GPS inside the subject parcel to calculate coverage. Unvisited acreage remains unknown.";
+    const efficiency = state.field_efficiency;
+    document.getElementById("documentingTime").textContent = formatDuration(efficiency.time_documenting_ms);
+    document.getElementById("observationSpacing").textContent = formatMetricNumber(efficiency.average_spacing_between_observations_m, " m");
+    document.getElementById("photosPerAcre").textContent = formatMetricNumber(efficiency.photographs_per_acre, "");
+    document.getElementById("observationsPerAcre").textContent = formatMetricNumber(efficiency.observations_per_acre, "");
+    document.getElementById("questionsAnswered").textContent = efficiency.questions_answered;
+    document.getElementById("questionsRemaining").textContent = efficiency.questions_remaining;
+  }
+
+  function renderMissingEvidence() {
+    if (!coachingTools) return;
+    const state = calculateCoachingState(false);
+    const list = document.getElementById("missingEvidenceList");
+    list.innerHTML = "";
+    const actions = state.missing_evidence_review.highest_value_next_actions;
+    if (!data.investigation_questions.length) {
+      const item = document.createElement("li");
+      item.textContent = "Add the most important investigation question before collecting more evidence.";
+      list.appendChild(item);
+    } else if (!actions.length) {
+      const item = document.createElement("li");
+      item.textContent = "No obvious evidence gap was detected. Review each answer and the coverage map before leaving.";
+      list.appendChild(item);
+    } else {
+      actions.slice(0, 4).forEach(action => {
+        const item = document.createElement("li");
+        item.textContent = `${action.action} ${action.question ? `Question: ${action.question}` : ""}`.trim();
+        list.appendChild(item);
+      });
+    }
+    const best = list.firstElementChild ? list.firstElementChild.textContent : "Review coverage and unanswered questions.";
+    document.getElementById("coachNextAction").textContent = `NEXT BEST EVIDENCE: ${best}`;
+  }
+
+  function renderQuestionList() {
+    if (!coachingTools) return;
+    coachingTools.ensureInspectionModel(data);
+    const previousArea = activeAreaSelect.value;
+    activeAreaSelect.innerHTML = "";
+    data.inspection_areas.forEach(area => {
+      const option = document.createElement("option");
+      option.value = area.area_id;
+      option.textContent = area.name;
+      activeAreaSelect.appendChild(option);
+    });
+    activeAreaSelect.value = data.inspection_areas.some(area => area.area_id === data.active_area_id) ? data.active_area_id : previousArea;
+    questionList.innerHTML = "";
+    if (!data.investigation_questions.length) {
+      const empty = document.createElement("p");
+      empty.className = "small";
+      empty.textContent = "No investigation questions yet. Add the most important uncertainty before walking.";
+      questionList.appendChild(empty);
+    }
+    data.investigation_questions.forEach(question => {
+      const row = document.createElement("div");
+      row.className = `question-row${data.active_question_ids.includes(question.question_id) ? " active" : ""}`;
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = data.active_question_ids.includes(question.question_id);
+      checkbox.setAttribute("aria-label", `Attach new evidence to ${question.text}`);
+      const text = document.createElement("span");
+      text.textContent = question.text;
+      label.append(checkbox, text);
+      const controls = document.createElement("div");
+      controls.className = "question-controls";
+      const status = document.createElement("select");
+      status.setAttribute("aria-label", `Answer status for ${question.text}`);
+      [["open", "Unanswered"], ["partially_answered", "Partly answered"], ["answered", "Answered"]].forEach(([value, title]) => {
+        const option = document.createElement("option"); option.value = value; option.textContent = title; status.appendChild(option);
+      });
+      status.value = question.status;
+      const answer = document.createElement("button");
+      answer.type = "button";
+      answer.textContent = question.answer_summary ? "Edit Answer" : "Record Answer";
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked && !data.active_question_ids.includes(question.question_id)) data.active_question_ids.push(question.question_id);
+        if (!checkbox.checked) data.active_question_ids = data.active_question_ids.filter(id => id !== question.question_id);
+        saveState(); renderCoaching();
+      });
+      status.addEventListener("change", () => { question.status = status.value; saveState(); renderCoaching(); });
+      answer.addEventListener("click", () => {
+        const response = prompt("What does the evidence currently support? Include what remains uncertain.", question.answer_summary || "");
+        if (response === null) return;
+        question.answer_summary = response.trim();
+        if (question.answer_summary) question.status = "answered";
+        saveState(); renderCoaching();
+      });
+      controls.append(status, answer);
+      row.append(label, controls);
+      questionList.appendChild(row);
+    });
+    evidenceRelationshipSelect.value = data.next_evidence_relationship;
+    nextPhotoValueSelect.value = data.next_photo_value;
+  }
+
+  function renderCoaching() {
+    calculateCoachingState(true, false);
+    renderQuestionList();
+    renderCoverage();
+    renderMissingEvidence();
+    updateNextStep();
+  }
+
+  function addInspectionArea() {
+    const input = document.getElementById("newArea");
+    const name = input.value.trim();
+    if (!name) {
+      setStatus("Type a short area name, such as Road Frontage, Creek, or South Ridge.", "warning");
+      input.focus();
+      return;
+    }
+    const area = { area_id: makeId("area"), name, created_at: new Date().toISOString(), description: "" };
+    data.inspection_areas.push(area);
+    data.active_area_id = area.area_id;
+    input.value = "";
+    data.lifecycle_events.push({ type: "inspection_area_selected", time: new Date().toISOString(), area_id: area.area_id, area_name: area.name, source: "button_press" });
+    saveState(); renderCoaching();
+    setStatus(`Current area is now ${area.name}. New evidence will attach automatically.`, "active");
+  }
+
+  function addInvestigationQuestion() {
+    const input = document.getElementById("newQuestion");
+    const text = input.value.trim();
+    if (!text) {
+      setStatus("Type the uncertainty you want this inspection to answer.", "warning");
+      input.focus();
+      return;
+    }
+    const question = { question_id: makeId("question"), text, created_at: new Date().toISOString(), status: "open", answer_summary: "", confidence: null, decision_categories: [] };
+    data.investigation_questions.push(question);
+    data.active_question_ids.push(question.question_id);
+    input.value = "";
+    saveState(); renderCoaching();
+    setStatus("Question added and selected. New evidence will attach to it automatically.", "active");
+  }
+
+  function showDepartureReview() {
+    const state = calculateCoachingState(true);
+    const review = state.missing_evidence_review;
+    const coverage = state.coverage;
+    document.getElementById("departureSummary").textContent = coverage.status === "ESTIMATED"
+      ? `${coverage.not_inspected.percent}% of parcel cells are estimated not inspected. ${review.important_questions_remaining.length} investigation question(s) still have an evidence or answer gap.`
+      : `${review.important_questions_remaining.length} investigation question(s) still have an evidence or answer gap. Coverage could not be estimated.`;
+    const list = document.getElementById("departureActions");
+    list.innerHTML = "";
+    const actions = review.highest_value_next_actions.length ? review.highest_value_next_actions : [{ action: "Review the route, questions, and Critical photographs before creating the package." }];
+    actions.forEach(action => { const item = document.createElement("li"); item.textContent = action.action; list.appendChild(item); });
+    departureDialog.showModal();
   }
 
   function openPhotoDbConnection() {
@@ -585,9 +820,28 @@
     });
   }
 
+  function drawCoverageOverlay() {
+    if (!coachingTools) return;
+    const state = calculateCoachingState(false);
+    if (!state || state.coverage.status !== "ESTIMATED") return;
+    const styles = {
+      well_inspected: { fill: "#35c759", opacity: 0.24 },
+      lightly_inspected: { fill: "#ffe34f", opacity: 0.22 },
+      not_inspected: { fill: "#666", opacity: 0.18 }
+    };
+    state.coverage.cells.forEach(cell => {
+      const style = styles[cell.classification];
+      addSvg("rect", {
+        x: sx(cell.west), y: sy(cell.north), width: Math.max(1, sx(cell.east) - sx(cell.west)), height: Math.max(1, sy(cell.south) - sy(cell.north)),
+        fill: style.fill, opacity: style.opacity, stroke: "none"
+      });
+    });
+  }
+
   function redraw() {
     svg.innerHTML = "";
     drawPropertyLines();
+    drawCoverageOverlay();
     const visiblePoints = data.points.filter(point => point.lon >= xmin && point.lon <= xmax && point.lat >= ymin && point.lat <= ymax);
     const pathStride = Math.max(1, Math.ceil(visiblePoints.length / 1500));
     const displayPoints = visiblePoints.filter((point, index) => index % pathStride === 0 || index === visiblePoints.length - 1);
@@ -619,6 +873,7 @@
     const feet = totalDistance() * 3.280839895;
     document.getElementById("distance").textContent = feet < 5280 ? `${Math.round(feet)} ft` : `${(feet / 5280).toFixed(2)} mi`;
     updateTimeMetrics();
+    renderCoverage();
     updateControls();
   }
 
@@ -656,7 +911,18 @@
       caption.textContent = `${metadata.photo_number || `P${index + 1}`} · ${metadata.category || "Other"} · ${new Date(metadata.recorded_at || metadata.time).toLocaleString()}`;
       const location = document.createElement("div");
       location.textContent = `${Number(metadata.lat).toFixed(6)}, ${Number(metadata.lon).toFixed(6)} · ±${Math.round(metadata.gps_accuracy_m)} m`;
-      card.append(image, caption, location);
+      const valueSelect = document.createElement("select");
+      valueSelect.className = "photo-value-select";
+      valueSelect.setAttribute("aria-label", `Evidence value for ${metadata.photo_number || `P${index + 1}`}`);
+      (coachingTools ? coachingTools.PHOTO_VALUES : ["Critical", "Helpful", "Reference", "Duplicate"]).forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        valueSelect.appendChild(option);
+      });
+      valueSelect.value = metadata.photo_value || "Helpful";
+      valueSelect.addEventListener("change", () => updatePhotoValue(metadata.id, valueSelect.value));
+      card.append(image, caption, location, valueSelect);
       gallery.appendChild(card);
       try {
         const stored = await photoStoreGet(metadata.id);
@@ -673,6 +939,24 @@
         warning.textContent = "PHOTO BYTES MISSING — package export is blocked";
         card.prepend(warning);
       }
+    }
+  }
+
+  async function updatePhotoValue(photoId, value) {
+    if (coachingTools && !coachingTools.PHOTO_VALUES.includes(value)) return;
+    try {
+      const stored = await photoStoreGet(photoId);
+      if (!stored || !stored.metadata) throw new Error("Photo record could not be read.");
+      stored.metadata.photo_value = value;
+      await photoStorePut(stored);
+      const metadata = data.photos.find(photo => String(photo.id) === String(photoId));
+      if (metadata) metadata.photo_value = value;
+      saveState();
+      renderCoaching();
+      setStatus(`${metadata && metadata.photo_number ? metadata.photo_number : "Photo"} marked ${value}.`, "active");
+    } catch (error) {
+      setStatus(`PHOTO VALUE NOT SAVED: ${error.message}`, "error");
+      await renderGallery();
     }
   }
 
@@ -803,6 +1087,7 @@
     };
     point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;
     data.points.push(point);
+    coverageDirty = true;
     gpsWriteQueue = gpsWriteQueue
       .then(() => gpsPointPut(data.inspection_id, point))
       .catch(error => {
@@ -894,6 +1179,7 @@
   function markerFromPosition(type, note, photoId, time, positionOverride, details) {
     const position = positionOverride || lastPosition;
     const settings = details || {};
+    const context = currentEvidenceContext();
     return {
       id: makeId("event"),
       source: settings.source || "button_press",
@@ -905,6 +1191,9 @@
       note: note || "",
       evidence_classification: settings.evidenceClassification || "Observed",
       attributes: Object.assign({}, settings.attributes || {}),
+      area_id: settings.areaId || context.area_id,
+      question_ids: Array.isArray(settings.questionIds) ? settings.questionIds.slice() : context.question_ids,
+      question_links: Array.isArray(settings.questionLinks) ? settings.questionLinks.map(link => Object.assign({}, link)) : context.question_links,
       time: time || new Date().toISOString(),
       lat: position.lat,
       lon: position.lon,
@@ -948,6 +1237,7 @@
     data.markers.push(marker);
     saveState();
     redraw();
+    renderCoaching();
     setStatus(type === "thought" ? "Inspector thought saved separately from observed evidence." : `${buttonLabels[type]} recorded at the current location.`, "active");
     return marker;
   }
@@ -1013,7 +1303,10 @@
         note,
         associatedObservationId: marker.id,
         evidenceClassification,
-        observationAttributes: attributes
+        observationAttributes: attributes,
+        area_id: marker.area_id,
+        question_ids: marker.question_ids,
+        question_links: marker.question_links
       });
     }
   }
@@ -1044,6 +1337,7 @@
       mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
       const id = makeId("voice");
       const startedAt = new Date().toISOString();
+      const coachingContext = currentEvidenceContext();
       activeVoiceNote = {
         id,
         started_at: startedAt,
@@ -1060,6 +1354,9 @@
           gamma_deg: latestOrientation.gamma_deg,
           absolute: latestOrientation.absolute
         } : null,
+        area_id: coachingContext.area_id,
+        question_ids: coachingContext.question_ids,
+        question_links: coachingContext.question_links,
         recovered_after_interruption: false
       };
       data.pending_voice_note = activeVoiceNote;
@@ -1114,6 +1411,9 @@
         button_label: "Voice Note",
         note: "",
         attributes: { duration_ms: metadata.duration_ms },
+        area_id: metadata.area_id || null,
+        question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
+        question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
         time: metadata.started_at,
         lat: metadata.lat,
         lon: metadata.lon,
@@ -1131,6 +1431,7 @@
       saveState();
       await voiceChunksDelete(metadata.id);
       redraw();
+      renderCoaching();
       schedulePackageEstimateRefresh();
       setStatus(`Voice note ${data.voice_notes.length} saved with audio, GPS, time, and heading.`, "active");
     } catch (error) {
@@ -1165,6 +1466,8 @@
         id: makeId("event"), source: "recovered_voice_note", type: "voice_note",
         observation_type: "field.voice_note", taxonomy_version: "property-observation-1.0",
         button_label: "Voice Note", note: "", attributes: { duration_ms: pending.duration_ms, recovered_after_interruption: true },
+        area_id: pending.area_id || null, question_ids: Array.isArray(pending.question_ids) ? pending.question_ids.slice() : [],
+        question_links: Array.isArray(pending.question_links) ? pending.question_links.map(link => Object.assign({}, link)) : [],
         time: pending.started_at, lat: pending.lat, lon: pending.lon, gps_accuracy_m: pending.gps_accuracy_m,
         gps_position_at: pending.gps_position_at, compass_heading_deg: pending.compass_heading_deg,
         device_orientation: pending.sensor_orientation, voice_note_id: pending.id, photo_id: null
@@ -1270,6 +1573,7 @@
     redraw();
     galleryPage = Math.max(0, Math.ceil(data.photos.length / galleryPageSize) - 1);
     await renderGallery();
+    renderCoaching();
     schedulePackageEstimateRefresh();
   }
 
@@ -1407,7 +1711,13 @@
       setStatus("Waiting for the first current GPS location. Camera was not opened.", "warning");
       return;
     }
-    pendingPhotoContext = context && context.category ? context : null;
+    const coachingContext = currentEvidenceContext();
+    pendingPhotoContext = Object.assign({}, context || {}, {
+      area_id: context && context.area_id ? context.area_id : coachingContext.area_id,
+      question_ids: context && Array.isArray(context.question_ids) ? context.question_ids.slice() : coachingContext.question_ids,
+      question_links: context && Array.isArray(context.question_links) ? context.question_links.map(link => Object.assign({}, link)) : coachingContext.question_links,
+      photo_value: data.next_photo_value || "Helpful"
+    });
     pendingPhotoRequestedAt = new Date().toISOString();
     try {
       await (photoHealthPromise || preparePhotoStorage());
@@ -1501,7 +1811,11 @@
         note: photoContext.note || "",
         associated_observation_id: photoContext.associatedObservationId || null,
         evidence_classification: photoContext.evidenceClassification || "Observed",
-        observation_attributes: Object.assign({}, photoContext.observationAttributes || {})
+        observation_attributes: Object.assign({}, photoContext.observationAttributes || {}),
+        area_id: photoContext.area_id || null,
+        question_ids: Array.isArray(photoContext.question_ids) ? photoContext.question_ids.slice() : [],
+        question_links: Array.isArray(photoContext.question_links) ? photoContext.question_links.map(link => Object.assign({}, link)) : [],
+        photo_value: photoContext.photo_value || "Helpful"
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
         evidenceClassification: metadata.evidence_classification,
@@ -1510,7 +1824,10 @@
           category: metadata.category,
           associated_observation_id: metadata.associated_observation_id,
           observation_attributes: metadata.observation_attributes
-        }
+        },
+        areaId: metadata.area_id,
+        questionIds: metadata.question_ids,
+        questionLinks: metadata.question_links
       });
       metadata.associated_marker_id = photoEvent.id;
       if (typeof packageTools.sha256Hex === "function") {
@@ -1741,8 +2058,9 @@
         const voiceEntries = await recoverEveryVoiceNote();
         const mapContext = await recoverMapContext();
         setStatus(packageMode === "full_archive" ? "Building the FULL EVIDENCE ARCHIVE. Keep Safari open…" : "Building the CHATGPT ANALYSIS PACKAGE. Keep Safari open…", "active");
+        const coachingState = calculateCoachingState(true);
         const result = await packageTools.createInspectionPackage({
-          inspection: data,
+          inspection: Object.assign({}, data, { field_coaching: coachingState }),
           photoEntries,
           voiceEntries,
           mapContext,
@@ -1773,7 +2091,8 @@
     return confirm(`${mode === "full_archive" ? "FULL EVIDENCE ARCHIVE" : "CHATGPT ANALYSIS PACKAGE"} is estimated at ${formatBytes(bytes)}, which exceeds 500 MB. Keep Safari open and confirm the destination has enough free space. Continue?`);
   }
 
-  async function finishInspection() {
+  async function finishInspection(options) {
+    const settings = options || {};
     if (packageBusy || photoBusy) return;
     if (!data.started || !data.points.length) {
       setStatus("INSPECTION INCOMPLETE: at least one recorded GPS point is required.", "error");
@@ -1781,6 +2100,10 @@
     }
     if (!data.photos.length && !pendingPhotoQueue.length) {
       setStatus("INSPECTION INCOMPLETE: at least one photograph is required. Photo markers alone are unacceptable.", "error");
+      return;
+    }
+    if (!settings.reviewed) {
+      showDepartureReview();
       return;
     }
     if (!(await confirmLargePackage("report"))) return;
@@ -1851,10 +2174,16 @@
       await photoStoreClear();
       for (const pending of pendingPhotoQueue.slice()) await removePendingPhoto(pending.id);
       data = emptyInspection();
+      coachingTools.ensureInspectionModel(data);
       lastPosition = null;
       latestOrientation = null;
       gpsWriteQueue = Promise.resolve();
       gpsStorageFailed = false;
+      coverageSnapshot = null;
+      coachingReview = null;
+      coverageDirty = true;
+      coachingStateSnapshot = null;
+      coachingStateLastCalculatedAt = 0;
       localStorage.removeItem(stateKey);
       localStorage.removeItem(legacyStateKey);
       if (lastPackageUrl) URL.revokeObjectURL(lastPackageUrl);
@@ -1868,6 +2197,7 @@
       redraw();
       renderConditions();
       await renderGallery();
+      renderCoaching();
       document.getElementById("accuracy").textContent = "—";
       document.getElementById("location").textContent = "—";
       document.getElementById("heading").textContent = "—";
@@ -1915,7 +2245,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -1945,6 +2275,11 @@
     renderConditions();
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
+    coverageSnapshot = null;
+    coachingStateSnapshot = null;
+    coverageDirty = true;
+    redraw();
+    renderCoaching();
     if (statusEl.dataset.kind !== "error") {
       setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
     }
@@ -1953,7 +2288,23 @@
 
   startBtn.addEventListener("click", startTracking);
   stopBtn.addEventListener("click", () => stopTracking());
-  finishBtn.addEventListener("click", finishInspection);
+  finishBtn.addEventListener("click", () => finishInspection());
+  document.getElementById("addArea").addEventListener("click", addInspectionArea);
+  document.getElementById("newArea").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addInspectionArea(); } });
+  document.getElementById("addQuestion").addEventListener("click", addInvestigationQuestion);
+  document.getElementById("newQuestion").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addInvestigationQuestion(); } });
+  activeAreaSelect.addEventListener("change", () => {
+    data.active_area_id = activeAreaSelect.value;
+    const area = data.inspection_areas.find(item => item.area_id === data.active_area_id);
+    data.lifecycle_events.push({ type: "inspection_area_selected", time: new Date().toISOString(), area_id: data.active_area_id, area_name: area ? area.name : null, source: "field_control" });
+    saveState(); renderCoaching();
+    setStatus(`Current area is ${area ? area.name : "selected"}. New evidence will attach automatically.`, "active");
+  });
+  evidenceRelationshipSelect.addEventListener("change", () => { data.next_evidence_relationship = evidenceRelationshipSelect.value; saveState(); renderCoaching(); });
+  nextPhotoValueSelect.addEventListener("change", () => { data.next_photo_value = nextPhotoValueSelect.value; saveState(); renderCoaching(); });
+  document.getElementById("reviewEvidence").addEventListener("click", showDepartureReview);
+  document.getElementById("continueInspecting").addEventListener("click", () => departureDialog.close());
+  document.getElementById("finishAfterReview").addEventListener("click", () => { departureDialog.close(); finishInspection({ reviewed: true }); });
   document.getElementById("wet").addEventListener("click", () => openObservationDialog("wet"));
   document.getElementById("dry").addEventListener("click", () => openObservationDialog("dry"));
   document.getElementById("blocked").addEventListener("click", () => openObservationDialog("blocked"));

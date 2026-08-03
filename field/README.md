@@ -2,6 +2,16 @@
 
 Production, offline-first field evidence collection for the subject rural parcel. The iPhone workflow is deliberately simple: confirm **Offline ready**, tap **Start Inspection**, record observations while walking, then tap **Finish Inspection** and save the one resulting package to the Property Intelligence Repository. ChatGPT analyzes the permanent repository record rather than acting as file storage.
 
+## Inspection Coaching
+
+- Create one or more investigation questions and select any question(s) the next evidence should answer.
+- Create named inspection areas such as **Large Tract – Northwest**, **Road Frontage**, **Creek**, or **South Ridge**. The selected area attaches automatically to each new observation, photograph, note, inspector thought, and voice note.
+- Mark question-linked evidence as supporting, contradicting, or context. This prevents an evidence count from being mistaken for a conclusion.
+- Mark each photograph **Critical**, **Helpful**, **Reference**, or **Duplicate**. The default is Helpful, and the value can be changed from the paginated gallery without altering image bytes.
+- View a conservative route-proximity estimate of **Well inspected**, **Lightly inspected**, and **Not inspected** parcel cells. The method and limitation are exported; unvisited acreage is never represented as inspected.
+- Before GPS is stopped, **Finish Inspection** presents the most important unanswered questions, missing photographs and measurements, empty inspection areas, and the cheapest next evidence to collect. The inspector may safely return to the inspection or finish with the uncertainty explicitly preserved.
+- The package includes `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, and `RETURN_VISIT_PLAN.json`, plus field-efficiency estimates for walking, stopping, documenting, observation spacing, evidence per acre, and questions answered versus remaining.
+
 ## Reliability model
 
 - The app shell, parcel geometry, USGS terrain, and USGS 2-foot contour raster are cached under the `/field/` service-worker scope.
@@ -25,6 +35,9 @@ Both modes contain:
 - `AI_README.md`, the plain-English first-read contract that tells ChatGPT what the inspection contains, how evidence relates, and how to report uncertainty;
 - `AI_ANALYSIS.json`, the analysis-first view organized as Executive Summary, Property Information, Inspection Conditions, Inspection Statistics, GPS Track, Observations, Photographs, Voice Notes, Map Layers, Weather, Terrain, Contours, Parcel Boundary, Public Data, Evidence Relationships, Suggested Inspection Questions, and Metadata;
 - `DECISION_BRIEF.json`, the five-decision brief with routed evidence, possible strengths and weaknesses, material-unknown rules, an explained 0-100 confidence rubric, lowest-cost investigation requirements, and evidence-triggered professional follow-up;
+- `QUESTION_BRIEF.json`, every inspector-created question with directly linked supporting, contradicting, and contextual evidence;
+- `FIELD_COACHING.json`, named areas, conservative coverage estimates, missing-evidence review, and field-efficiency measures;
+- `RETURN_VISIT_PLAN.json`, unvisited-zone waypoints and prioritized questions, measurements, and photographs;
 - `REPORT_TEMPLATE.md`, with the required professional Property Intelligence Report sections;
 - `INSPECTOR_THOUGHTS.md`, which preserves the inspector's judgment, theories, concerns, and preferences while explicitly separating them from observed facts;
 - `EVIDENCE_RELATIONSHIPS.json`, which directly joins observations, photographs, voice notes, and stable GPS-point IDs;
@@ -53,10 +66,12 @@ From the repository root:
 
 ```powershell
 node --check field\inspection-package.js
+node --check field\inspection-coaching.js
 node --check field\app.js
 node --check field\idb-recovery.js
 node --check repository\import-package.js
 node tests\idb-recovery.test.js
+node tests\inspection-coaching.test.js
 node tests\inspection-package.test.js
 ```
 
@@ -67,11 +82,12 @@ The recovery tests simulate stale cached connections, close events, transaction-
 1. Open the deployed `/field/` page in iPhone Safari while online and wait for **Offline ready**.
 2. Turn on Airplane Mode. Reload the page and confirm the terrain, 2-foot contours, red subject boundary, and neighboring boundaries still appear.
 3. Tap **Start Inspection**, allow Precise Location and motion/orientation access, then walk at least 20 feet.
-4. Record Wet, High Ground, a Free Note, one Voice Note, and at least one photo. Use **Take a photograph after saving** on one structured observation to verify the relationship.
+4. Create two named Inspection Areas and two investigation questions. Select both questions, record Wet, High Ground, a Free Note, one Voice Note, and at least one photo. Use **Take a photograph after saving** on one structured observation to verify the relationship.
 5. Close Safari after saving one observation, reopen it, and confirm the counters and photographs return.
 6. Take 20 photos over several minutes. Background and reopen Safari twice, rotate between portrait and landscape, and continue taking photos. If a pending-photo button appears, tap it and confirm recovery.
-7. Still offline, tap **Finish Inspection**. Use **Save to Property Intelligence Repository** in the iOS share sheet for the single `AI_ANALYSIS_REPORT_PACKAGE` ZIP.
-8. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. ChatGPT should begin with `AI_README.md` and `DECISION_BRIEF.json`, answer the five property decisions, then produce the supporting map, report, timeline, gallery, role-specific questions, next visit, and uninspected areas without asking the user to match evidence.
-9. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Save it to the same repository inspection; it must create a second export version and add exact originals without replacing the report package.
+7. Mark photos Critical, Helpful, Reference, and Duplicate from the gallery. Confirm the classifications survive backgrounding Safari.
+8. Still offline, tap **Finish Inspection**. Confirm the before-you-leave review identifies unanswered questions, missing evidence, and unvisited coverage before GPS stops. Return once, collect the suggested evidence, then finish and use **Save to Property Intelligence Repository** for the single `AI_ANALYSIS_REPORT_PACKAGE` ZIP.
+9. Confirm the repository receipt names the expected property folder, inspection folder, and unique export ID. Verify `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, and `RETURN_VISIT_PLAN.json`; every new evidence item must carry its selected area and questions. ChatGPT should answer every investigation question and five property decisions with cited support, contradictions, remaining uncertainty, explained confidence, and the cheapest next investigation.
+10. Return to the unchanged saved inspection and create the `FULL_ARCHIVE` ZIP. Save it to the same repository inspection; it must create a second export version and add exact originals without replacing the report package.
 
 Do not clear the inspection until the repository confirms both packages were received and every photo can be displayed.

@@ -152,6 +152,18 @@ async function main() {
     inspection_id: "inspection-acceptance-test",
     started,
     stopped: "2026-08-02T15:00:00.000Z",
+    inspection_areas: [
+      { area_id: "area-northwest", name: "Large Tract – Northwest", created_at: started },
+      { area_id: "area-road", name: "Road Frontage", created_at: started }
+    ],
+    active_area_id: "area-northwest",
+    investigation_questions: [
+      { question_id: "question-berm", text: "Does the road berm trap water?", created_at: started, status: "partially_answered", answer_summary: "Water was observed behind the berm; outlet remains unknown.", confidence: 60 },
+      { question_id: "question-homesite", text: "Where is the best homesite?", created_at: started, status: "open", answer_summary: "", confidence: null }
+    ],
+    active_question_ids: ["question-berm"],
+    next_evidence_relationship: "supports",
+    next_photo_value: "Critical",
     lifecycle_events: [
       { type: "inspection_started", time: "2026-08-02T14:00:00.000Z", source: "button_press" },
       { type: "inspection_finished", time: "2026-08-02T15:00:00.000Z", source: "button_press" }
@@ -166,6 +178,22 @@ async function main() {
     ],
     voice_notes: [{ id: "voice-1", started_at: "2026-08-02T14:05:00.000Z", finished_at: "2026-08-02T14:05:04.500Z", duration_ms: 4500, mime_type: "audio/mp4", size_bytes: voiceBytes.length, lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, recovered_after_interruption: false }]
   };
+  inspection.markers.forEach(marker => {
+    marker.area_id = marker.type === "entrance" ? "area-road" : "area-northwest";
+    marker.question_ids = marker.type === "wet" || marker.type === "ditch" || marker.type === "photo" || marker.type === "voice_note" ? ["question-berm"] : [];
+    marker.question_links = marker.question_ids.map(questionId => ({ question_id: questionId, relationship: marker.type === "dry" ? "contradicts" : "supports" }));
+  });
+  inspection.photos[0].area_id = "area-northwest";
+  inspection.photos[0].question_ids = ["question-berm"];
+  inspection.photos[0].question_links = [{ question_id: "question-berm", relationship: "supports" }];
+  inspection.photos[0].photo_value = "Critical";
+  inspection.photos[1].area_id = "area-northwest";
+  inspection.photos[1].question_ids = ["question-homesite"];
+  inspection.photos[1].question_links = [{ question_id: "question-homesite", relationship: "context" }];
+  inspection.photos[1].photo_value = "Helpful";
+  inspection.voice_notes[0].area_id = "area-northwest";
+  inspection.voice_notes[0].question_ids = ["question-berm"];
+  inspection.voice_notes[0].question_links = [{ question_id: "question-berm", relationship: "supports" }];
 
   const basePhotoEntries = [
     { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
@@ -195,7 +223,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -214,7 +242,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "1.5");
+  assert.equal(manifest.format_version, "1.6");
   assert.equal(manifest.repository.export_id, "export_full_test");
   assert.equal(manifest.repository.append_only, true);
   assert.equal(manifest.repository.overwrite_allowed, false);
@@ -239,6 +267,8 @@ async function main() {
   assert.equal(manifest.summary.original_photo_count, 2);
   assert.equal(manifest.summary.analysis_photo_count, 2);
   assert.equal(manifest.summary.voice_note_count, 1);
+  assert.equal(manifest.summary.investigation_question_count, 2);
+  assert.equal(manifest.summary.inspection_area_count, 2);
   assert.equal(manifest.summary.device_orientation_sample_count, 1);
   assert.equal(manifest.summary.lifecycle_event_count, 2);
   assert.equal(manifest.summary.elapsed_time_ms, 3600000);
@@ -252,6 +282,9 @@ async function main() {
   assert.equal(manifest.photographs[0].photo_number, "P1");
   assert.equal(manifest.photographs[0].associated_marker_id, "event-photo-1");
   assert.equal(manifest.photographs[0].category, "Wet");
+  assert.equal(manifest.photographs[0].photo_value, "Critical");
+  assert.equal(manifest.photographs[0].area_id, "area-northwest");
+  assert.deepEqual(manifest.photographs[0].question_ids, ["question-berm"]);
   assert.equal(manifest.photographs[0].compass_heading_deg, 88);
   assert.equal(manifest.photographs[1].orientation.exif_value, 6);
   assert.equal(manifest.voice_notes[0].audio.path, "voice-notes/001_voice-note.m4a");
@@ -288,11 +321,19 @@ async function main() {
 
   const aiAnalysis = JSON.parse(files.get("AI_ANALYSIS.json").toString("utf8"));
   const decisionBrief = JSON.parse(files.get("DECISION_BRIEF.json").toString("utf8"));
+  const questionBrief = JSON.parse(files.get("QUESTION_BRIEF.json").toString("utf8"));
+  const fieldCoaching = JSON.parse(files.get("FIELD_COACHING.json").toString("utf8"));
+  const returnVisit = JSON.parse(files.get("RETURN_VISIT_PLAN.json").toString("utf8"));
   const relationships = JSON.parse(files.get("EVIDENCE_RELATIONSHIPS.json").toString("utf8"));
   const aiReadme = files.get("AI_README.md").toString("utf8");
   const reportTemplate = files.get("REPORT_TEMPLATE.md").toString("utf8");
   const thoughtDocument = files.get("INSPECTOR_THOUGHTS.md").toString("utf8");
-  ["executive_summary", "decision_framework", "decision_brief", "stakeholder_questions", "property_information", "inspection_conditions", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
+  ["executive_summary", "decision_framework", "decision_brief", "investigation_questions", "inspection_areas", "coverage", "missing_evidence", "return_visit_plan", "field_efficiency", "stakeholder_questions", "property_information", "inspection_conditions", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
+  assert.equal(questionBrief.questions.length, 2, "every inspector question is packaged");
+  assert(questionBrief.questions[0].photo_ids.includes("photo-1"), "question links directly to its photo evidence");
+  assert.equal(fieldCoaching.coverage.status, "ESTIMATED", "coverage is explicitly estimated");
+  assert(Number.isFinite(fieldCoaching.coverage.not_inspected.percent), "not-inspected percent is reported");
+  assert.equal(returnVisit.schema_name, "property-intelligence-return-visit-plan");
   assert.equal(decisionBrief.decisions.length, 5, "decision brief contains the five rural-property decisions");
   assert.deepEqual(decisionBrief.decisions.map(decision => decision.question), ["Can I access it?", "Can I build here?", "Can I make money here?", "What might cost me money?", "What makes this property special?"]);
   decisionBrief.decisions.forEach(decision => {
@@ -307,7 +348,7 @@ async function main() {
   assert.equal(relationships.photographs.length, 2);
   assert.equal(relationships.voice_notes.length, 1);
   assert(aiReadme.includes("Can I access it?") && aiReadme.includes("Every observation directly names its GPS point") && aiReadme.includes("not observed facts") && aiReadme.includes("Absence of an observation is not proof") && aiReadme.includes("0-100 confidence score"), "AI README explains decisions, relationships, thought boundaries, uncertainty, and confidence in plain English");
-  ["Decision Summary", "Property Overview", "Inspection Conditions", "Decision Matrix", "Can I Access It?", "Can I Build Here?", "Can I Make Money Here?", "What Might Cost Me Money?", "What Makes This Property Special?", "Strengths", "Weaknesses", "Unknowns and Coverage Gaps", "What Changed the Assessment", "Inspection Statistics", "Questions Answered", "Questions Remaining", "Lowest-Cost Next Investigation", "Estimated Confidence", "Buyer Questions", "Seller Transparency", "Builder Questions", "Developer Questions", "Engineer Questions", "Forester Questions", "Recommended Professional Follow-up", "Evidence Appendix"].forEach(heading => assert(reportTemplate.includes(`## ${heading}`), `report template includes ${heading}`));
+  ["Decision Summary", "Property Overview", "Inspection Conditions", "Decision Matrix", "Can I Access It?", "Can I Build Here?", "Can I Make Money Here?", "What Might Cost Me Money?", "What Makes This Property Special?", "Strengths", "Weaknesses", "Unknowns and Coverage Gaps", "What Changed the Assessment", "Inspection Statistics", "Questions Answered", "Questions Remaining", "Inspection Areas", "Coverage: Well Inspected, Lightly Inspected, Not Inspected", "Lowest-Cost Next Investigation", "Estimated Confidence", "Return Visit Plan", "Field Efficiency", "Buyer Questions", "Seller Transparency", "Builder Questions", "Developer Questions", "Engineer Questions", "Forester Questions", "Recommended Professional Follow-up", "Evidence Appendix"].forEach(heading => assert(reportTemplate.includes(`## ${heading}`), `report template includes ${heading}`));
   assert(thoughtDocument.includes("I think the road berm may be causing this standing water.") && thoughtDocument.includes("NOT AN OBSERVED FACT"), "inspector reasoning is preserved and explicitly separated from facts");
 
   const parcelGeoJson = JSON.parse(files.get("context/parcels.geojson").toString("utf8"));
@@ -324,6 +365,8 @@ async function main() {
   assert(report.includes('src="photos/001_analysis.png"'), "printable report resolves actual photo 1 from the package");
   assert(report.includes('src="photos/002_analysis.png"'), "printable report resolves actual photo 2 from the package");
   assert(report.includes("Decision Brief") && report.includes("Every next step must state what uncertainty it removes."), "printable evidence report leads the analyst into decision-focused uncertainty reduction");
+  assert(report.includes("Inspection Coaching") && report.includes("Well inspected") && report.includes("Not inspected"), "printable report explains coaching and conservative coverage");
+  assert(report.includes("Photo value") && report.includes("Critical") && report.includes("question-berm"), "printable report prioritizes and explains question-linked photo evidence");
   ["Complete Route", "Water and Drainage", "Dry Ground and Homesites", "Access and Obstacles", "Trees and Timber", "Photos", "Inspection Conditions"].forEach(section => assert(report.includes(section), `${section} report section exists`));
   assert(report.indexOf("Complete Route") < report.indexOf("Pearson Road Property Inspection"), "complete parcel route is report page 1");
   assert(report.includes("miles walked") && report.includes("elapsed") && report.includes("numbered detail zone"), "page 1 carries date, distance, duration, and numbered zones");
@@ -388,7 +431,7 @@ async function main() {
     assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "conditions.json")), "inspection weather is preserved in its repository evidence folder per export");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
-    for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {
+    for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {
       assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", name)), `repository extracts ${name} for direct ChatGPT analysis`);
     }
     await assert.rejects(async () => Repository.importInspectionPackage(reportPath, repositoryRoot), /already exists/, "reimporting an export never overwrites its earlier version");
