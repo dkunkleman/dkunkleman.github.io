@@ -9,7 +9,7 @@ Every Property Inspector ZIP contains `repository-import.json`. It supplies stab
 The importer rejects a repeated `export_id` and never overwrites a different file. Report packages and full archives from the same field visit merge under the same inspection folder because they share an `inspection_id`; each export remains a separate version.
 
 ```powershell
-node repository\import-package.js C:\Inspections\Pearson_Road_Inspection_REPORT_PACKAGE_....zip D:\Property-Intelligence
+node repository\import-package.js C:\Inspections\Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_....zip D:\Property-Intelligence
 ```
 
 The resulting layout is append-only:

@@ -512,7 +512,7 @@
       artifact: {
         role: manifest.package_mode,
         source_filename: fileName,
-        repository_filename: `${manifest.package_mode === "full_evidence_archive" ? "FULL_ARCHIVE" : "REPORT_PACKAGE"}_${exportId}.zip`,
+        repository_filename: `${manifest.package_mode === "full_evidence_archive" ? "FULL_ARCHIVE" : "AI_ANALYSIS_REPORT_PACKAGE"}_${exportId}.zip`,
         package_sha256: "COMPUTE_DURING_INGESTION",
         package_size_bytes: "COMPUTE_DURING_INGESTION"
       },

@@ -332,6 +332,8 @@ async function main() {
   });
   assert.match(reportResult.fileName, /^Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_/);
   const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
+  const reportImportContract = JSON.parse(reportFiles.get("repository-import.json").toString("utf8"));
+  assert.equal(reportImportContract.artifact.repository_filename, "AI_ANALYSIS_REPORT_PACKAGE_export_report_test.zip", "repository retains the AI package identity after ingestion");
   assert(!reportFiles.has("photos/001_original.png") && !reportFiles.has("photos/002_original.png"), "report package does not duplicate full-resolution originals");
   assert.deepEqual(reportFiles.get("photos/001_analysis.png"), photoOneBytes, "report package contains actual viewable photo 1");
   assert.deepEqual(reportFiles.get("photos/002_analysis.png"), photoTwoBytes, "report package contains actual viewable photo 2");
