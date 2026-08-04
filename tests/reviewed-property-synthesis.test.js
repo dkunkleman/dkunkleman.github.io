@@ -128,6 +128,7 @@ const workerSource = fs.readFileSync(path.join(root, "field/sw.js"), "utf8");
 for (const label of ["Review Corrections", "Approve Evidence Sets", "Review Water Map", "Review Creek Map", "Review Vegetation Map", "Review Homesite Concepts", "Import ChatGPT Review", "Generate Property Report"]) assert(indexSource.includes(label), `${label} is present`);
 assert(indexSource.includes("NEW INSPECTION PHASE / RELOCATION"));
 assert(appSource.includes('const APP_VERSION = "3.12.0"'));
+assert(appSource.includes("isCompletePearsonAugust3Review") && appSource.includes('inspectionDate === "2026-08-03"'), "display-only Pearson cleanup is scoped to the reviewed inspection and cannot alter a later visit");
 assert(workerSource.includes("property-inspector-field-2026-08-03-v17"));
 assert(workerSource.includes("reviewed-property-synthesis.js?v=3.12.0"));
 

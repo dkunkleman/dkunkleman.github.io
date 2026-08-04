@@ -439,6 +439,11 @@
     return !governanceTools || governanceTools.recordStatus(data, recordType, recordId) !== "voided";
   }
 
+  function isCompletePearsonAugust3Review() {
+    const inspectionDate = String(data.conditions && data.conditions.inspection_date || data.started || "").slice(0, 10);
+    return String(data.property_id || "") === "parcel:221S280000001010000" && inspectionDate === "2026-08-03" && data.photos.some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+  }
+
   function effectiveEvidenceData() {
     if (!governanceTools) return data;
     const photos = data.photos.map(item => governanceTools.effectiveRecord(data, "photo", item)).filter(item => !item.excluded_from_findings);
@@ -454,7 +459,7 @@
       if (voice) item.area_id = voice.area_id || item.area_id || null;
       return item;
     });
-    const completePearsonReview = data.photos.some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+    const completePearsonReview = isCompletePearsonAugust3Review();
     const points = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
     return Object.assign({}, data, { points, markers, photos, voice_notes: voices });
   }
@@ -1485,7 +1490,7 @@
     const lastPhoto = data.photos[data.photos.length - 1];
     const key = [data.points.length, lastPoint && lastPoint.time, data.lifecycle_events.length, lastEvent && lastEvent.time, data.photos.length, lastPhoto && (lastPhoto.recorded_at || lastPhoto.time)].join("|");
     if (routeDisplayCache.key !== key) {
-      const completePearsonReview = data.photos.some(photo => Number(String(photo.photo_number || "").replace(/\D/g, "")) === 196);
+      const completePearsonReview = isCompletePearsonAugust3Review();
       const activePoints = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
       routeDisplayCache = { key, model: synthesisTools.segmentRoute(activePoints, data) };
     }
