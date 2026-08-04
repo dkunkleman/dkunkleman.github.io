@@ -6,10 +6,11 @@
   const evidenceSets = typeof module === "object" && module.exports ? require("./evidence-sets.js") : (root && root.EvidenceSets);
   const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
   const synthesis = typeof module === "object" && module.exports ? require("./reviewed-property-synthesis.js") : (root && root.ReviewedPropertySynthesis);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis);
+  const valueEngine = typeof module === "object" && module.exports ? require("./property-value-engine.js") : (root && root.PropertyValueEngine);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, valueEngine);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, valueTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
@@ -1374,7 +1375,9 @@
         evidence_classification: observation.evidence_classification,
         area_id: observation.area_id,
         question_ids: observation.question_ids,
-        question_links: observation.question_links
+        question_links: observation.question_links,
+        value_assessment_status: observation.value_assessment_status,
+        value_driver_links: observation.value_driver_links
       })),
       photographs: manifest.photographs.map(photo => ({
         photo_id: photo.photo_id,
@@ -1398,7 +1401,9 @@
         water: photo.water,
         area_id: photo.area_id,
         question_ids: photo.question_ids,
-        question_links: photo.question_links
+        question_links: photo.question_links,
+        value_assessment_status: photo.value_assessment_status,
+        value_driver_links: photo.value_driver_links
       })),
       voice_notes: manifest.voice_notes.map(voice => ({
         voice_note_id: voice.voice_note_id,
@@ -1413,12 +1418,15 @@
         evidence_set_id: voice.evidence_set_id || null,
         area_id: voice.area_id,
         question_ids: voice.question_ids,
-        question_links: voice.question_links
+        question_links: voice.question_links,
+        value_assessment_status: voice.value_assessment_status,
+        value_driver_links: voice.value_driver_links
       })),
       evidence_sets: manifest.inspection.evidence_set_summaries || { sets: [] },
       structured_measurements: (manifest.structured_measurements || []).map(item => ({ measurement_id: item.measurement_id, measurement_type: item.measurement_type, authoritative_value: item.authoritative_value, unit: item.unit, basis: item.basis, photo_id: item.photo_id, evidence_set_id: item.evidence_set_id, subject_id: item.subject_id, timber_tree_id: item.timber_tree_id, timber_plot_id: item.timber_plot_id, authority_rule: item.authority_rule })),
       timber_trees: (manifest.preliminary_timber_reconnaissance && manifest.preliminary_timber_reconnaissance.trees || []).map(tree => ({ tree_id: tree.tree_id, plot_id: tree.plot_id, evidence_set_id: tree.evidence_set_id, photo_ids: tree.photo_ids, defect_photo_ids: tree.defect_photo_ids })),
       approved_review_annotations: manifest.inspection.post_inspection_review ? manifest.inspection.post_inspection_review.active_annotations : [],
+      property_value_engine: { path: "PROPERTY_VALUE_ENGINE.json", heat_maps_path: "VALUE_DRIVER_HEAT_MAPS.json", interactive_map_path: "property-value-heat-map.html" },
       inspector_thoughts: manifest.inspection.inspector_thoughts.map(thought => ({
         thought_id: thought.thought_id,
         gps_point_id: thought.gps_point_id,
@@ -1582,6 +1590,7 @@
       missing_evidence: fieldCoaching ? fieldCoaching.missing_evidence_review : null,
       return_visit_plan: fieldCoaching ? fieldCoaching.return_visit_plan : null,
       field_efficiency: fieldCoaching ? fieldCoaching.field_efficiency : null,
+      property_value_engine: manifest.property_value_engine || null,
       small_tract_water_map: manifest.small_tract_water_map || null,
       stakeholder_questions: questions.reduce((groups, question) => {
         const key = String(question.stakeholder || "Other").toLowerCase().replace(/[^a-z0-9]+/g, "_");
@@ -1644,7 +1653,7 @@
 
 ## Start here
 
-This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`EVIDENCE_AUDIT_HISTORY.json\`, \`REVIEWED_PROPERTY_SYNTHESIS.json\`, \`PROPERTY_INTELLIGENCE_REPORT.md\`, \`SEGMENTED_ROUTE.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open the four interactive map HTML files for human-readable evidence maps and \`professional-handoff-cards.html\` for one-page audience handoffs. Do not ask the user to identify files or relationships.
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`EVIDENCE_AUDIT_HISTORY.json\`, \`REVIEWED_PROPERTY_SYNTHESIS.json\`, \`PROPERTY_INTELLIGENCE_REPORT.md\`, \`PROPERTY_VALUE_ENGINE.json\`, \`VALUE_DRIVER_HEAT_MAPS.json\`, \`SEGMENTED_ROUTE.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open the interactive maps, including \`property-value-heat-map.html\`, and \`professional-handoff-cards.html\` for one-page audience handoffs. Do not ask the user to identify files or relationships.
 
 The purpose is not to repeat the evidence. The purpose is to reduce uncertainty about five decisions:
 
@@ -1655,6 +1664,8 @@ The purpose is not to repeat the evidence. The purpose is to reduce uncertainty 
 5. What makes this property special?
 
 Every observation includes \`decision_relevance\`. Treat its candidate effect as a routing aid, not a conclusion. Decide whether it is truly a strength, weakness, neutral fact, or unresolved issue only after reviewing the linked evidence and intended use.
+
+Every observation also includes \`value_assessment_status\` and \`value_driver_links\`. Only inspector-assessed links drive rankings or heat maps. Suggested drivers for legacy or unassessed observations remain unconfirmed and cannot become findings without inspector approval.
 
 ## How the evidence fits together
 
@@ -1672,6 +1683,8 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`SEGMENTED_ROUTE.json\` preserves every exact GPS point but separates confirmed walked segments from rejected fixes and unverified relocations. Never draw a straight jump as walked.
 - \`REVIEWED_PROPERTY_SYNTHESIS.json\` distinguishes approved Pearson review phases from pending or rejected interpretations. Pending items are not findings.
 - \`PROPERTY_INTELLIGENCE_REPORT.md\` is the inspector-reviewed, plain-English report. Its audience variants change emphasis only; they never change evidence.
+- \`PROPERTY_VALUE_ENGINE.json\` preserves each selected driver, value/cost/uncertainty effect, magnitude, confidence, reason, GPS location, and direct evidence links. Scores prioritize evidence; they are not dollars, appraisal adjustments, probabilities, bids, or ROI.
+- \`VALUE_DRIVER_HEAT_MAPS.json\` and \`property-value-heat-map.html\` provide Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water layers. Circles are evidence influence zones, not feature boundaries. Unsupported acreage remains unknown.
 - \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.48-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
 - \`FLOWING_WATER_CORRIDORS.json\` contains only inspector-confirmed creek Evidence Sets. Treat exact photographed points as observations; treat dashed centerlines and flow arrows as inferences. Never convert a centerline into a surveyed boundary or extend it through uninspected ground.
 - Always report a confirmed creek as: "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified."
@@ -1708,6 +1721,7 @@ The \`weather\` section and \`WEATHER_CONTEXT.json\` keep four things separate: 
 6. Answer the buyer, seller, builder, developer, engineer, and forester questions that the evidence supports. Put unresolved matters under Questions Remaining without interrupting report generation to ask the user.
 7. Recommend professional follow-up only when evidence justifies it. Name the professional, the exact question, the triggering evidence, and which decision the answer could change.
 8. Recommend the lowest-cost next evidence-gathering step before expensive professional work whenever that step can reliably reduce the uncertainty.
+9. End every report with Top 10 Value Drivers, Top 10 Cost Drivers, Top 10 Risks, Top 10 Opportunities, Top 10 Unanswered Questions, and Top 10 Cheapest Next Investigations. Explain why, cite evidence, identify contradictions and unknowns, and preserve opposing value/cost effects.
 
 ## Unanswered-question rule
 
@@ -1817,7 +1831,50 @@ Name the professional, exact question, triggering evidence, expected decision va
 ## Evidence Appendix
 
 Include an evidence index, photograph index, route and map-layer summary, voice-note references, inspector-thought comparison, methodology, sources, assumptions, and limitations.
+
+## Top 10 Value Drivers
+
+## Top 10 Cost Drivers
+
+## Top 10 Risks
+
+## Top 10 Opportunities
+
+## Top 10 Unanswered Questions
+
+## Top 10 Cheapest Next Investigations
+
+End the report with these six sections in this order. Use only inspector-confirmed impacts from \`PROPERTY_VALUE_ENGINE.json\`. Explain why each item matters, cite supporting observations and photographs, identify contrary evidence and remaining uncertainty, and do not convert relative evidence scores into dollars or appraisal adjustments.
 `;
+  }
+
+  function valueRankingMarkdown(title, items, kind) {
+    const rows = Array.isArray(items) ? items : [];
+    if (!rows.length) return `## ${title}\n\nNo inspector-confirmed items were available. Do not fill this section with inferred impacts.\n`;
+    return `## ${title}\n\n${rows.map((item, index) => {
+      const name = item.value_driver || item.question || item.investigation || `Item ${index + 1}`;
+      const why = item.why || "No inspector reason was recorded; review the cited evidence before relying on this item.";
+      const observations = (item.supporting_observation_ids || []).join(", ") || "None directly linked";
+      const photos = (item.supporting_photograph_ids || []).join(", ") || "None directly linked";
+      const next = item.cheapest_next_investigation || item.investigation || "Identify the smallest reliable evidence step before ordering expensive work.";
+      return `${index + 1}. **${name}**\n   - Why: ${why}\n   - Supporting observations: ${observations}\n   - Supporting photographs: ${photos}\n   - Contrary evidence: ${item.contradicting_evidence || "Review opposing impacts and package evidence; none is automatically assumed absent."}\n   - Remaining uncertainty: ${item.remaining_uncertainty || "The field record does not establish a monetary adjustment or parcel-wide condition."}\n   - Cheapest next investigation: ${next}`;
+    }).join("\n\n")}\n`;
+  }
+
+  function createValueEngineReportAppendix(engine) {
+    const rankings = engine && engine.rankings || {};
+    return `\n# Property Value Engine — Decision Rankings\n\nThese rankings organize inspector-confirmed field impacts. Scores are relative evidence weights, not appraised dollars, ROI, probabilities, bids, or parcel-wide conclusions. A feature may create both value and cost.\n\n${valueRankingMarkdown("Top 10 Value Drivers", rankings.top_10_value_drivers, "driver")}\n${valueRankingMarkdown("Top 10 Cost Drivers", rankings.top_10_cost_drivers, "driver")}\n${valueRankingMarkdown("Top 10 Risks", rankings.top_10_risks, "risk")}\n${valueRankingMarkdown("Top 10 Opportunities", rankings.top_10_opportunities, "opportunity")}\n${valueRankingMarkdown("Top 10 Unanswered Questions", rankings.top_10_unanswered_questions, "question")}\n${valueRankingMarkdown("Top 10 Cheapest Next Investigations", rankings.top_10_cheapest_next_investigations, "investigation")}\n`;
+  }
+
+  function valueEngineAppendixHtml(markdown) {
+    const lines = String(markdown || "").split(/\r?\n/);
+    return `<section class="property-value-engine"><h1>Property Value Engine — Decision Rankings</h1>${lines.slice(2).filter(Boolean).map(line => {
+      if (line.startsWith("## ")) return `<h2>${htmlEscape(line.slice(3))}</h2>`;
+      if (/^\d+\. \*\*/.test(line)) return `<h3>${htmlEscape(line.replace(/\*\*/g, ""))}</h3>`;
+      if (/^\s+- /.test(line)) return `<p>${htmlEscape(line.trim().slice(2))}</p>`;
+      if (line.startsWith("# ")) return "";
+      return `<p>${htmlEscape(line.replace(/\*\*/g, ""))}</p>`;
+    }).join("")}</section>`;
   }
 
   function createInspectorThoughtsMarkdown(manifest) {
@@ -1874,6 +1931,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     sourceInspection.imported_chat_review_annotations = Array.isArray(sourceInspection.imported_chat_review_annotations) ? sourceInspection.imported_chat_review_annotations : [];
     if (timberTools) timberTools.ensureModel(sourceInspection);
     if (synthesisTools) synthesisTools.ensureModel(sourceInspection);
+    if (valueTools) valueTools.ensureInspectionModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
     if (governanceTools) governanceTools.ensureGovernanceModel(sourceInspection, settings.exportedAt);
     const governanceView = governanceTools ? governanceTools.buildEffectiveInspection(sourceInspection) : { active: sourceInspection, audit_history: { corrections: [] } };
@@ -1949,6 +2007,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
+        value_driver_links: valueTools ? valueTools.normalizeLinks(metadata) : (metadata.value_driver_links || []),
+        value_assessment_status: metadata.value_assessment_status || ((metadata.value_driver_links || []).length ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED"),
         note: metadata.note || "",
         evidence_classification: metadata.evidence_classification || "Observed",
         observation_attributes: metadata.observation_attributes || {},
@@ -2043,6 +2103,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
+        value_driver_links: valueTools ? valueTools.normalizeLinks(metadata) : (metadata.value_driver_links || []),
+        value_assessment_status: metadata.value_assessment_status || ((metadata.value_driver_links || []).length ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED"),
         started_at: metadata.started_at || metadata.recorded_at || null,
         finished_at: metadata.finished_at || null,
         duration_ms: metadata.duration_ms == null ? null : metadata.duration_ms,
@@ -2149,6 +2211,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       area_id: event.area_id || null,
       question_ids: Array.isArray(event.question_ids) ? event.question_ids.slice() : [],
       question_links: Array.isArray(event.question_links) ? event.question_links.map(link => Object.assign({}, link)) : [],
+      value_driver_links: valueTools ? valueTools.normalizeLinks(event) : (event.value_driver_links || []),
+      value_assessment_status: event.value_assessment_status || ((event.value_driver_links || []).length ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED"),
       observed_at: event.time,
       geometry: { type: "Point", coordinates: [event.lon, event.lat] },
       gps: {
@@ -2253,12 +2317,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.10",
+      schema_version: "1.11",
       purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
-      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "structured_measurement", "timber_tree", "timber_sample_plot", "preliminary_timber_reconnaissance", "professional_handoff_card", "water_evidence", "water_area_cluster", "map_context", "coverage_estimate", "return_visit_plan"],
+      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "structured_measurement", "timber_tree", "timber_sample_plot", "preliminary_timber_reconnaissance", "professional_handoff_card", "water_evidence", "water_area_cluster", "value_driver", "value_impact", "value_heat_layer", "map_context", "coverage_estimate", "return_visit_plan"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
-        classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance", "area_id", "question_ids", "question_links"],
+        classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance", "value_assessment_status", "value_driver_links", "area_id", "question_ids", "question_links"],
         time_and_place: ["observed_at", "geometry", "gps"],
         optional_measurements: ["attributes", "compass_heading_deg", "device_orientation"],
         evidence_links: ["gps_point_id", "attachments.photo_id", "attachments.voice_note_id", "attachments.nearest_photographs", "attachments.nearest_voice_notes"]
@@ -2273,6 +2337,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       water_contract: "User-confirmed water photographs are facts about inspection-time observations. Only an inspector-confirmed Flowing Water / Creek Corridor Evidence Set may create a conservative centerline. Centerlines, cluster outlines, flow arrows, and building-avoidance areas are interpretations, must retain every supporting evidence ID, and never establish a surveyed watercourse boundary, ordinary high-water limit, wetland, drainage right, setback, soil, septic, groundwater, or year-round condition.",
       measurement_contract: "The inspector-entered numeric value, unit, and basis are authoritative field data. A photograph supports the measurement but must never become the sole source for reading or replacing the entered number. Pending suggested values remain inactive until inspector confirmation.",
       timber_contract: "Permanent tree and plot IDs preserve preliminary identification, measurement method, confidence, defects, purposes, plot design and limitations. Never label reconnaissance as a certified cruise, appraisal, sale volume, or market valuation, and never generalize convenience or sparse plots as statistically valid.",
+      property_value_contract: "Only inspector-assessed Value Driver links enter rankings and heat maps. Preserve effect, magnitude, confidence, reason, GPS, and evidence IDs. Relative scores organize evidence and must never be represented as dollars, appraisal adjustments, ROI, probabilities, bids, or unsupported parcel-wide conditions.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
@@ -2320,6 +2385,19 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const structuredMeasurements = sourceInspection.measurements || [];
     const timberReconnaissance = timberTools ? timberTools.createReconnaissance(sourceInspection) : { schema_name: "property-intelligence-preliminary-timber-reconnaissance", schema_version: "1.0", title: "Preliminary Timber Reconnaissance", trees: [], sampling_method_summary: { plot_count: 0, plots: [] }, builder_and_clearing_summary: {}, disclaimer: "Timber reconnaissance module unavailable." };
     const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
+    const propertyValueEngine = valueTools ? valueTools.buildValueEngine({
+      observations,
+      questions: inspection.investigation_questions,
+      propertyId: mapMetadata.subject_parcel.property_id,
+      inspectionId: inspection.inspection_id,
+      subjectParcel: Object.assign({}, mapMetadata.subject_parcel, { geometry: subjectFeature.geometry || null })
+    }) : { schema_name: "property-intelligence-value-engine", schema_version: "1.0", status: "NOT_AVAILABLE", impacts: [], rankings: {}, heat_maps: { layers: [] } };
+    mapMetadata.layers.value_driver_heat_maps = {
+      path: "VALUE_DRIVER_HEAT_MAPS.json",
+      interactive_path: "property-value-heat-map.html",
+      method: "Inspector-confirmed evidence influence zones; no interpolation into unsupported acreage.",
+      available: Boolean(propertyValueEngine.impacts && propertyValueEngine.impacts.length)
+    };
 
     const manifest = {
       format: FORMAT,
@@ -2397,6 +2475,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,authoritative_weather_station_id: inspection.authoritative_weather && inspection.authoritative_weather.station ? inspection.authoritative_weather.station.station_id : null
         ,small_tract_water_photo_count: smallTractWaterMap.water_photographs ? smallTractWaterMap.water_photographs.length : 0
         ,small_tract_water_cluster_count: smallTractWaterMap.water_area_clusters ? smallTractWaterMap.water_area_clusters.length : 0
+        ,value_impact_count: propertyValueEngine.impacts ? propertyValueEngine.impacts.length : 0
+        ,value_unassessed_observation_count: propertyValueEngine.unassessed_observation_ids ? propertyValueEngine.unassessed_observation_ids.length : observations.length
       },
       property: mapMetadata.subject_parcel,
       inspection: {
@@ -2436,6 +2516,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,land_use_concepts: sourceInspection.land_use_concepts || []
         ,reviewed_map_status: sourceInspection.reviewed_map_status || {}
         ,imported_chat_review_annotations: sourceInspection.imported_chat_review_annotations || []
+        ,property_value_engine: propertyValueEngine
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
@@ -2445,6 +2526,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       structured_measurements: structuredMeasurements,
       preliminary_timber_reconnaissance: timberReconnaissance,
       forester_handoff: foresterHandoff,
+      property_value_engine: propertyValueEngine,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2458,6 +2540,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         evidence_sets: "EVIDENCE_SETS.json",
         post_inspection_review: "POST_INSPECTION_REVIEW.json",
         weather_context: "WEATHER_CONTEXT.json",
+        property_value_engine: "PROPERTY_VALUE_ENGINE.json",
+        value_driver_heat_maps: "VALUE_DRIVER_HEAT_MAPS.json",
+        property_value_heat_map_interactive: "property-value-heat-map.html",
         authoritative_weather_context: "WEATHER_CONTEXT.json",
         chat_review_return_instructions: "CHAT_REVIEW_RETURN_INSTRUCTIONS.md",
         review_annotation_schema: "schemas/property-intelligence-review-annotation.schema.json",
@@ -2524,6 +2609,13 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       flowingWaterModel: flowingWaterCorridorModel,
       manifest
     }) : { route: segmentedRoute, review: { phases: [], events: [], rule: "Reviewed synthesis module unavailable." }, creek_corridor_map: {}, vegetation_clearing_map: {}, homesite_opportunity_map: {}, property_report: { sections: [] }, property_report_markdown: "# Property Intelligence Report\n\nReviewed synthesis module unavailable.\n", property_report_html: "<!doctype html><title>Property Intelligence Report unavailable</title>", audience_reports: { reports: [] }, map_html: { creek: "", vegetation: "", homesite: "" } };
+    const valueEngineAppendix = createValueEngineReportAppendix(propertyValueEngine);
+    const valueEngineHtml = valueEngineAppendixHtml(valueEngineAppendix);
+    reviewedSynthesis.property_report_markdown = `${reviewedSynthesis.property_report_markdown || ""}${valueEngineAppendix}`;
+    reviewedSynthesis.property_report_html = String(reviewedSynthesis.property_report_html || "").includes("</body>")
+      ? String(reviewedSynthesis.property_report_html).replace("</body>", `${valueEngineHtml}</body>`)
+      : `${reviewedSynthesis.property_report_html || ""}${valueEngineHtml}`;
+    (reviewedSynthesis.audience_reports && reviewedSynthesis.audience_reports.reports || []).forEach(report => { report.markdown = `${report.markdown || ""}${valueEngineAppendix}`; });
     inspection.segmented_route = reviewedSynthesis.route;
     manifest.inspection.segmented_route = reviewedSynthesis.route;
     manifest.reviewed_property_synthesis = {
@@ -2565,6 +2657,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const comparisonRecord = createRepositoryComparisonRecord(manifest);
     const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.filter(photo => !photo.excludedFromFindings).map(photo => ({ analysisBlob: photo.analysisBlob })));
     const interactiveWaterMap = createSmallTractWaterMapHtml(manifest);
+    const interactiveValueMap = valueTools ? valueTools.createHeatMapHtml(propertyValueEngine.heat_maps) : "<!doctype html><title>Property Value Heat Map unavailable</title>";
+    const printableReportWithValue = String(printableReport).includes("</body>") ? String(printableReport).replace("</body>", `${valueEngineHtml}</body>`) : `${printableReport}${valueEngineHtml}`;
     const zip = new ZipBuilder();
     const modifiedAt = new Date(exportedAt);
     zip.add("AI_README.md", aiReadme, { modifiedAt });
@@ -2578,6 +2672,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("EVIDENCE_SETS.json", JSON.stringify({ summaries: evidenceSetSummaries, pending_suggestions: evidenceSetSuggestions, append_only_events: sourceInspection.evidence_set_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("POST_INSPECTION_REVIEW.json", JSON.stringify(postInspectionReview, null, 2) + "\n", { modifiedAt });
     zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "2.0", inspection_id: manifest.inspection_id, authoritative_weather: manifest.inspection.authoritative_weather || null, manual_weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation.", "Calculated departures and percentages must be labeled as derived from cited official station records.", "Station rainfall may differ from parcel rainfall."] }, null, 2) + "\n", { modifiedAt });
+    zip.add("PROPERTY_VALUE_ENGINE.json", JSON.stringify(propertyValueEngine, null, 2) + "\n", { modifiedAt });
+    zip.add("VALUE_DRIVER_HEAT_MAPS.json", JSON.stringify(propertyValueEngine.heat_maps, null, 2) + "\n", { modifiedAt });
+    zip.add("property-value-heat-map.html", interactiveValueMap, { modifiedAt });
+    zip.add("VALUE_DRIVER_REPORT_APPENDIX.md", valueEngineAppendix, { modifiedAt });
     zip.add("CHAT_REVIEW_RETURN_INSTRUCTIONS.md", chatReviewInstructions, { modifiedAt });
     zip.add("schemas/property-intelligence-review-annotation.schema.json", JSON.stringify(reviewAnnotationSchema, null, 2) + "\n", { modifiedAt });
     zip.add("PROFESSIONAL_HANDOFF_CARDS.json", JSON.stringify(professionalHandoffCards, null, 2) + "\n", { modifiedAt });
@@ -2619,7 +2717,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("observations.csv", createObservationsCsv(observations), { modifiedAt });
     zip.add("photos.csv", createPhotoCsv(manifestPhotos), { modifiedAt });
     zip.add("photo_index.json", JSON.stringify(photoIndex, null, 2) + "\n", { modifiedAt });
-    zip.add("printable-report.html", printableReport, { modifiedAt });
+    zip.add("printable-report.html", printableReportWithValue, { modifiedAt });
     zip.add("voice-notes.csv", createVoiceCsv(manifestVoices), { modifiedAt });
     zip.add("track.geojson", createGeoJSON(inspection, manifestPhotos, manifestVoices) + "\n", { modifiedAt });
     zip.add("track.gpx", createGpx(inspection, manifestPhotos, manifestVoices), { modifiedAt });

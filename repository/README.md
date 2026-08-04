@@ -34,6 +34,8 @@ Pearson_Road/
       vegetation-clearing-map.html
       HOMESITE_OPPORTUNITY_MAP.json
       homesite-opportunity-map.html
+      VALUE_DRIVER_HEAT_MAPS.json
+      property-value-heat-map.html
     photos/analysis/
     photos/original/
     photos/audit/
@@ -48,6 +50,8 @@ Pearson_Road/
     analysis/<export-id>/
       AI_README.md
       AI_ANALYSIS.json
+      PROPERTY_VALUE_ENGINE.json
+      VALUE_DRIVER_REPORT_APPENDIX.md
       REVIEWED_PROPERTY_SYNTHESIS.json
       PROPERTY_INTELLIGENCE_REPORT.md
       property-intelligence-report.html
@@ -94,6 +98,8 @@ Confirmed creek Evidence Sets are retained in `FLOWING_WATER_CORRIDORS.json`. Ex
 Reviewed synthesis is also append-only. `REVIEWED_PROPERTY_SYNTHESIS.json` records pending, approved, and rejected phase/map/concept decisions and their immutable review events. Audience reports may change emphasis but may not change the underlying evidence. `SEGMENTED_ROUTE.json` is the controlling display-route model; raw GPS remains preserved while false jump-lines are excluded from walked geometry.
 
 Authoritative field measurements are retained under `measurements/<export_id>/STRUCTURED_MEASUREMENTS.json`. Preliminary tree, fixed-radius plot, builder/clearing, and forester-handoff records are retained under `timber/<export_id>/`. Every version preserves its methods and limitations; no later interpretation overwrites an earlier inspection.
+
+Value-driver assessments remain versioned analysis, never edits to source evidence. `PROPERTY_VALUE_ENGINE.json` retains inspector-selected effects, magnitude, confidence, reasons, GPS and evidence IDs; `VALUE_DRIVER_HEAT_MAPS.json` retains evidence influence zones for eight decision layers. Unconfirmed suggestions are excluded from rankings and maps, and relative scores are never monetary appraisal adjustments.
 
 `printable_report.pdf.pending.json` tells the future repository service to render `printable-report.html` into a PDF. PDF rendering and ChatGPT analysis are deliberately repository responsibilities rather than field-phone work.
 

@@ -154,6 +154,11 @@
     #coachNextAction { margin: 10px 0 0; padding: 10px; border-left: 7px solid var(--focus); background: #111; color: #fff; font-weight: 850; }
     .evidence-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .evidence-mode select { width: 100%; min-height: 50px; border: 2px solid #777; border-radius: 7px; background: #fff; font-size: 16px; }
+    #valueLens { border: 3px solid #365a3a; border-radius: 9px; padding: 0 10px 10px; background: #f1f8ed; }
+    #valueLens fieldset { border: 2px solid #777; border-radius: 8px; padding: 7px; }
+    #valueLens legend { padding: 0 5px; font-weight: 800; }
+    #valueReason { display: block; width: 100%; min-height: 50px; margin-top: 6px; border: 2px solid #777; border-radius: 7px; padding: 9px; background: #fff; color: #111; font-size: 16px; }
+    #activeValueLens { border-left: 6px solid #365a3a; padding: 8px; background: #f1f8ed; }
     .coverage-key { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 8px; }
     .coverage-key div { border: 2px solid #777; border-radius: 7px; padding: 8px; text-align: center; }
     .coverage-key strong { display: block; font-size: 20px; }
@@ -264,6 +269,23 @@
         <label>Next evidence relationship<select id="evidenceRelationship"><option value="supports">Supports the question</option><option value="contradicts">Contradicts the question</option><option value="context">Context only</option></select></label>
         <label>Next photo value<select id="nextPhotoValue"><option>Critical</option><option selected>Helpful</option><option>Reference</option><option>Duplicate</option></select></label>
       </div>
+      <details id="valueLens" style="margin-top:12px">
+        <summary>VALUE LENS — Why could the next evidence matter?</summary>
+        <p class="small"><strong>Optional and persistent.</strong> Select one or more drivers and every effect that applies. New observations keep this context until you clear it.</p>
+        <div id="valueDriverChoices" class="choice-grid"></div>
+        <fieldset style="margin-top:10px"><legend>What does it do? Select every effect that applies.</legend><div id="valueEffectChoices" class="choice-grid">
+          <label><input type="checkbox" value="increase_value">Increase value</label><label><input type="checkbox" value="decrease_value">Decrease value</label>
+          <label><input type="checkbox" value="increase_cost">Increase cost</label><label><input type="checkbox" value="decrease_cost">Decrease cost</label>
+          <label><input type="checkbox" value="increase_uncertainty">Increase uncertainty</label><label><input type="checkbox" value="reduce_uncertainty">Reduce uncertainty</label>
+        </div></fieldset>
+        <div class="evidence-mode" style="margin-top:10px">
+          <label>Importance<select id="valueMagnitude"><option value="1">1 — Minor</option><option value="2">2 — Limited</option><option value="3" selected>3 — Material</option><option value="4">4 — Major</option><option value="5">5 — Potentially decisive</option></select></label>
+          <label>Confidence<select id="valueConfidence"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label>
+        </div>
+        <label>Why might it matter?<input id="valueReason" type="text" placeholder="Short reason; do not guess dollars"></label>
+        <button id="clearValueLens" class="cancel" type="button" style="width:100%;margin-top:8px">CLEAR VALUE LENS</button>
+      </details>
+      <p id="activeValueLens" class="small"><strong>Value lens:</strong> Not assessed. Evidence can still be recorded.</p>
       <p id="coachNextAction">NEXT BEST EVIDENCE: Add an investigation question, then collect evidence that could answer it.</p>
       <details>
         <summary>Professional evidence checklist</summary>
@@ -546,6 +568,7 @@
           <label>Blocked by<select id="blockedReason"><option value="">Not entered</option><option>Water</option><option>Brush</option><option>Ditch</option><option>Fence</option><option>Unsafe</option><option>Boundary</option><option>Other</option></select></label>
         </div>
         <label>Evidence classification<select id="observationEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
+        <p id="observationValueSummary" class="small"><strong>Value lens:</strong> Not assessed. Change it under Inspection Coaching if needed.</p>
         <label>Optional note<textarea id="observationNote" placeholder="Short field note"></textarea></label>
         <div class="choice-grid"><label><input id="observationPhoto" type="checkbox">Take a photograph after saving</label></div>
       </div>
@@ -838,15 +861,16 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.13.0"></script>
-  <script src="./water-intelligence.js?v=3.13.0"></script>
-  <script src="./evidence-governance.js?v=3.13.0"></script>
-  <script src="./evidence-sets.js?v=3.13.0"></script>
-  <script src="./timber-reconnaissance.js?v=3.13.0"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.13.0"></script>
-  <script src="./authoritative-weather.js?v=3.13.0"></script>
-  <script src="./inspection-package.js?v=3.13.0"></script>
-  <script src="./idb-recovery.js?v=3.13.0"></script>
-  <script src="./app.js?v=3.13.0"></script>
+  <script src="./inspection-coaching.js?v=3.14.0"></script>
+  <script src="./water-intelligence.js?v=3.14.0"></script>
+  <script src="./evidence-governance.js?v=3.14.0"></script>
+  <script src="./evidence-sets.js?v=3.14.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.14.0"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.14.0"></script>
+  <script src="./authoritative-weather.js?v=3.14.0"></script>
+  <script src="./property-value-engine.js?v=3.14.0"></script>
+  <script src="./inspection-package.js?v=3.14.0"></script>
+  <script src="./idb-recovery.js?v=3.14.0"></script>
+  <script src="./app.js?v=3.14.0"></script>
 </body>
 </html>

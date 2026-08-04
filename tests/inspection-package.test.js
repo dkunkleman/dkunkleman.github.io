@@ -104,6 +104,8 @@ async function main() {
     observation_type: `field.${type}`,
     taxonomy_version: "property-observation-1.0",
     evidence_classification: type === "tree" ? "Measured" : "Observed",
+    value_driver_links: type === "wet" ? [{ value_driver_id: "water", effect: "increase_cost", magnitude: 4, confidence: "high", inspector_reason: "Standing water may require drainage work.", assessment_source: "inspector_selected" }] : (type === "homesite" ? [{ value_driver_id: "buildability", effect: "increase_value", magnitude: 4, confidence: "medium", inspector_reason: "Candidate building area was observed.", assessment_source: "inspector_selected" }] : []),
+    value_assessment_status: ["wet", "homesite"].includes(type) ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED",
     button_label: type === "tree" ? "Specimen Tree" : type,
     note: type === "note" ? "Standing water reaches the flagged pine." : "",
     attributes: type === "tree" ? { species: "live_oak", diameter_in: 38 } : (type === "wet" ? { water_depth: "1–3 inches", water_depth_basis: "Estimated", water_condition: "Still" } : {}),
@@ -241,6 +243,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
+    "PROPERTY_VALUE_ENGINE.json", "VALUE_DRIVER_HEAT_MAPS.json", "property-value-heat-map.html", "VALUE_DRIVER_REPORT_APPENDIX.md",
     "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "AUDIT_ONLY_GPS_POINTS.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "SEGMENTED_ROUTE.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "PROPERTY_INTELLIGENCE_REPORT.md", "property-intelligence-report.html", "printable-property-report.html", "AUDIENCE_REPORTS.json", "audience-reports/buyer-report.md", "audience-reports/seller-report.md", "audience-reports/builder-report.md", "audience-reports/forester-report.md", "audience-reports/drainage-engineer-report.md", "audience-reports/internal-report.md", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
@@ -262,6 +265,7 @@ async function main() {
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
   assert.equal(manifest.format_version, "2.1");
   assert.equal(manifest.summary.evidence_set_count, 1);
+  assert.equal(manifest.summary.value_impact_count, 2);
   assert.equal(manifest.summary.structured_measurement_count, 1);
   assert.equal(manifest.summary.timber_tree_count, 1);
   assert.equal(manifest.summary.timber_sample_plot_count, 1);
@@ -371,6 +375,12 @@ async function main() {
   const aiReadme = files.get("AI_README.md").toString("utf8");
   const reportTemplate = files.get("REPORT_TEMPLATE.md").toString("utf8");
   const thoughtDocument = files.get("INSPECTOR_THOUGHTS.md").toString("utf8");
+  const valueEngine = JSON.parse(files.get("PROPERTY_VALUE_ENGINE.json").toString("utf8"));
+  assert(Object.hasOwn(aiAnalysis, "property_value_engine"), "AI analysis exposes the value engine");
+  assert.equal(valueEngine.impacts.length, 2, "only inspector-assessed links become value impacts");
+  assert.equal(valueEngine.rankings.top_10_cost_drivers[0].value_driver_id, "water");
+  assert.equal(valueEngine.heat_maps.layers.length, 8, "all eight required decision heat-map layers are generated");
+  assert.match(files.get("PROPERTY_INTELLIGENCE_REPORT.md").toString("utf8"), /Top 10 Cheapest Next Investigations/);
   ["executive_summary", "decision_framework", "decision_brief", "investigation_questions", "inspection_areas", "coverage", "missing_evidence", "return_visit_plan", "field_efficiency", "stakeholder_questions", "property_information", "inspection_conditions", "weather_context", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "structured_measurements", "preliminary_timber_reconnaissance", "forester_handoff", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
   assert.equal(questionBrief.questions.length, 2, "every inspector question is packaged");
   assert(questionBrief.questions[0].photo_ids.includes("photo-1"), "question links directly to its photo evidence");

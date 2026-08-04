@@ -24,6 +24,10 @@ Every report must reduce uncertainty about five decisions:
 
 Evidence collection exists to improve these decisions. Reports lead with decision answers, strengths, weaknesses, material unknowns, explained confidence, the lowest-cost next investigation, and narrowly justified professional follow-up. They do not lead with a catalog of observations.
 
+The product is learning which observed conditions create value, cost, risk, opportunity, and uncertainty. Every field record must either carry an inspector-confirmed Value Driver assessment or remain explicitly unassessed. Software-generated driver suggestions are review aids, never findings. Relative evidence scores organize attention; they must never be presented as appraised dollars, ROI, probabilities, bids, or parcel-wide conclusions.
+
+Every report ends with evidence-linked Top 10 Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Every map package includes Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water evidence layers. Unvisited ground remains unknown, and a feature that creates both benefit and cost retains both effects.
+
 The app is a field mentor, not a passive recorder. It should continuously answer: What should I do next? What evidence is missing? What would increase confidence most? What is the cheapest reliable way to remove the uncertainty? Named inspection areas and investigation questions must remain attached to evidence so later reports and property comparisons never guess where or why it was collected.
 
 The app must communicate inspection intent, not merely coordinates. A photograph is incomplete field intelligence until its purpose is preserved. Water mapping must keep photographed facts, inspector-confirmed classifications, conservative inferences, inspected corridors, and unvisited unknowns visibly distinct; it must never convert a shallow isolated depression or missing observation into a broad conclusion.

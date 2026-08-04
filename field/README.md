@@ -12,6 +12,15 @@ Production, offline-first field evidence collection for the subject rural parcel
 - Before GPS is stopped, **Finish Inspection** presents the most important unanswered questions, missing photographs and measurements, empty inspection areas, and the cheapest next evidence to collect. The inspector may safely return to the inspection or finish with the uncertainty explicitly preserved.
 - The package includes `QUESTION_BRIEF.json`, `FIELD_COACHING.json`, and `RETURN_VISIT_PLAN.json`, plus field-efficiency estimates for walking, stopping, documenting, observation spacing, evidence per acre, and questions answered versus remaining.
 
+## Property Value Engine
+
+- **Value Lens** is an optional persistent field context. The inspector selects one or more drivers, every value/cost/uncertainty effect that applies, importance from 1–5, confidence, and a short reason. One-tap observations inherit that context until it is cleared.
+- Supported drivers are Buildability, Development Potential, Timber, Water, Views, Privacy, Access, Utilities, Clearing Cost, Recreation, Agriculture, Horses, Wildlife, Beauty, Investment, Maintenance, Hazards, and Tree Preservation.
+- Every observation records either `INSPECTOR_ASSESSED` with its value-driver links or `NOT_ASSESSED`. The app may suggest likely drivers for unassessed evidence, but suggestions remain `SUGGESTED_UNCONFIRMED` and never enter findings, rankings, or maps without inspector confirmation.
+- `PROPERTY_VALUE_ENGINE.json` ends the report with Top 10 Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Every ranked item explains why, cites evidence, and preserves contrary evidence and uncertainty.
+- `VALUE_DRIVER_HEAT_MAPS.json` and `property-value-heat-map.html` provide Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water layers. They show only evidence influence zones around assessed observations; they do not interpolate across unvisited ground or claim appraised dollars.
+- The same feature may increase both value and cost. The engine preserves both impacts instead of hiding the tradeoff in a single score.
+
 ## Correctable professional evidence
 
 - **Undo / Correct Last Record** is always visible. It can mark an observation, button press, photograph, category, area assignment, or voice note Correct, Accidental, Wrong Category, Wrong Area, Duplicate, Needs Clarification, or Withdrawn.

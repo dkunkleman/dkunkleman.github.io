@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0";
+  const APP_VERSION = "3.14.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -24,6 +24,7 @@
   const timberTools = window.TimberReconnaissance;
   const synthesisTools = window.ReviewedPropertySynthesis;
   const weatherTools = window.AuthoritativeWeather;
+  const valueTools = window.PropertyValueEngine;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -146,6 +147,12 @@
       active_question_ids: [],
       next_evidence_relationship: "supports",
       next_photo_value: "Helpful",
+      active_value_driver_ids: [],
+      active_value_effects: [],
+      active_value_effect: "",
+      active_value_magnitude: 3,
+      active_value_confidence: "medium",
+      active_value_reason: "",
       water_observation_rule: {
         all_observed_standing_water_photographed: false,
         confirmed_at: null,
@@ -229,6 +236,10 @@
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
+  }
+
   function loadState() {
     try {
       const current = localStorage.getItem(stateKey);
@@ -248,6 +259,7 @@
     data.weather_context = Object.assign(emptyInspection().weather_context, data.weather_context || {});
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
     if (coachingTools) coachingTools.ensureInspectionModel(data);
+    if (valueTools) valueTools.ensureInspectionModel(data);
     if (governanceTools) governanceTools.ensureGovernanceModel(data);
     if (evidenceSetTools) {
       evidenceSetTools.ensureEvidenceSetModel(data);
@@ -301,7 +313,68 @@
   }
 
   function currentEvidenceContext() {
-    return coachingTools ? coachingTools.evidenceContext(data) : { area_id: null, question_ids: [], question_links: [] };
+    const context = coachingTools ? coachingTools.evidenceContext(data) : { area_id: null, question_ids: [], question_links: [] };
+    const valueContext = valueTools ? valueTools.activeContext(data) : { driver_ids: [], effect: "", magnitude: 3, confidence: "medium", reason: "" };
+    context.value_driver_links = valueTools ? valueTools.linksFromContext(valueContext) : [];
+    context.value_assessment_status = context.value_driver_links.length ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED";
+    return context;
+  }
+
+  function renderValueLens() {
+    if (!valueTools) return;
+    valueTools.ensureInspectionModel(data);
+    const choices = document.getElementById("valueDriverChoices");
+    if (!choices.dataset.ready) {
+      valueTools.VALUE_DRIVERS.forEach(driver => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = driver.driver_id;
+        input.addEventListener("change", saveValueLens);
+        label.append(input, document.createTextNode(driver.label));
+        choices.appendChild(label);
+      });
+      choices.dataset.ready = "true";
+    }
+    choices.querySelectorAll('input[type="checkbox"]').forEach(input => { input.checked = data.active_value_driver_ids.includes(input.value); });
+    document.querySelectorAll('#valueEffectChoices input[type="checkbox"]').forEach(input => { input.checked = data.active_value_effects.includes(input.value); });
+    document.getElementById("valueMagnitude").value = String(data.active_value_magnitude);
+    document.getElementById("valueConfidence").value = data.active_value_confidence;
+    document.getElementById("valueReason").value = data.active_value_reason;
+    const context = valueTools.activeContext(data);
+    const names = context.driver_ids.map(id => (valueTools.VALUE_DRIVERS.find(item => item.driver_id === id) || {}).label).filter(Boolean);
+    const effects = context.effects.map(id => (valueTools.EFFECTS.find(item => item.effect_id === id) || {}).label).filter(Boolean);
+    const summary = names.length && effects.length
+      ? `${effects.join(" + ")}: ${names.join(", ")} (importance ${context.magnitude}/5, ${context.confidence} confidence)${context.reason ? ` — ${context.reason}` : ""}`
+      : "Not assessed. Evidence can still be recorded; the package will label it unassessed rather than infer an impact.";
+    document.getElementById("activeValueLens").innerHTML = `<strong>Value lens:</strong> ${escapeHtml(summary)}`;
+    const observationSummary = document.getElementById("observationValueSummary");
+    if (observationSummary) observationSummary.innerHTML = `<strong>Value lens for this observation:</strong> ${escapeHtml(summary)}`;
+  }
+
+  function saveValueLens() {
+    if (!valueTools) return;
+    data.active_value_driver_ids = [...document.querySelectorAll('#valueDriverChoices input[type="checkbox"]:checked')].map(input => input.value);
+    data.active_value_effects = [...document.querySelectorAll('#valueEffectChoices input[type="checkbox"]:checked')].map(input => input.value);
+    data.active_value_effect = data.active_value_effects[0] || "";
+    data.active_value_magnitude = Number(document.getElementById("valueMagnitude").value) || 3;
+    data.active_value_confidence = document.getElementById("valueConfidence").value;
+    data.active_value_reason = document.getElementById("valueReason").value.trim();
+    valueTools.ensureInspectionModel(data);
+    saveState();
+    renderValueLens();
+  }
+
+  function clearValueLens() {
+    data.active_value_driver_ids = [];
+    data.active_value_effects = [];
+    data.active_value_effect = "";
+    data.active_value_magnitude = 3;
+    data.active_value_confidence = "medium";
+    data.active_value_reason = "";
+    saveState();
+    renderValueLens();
+    setStatus("Value lens cleared. New evidence will be recorded as not assessed until you select another value context.", "normal");
   }
 
   function calculateCoachingState(force, forceCoverage) {
@@ -2245,6 +2318,10 @@
       area_id: settings.areaId || context.area_id,
       question_ids: Array.isArray(settings.questionIds) ? settings.questionIds.slice() : context.question_ids,
       question_links: Array.isArray(settings.questionLinks) ? settings.questionLinks.map(link => Object.assign({}, link)) : context.question_links,
+      value_driver_links: Array.isArray(settings.valueDriverLinks)
+        ? settings.valueDriverLinks.map(link => Object.assign({}, link))
+        : (settings.recordClass === "inspector_thought" ? [] : context.value_driver_links.map(link => Object.assign({}, link))),
+      value_assessment_status: settings.recordClass === "inspector_thought" ? "INSPECTOR_THOUGHT_SEPARATE_FROM_EVIDENCE" : (settings.valueAssessmentStatus || ((Array.isArray(settings.valueDriverLinks) ? settings.valueDriverLinks : context.value_driver_links).length ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED")),
       time: time || new Date().toISOString(),
       lat: position.lat,
       lon: position.lon,
@@ -2290,7 +2367,14 @@
     saveState();
     redraw();
     renderCoaching();
-    setStatus(type === "thought" ? "Inspector thought saved separately from observed evidence." : `${buttonLabels[type]} recorded at the current location.`, "active");
+    if (type === "thought") {
+      setStatus("Inspector thought saved separately from observed evidence.", "active");
+    } else if (marker.value_assessment_status === "NOT_ASSESSED" && valueTools) {
+      const suggested = valueTools.suggestedDriverIds(type).map(id => (valueTools.VALUE_DRIVERS.find(item => item.driver_id === id) || {}).label).filter(Boolean);
+      setStatus(`${buttonLabels[type]} recorded. Value impact was not assessed.${suggested.length ? ` Likely review drivers: ${suggested.join(", ")}.` : ""}`, "active");
+    } else {
+      setStatus(`${buttonLabels[type]} recorded with its Value Lens assessment.`, "active");
+    }
     return marker;
   }
 
@@ -2308,6 +2392,11 @@
     document.getElementById("observationNote").value = "";
     document.getElementById("observationEvidence").value = "Observed";
     document.getElementById("observationPhoto").checked = false;
+    renderValueLens();
+    if (valueTools && !data.active_value_driver_ids.length) {
+      const suggested = valueTools.suggestedDriverIds(type).map(id => (valueTools.VALUE_DRIVERS.find(item => item.driver_id === id) || {}).label).filter(Boolean);
+      if (suggested.length) document.getElementById("observationValueSummary").innerHTML += `<br>Suggested for inspector review: ${escapeHtml(suggested.join(", "))}. These are not selected automatically.`;
+    }
     if (type === "wet") {
       const unknown = document.querySelector('input[name="wetDepth"][value="unknown"]');
       if (unknown) unknown.checked = true;
@@ -2358,7 +2447,9 @@
         observationAttributes: attributes,
         area_id: marker.area_id,
         question_ids: marker.question_ids,
-        question_links: marker.question_links
+        question_links: marker.question_links,
+        value_driver_links: marker.value_driver_links,
+        value_assessment_status: marker.value_assessment_status
       });
     }
   }
@@ -2410,6 +2501,8 @@
         area_id: settings.area_id || coachingContext.area_id,
         question_ids: Array.isArray(settings.question_ids) ? settings.question_ids.slice() : coachingContext.question_ids,
         question_links: Array.isArray(settings.question_links) ? settings.question_links.map(link => Object.assign({}, link)) : coachingContext.question_links,
+        value_driver_links: Array.isArray(settings.value_driver_links) ? settings.value_driver_links.map(link => Object.assign({}, link)) : coachingContext.value_driver_links,
+        value_assessment_status: settings.value_assessment_status || coachingContext.value_assessment_status,
         purpose: settings.purpose || "general_field_note",
         photo_id: settings.photo_id || null,
         evidence_set_id: settings.evidence_set_id || data.active_evidence_set_id || null,
@@ -2486,7 +2579,9 @@
       purpose: isFirstSetPhoto ? "evidence_set_explanation" : "photo_explanation", photo_id: photoId, evidence_set_id: photo && photo.evidence_set_id || null, prompt: explanationPrompt,
       area_id: photo && photo.area_id,
       question_ids: photo && photo.question_ids,
-      question_links: photo && photo.question_links
+      question_links: photo && photo.question_links,
+      value_driver_links: photo && photo.value_driver_links,
+      value_assessment_status: photo && photo.value_assessment_status
     });
     document.getElementById("photoExplanationState").textContent = started ? "Recording. Explain what matters and why." : "Voice recording did not start. Tap Retry Voice Explanation.";
     document.getElementById("retryPhotoExplanation").hidden = started;
@@ -2533,6 +2628,8 @@
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
+        value_driver_links: Array.isArray(metadata.value_driver_links) ? metadata.value_driver_links.map(link => Object.assign({}, link)) : [],
+        value_assessment_status: metadata.value_assessment_status || "NOT_ASSESSED",
         time: metadata.started_at,
         lat: metadata.lat,
         lon: metadata.lon,
@@ -3191,6 +3288,8 @@
       area_id: context && context.area_id ? context.area_id : coachingContext.area_id,
       question_ids: context && Array.isArray(context.question_ids) ? context.question_ids.slice() : coachingContext.question_ids,
       question_links: context && Array.isArray(context.question_links) ? context.question_links.map(link => Object.assign({}, link)) : coachingContext.question_links,
+      value_driver_links: context && Array.isArray(context.value_driver_links) ? context.value_driver_links.map(link => Object.assign({}, link)) : coachingContext.value_driver_links,
+      value_assessment_status: context && context.value_assessment_status ? context.value_assessment_status : coachingContext.value_assessment_status,
       photo_value: data.next_photo_value || "Helpful",
       evidence_set_id: context && context.evidence_set_id ? context.evidence_set_id : data.active_evidence_set_id,
       timber_tree_id: context && context.timber_tree_id ? context.timber_tree_id : (activeSetForPhoto && activeSetForPhoto.set_type === "Individual Tree" ? (activeSetForPhoto.subject_details && activeSetForPhoto.subject_details.timber_tree_id || activeSetForPhoto.tree_id) : (activePlotForPhoto && activePlotForPhoto.active_tree_id || null))
@@ -3292,6 +3391,8 @@
         area_id: photoContext.area_id || null,
         question_ids: Array.isArray(photoContext.question_ids) ? photoContext.question_ids.slice() : [],
         question_links: Array.isArray(photoContext.question_links) ? photoContext.question_links.map(link => Object.assign({}, link)) : [],
+        value_driver_links: Array.isArray(photoContext.value_driver_links) ? photoContext.value_driver_links.map(link => Object.assign({}, link)) : [],
+        value_assessment_status: photoContext.value_assessment_status || "NOT_ASSESSED",
         photo_value: photoContext.photo_value || "Helpful"
         ,evidence_set_id: photoContext.evidence_set_id || null
         ,timber_tree_id: photoContext.timber_tree_id || null
@@ -3306,7 +3407,9 @@
         },
         areaId: metadata.area_id,
         questionIds: metadata.question_ids,
-        questionLinks: metadata.question_links
+        questionLinks: metadata.question_links,
+        valueDriverLinks: metadata.value_driver_links,
+        valueAssessmentStatus: metadata.value_assessment_status
       });
       metadata.associated_marker_id = photoEvent.id;
       if (typeof packageTools.sha256Hex === "function") {
@@ -3750,7 +3853,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !valueTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -3761,6 +3864,7 @@
       return;
     }
     loadState();
+    valueTools.ensureInspectionModel(data);
     governanceTools.ensureGovernanceModel(data);
     saveState();
     lastSavedOrientation = data.orientation_samples.length ? data.orientation_samples[data.orientation_samples.length - 1] : null;
@@ -3789,6 +3893,7 @@
     coverageDirty = true;
     redraw();
     renderCoaching();
+    renderValueLens();
     renderAuditHistory();
     renderEvidenceSets();
     if (statusEl.dataset.kind !== "error") {
@@ -3814,6 +3919,10 @@
   });
   evidenceRelationshipSelect.addEventListener("change", () => { data.next_evidence_relationship = evidenceRelationshipSelect.value; saveState(); renderCoaching(); });
   nextPhotoValueSelect.addEventListener("change", () => { data.next_photo_value = nextPhotoValueSelect.value; saveState(); renderCoaching(); });
+  document.querySelectorAll('#valueEffectChoices input[type="checkbox"]').forEach(input => input.addEventListener("change", saveValueLens));
+  ["valueMagnitude", "valueConfidence"].forEach(id => document.getElementById(id).addEventListener("change", saveValueLens));
+  document.getElementById("valueReason").addEventListener("input", saveValueLens);
+  document.getElementById("clearValueLens").addEventListener("click", clearValueLens);
   document.getElementById("reviewEvidence").addEventListener("click", showDepartureReview);
   document.getElementById("reviewCorrections").addEventListener("click", () => document.querySelector(".audit-card").scrollIntoView({ behavior: "smooth", block: "start" }));
   document.getElementById("reviewPearsonPhases").addEventListener("click", () => renderReviewedSynthesis("phases"));
