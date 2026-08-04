@@ -1,26 +1,26 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-04-v23-recovery";
-const INDEX_URL = "./index.html?v=3.16.1";
+const CACHE_NAME = "property-inspector-field-2026-08-04-v24-recovery";
+const INDEX_URL = "./index.html?v=3.16.2";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./field-truth-engine.js?v=3.16.1",
-  "./guided-mission-orchestrator.js?v=3.16.1",
-  "./tree-identification-engine.js?v=3.16.1",
-  "./field-capture-coach.js?v=3.16.1",
-  "./field-measurement-engine.js?v=3.16.1",
-  "./tree-network-engine.js?v=3.16.1",
-  "./inspection-coaching.js?v=3.16.1",
-  "./water-intelligence.js?v=3.16.1",
-  "./evidence-governance.js?v=3.16.1",
-  "./evidence-sets.js?v=3.16.1",
-  "./timber-reconnaissance.js?v=3.16.1",
-  "./reviewed-property-synthesis.js?v=3.16.1",
-  "./authoritative-weather.js?v=3.16.1",
-  "./property-value-engine.js?v=3.16.1",
-  "./app.js?v=3.16.1",
-  "./idb-recovery.js?v=3.16.1",
-  "./inspection-package.js?v=3.16.1",
+  "./field-truth-engine.js?v=3.16.2",
+  "./guided-mission-orchestrator.js?v=3.16.2",
+  "./tree-identification-engine.js?v=3.16.2",
+  "./field-capture-coach.js?v=3.16.2",
+  "./field-measurement-engine.js?v=3.16.2",
+  "./tree-network-engine.js?v=3.16.2",
+  "./inspection-coaching.js?v=3.16.2",
+  "./water-intelligence.js?v=3.16.2",
+  "./evidence-governance.js?v=3.16.2",
+  "./evidence-sets.js?v=3.16.2",
+  "./timber-reconnaissance.js?v=3.16.2",
+  "./reviewed-property-synthesis.js?v=3.16.2",
+  "./authoritative-weather.js?v=3.16.2",
+  "./property-value-engine.js?v=3.16.2",
+  "./app.js?v=3.16.2",
+  "./idb-recovery.js?v=3.16.2",
+  "./inspection-package.js?v=3.16.2",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];

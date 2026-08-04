@@ -50,6 +50,14 @@
     #status[data-kind="warning"] { background: #704400; }
     #status[data-kind="success"] { background: #096028; }
     #status[data-kind="active"] { background: #173f60; }
+    #recoveryHome:not([hidden]) { position: fixed; inset: 0; z-index: 450; display: flex; flex-direction: column; gap: 14px; padding: max(22px, env(safe-area-inset-top)) 16px max(22px, env(safe-area-inset-bottom)); overflow-y: auto; background: #f4f1e7; color: #111; }
+    #recoveryHome[hidden] { display: none; }
+    #recoveryHome h2 { margin: 0; font-size: 30px; line-height: 1.05; }
+    #recoveryHome p { margin: 0; font-size: 17px; line-height: 1.35; }
+    #recoverySend { min-height: 92px; background: #111; border: 5px solid var(--focus); font-size: 22px; }
+    #recoveryFull { min-height: 68px; background: #492568; }
+    #recoveryReturn { min-height: 58px; background: #59615c; }
+    #recoveryProgress { border: 3px solid #173f60; border-radius: 8px; padding: 12px; max-height: 110px; overflow-y: auto; background: #fff; font-weight: 800; }
     main { max-width: 1200px; margin: 0 auto; }
     .card { background: var(--card); border: 1px solid #c7c5bb; border-radius: 9px; padding: 12px; margin: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
     .card h2 { margin: 0 0 4px; font-size: 19px; }
@@ -259,8 +267,19 @@
     <h1>Property Inspector</h1>
     <p>Offline field evidence for real rural property inspections.</p>
     <span id="offlineState" data-ready="false">Preparing offline use…</span>
-    <span id="appVersion" class="small">Version 3.16.1 recovery</span>
+    <span id="appVersion" class="small">Version 3.16.2 recovery</span>
   </header>
+
+  <section id="recoveryHome" aria-label="Saved inspection recovery" hidden>
+    <h2>YOUR INSPECTION IS STILL SAVED</h2>
+    <p>Nothing has been cleared. You do not need to finish forms or answer more questions.</p>
+    <button id="recoverySend" type="button">SEND THIS INSPECTION TO CHATGPT</button>
+    <p>Creates the smaller ZIP with today’s photographs, GPS, measurements, notes, and voice records.</p>
+    <button id="recoveryFull" type="button">DOWNLOAD FULL PRESERVATION ARCHIVE</button>
+    <button id="recoveryReturn" type="button">RETURN TO CAPTURE</button>
+    <div id="recoveryProgress" role="status">Ready. Tap the first button.</div>
+    <p><strong>Clear is disabled.</strong></p>
+  </section>
 
   <section id="workflow" aria-label="Inspection controls">
     <div id="nextStep">NEXT: Wait for “Offline ready,” then tap Start Inspection.</div>
@@ -1053,22 +1072,22 @@
     </div>
   </dialog>
 
-  <script src="./field-truth-engine.js?v=3.16.1"></script>
-  <script src="./guided-mission-orchestrator.js?v=3.16.1"></script>
-  <script src="./tree-identification-engine.js?v=3.16.1"></script>
-  <script src="./field-capture-coach.js?v=3.16.1"></script>
-  <script src="./field-measurement-engine.js?v=3.16.1"></script>
-  <script src="./tree-network-engine.js?v=3.16.1"></script>
-  <script src="./inspection-coaching.js?v=3.16.1"></script>
-  <script src="./water-intelligence.js?v=3.16.1"></script>
-  <script src="./evidence-governance.js?v=3.16.1"></script>
-  <script src="./evidence-sets.js?v=3.16.1"></script>
-  <script src="./timber-reconnaissance.js?v=3.16.1"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.16.1"></script>
-  <script src="./authoritative-weather.js?v=3.16.1"></script>
-  <script src="./property-value-engine.js?v=3.16.1"></script>
-  <script src="./inspection-package.js?v=3.16.1"></script>
-  <script src="./idb-recovery.js?v=3.16.1"></script>
-  <script src="./app.js?v=3.16.1"></script>
+  <script src="./field-truth-engine.js?v=3.16.2"></script>
+  <script src="./guided-mission-orchestrator.js?v=3.16.2"></script>
+  <script src="./tree-identification-engine.js?v=3.16.2"></script>
+  <script src="./field-capture-coach.js?v=3.16.2"></script>
+  <script src="./field-measurement-engine.js?v=3.16.2"></script>
+  <script src="./tree-network-engine.js?v=3.16.2"></script>
+  <script src="./inspection-coaching.js?v=3.16.2"></script>
+  <script src="./water-intelligence.js?v=3.16.2"></script>
+  <script src="./evidence-governance.js?v=3.16.2"></script>
+  <script src="./evidence-sets.js?v=3.16.2"></script>
+  <script src="./timber-reconnaissance.js?v=3.16.2"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.16.2"></script>
+  <script src="./authoritative-weather.js?v=3.16.2"></script>
+  <script src="./property-value-engine.js?v=3.16.2"></script>
+  <script src="./inspection-package.js?v=3.16.2"></script>
+  <script src="./idb-recovery.js?v=3.16.2"></script>
+  <script src="./app.js?v=3.16.2"></script>
 </body>
 </html>

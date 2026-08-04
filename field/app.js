@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.16.1";
+  const APP_VERSION = "3.16.2";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -49,6 +49,10 @@
   const packageInstruction = document.getElementById("packageInstruction");
   const copyPackageFilenameBtn = document.getElementById("copyPackageFilename");
   const returnFromPackageBtn = document.getElementById("returnFromPackage");
+  const recoveryHome = document.getElementById("recoveryHome");
+  const recoverySendBtn = document.getElementById("recoverySend");
+  const recoveryFullBtn = document.getElementById("recoveryFull");
+  const recoveryProgress = document.getElementById("recoveryProgress");
   const offlineState = document.getElementById("offlineState");
   const nextStep = document.getElementById("nextStep");
   const voiceBtn = document.getElementById("voice");
@@ -214,6 +218,7 @@
   function setStatus(message, kind) {
     statusEl.textContent = message;
     statusEl.dataset.kind = kind || "normal";
+    if (recoveryHome && !recoveryHome.hidden) recoveryProgress.textContent = message;
     updateNextStep();
   }
 
@@ -2514,6 +2519,8 @@
     voiceBtn.disabled = !tracking || photoBusy || packageBusy;
     finishBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     clearBtn.disabled = true;
+    recoverySendBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
+    recoveryFullBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     fullArchiveBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     retryPendingPhotoBtn.disabled = photoBusy || packageBusy || recordingVoice;
@@ -4392,12 +4399,19 @@
     if (statusEl.dataset.kind !== "error") {
       setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
     }
+    if (data.started) {
+      recoveryHome.hidden = false;
+      recoveryProgress.textContent = pendingPhotoQueue.length ? "A photograph is waiting to be saved. Keep this page open." : "Ready. Tap SEND THIS INSPECTION TO CHATGPT.";
+    }
     schedulePackageEstimateRefresh();
   }
 
   startBtn.addEventListener("click", startTracking);
   stopBtn.addEventListener("click", () => stopTracking());
   finishBtn.addEventListener("click", () => finishInspection({ reviewed: true }));
+  recoverySendBtn.addEventListener("click", () => finishInspection({ reviewed: true }));
+  recoveryFullBtn.addEventListener("click", exportBackupNow);
+  document.getElementById("recoveryReturn").addEventListener("click", () => { recoveryHome.hidden = true; updateNextStep(); });
   missionProgressButton.addEventListener("click", showMissionDialog);
   document.getElementById("markRouteCondition").addEventListener("click", () => openFeatureCaptureSession("routeCondition"));
   document.getElementById("missionStartCapture").addEventListener("click", startCurrentMissionCapture);
