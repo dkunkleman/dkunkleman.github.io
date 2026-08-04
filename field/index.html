@@ -45,7 +45,7 @@
     #start { background: #18783a; }
     #finish { background: #111; border: 3px solid var(--focus); }
     #stop { grid-column: 1 / -1; background: #4c5650; }
-    #status { margin-top: 8px; border-radius: 6px; background: #1d2420; color: #fff; padding: 9px 10px; min-height: 42px; font: 700 13px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #status { margin-top: 8px; border-radius: 6px; background: #1d2420; color: #fff; padding: 9px 10px; min-height: 42px; max-height: 74px; overflow: auto; font: 700 13px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
     #status[data-kind="error"] { background: #8e1111; }
     #status[data-kind="warning"] { background: #704400; }
     #status[data-kind="success"] { background: #096028; }
@@ -140,11 +140,16 @@
     label { display: block; margin-top: 10px; font-weight: 700; font-size: 14px; }
     input[type="range"] { width: min(250px, 70vw); vertical-align: middle; }
     #packageReady { border: 3px solid #0b762f; background: #ecfff2; }
-    #packageReady[hidden], #packageLink[hidden], #sharePackage[hidden] { display: none; }
+    #packageReady:not([hidden]) { position: fixed; inset: 0; z-index: 500; margin: 0; border-radius: 0; padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); overflow-y: auto; }
+    #packageReady[hidden], #packageLink[hidden], #sharePackage[hidden], #copyPackageFilename[hidden], #returnFromPackage[hidden] { display: none; }
     #packageReady p { font-weight: 700; }
+    #packageReady h2 { font-size: 28px; }
     #packageFilename { display: block; padding: 9px; border: 2px dashed #0b762f; background: #fff; overflow-wrap: anywhere; font: 800 15px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
-    #packageLink, #sharePackage { display: block; width: 100%; margin-top: 8px; text-decoration: none; background: #0b762f; }
-    #sharePackage { background: #111; border: 3px solid var(--focus); }
+    #packageLink, #sharePackage, #copyPackageFilename, #returnFromPackage { display: block; width: 100%; margin-top: 10px; text-decoration: none; }
+    #sharePackage { min-height: 68px; background: #111; border: 4px solid var(--focus); font-size: 20px; }
+    #packageLink { background: #0b762f; }
+    #copyPackageFilename { background: #295b73; }
+    #returnFromPackage { background: #59615c; }
     .export-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
     .export-mode { border: 2px solid #777; border-radius: 8px; padding: 10px; background: #f7f7f2; }
     .export-mode.recommended { border: 3px solid #11652d; background: #edfff1; }
@@ -254,13 +259,14 @@
     <h1>Property Inspector</h1>
     <p>Offline field evidence for real rural property inspections.</p>
     <span id="offlineState" data-ready="false">Preparing offline use…</span>
+    <span id="appVersion" class="small">Version 3.16.1 recovery</span>
   </header>
 
   <section id="workflow" aria-label="Inspection controls">
     <div id="nextStep">NEXT: Wait for “Offline ready,” then tap Start Inspection.</div>
     <div id="primaryControls">
       <button id="start" disabled>Start Inspection</button>
-      <button id="finish" disabled>Finish Inspection</button>
+      <button id="finish" disabled>SEND THIS INSPECTION TO CHATGPT</button>
       <button id="stop" disabled>Pause GPS</button>
     </div>
     <button id="missionProgressButton" type="button" disabled>MISSIONS: preparing guided inspection…</button>
@@ -526,13 +532,13 @@
 
     <section class="card" aria-labelledby="export-heading">
       <h2 id="export-heading">Inspection packages</h2>
-      <p class="small">Nothing is removed after either export. <strong>Finish Inspection</strong> creates the smaller ChatGPT package. The full archive remains available afterward from the saved originals.</p>
+      <p class="small">Nothing is removed after either export. <strong>Send This Inspection to ChatGPT</strong> creates the smaller analysis package. The full archive remains available afterward from the saved originals.</p>
       <div class="export-modes">
         <div class="export-mode recommended">
           <h3>CHATGPT ANALYSIS PACKAGE</h3>
           <p class="small">Decision-ready evidence organized around access, buildability, economic potential, cost and risk, and what makes the property special. Includes strengths, weaknesses, unknowns, confidence rules, cheapest next investigations, and every photo at analysis quality.</p>
           <span id="reportEstimate" class="package-estimate">Estimating…</span>
-          <p class="small">Created when you tap <strong>Finish Inspection</strong>.</p>
+          <p class="small">Choose this when you need ChatGPT to review today’s photographs, GPS, measurements, notes, and voice records.</p>
         </div>
         <div class="export-mode">
           <h3>FULL EVIDENCE ARCHIVE</h3>
@@ -553,13 +559,15 @@
     </section>
 
     <section id="packageReady" class="card" hidden>
-      <h2>Inspection package ready</h2>
+      <h2>Inspection ZIP is ready</h2>
       <p id="packageSummary">Everything is in one file.</p>
       <strong id="packageFilename"></strong>
-      <button id="sharePackage" hidden>Save to Property Intelligence Repository</button>
-      <a id="packageLink" class="button-link" hidden>Save Inspection Package</a>
+      <button id="sharePackage" hidden>SHARE ZIP</button>
+      <a id="packageLink" class="button-link" hidden>SAVE TO FILES</a>
+      <button id="copyPackageFilename" type="button" hidden>COPY FILENAME</button>
+      <button id="returnFromPackage" type="button" hidden>RETURN TO INSPECTION</button>
       <p id="packageInstruction" class="small"></p>
-      <p class="small">The repository stores the permanent record. ChatGPT analyzes it there. Do not clear the inspection until the repository confirms receipt.</p>
+      <p class="small"><strong>Do not press Clear.</strong> The saved inspection remains on this phone after either button.</p>
     </section>
 
     <section class="card">
@@ -583,7 +591,7 @@
         <button id="csv">Recovery CSV</button>
         <button id="geojson">Recovery GeoJSON</button>
         <button id="gpx">Recovery GPX</button>
-        <button id="clear">Clear Inspection</button>
+        <button id="clear" disabled>Clear unavailable until both packages are verified</button>
       </div>
     </details>
   </main>
@@ -1045,22 +1053,22 @@
     </div>
   </dialog>
 
-  <script src="./field-truth-engine.js?v=3.16.0"></script>
-  <script src="./guided-mission-orchestrator.js?v=3.16.0"></script>
-  <script src="./tree-identification-engine.js?v=3.16.0"></script>
-  <script src="./field-capture-coach.js?v=3.16.0"></script>
-  <script src="./field-measurement-engine.js?v=3.16.0"></script>
-  <script src="./tree-network-engine.js?v=3.16.0"></script>
-  <script src="./inspection-coaching.js?v=3.16.0"></script>
-  <script src="./water-intelligence.js?v=3.16.0"></script>
-  <script src="./evidence-governance.js?v=3.16.0"></script>
-  <script src="./evidence-sets.js?v=3.16.0"></script>
-  <script src="./timber-reconnaissance.js?v=3.16.0"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.16.0"></script>
-  <script src="./authoritative-weather.js?v=3.16.0"></script>
-  <script src="./property-value-engine.js?v=3.16.0"></script>
-  <script src="./inspection-package.js?v=3.16.0"></script>
-  <script src="./idb-recovery.js?v=3.16.0"></script>
-  <script src="./app.js?v=3.16.0"></script>
+  <script src="./field-truth-engine.js?v=3.16.1"></script>
+  <script src="./guided-mission-orchestrator.js?v=3.16.1"></script>
+  <script src="./tree-identification-engine.js?v=3.16.1"></script>
+  <script src="./field-capture-coach.js?v=3.16.1"></script>
+  <script src="./field-measurement-engine.js?v=3.16.1"></script>
+  <script src="./tree-network-engine.js?v=3.16.1"></script>
+  <script src="./inspection-coaching.js?v=3.16.1"></script>
+  <script src="./water-intelligence.js?v=3.16.1"></script>
+  <script src="./evidence-governance.js?v=3.16.1"></script>
+  <script src="./evidence-sets.js?v=3.16.1"></script>
+  <script src="./timber-reconnaissance.js?v=3.16.1"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.16.1"></script>
+  <script src="./authoritative-weather.js?v=3.16.1"></script>
+  <script src="./property-value-engine.js?v=3.16.1"></script>
+  <script src="./inspection-package.js?v=3.16.1"></script>
+  <script src="./idb-recovery.js?v=3.16.1"></script>
+  <script src="./app.js?v=3.16.1"></script>
 </body>
 </html>

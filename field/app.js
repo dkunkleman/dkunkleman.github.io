@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.16.0";
+  const APP_VERSION = "3.16.1";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -47,6 +47,8 @@
   const packageSummary = document.getElementById("packageSummary");
   const packageFilename = document.getElementById("packageFilename");
   const packageInstruction = document.getElementById("packageInstruction");
+  const copyPackageFilenameBtn = document.getElementById("copyPackageFilename");
+  const returnFromPackageBtn = document.getElementById("returnFromPackage");
   const offlineState = document.getElementById("offlineState");
   const nextStep = document.getElementById("nextStep");
   const voiceBtn = document.getElementById("voice");
@@ -231,7 +233,7 @@
     } else if (!data.started) {
       nextStep.textContent = offlineState.dataset.ready === "true" ? "NEXT: Tap Start Inspection." : "NEXT: Wait for “Offline ready,” then tap Start Inspection.";
     } else if (watchId === null) {
-      nextStep.textContent = "NEXT: Tap Resume Inspection to continue walking, or Finish Inspection if the property is complete.";
+      nextStep.textContent = "NEXT: Tap SEND THIS INSPECTION TO CHATGPT. Unfinished answers will remain marked incomplete; no evidence will be deleted.";
     } else if (!lastPosition) {
       nextStep.textContent = "NEXT: Wait here for the first precise GPS location.";
     } else if (coachingTools && !data.investigation_questions.length) {
@@ -2511,7 +2513,7 @@
     markerButtons.forEach(button => { button.disabled = !tracking || photoBusy || packageBusy || recordingVoice; });
     voiceBtn.disabled = !tracking || photoBusy || packageBusy;
     finishBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
-    clearBtn.disabled = photoBusy || packageBusy || recordingVoice;
+    clearBtn.disabled = true;
     document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     fullArchiveBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     retryPendingPhotoBtn.disabled = photoBusy || packageBusy || recordingVoice;
@@ -3958,13 +3960,13 @@
     try {
       await navigator.share({
         files: [lastPackageFile],
-        title: "Save property inspection to repository",
-        text: "Store this immutable inspection package in the Property Intelligence Repository. Use repository-import.json for its permanent property, inspection, and export paths."
+        title: "Property inspection ZIP",
+        text: "Choose Save to Files to preserve this inspection, or choose ChatGPT when the report package is small enough to send."
       });
-      setStatus("Package handed to the selected repository destination. Keep this inspection until the repository confirms receipt.", "success");
+      setStatus("The iPhone share sheet accepted the ZIP. Keep this inspection until you confirm the file is saved.", "success");
       return true;
     } catch (error) {
-      if (error && error.name !== "AbortError") setStatus("The share sheet did not accept the package. Tap Save to Property Intelligence Repository and try again.", "warning");
+      if (error && error.name !== "AbortError") setStatus("The share sheet did not accept the ZIP. Your inspection is still safe. Tap SAVE TO FILES.", "warning");
       return false;
     }
   }
@@ -3976,12 +3978,15 @@
     lastPackageFile = typeof File === "function" ? new File([blob], name, { type: "application/zip", lastModified: Date.now() }) : null;
     packageLink.href = lastPackageUrl;
     packageLink.download = name;
-    packageLink.textContent = reportPackage ? "Download CHATGPT ANALYSIS PACKAGE" : "Download FULL EVIDENCE ARCHIVE";
+    packageLink.textContent = "SAVE TO FILES";
     packageLink.hidden = false;
     packageFilename.textContent = name;
-    packageInstruction.textContent = reportPackage ? `Save ${name} to the Property Intelligence Repository. It will be filed permanently at ${manifest.repository.inspection_path} without overwriting an older export.` : `Save ${name} to the Property Intelligence Repository as permanent original evidence. The saved inspection remains unchanged on this phone.`;
+    packageInstruction.textContent = reportPackage ? "Choose SHARE ZIP, then choose ChatGPT or Save to Files on the iPhone share sheet." : "Choose SHARE ZIP, then choose Save to Files on the iPhone share sheet. This full archive may be too large for ChatGPT.";
     packageSummary.textContent = `${reportPackage ? "CHATGPT ANALYSIS PACKAGE" : "FULL EVIDENCE ARCHIVE"}: one immutable repository export contains ${countLabel(manifest.summary.gps_track_point_count, "GPS point")}, ${countLabel(manifest.summary.field_event_count, "field event")}, ${countLabel(manifest.summary.photo_count, "viewable photograph")}, ${countLabel(manifest.summary.voice_note_count, "voice note")}, and ${countLabel(manifest.summary.inspector_thought_count, "inspector thought")}.`;
     packageReady.hidden = false;
+    copyPackageFilenameBtn.hidden = false;
+    returnFromPackageBtn.hidden = false;
+    packageReady.scrollTop = 0;
     let canShareFile = false;
     try {
       canShareFile = Boolean(lastPackageFile && navigator.share && navigator.canShare && navigator.canShare({ files: [lastPackageFile] }));
@@ -4392,7 +4397,7 @@
 
   startBtn.addEventListener("click", startTracking);
   stopBtn.addEventListener("click", () => stopTracking());
-  finishBtn.addEventListener("click", () => finishInspection());
+  finishBtn.addEventListener("click", () => finishInspection({ reviewed: true }));
   missionProgressButton.addEventListener("click", showMissionDialog);
   document.getElementById("markRouteCondition").addEventListener("click", () => openFeatureCaptureSession("routeCondition"));
   document.getElementById("missionStartCapture").addEventListener("click", startCurrentMissionCapture);
@@ -4565,6 +4570,18 @@
     setStatus(event.target.checked ? "Field rule saved: within the walked and visually observed corridor, unphotographed locations may support ‘no standing water observed at inspection time.’" : "Field rule removed. The report will not infer inspected dry ground from missing water photographs.", "active");
   });
   sharePackageBtn.addEventListener("click", shareLastPackage);
+  copyPackageFilenameBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(packageFilename.textContent || "");
+      setStatus("Filename copied.", "success");
+    } catch (error) {
+      setStatus("Could not copy the filename. It remains visible on the package screen.", "warning");
+    }
+  });
+  returnFromPackageBtn.addEventListener("click", () => {
+    packageReady.hidden = true;
+    updateNextStep();
+  });
   clearBtn.addEventListener("click", clearInspection);
   document.getElementById("backup").addEventListener("click", exportBackupNow);
   fullArchiveBtn.addEventListener("click", exportBackupNow);
