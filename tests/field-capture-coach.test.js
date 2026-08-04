@@ -1,0 +1,10 @@
+"use strict";
+const assert = require("node:assert/strict");
+const Coach = require("../field/field-capture-coach.js");
+const inspection = { feature_capture_sessions: [{ feature_session_id: "F1", feature_type: "wet", status: "draft", structured_attributes: { water_depth: 3, depth_status: "Measured" }, direct_photographs: [], direct_voice_notes: [], skipped_fields: [] }], photos: [{ id: "P-unassigned" }], measurements: [] };
+Coach.ensureModel(inspection); assert.equal(inspection.field_capture_mode, "GUIDED"); assert(Coach.HELP_LIBRARY.length >= 20); assert(Coach.helpTopic("yardstick_soft_bottom").safety_warning);
+const response = Coach.stuckResponse(inspection, { feature_capture_session_id: "F1", feature_type: "wet", reason: "Unsafe", disposition: "STOP_UNSAFE" }); assert.equal(response.append_only, true); assert.match(response.when_to_stop, /stop|unstable|unsafe/i);
+const help = Coach.askFieldAssistant(inspection, { feature_capture_session_id: "F1", feature_type: "wet", question: "How do I measure depth?", online: false }); assert.equal(help.response_source, "OFFLINE_FIELD_HELP_LIBRARY"); assert.equal(help.evidence_modified, false);
+const result = Coach.completeness(inspection); assert(result.sessions[0].issues.includes("MINIMUM_PHOTOGRAPH_OR_REASON_MISSING")); assert(result.media_captured_outside_session.includes("P-unassigned"));
+Coach.setMode(inspection, "EXPERIENCED"); assert.equal(inspection.field_capture_mode, "EXPERIENCED");
+process.stdout.write("PASS: offline help, safety stop, optional assistant boundary, progressive modes, and honest finish completeness.\n");

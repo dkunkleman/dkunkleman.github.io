@@ -61,7 +61,7 @@ assert.equal(comparison.classification, "Derived from cited official station rec
   assert(app.includes("await refreshAuthoritativeWeather({ silent: true })"), "Finish Inspection retrieves or reuses official weather before package creation");
   assert(app.includes("authoritative_weather_context_attached"), "the attachment is recorded in inspection lifecycle history");
   assert(index.includes("Automatic authoritative weather") && index.includes("Refresh Official NOAA Weather"));
-  assert(worker.includes("authoritative-weather.js?v=3.15.0") && worker.includes("v21"), "weather resolution and its verified fallback are cached for offline use");
+  assert(worker.includes("authoritative-weather.js?v=3.16.0") && worker.includes("v22"), "weather resolution and its verified fallback are cached for offline use");
 
   process.stdout.write("PASS: official Pearson rainfall, normals, derived comparisons, source URLs, event context, audit correction, offline preservation, UI, package integration, and service-worker delivery are verified.\n");
 })().catch(error => {

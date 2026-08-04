@@ -105,7 +105,8 @@ async function main() {
     metadata: { id: "photo-recovered-1", photo_number: "P1", original_size_bytes: originalBytes.length },
     event: { id: "event-photo-recovered-1", type: "photo", photo_id: "photo-recovered-1" },
     originalBlob: new Blob([originalBytes], { type: "image/jpeg" }),
-    analysisBlob: new Blob([analysisBytes], { type: "image/jpeg" })
+    analysisBlob: new Blob([analysisBytes], { type: "image/jpeg" }),
+    annotatedBlob: new Blob([new Uint8Array([9, 8, 7])], { type: "image/jpeg" })
   };
 
   {
@@ -121,6 +122,7 @@ async function main() {
         throw namedError("AbortError", "Connection closed between original and analysis serialization.");
       }
       staged.analysisBlob = record.analysisBlob;
+      staged.annotatedBlob = record.annotatedBlob;
       stored.set(record.id, Object.assign({}, record, staged));
     });
     const get = id => manager.transaction("photos", "readonly", async () => {
@@ -134,6 +136,7 @@ async function main() {
     assert.equal(openCount, 3, "put abort and read-back close each reopen once");
     assert.deepEqual(new Uint8Array(await committed.originalBlob.arrayBuffer()), originalBytes, "original bytes survive the automatic retry");
     assert.deepEqual(new Uint8Array(await committed.analysisBlob.arrayBuffer()), analysisBytes, "analysis bytes survive the automatic retry");
+    assert.deepEqual(new Uint8Array(await committed.annotatedBlob.arrayBuffer()), new Uint8Array([9, 8, 7]), "optional annotated derivative survives the same atomic retry and read-back");
     assert.equal(committed.event.id, photoRecord.event.id, "photo marker is committed with the blobs and metadata");
   }
 

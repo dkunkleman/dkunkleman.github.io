@@ -630,6 +630,8 @@
   <dialog id="featureCaptureDialog">
     <div class="dialog-body">
       <h2 id="featureCaptureTitle">Feature Capture Session</h2>
+      <p id="featureContextBanner" class="field-warning"><strong>Active feature:</strong> Direct photos, voice notes, and measurements stay with this subject until you save or defer it.</p>
+      <label>Field guidance<select id="fieldCaptureMode"><option value="GUIDED">Guided — show one best next step</option><option value="EXPERIENCED">Experienced — compact prompts</option><option value="SHOW_ALL">Show all fields</option></select></label>
       <p id="featureImmediateRecord">GPS, timestamp, accuracy, heading and orientation were saved immediately.</p>
       <p class="small"><strong>Unknown is acceptable.</strong> Never invent a measurement. Save Minimum Record as soon as the essential fields are complete; details can be finished during review.</p>
       <label>Feature location basis<select id="featureGeometryBasis"><option value="at_feature">I am at the feature</option><option value="phone_location_only">Phone location only — feature may be elsewhere</option><option value="measured_offset">Measured bearing and distance to feature</option><option value="mapped_polygon">Mapped polygon</option><option value="walked_line">Walked line</option></select></label>
@@ -640,6 +642,62 @@
         <label>Accuracy / limitation<input id="featureOffsetLimitation" placeholder="Example: bearing affected by nearby metal"></label>
       </div>
       <div id="featureFields"></div>
+      <section id="treeIdentificationPanel" class="structured-fields" hidden>
+        <h3 id="activeTreeIdentifier">TREE-000</h3>
+        <p class="small"><strong>This ID remains attached to everything captured before Save Tree.</strong> A physical identifier card is optional; originals remain unchanged.</p>
+        <label>Why this tree matters<select id="treeRecordType"><option>Unknown</option><option>Representative tree</option><option>Specimen or notable tree</option><option>Timber sample tree</option><option>Access obstruction</option><option>Possible hazard</option><option>Dead tree</option><option>Preserve candidate</option></select></label>
+        <label>Photo role<select id="treePhotoRole"><option>Whole tree</option><option>Crown</option><option>Trunk from base upward</option><option>Bark at breast height</option><option>Bark close-up</option><option>Tree base and root flare</option><option>Leaf attached to twig</option><option>Leaf upper surface</option><option>Leaf lower surface</option><option>Twig tip</option><option>Terminal bud</option><option>Fruit</option><option>Seed</option><option>Acorn</option><option>Cone side</option><option>DBH measurement</option><option>Habitat overview</option><option>Tree identifier</option><option>Other diagnostic feature</option></select></label>
+        <label>Plant material relationship<select id="treeMaterialAssociation"><option value="ATTACHED_TO_TARGET_TREE">Attached to target tree</option><option value="REACHABLE_BRANCH_OF_TARGET_TREE">Reachable branch of target tree</option><option value="NATURALLY_FALLEN_DIRECTLY_BENEATH_TARGET">Naturally fallen directly beneath target</option><option value="FOUND_IN_MIXED_GROUND_MATERIAL">Found in mixed ground material</option><option value="ASSOCIATION_UNCERTAIN">Association uncertain</option></select></label>
+        <label class="water-rule"><input id="treeOverlayGuidance" type="checkbox">Show the tree ID before camera and save a separate annotated analysis copy</label>
+        <h4>Circumference first</h4>
+        <label>Measurement choice<select id="treeMeasurementMode"><option>Circumference</option><option>Direct diameter</option><option>Estimate only</option><option>Not measured</option><option>Unsafe</option><option>No measuring tool</option><option>Irregular trunk</option><option>Multiple stems</option></select></label>
+        <label>Original circumference or direct diameter<input id="treeCircumference" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Unit<select id="treeCircumferenceUnit"><option value="in">inches</option><option value="cm">centimeters</option><option value="ft">feet</option><option value="m">meters</option></select></label>
+        <label>Tool<select id="treeCircumferenceTool"><option value="FLEXIBLE_HOSPITAL_TAPE">Flexible hospital/baby-measuring tape</option><option value="DIAMETER_TAPE">Diameter tape</option><option value="OTHER_FLEXIBLE_TAPE">Other flexible tape</option></select></label>
+        <label>Classification<select id="treeCircumferenceClass"><option>Measured</option><option>Estimated</option></select></label>
+        <label>Measurement height<input id="treeMeasurementHeight" type="number" value="54" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Height unit<select id="treeMeasurementHeightUnit"><option value="in">inches</option><option value="cm">centimeters</option></select></label>
+        <label>Height basis<select id="treeMeasurementHeightBasis"><option value="UPHILL_SIDE">Uphill side</option><option value="GROUND_LEVEL_AT_TRUNK">Ground at trunk</option><option value="NONSTANDARD_EXPLAINED">Nonstandard — explain in note</option></select></label>
+        <label>Stem ID<input id="treeStemId" value="STEM-1" placeholder="STEM-1"></label>
+        <label>Fork below 4 feet 6 inches?<select id="treeForkBelow"><option>No</option><option>Yes</option><option>Unsure</option></select></label>
+        <details><summary>Improve identification and measurement</summary>
+          <label>Overall leaf type<select id="treeOverallLeaf"><option>Unknown</option><option>Broadleaf</option><option>Needle leaf</option><option>Scale leaf</option><option>Palm-like</option></select></label>
+          <label>Leaf structure<select id="treeLeafStructure"><option>Unknown</option><option>Simple</option><option>Compound</option><option>Doubly compound</option><option>Needle</option><option>Scale</option></select></label>
+          <label>Leaf arrangement<select id="treeLeafArrangement"><option>Unknown</option><option>Alternate</option><option>Opposite</option><option>Whorled</option><option>Clustered</option></select></label>
+          <label>Bark texture<select id="treeBarkTexture"><option>Unknown</option><option>Smooth</option><option>Furrowed</option><option>Ridged</option><option>Scaly</option><option>Plated</option><option>Flaky</option><option>Peeling</option><option>Warty</option><option>Fibrous</option><option>Mottled</option></select></label>
+          <label>Nonstandard height / abnormal trunk reason<input id="treeNonstandardReason" placeholder="Bulge, wound, vine, cavity, fork…"></label>
+          <h4>Optional flexible-tape check</h4>
+          <label>Reference length used<input id="tapeCheckReference" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Flexible-tape reading<input id="tapeCheckReading" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Tape-check unit<select id="tapeCheckUnit"><option value="in">inches</option><option value="cm">centimeters</option></select></label>
+          <label><input id="treeQueueAnalysis" type="checkbox">Queue optional identification analysis; capture remains complete offline</label>
+        </details>
+        <p id="treeEvidenceNext" class="field-warning">NEXT: photograph the whole tree or visible crown.</p>
+        <div class="utilityButtons"><button id="treeEvidenceUnavailable" type="button">View unavailable — record why</button><button id="openTreeNetwork" type="button">Measure tree-to-tree distance</button></div>
+      </section>
+      <section id="yardstickWaterPanel" class="structured-fields" hidden>
+        <h3>Yardstick Water Measurement</h3>
+        <p class="small">Record visible water and soft-sediment penetration separately. The photograph supports your entered number; it is not the only record.</p>
+        <label>Visible water depth<input id="yardstickWaterDepth" type="number" min="0" step="0.25" inputmode="decimal"></label>
+        <label>Unit<select id="yardstickWaterUnit"><option value="in">inches</option><option value="cm">centimeters</option></select></label>
+        <label>Bottom reference<select id="yardstickBottom"><option>FIRM_BOTTOM</option><option>TOP_OF_SOFT_SEDIMENT</option><option>INTO_SOFT_SEDIMENT</option><option>BOTTOM_NOT_REACHED</option><option>UNKNOWN</option></select></label>
+        <label>Penetration into soft sediment — separate<input id="yardstickPenetration" type="number" min="0" step="0.25" inputmode="decimal"></label>
+        <label>Location role<select id="yardstickRole"><option>Deepest safely reachable point</option><option>Typical-depth point</option><option>Edge point</option><option>Center point</option><option>Inlet</option><option>Outlet</option><option>Other</option></select></label>
+        <label>Measurement classification<select id="yardstickClass"><option>Measured</option><option>Estimate only</option><option>Not measured — unsafe</option></select></label>
+        <label>Bottom-condition / limitation note<textarea id="yardstickNote" placeholder="Firm, soft, bottom not reached, markings not visible, unsafe…"></textarea></label>
+      </section>
+      <section id="candidateOpeningPanel" class="structured-fields" hidden>
+        <h3>Candidate Opening</h3>
+        <p class="small">Measure the usable opening, not the entire parcel. This is not a surveyed or approved building envelope.</p>
+        <label>Candidate type<select id="candidateType"><option>Unsure</option><option>Existing clear opening</option><option>Potential clearing envelope</option><option>Possible house location</option><option>Possible shop or barn location</option><option>Parking or staging area</option><option>Other candidate use area</option></select></label>
+        <label>Longest usable length<input id="candidateLength" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Perpendicular width near midpoint<input id="candidateWidth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Unit<select id="candidateUnit"><option value="ft">feet</option><option value="m">meters</option></select></label>
+        <label>Method<select id="candidateMethod"><option>100-foot measuring tape</option><option>Laser rangefinder</option><option>Paced</option><option>Estimated</option><option>Unknown</option></select></label>
+        <label>Next context photograph<select id="candidatePhotoDirection"><option>North context</option><option>East context</option><option>South context</option><option>West context</option><option>Along longest usable line</option><option>Limiting feature</option></select></label>
+        <div class="utilityButtons"><button id="toggleCandidatePerimeter" type="button">Start walked approximate perimeter</button></div>
+        <p id="candidatePerimeterStatus" class="small">No perimeter is active.</p>
+      </section>
       <label>Inspector note<textarea id="featureNote" placeholder="Observed fact or short explanation"></textarea></label>
       <label>Direct photograph role<select id="featurePhotoRole"></select></label>
       <div class="choice-grid">
@@ -648,13 +706,34 @@
         <label><input id="featureRepeatStation" type="checkbox">Make repeat station</label>
       </div>
       <p id="featureWarning" hidden></p>
+      <p id="featureSessionSummary" class="field-warning small">Session summary will update as evidence is saved.</p>
       <p id="featureVoiceStatus" class="small" hidden></p>
+      <div class="utilityButtons"><button id="featureStuck" type="button">I'M STUCK</button><button id="featureSwitch" class="cancel" type="button">Switch to a different feature</button></div>
+      <p id="featureHelpResponse" class="field-warning" hidden></p>
     </div>
     <div class="dialog-actions">
       <button id="saveMinimumFeature" class="minimum-action" type="button">SAVE MINIMUM RECORD</button>
       <button id="completeFeature" class="complete-action" type="button">SAVE &amp; COMPLETE FEATURE</button>
       <button id="deferFeature" class="defer-action" type="button">FINISH DETAILS DURING REVIEW</button>
     </div>
+  </dialog>
+
+  <dialog id="treeNetworkDialog">
+    <div class="dialog-body">
+      <h2>Tree Network Distance</h2>
+      <p class="field-warning">Measure the clear gap from bark to bark along the shortest line between the tree centers. Keep the tape taut and as level as practical. The app adds calculated radii only when both circumferences exist.</p>
+      <label>From tree<select id="treeDistanceFrom"></select></label>
+      <label>To tree<select id="treeDistanceTo"></select></label>
+      <label>Measured distance<input id="treeDistanceValue" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label>Unit<select id="treeDistanceUnit"><option value="ft">feet</option><option value="m">meters</option><option value="in">inches</option></select></label>
+      <label>Endpoints<select id="treeDistanceEndpoint"><option value="CLEAR_BARK_TO_BARK">Clear bark to bark — recommended</option><option value="APPROXIMATE_CENTER_TO_CENTER">Approximate center to center</option><option value="MARKED_CENTER_TARGETS">Marked center targets</option><option value="OUTSIDE_EDGE_TO_OUTSIDE_EDGE">Outside edge to outside edge</option><option value="OTHER">Other</option><option value="UNKNOWN">Unknown</option></select></label>
+      <label>Distance type<select id="treeDistanceType"><option value="APPROXIMATELY_HORIZONTAL">Approximately horizontal</option><option value="SLOPE_DISTANCE">Slope distance</option><option value="GROUND_FOLLOWING_DISTANCE">Ground-following distance</option><option value="INDIRECT_OR_OBSTRUCTED">Indirect or obstructed</option><option value="UNKNOWN">Unknown</option></select></label>
+      <label>Tape alignment<select id="treeTapeAlignment"><option>Taut and unobstructed</option><option>Minor sag</option><option>Significant sag</option><option>Routed around obstruction</option><option>Unable to verify</option><option>Unknown</option></select></label>
+      <label>100-foot-tape segments — comma separated<input id="treeDistanceSegments" placeholder="100, 100, 46.5"></label>
+      <label>Limitations<textarea id="treeDistanceLimitations" placeholder="Slope, obstruction, unsafe line, endpoints unclear…"></textarea></label>
+      <p id="treeNetworkRecommendation" class="field-warning">Save at least three broad, useful connections where practical. This is not a survey.</p>
+    </div>
+    <div class="dialog-actions"><button id="closeTreeNetwork" class="cancel" type="button">Close</button><button id="saveTreeDistance" type="button">Save distance &amp; update network</button></div>
   </dialog>
 
   <dialog id="departureDialog">
@@ -966,18 +1045,22 @@
     </div>
   </dialog>
 
-  <script src="./field-truth-engine.js?v=3.15.0"></script>
-  <script src="./guided-mission-orchestrator.js?v=3.15.0"></script>
-  <script src="./inspection-coaching.js?v=3.15.0"></script>
-  <script src="./water-intelligence.js?v=3.15.0"></script>
-  <script src="./evidence-governance.js?v=3.15.0"></script>
-  <script src="./evidence-sets.js?v=3.15.0"></script>
-  <script src="./timber-reconnaissance.js?v=3.15.0"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.15.0"></script>
-  <script src="./authoritative-weather.js?v=3.15.0"></script>
-  <script src="./property-value-engine.js?v=3.15.0"></script>
-  <script src="./inspection-package.js?v=3.15.0"></script>
-  <script src="./idb-recovery.js?v=3.15.0"></script>
-  <script src="./app.js?v=3.15.0"></script>
+  <script src="./field-truth-engine.js?v=3.16.0"></script>
+  <script src="./guided-mission-orchestrator.js?v=3.16.0"></script>
+  <script src="./tree-identification-engine.js?v=3.16.0"></script>
+  <script src="./field-capture-coach.js?v=3.16.0"></script>
+  <script src="./field-measurement-engine.js?v=3.16.0"></script>
+  <script src="./tree-network-engine.js?v=3.16.0"></script>
+  <script src="./inspection-coaching.js?v=3.16.0"></script>
+  <script src="./water-intelligence.js?v=3.16.0"></script>
+  <script src="./evidence-governance.js?v=3.16.0"></script>
+  <script src="./evidence-sets.js?v=3.16.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.16.0"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.16.0"></script>
+  <script src="./authoritative-weather.js?v=3.16.0"></script>
+  <script src="./property-value-engine.js?v=3.16.0"></script>
+  <script src="./inspection-package.js?v=3.16.0"></script>
+  <script src="./idb-recovery.js?v=3.16.0"></script>
+  <script src="./app.js?v=3.16.0"></script>
 </body>
 </html>

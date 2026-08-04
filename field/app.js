@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.15.0";
+  const APP_VERSION = "3.16.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -27,6 +27,10 @@
   const valueTools = window.PropertyValueEngine;
   const fieldTruthTools = window.FieldTruthEngine;
   const missionTools = window.GuidedMissionOrchestrator;
+  const treeIdentificationTools = window.TreeIdentificationEngine;
+  const fieldCoachTools = window.FieldCaptureCoach;
+  const measurementTools = window.FieldMeasurementEngine;
+  const treeNetworkTools = window.TreeNetworkEngine;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -271,6 +275,10 @@
     if (valueTools) valueTools.ensureInspectionModel(data);
     if (fieldTruthTools) fieldTruthTools.ensureInspectionModel(data);
     if (missionTools) missionTools.ensureModel(data);
+    if (treeIdentificationTools) treeIdentificationTools.ensureModel(data);
+    if (fieldCoachTools) fieldCoachTools.ensureModel(data);
+    if (measurementTools) measurementTools.ensureModel(data);
+    if (treeNetworkTools) treeNetworkTools.ensureModel(data);
     if (governanceTools) governanceTools.ensureGovernanceModel(data);
     if (evidenceSetTools) {
       evidenceSetTools.ensureEvidenceSetModel(data);
@@ -450,10 +458,11 @@
   }
 
   function renderFeatureFields(session) {
-    const template = fieldTruthTools.templateFor(session.button_type); const container = document.getElementById("featureFields"); container.innerHTML = "";
+    const template = fieldTruthTools.templateFor(session.button_type); const container = document.getElementById("featureFields"); container.innerHTML = ""; const captureMode = data.field_capture_mode || "GUIDED";
     template.fields.forEach(definition => {
       const [key, labelText, kind, choices] = definition; const label = document.createElement("label");
       const required = template.minimum.includes(key); label.appendChild(document.createTextNode(`${labelText}${required ? " — required minimum" : ""}`));
+      if (captureMode === "GUIDED" && !required) label.hidden = true;
       let input;
       if (kind === "select") {
         input = document.createElement("select"); (choices || []).forEach(choice => { const option = document.createElement("option"); option.value = choice; option.textContent = choice; input.appendChild(option); });
@@ -467,13 +476,143 @@
       container.appendChild(label);
     });
     const roles = document.getElementById("featurePhotoRole"); roles.innerHTML = ""; template.photo_roles.forEach(role => { const option = document.createElement("option"); option.value = role; option.textContent = role; roles.appendChild(option); });
+    renderSpecializedFeaturePanel(session);
     document.getElementById("featureWarning").hidden = !session.warning; document.getElementById("featureWarning").textContent = session.warning || "";
     const firstRequired = template.fields.find(item => template.minimum.includes(item[0])); if (firstRequired) speakFeaturePrompt(`Next, record ${firstRequired[1]}. Unknown is acceptable when you cannot determine it safely.`);
+  }
+
+  function renderSpecializedFeaturePanel(session) {
+    const isTree = session.button_type === "tree";
+    const isWater = ["wet", "ditch", "culvert"].includes(session.button_type);
+    const isCandidate = ["homesite", "open"].includes(session.button_type);
+    document.getElementById("treeIdentificationPanel").hidden = !isTree;
+    document.getElementById("yardstickWaterPanel").hidden = !isWater;
+    document.getElementById("candidateOpeningPanel").hidden = !isCandidate;
+    document.getElementById("fieldCaptureMode").value = data.field_capture_mode || "GUIDED";
+    document.getElementById("featureContextBanner").innerHTML = `<strong>Active feature: ${escapeHtml(session.feature_label)}</strong><br>Direct photos, voice notes, and measurements stay with this subject until you save or defer it.`;
+    if (isTree && treeIdentificationTools) {
+      const tree = treeIdentificationTools.sessionForFeature(data, session.feature_session_id);
+      if (tree) {
+        document.getElementById("activeTreeIdentifier").textContent = tree.tree_identifier;
+        document.getElementById("treeRecordType").value = tree.tree_record_type || "Unknown";
+        const minimum = treeIdentificationTools.minimumEvidence(data, tree.tree_identification_session_id);
+        document.getElementById("treeEvidenceNext").textContent = minimum && minimum.missing.length ? `NEXT: Collect ${minimum.missing[0]}, or record why that view is unavailable or unsafe.` : "Minimum identification evidence is accounted for. Add only evidence that improves confidence.";
+      }
+      const photoRoles = document.getElementById("featurePhotoRole"); photoRoles.innerHTML = "";
+      treeIdentificationTools.PHOTO_ROLES.forEach(role => { const option = document.createElement("option"); option.value = role; option.textContent = role; photoRoles.appendChild(option); });
+      restoreSpecializedDraft(session, "_tree_capture_draft");
+      photoRoles.value = document.getElementById("treePhotoRole").value;
+    }
+    if (isWater) restoreSpecializedDraft(session, "_yardstick_capture_draft");
+    if (isCandidate && measurementTools) {
+      restoreSpecializedDraft(session, "_candidate_opening_draft");
+      const candidate = measurementTools.candidateForFeature(data, session.feature_session_id); const perimeter = candidate && candidate.perimeters.find(item => item.candidate_perimeter_id === candidate.active_perimeter_id);
+      document.getElementById("toggleCandidatePerimeter").textContent = perimeter ? "Finish walked approximate perimeter" : "Start walked approximate perimeter";
+      document.getElementById("candidatePerimeterStatus").textContent = perimeter ? `${perimeter.track_points.length} approximate phone-GPS perimeter points saved. Keep walking the visible usable edge.` : (candidate && candidate.perimeters.length ? `${candidate.perimeters.length} approximate perimeter record(s) saved. None active.` : "No perimeter is active.");
+    }
+    renderFeatureSessionSummary(session);
+  }
+
+  function restoreSpecializedDraft(session, key) {
+    const draft = session.structured_attributes && session.structured_attributes[key] || {}; Object.entries(draft).forEach(([id, value]) => { const element = document.getElementById(id); if (!element || value == null) return; if (element.type === "checkbox") element.checked = Boolean(value); else element.value = value; });
+  }
+
+  function captureSpecializedDraft(ids) {
+    const result = {}; ids.forEach(id => { const element = document.getElementById(id); if (element) result[id] = element.type === "checkbox" ? element.checked : element.value; }); return result;
+  }
+
+  function renderFeatureSessionSummary(session) {
+    const measurements = session.button_type === "tree" && treeIdentificationTools ? ((treeIdentificationTools.sessionForFeature(data, session.feature_session_id) || {}).measurements || []) : (session.button_type === "wet" ? (data.yardstick_water_measurements || []).filter(item => item.water_feature_session_id === session.feature_session_id) : []);
+    const measured = measurements.filter(item => /measured/i.test(item.measurement_classification || "")), estimated = measurements.filter(item => /estimated|estimate/i.test(item.measurement_classification || ""));
+    const tree = treeIdentificationTools && treeIdentificationTools.sessionForFeature(data, session.feature_session_id); const missing = tree ? treeIdentificationTools.minimumEvidence(data, tree.tree_identification_session_id).missing : [];
+    const value = (data.active_value_driver_ids || []).length ? `${data.active_value_driver_ids.length} Value Driver(s) active` : "Value not assessed";
+    document.getElementById("featureSessionSummary").textContent = `SUMMARY · ${measured.length} measured · ${estimated.length} estimated · ${(session.direct_photographs || []).length} direct photo(s) · ${(session.direct_voice_notes || []).length} direct voice note(s) · ${missing.length ? `missing: ${missing.join(", ")}` : "minimum photo evidence accounted for"} · ${value}.`;
+  }
+
+  function toggleCandidatePerimeter() {
+    if (!measurementTools || !activeFeatureSessionId) return; const session = fieldTruthTools.sessionById(data, activeFeatureSessionId); if (!session) return;
+    try {
+      let candidate = measurementTools.candidateForFeature(data, session.feature_session_id); if (!candidate) candidate = measurementTools.createCandidateAreaSession(data, { feature_capture_session_id: session.feature_session_id, candidate_type: document.getElementById("candidateType").value, center_phone_gps: session.geometry.phone_location, active_value_lens: currentEvidenceContext() });
+      if (candidate.active_perimeter_id) measurementTools.finishPerimeter(data, candidate.candidate_area_session_id, { fully_walked: confirm("Did you safely walk the entire visible usable perimeter? Tap Cancel for No; blocked or inferred sections remain limitations.") });
+      else measurementTools.startPerimeter(data, candidate.candidate_area_session_id, { started_at: new Date().toISOString() });
+      saveState(); renderSpecializedFeaturePanel(session);
+    } catch (error) { setStatus(`CANDIDATE PERIMETER NOT SAVED: ${error.message}`, "error"); }
+  }
+
+  function activeTreeSession() {
+    return treeIdentificationTools && activeFeatureSessionId ? treeIdentificationTools.sessionForFeature(data, activeFeatureSessionId) : null;
+  }
+
+  function saveSpecializedFeatureDetails(session) {
+    if (session.button_type === "tree" && treeIdentificationTools) {
+      const tree = treeIdentificationTools.sessionForFeature(data, session.feature_session_id);
+      if (tree) {
+        const measurementMode = document.getElementById("treeMeasurementMode").value;
+        treeIdentificationTools.applyDraft(data, tree.tree_identification_session_id, { tree_record_type: document.getElementById("treeRecordType").value, current_prompt: "next_high_value_photo", field_traits: { overall_leaf_type: document.getElementById("treeOverallLeaf").value, leaf_structure: document.getElementById("treeLeafStructure").value, leaf_arrangement: document.getElementById("treeLeafArrangement").value, bark_texture: document.getElementById("treeBarkTexture").value, measurement_disposition: measurementMode } });
+        const measuredValue = Number(document.getElementById("treeCircumference").value); const unit = document.getElementById("treeCircumferenceUnit").value; const stemId = document.getElementById("treeStemId").value.trim() || "STEM-1";
+        const common = { measurement_height: document.getElementById("treeMeasurementHeight").value, measurement_height_unit: document.getElementById("treeMeasurementHeightUnit").value, measurement_height_basis: document.getElementById("treeMeasurementHeightBasis").value, measurement_classification: document.getElementById("treeCircumferenceClass").value, measurement_notes: document.getElementById("featureNote").value.trim(), nonstandard_height_reason: document.getElementById("treeNonstandardReason").value.trim(), fork_below_measurement_height: document.getElementById("treeForkBelow").value, stem_id: stemId };
+        if (measuredValue > 0 && measurementMode === "Direct diameter" && !tree.measurements.some(item => item.measurement_type === "TREE_DIAMETER" && item.stem_id === stemId && item.original_diameter_value === measuredValue)) {
+          treeIdentificationTools.recordDirectDiameter(data, tree.tree_identification_session_id, Object.assign({}, common, { original_diameter_value: measuredValue, original_diameter_unit: unit, measurement_method: document.getElementById("treeCircumferenceTool").value }));
+        } else if (measuredValue > 0 && ["Circumference", "Estimate only", "Irregular trunk", "Multiple stems"].includes(measurementMode) && !tree.measurements.some(item => item.measurement_type === "TREE_CIRCUMFERENCE" && item.stem_id === stemId && item.original_circumference_value === measuredValue && item.original_circumference_unit === unit)) {
+          treeIdentificationTools.recordCircumference(data, tree.tree_identification_session_id, Object.assign({}, common, { original_circumference_value: measuredValue, original_circumference_unit: unit, circumference_tool: document.getElementById("treeCircumferenceTool").value, measurement_classification: measurementMode === "Estimate only" ? "Estimated" : common.measurement_classification }));
+        }
+        const reference = Number(document.getElementById("tapeCheckReference").value), reading = Number(document.getElementById("tapeCheckReading").value);
+        if (measurementTools && reference > 0 && reading > 0 && !(data.tree_tape_checks || []).some(item => item.reference_length_used === reference && item.flexible_tape_reading === reading && item.unit === document.getElementById("tapeCheckUnit").value)) measurementTools.recordTapeCheck(data, { reference_length_used: reference, flexible_tape_reading: reading, unit: document.getElementById("tapeCheckUnit").value, status: Math.abs(reference - reading) <= reference * .01 ? "Passed" : "Difference observed", notes: "Optional in-field comparison against 100-foot reference tape." });
+      }
+    }
+    if (["wet", "ditch", "culvert"].includes(session.button_type) && measurementTools) {
+      const depth = Number(document.getElementById("yardstickWaterDepth").value);
+      if (depth > 0) {
+        const already = data.yardstick_water_measurements.some(item => item.water_feature_session_id === session.feature_session_id && item.measurement_value === depth && item.measurement_unit === document.getElementById("yardstickWaterUnit").value);
+        if (!already) measurementTools.recordWaterMeasurement(data, {
+          water_feature_session_id: session.feature_session_id, measurement_type: "VISIBLE_WATER_DEPTH", measurement_value: depth,
+          measurement_unit: document.getElementById("yardstickWaterUnit").value, measurement_tool: "YARDSTICK", yardstick_length: 36, yardstick_unit: "in",
+          bottom_reference: document.getElementById("yardstickBottom").value, rod_penetration_depth: document.getElementById("yardstickPenetration").value,
+          measurement_location_role: document.getElementById("yardstickRole").value, measurement_classification: document.getElementById("yardstickClass").value,
+          direct_photo_ids: (session.direct_photographs || []).map(item => item.photo_id), measurement_notes: document.getElementById("yardstickNote").value.trim(),
+          limitations: document.getElementById("yardstickClass").value === "Not measured — unsafe" ? ["Unsafe to enter"] : []
+        });
+      }
+    }
+    if (["homesite", "open"].includes(session.button_type) && measurementTools) {
+      let candidate = measurementTools.candidateForFeature(data, session.feature_session_id);
+      if (!candidate) candidate = measurementTools.createCandidateAreaSession(data, { feature_capture_session_id: session.feature_session_id, candidate_type: document.getElementById("candidateType").value, center_phone_gps: session.geometry.phone_location, active_value_lens: currentEvidenceContext() });
+      const length = Number(document.getElementById("candidateLength").value), width = Number(document.getElementById("candidateWidth").value), unit = document.getElementById("candidateUnit").value, method = document.getElementById("candidateMethod").value;
+      if (length > 0 && !candidate.dimensions.some(item => item.dimension_type === "LONGEST_USABLE_LENGTH")) measurementTools.recordDimension(data, candidate.candidate_area_session_id, { dimension_type: "LONGEST_USABLE_LENGTH", value: length, unit, method, measurement_classification: method === "Estimated" ? "Estimated" : "Measured" });
+      if (width > 0 && !candidate.cross_sections.some(item => item.position_role === "Midpoint perpendicular width")) measurementTools.recordCrossSection(data, candidate.candidate_area_session_id, { position_role: "Midpoint perpendicular width", width, unit, method });
+    }
+  }
+
+  function recordFeatureHelp() {
+    if (!fieldCoachTools || !activeFeatureSessionId) return;
+    const session = fieldTruthTools.sessionById(data, activeFeatureSessionId); const reason = prompt("What is stopping you? Unsafe, unclear instruction, cannot reach, tool problem, GPS problem, camera problem, or other?", "Unclear instruction") || "Other";
+    const response = fieldCoachTools.stuckResponse(data, { feature_capture_session_id: activeFeatureSessionId, feature_type: session.button_type, reason, disposition: /unsafe/i.test(reason) ? "STOP_UNSAFE" : "USE_ALTERNATIVE" });
+    const help = document.getElementById("featureHelpResponse"); help.hidden = false; help.textContent = `${response.plain_language_instruction} Alternative: ${response.alternative_method} Stop when: ${response.when_to_stop}`; saveState();
+  }
+
+  function openTreeNetworkDialog() {
+    if (!treeNetworkTools) return; const trees = data.tree_identification_sessions || []; if (trees.length < 2) { setStatus("Save at least two trees before measuring a tree-to-tree distance.", "warning"); return; }
+    ["treeDistanceFrom", "treeDistanceTo"].forEach((id, selectIndex) => { const select = document.getElementById(id); select.innerHTML = ""; trees.forEach((tree, index) => { const option = document.createElement("option"); option.value = tree.tree_id; option.textContent = `${tree.tree_identifier} — ${tree.provisional_identification || tree.tree_record_type}`; select.appendChild(option); }); select.selectedIndex = Math.min(selectIndex, trees.length - 1); });
+    const run = treeNetworkTools.runSolver(data); const next = run.next_measurement_recommendations[0]; if (next) { document.getElementById("treeDistanceFrom").value = next.from_tree_id; document.getElementById("treeDistanceTo").value = next.to_tree_id; document.getElementById("treeNetworkRecommendation").textContent = next.message; }
+    saveState(); document.getElementById("treeNetworkDialog").showModal();
+  }
+
+  function saveTreeNetworkDistance() {
+    try {
+      const session = treeNetworkTools.createDistanceSession(data, { from_tree_id: document.getElementById("treeDistanceFrom").value, to_tree_id: document.getElementById("treeDistanceTo").value });
+      const segments = document.getElementById("treeDistanceSegments").value.split(",").map(value => value.trim()).filter(Boolean).map(value => ({ measured_value: Number(value), unit: document.getElementById("treeDistanceUnit").value }));
+      const observation = treeNetworkTools.recordDistance(data, session.tree_distance_session_id, { measured_value: document.getElementById("treeDistanceValue").value, unit: document.getElementById("treeDistanceUnit").value, endpoint_basis: document.getElementById("treeDistanceEndpoint").value, distance_type: document.getElementById("treeDistanceType").value, measurement_tool: "TAPE_100_FT", tape_alignment: document.getElementById("treeTapeAlignment").value, segments, limitations: document.getElementById("treeDistanceLimitations").value.trim() ? [document.getElementById("treeDistanceLimitations").value.trim()] : [] });
+      saveState(); document.getElementById("treeNetworkDialog").close(); setStatus(`Distance saved without changing the original: ${observation.measured_value} ${observation.unit}. Relative network and next recommendation updated offline.`, "success");
+    } catch (error) { setStatus(`TREE DISTANCE NOT SAVED: ${error.message}`, "error"); }
   }
 
   function featureAttributesFromDialog() {
     const attributes = {};
     document.querySelectorAll("#featureFields [data-feature-field]").forEach(input => { attributes[input.dataset.featureField] = typeof input.value === "string" ? input.value.trim() : input.value; });
+    const active = fieldTruthTools && fieldTruthTools.sessionById(data, activeFeatureSessionId);
+    if (active && active.button_type === "tree") attributes._tree_capture_draft = captureSpecializedDraft(["treeRecordType", "treePhotoRole", "treeMaterialAssociation", "treeOverlayGuidance", "treeMeasurementMode", "treeCircumference", "treeCircumferenceUnit", "treeCircumferenceTool", "treeCircumferenceClass", "treeMeasurementHeight", "treeMeasurementHeightUnit", "treeMeasurementHeightBasis", "treeStemId", "treeForkBelow", "treeOverallLeaf", "treeLeafStructure", "treeLeafArrangement", "treeBarkTexture", "treeNonstandardReason", "tapeCheckReference", "tapeCheckReading", "tapeCheckUnit", "treeQueueAnalysis"]);
+    if (active && ["wet", "ditch", "culvert"].includes(active.button_type)) attributes._yardstick_capture_draft = captureSpecializedDraft(["yardstickWaterDepth", "yardstickWaterUnit", "yardstickBottom", "yardstickPenetration", "yardstickRole", "yardstickClass", "yardstickNote"]);
+    if (active && ["homesite", "open"].includes(active.button_type)) attributes._candidate_opening_draft = captureSpecializedDraft(["candidateType", "candidateLength", "candidateWidth", "candidateUnit", "candidateMethod", "candidatePhotoDirection"]);
     const note = document.getElementById("featureNote").value.trim(); if (note) attributes.inspector_note = note;
     return attributes;
   }
@@ -498,6 +637,7 @@
 
   function showFeatureSession(session) {
     activeFeatureSessionId = session.feature_session_id; document.getElementById("featureCaptureTitle").textContent = session.feature_label;
+    document.getElementById("completeFeature").textContent = session.button_type === "tree" ? "SAVE TREE" : (["wet", "ditch", "culvert"].includes(session.button_type) ? "SAVE WATER FEATURE" : (["homesite", "open"].includes(session.button_type) ? "SAVE CANDIDATE AREA" : "SAVE & COMPLETE FEATURE"));
     document.getElementById("featureGeometryBasis").value = session.geometry.geometry_basis || "phone_location_only";
     const offset = session.geometry.measured_offset || {}; document.getElementById("featureOffsetBearing").value = offset.bearing_to_feature_deg == null ? "" : offset.bearing_to_feature_deg;
     document.getElementById("featureOffsetDistance").value = offset.distance_to_feature_m == null ? "" : offset.distance_to_feature_m; document.getElementById("featureOffsetMethod").value = offset.distance_method || "Unknown";
@@ -521,6 +661,10 @@
       if (type === "routeCondition") fieldTruthTools.appendWalkedLinePoint(data, session.feature_session_id, lastPosition);
       const marker = markerFromPosition(type, "", null, session.opened_at, lastPosition, { source: "feature_capture_session", attributes: { feature_session_id: session.feature_session_id, feature_session_status_at_creation: "draft", geometry_basis: session.geometry.geometry_basis } });
       data.markers.push(marker); fieldTruthTools.attachDirectEvidence(data, session.feature_session_id, "observation", marker.id); if (missionStep && missionTools) missionTools.attachEvidence(data, missionStep.mission_step_id, session.feature_session_id); saveState(); redraw(); renderCoaching(); renderMissionProgress(); showFeatureSession(session);
+      if (type === "tree" && treeIdentificationTools) {
+        const treeSession = treeIdentificationTools.createSession(data, { feature_capture_session_id: session.feature_session_id, tree_observation_id: marker.id, phone_gps: session.geometry.phone_location, gps_accuracy: session.geometry.phone_location.accuracy_m, active_value_lens: currentEvidenceContext() });
+        saveState(); showFeatureSession(session); setStatus(`${treeSession.tree_identifier} is active. Everything captured before Save Tree stays directly attached to this tree.`, "active"); return;
+      }
       setStatus(`${session.feature_label} position and time are safe. Complete the required minimum fields; Unknown is acceptable.`, "active");
     } catch (error) { setStatus(`FEATURE SESSION NOT STARTED: ${error.message}`, "error"); }
   }
@@ -530,14 +674,18 @@
     try {
       updateFeatureSessionGeometry(); const attributes = featureAttributesFromDialog();
       const session = fieldTruthTools.saveMinimumSession(data, activeFeatureSessionId, attributes, []);
+      saveSpecializedFeatureDetails(session);
       const photo = document.getElementById("featureTakePhoto").checked; const voice = document.getElementById("featureTakeVoice").checked; const repeat = document.getElementById("featureRepeatStation").checked; const role = document.getElementById("featurePhotoRole").value;
       if (repeat && !session.repeat_station_id) fieldTruthTools.makeRepeatStation(data, session.feature_session_id, { camera_direction_deg: session.compass_heading_deg, photo_role_template: session.required_photo_roles, desired_trigger: "Scheduled date" });
       if (mode === "complete") fieldTruthTools.completeSession(data, session.feature_session_id); else if (mode === "defer") fieldTruthTools.abandonDraftForLater(data, session.feature_session_id, "Complete structured details during review");
+      const tree = treeIdentificationTools && treeIdentificationTools.sessionForFeature(data, session.feature_session_id);
+      if (tree) { if (mode === "complete") treeIdentificationTools.completeSession(data, tree.tree_identification_session_id); else treeIdentificationTools.saveMinimum(data, tree.tree_identification_session_id); }
       saveState();
+      if (mode === "minimum") renderSpecializedFeaturePanel(session);
       if (mode !== "minimum" || photo || voice) featureCaptureDialog.close();
       activeFeatureSessionId = mode === "minimum" ? session.feature_session_id : null; renderFieldTruthControls(); renderCoaching(); renderMissionProgress(); updateNextStep();
       setStatus(mode === "complete" ? `${session.feature_label} completed as structured Field Truth.` : (mode === "defer" ? `${session.feature_label} minimum record saved for review. No evidence was discarded.` : `${session.feature_label} minimum record saved. Continue details now, or complete it during review.`), "success");
-      if (photo) await takePhoto({ category: session.feature_label, note: attributes.inspector_note || "", feature_session_id: session.feature_session_id, feature_photo_role: role, associatedObservationId: session.direct_observation_ids[0] || null });
+      if (photo) await takePhoto({ category: session.feature_label, note: attributes.inspector_note || "", feature_session_id: session.feature_session_id, feature_photo_role: role, tree_identification_session_id: tree && tree.tree_identification_session_id || null, tree_material_association: tree ? document.getElementById("treeMaterialAssociation").value : null, tree_identifier_overlay_requested: Boolean(tree && document.getElementById("treeOverlayGuidance").checked), tree_analysis_requested: Boolean(tree && document.getElementById("treeQueueAnalysis").checked), associatedObservationId: session.direct_observation_ids[0] || null });
       if (voice) await startVoiceRecording({ purpose: "feature_session_explanation", feature_session_id: session.feature_session_id, prompt: `Explain why this ${session.feature_label.toLowerCase()} matters.`, area_id: session.area_id, question_ids: session.question_ids });
     } catch (error) { setStatus(`FEATURE RECORD NOT SAVED: ${error.message}`, "error"); speakFeaturePrompt(error.message); }
   }
@@ -1493,6 +1641,11 @@
     actions.forEach(action => { const item = document.createElement("li"); item.textContent = action.action; list.appendChild(item); });
     const missionReview = missionTools ? missionTools.buildFinishReview(data) : null;
     if (missionReview) { renderMissionFinishReview(missionReview); saveState(); }
+    if (fieldCoachTools) {
+      const completeness = fieldCoachTools.completeness(data);
+      const issueCount = completeness.sessions.reduce((sum, session) => sum + session.issues.length, 0) + completeness.media_captured_outside_session.length;
+      if (issueCount) { const item = document.createElement("li"); item.textContent = `${issueCount} guided-capture completeness item(s) remain. Unknown, unsafe, and skip-with-reason are valid; review before leaving when practical.`; list.prepend(item); }
+    }
     departureDialog.showModal();
   }
 
@@ -2460,6 +2613,7 @@
       const routeSession = fieldTruthTools.activeSession(data);
       if (routeSession && routeSession.geometry && routeSession.geometry.geometry_basis === "walked_line") fieldTruthTools.appendWalkedLinePoint(data, routeSession.feature_session_id, point);
     }
+    if (measurementTools) (data.candidate_area_sessions || []).filter(item => item.active_perimeter_id).forEach(item => measurementTools.appendPerimeterPoint(data, item.candidate_area_session_id, point));
     coverageDirty = true;
     gpsWriteQueue = gpsWriteQueue
       .then(() => gpsPointPut(data.inspection_id, point))
@@ -2876,6 +3030,7 @@
       metadata.finished_at = new Date().toISOString();
       metadata.duration_ms = Math.max(0, new Date(metadata.finished_at) - new Date(metadata.started_at));
       metadata.size_bytes = audioBlob.size;
+      if (typeof packageTools.sha256Hex === "function") metadata.sha256 = await packageTools.sha256Hex(audioBlob);
       const voiceEvent = {
         id: makeId("event"),
         source: isEvidenceExplanation ? metadata.purpose : "button_press",
@@ -2907,6 +3062,10 @@
       data.voice_notes.push(metadata);
       if (metadata.evidence_set_id && evidenceSetTools) evidenceSetTools.attachRecord(data, metadata.evidence_set_id, "voice_note", metadata, { created_by: data.inspector_identity });
       if (metadata.feature_session_id && fieldTruthTools) fieldTruthTools.attachDirectEvidence(data, metadata.feature_session_id, "voice_note", metadata.id, { role: metadata.purpose || "Feature explanation", recorded_at: metadata.started_at });
+      if (metadata.feature_session_id && treeIdentificationTools) {
+        const tree = treeIdentificationTools.sessionForFeature(data, metadata.feature_session_id);
+        if (tree && metadata.sha256) treeIdentificationTools.attachDirectMedia(data, tree.tree_identification_session_id, { media_id: metadata.id, media_type: "voice_note", media_role: "Other diagnostic feature", captured_at: metadata.started_at, original_file_hash: metadata.sha256, material_association: "ASSOCIATION_UNCERTAIN" });
+      }
       data.pending_voice_note = null;
       data.markers.push(voiceEvent);
       saveState();
@@ -3333,13 +3492,16 @@
         metadata: record.metadata,
         event: record.event,
         original_type: record.originalBlob.type,
-        analysis_type: record.analysisBlob.type
+        analysis_type: record.analysisBlob.type,
+        annotated_type: record.annotatedBlob && record.annotatedBlob.type || null
       };
-      await Promise.all([
+      const writes = [
         cache.put(pendingPhotoUrl(record.id, "record.json"), new Response(JSON.stringify(metadata), { headers: { "content-type": "application/json" } })),
         cache.put(pendingPhotoUrl(record.id, "original"), new Response(record.originalBlob, { headers: { "content-type": record.originalBlob.type || "application/octet-stream" } })),
         cache.put(pendingPhotoUrl(record.id, "analysis"), new Response(record.analysisBlob, { headers: { "content-type": record.analysisBlob.type || "image/jpeg" } }))
-      ]);
+      ];
+      if (record.annotatedBlob instanceof Blob && record.annotatedBlob.size) writes.push(cache.put(pendingPhotoUrl(record.id, "annotated"), new Response(record.annotatedBlob, { headers: { "content-type": record.annotatedBlob.type || "image/jpeg" } })));
+      await Promise.all(writes);
       return true;
     } catch (error) {
       return false;
@@ -3352,7 +3514,7 @@
     if (!("caches" in window)) return;
     try {
       const cache = await caches.open(pendingPhotoCacheName);
-      await Promise.all(["record.json", "original", "analysis"].map(part => cache.delete(pendingPhotoUrl(id, part))));
+      await Promise.all(["record.json", "original", "analysis", "annotated"].map(part => cache.delete(pendingPhotoUrl(id, part))));
     } catch (error) {
       // The canonical IndexedDB record is already verified; stale fallback entries are harmless.
     }
@@ -3376,7 +3538,8 @@
         if (!originalResponse || !analysisResponse) continue;
         const record = Object.assign({}, saved, {
           originalBlob: await originalResponse.blob(),
-          analysisBlob: await analysisResponse.blob()
+          analysisBlob: await analysisResponse.blob(),
+          annotatedBlob: saved.annotated_type ? await cache.match(pendingPhotoUrl(saved.id, "annotated")).then(response => response && response.blob()) : null
         });
         if (!pendingPhotoQueue.some(item => String(item.id) === String(record.id))) pendingPhotoQueue.push(record);
       }
@@ -3396,6 +3559,17 @@
       if (set && !(set.photo_links || []).some(link => String(link.record_id) === String(metadata.id))) evidenceSetTools.attachRecord(data, metadata.evidence_set_id, "photo", metadata, { photo_role: "Context", created_by: data.inspector_identity });
     }
     if (metadata.feature_session_id && fieldTruthTools) fieldTruthTools.attachDirectEvidence(data, metadata.feature_session_id, "photo", metadata.id, { role: metadata.feature_photo_role || "Context", recorded_at: metadata.recorded_at });
+    if (metadata.feature_session_id && measurementTools) (data.yardstick_water_measurements || []).filter(item => item.water_feature_session_id === metadata.feature_session_id).forEach(item => { if (!item.direct_photo_ids.includes(metadata.id)) item.direct_photo_ids.push(metadata.id); });
+    if (metadata.tree_identification_session_id && treeIdentificationTools) {
+      treeIdentificationTools.attachDirectMedia(data, metadata.tree_identification_session_id, { media_id: metadata.id, media_type: "photograph", media_role: metadata.feature_photo_role || "Other diagnostic feature", captured_at: metadata.recorded_at, original_file_hash: metadata.original_sha256, material_association: metadata.tree_material_association || "ASSOCIATION_UNCERTAIN", annotated_derivative_id: metadata.annotated_derivative && metadata.annotated_derivative.derivative_id || null });
+      const adequateResolution = Number(metadata.analysis_width_px || metadata.width_px) >= 1200 && Number(metadata.analysis_height_px || metadata.height_px) >= 900;
+      const quality = treeIdentificationTools.recordImageQuality(data, metadata.tree_identification_session_id, { media_id: metadata.id, checks: { resolution_adequate: adequateResolution, focus: "NOT_RELIABLY_MEASURABLE_OFFLINE", glare: "REVIEW_IMAGE", exposure: "REVIEW_IMAGE", diagnostic_feature_visible: "INSPECTOR_REVIEW_REQUIRED" }, retake_recommended: !adequateResolution, prompt: adequateResolution ? "Image preserved. Continue to the next missing high-value view." : "This image may be too small for identification. Retake if safe; the original remains preserved.", inspector_disposition: "PENDING", limitation: "The browser can check dimensions but cannot reliably prove focus, glare, or botanical usefulness without inspector review." });
+      if (quality.retake_recommended) setStatus(quality.prompt, "warning");
+      const tree = treeIdentificationTools.sessionById(data, metadata.tree_identification_session_id);
+      if (tree && !tree.adaptive_requests.some(item => item.status === "OPEN")) treeIdentificationTools.createAdaptiveRequests(data, tree.tree_identification_session_id, { candidate_species_compared: [] });
+      const feature = fieldTruthTools && fieldTruthTools.sessionById(data, metadata.feature_session_id); if (tree) { if (feature && feature.status === "complete") treeIdentificationTools.completeSession(data, tree.tree_identification_session_id); else treeIdentificationTools.saveMinimum(data, tree.tree_identification_session_id); }
+      if (tree && metadata.tree_analysis_requested) treeIdentificationTools.queueProviderAnalysis(data, tree.tree_identification_session_id, { adapter_id: "plantnet", selected_images: tree.direct_media_relationships.filter(item => item.media_type === "photograph").slice(-5).map(item => { const role = String(item.media_role || ""); let organ = "auto"; if (/leaf|needle|foliage/i.test(role)) organ = "leaf"; else if (/bark|trunk/i.test(role)) organ = "bark"; else if (/fruit|seed|acorn|cone/i.test(role)) organ = "fruit"; return { media_id: item.media_id, organ }; }), online: navigator.onLine, consent: true, proxy_url: null });
+    }
     if (metadata.feature_session_id && fieldTruthTools && missionTools) {
       const session = fieldTruthTools.sessionById(data, metadata.feature_session_id);
       (session && session.mission_ids || []).forEach(stepId => {
@@ -3528,6 +3702,19 @@
     }
   }
 
+  async function createTreeIdentifierDerivative(blob, treeIdentifier) {
+    const decoded = await loadImageSource(blob);
+    try {
+      const canvas = document.createElement("canvas"); canvas.width = decoded.width; canvas.height = decoded.height;
+      const context = canvas.getContext("2d", { alpha: false }); context.drawImage(decoded.source, 0, 0);
+      const fontSize = Math.max(30, Math.round(Math.min(decoded.width, decoded.height) * 0.055)); context.font = `800 ${fontSize}px system-ui`; context.textBaseline = "bottom";
+      const label = String(treeIdentifier || "TREE"); const padding = Math.round(fontSize * .45); const width = context.measureText(label).width + padding * 2;
+      context.fillStyle = "rgba(0,0,0,.72)"; context.fillRect(0, canvas.height - fontSize - padding * 2, width, fontSize + padding * 2);
+      context.fillStyle = "#fff"; context.fillText(label, padding, canvas.height - padding);
+      return await new Promise((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Tree identifier derivative could not be created.")), "image/jpeg", .82));
+    } finally { decoded.close(); }
+  }
+
   function getFreshPositionForPhoto() {
     return new Promise(resolve => {
       let settled = false;
@@ -3568,11 +3755,19 @@
       evidence_set_id: context && context.evidence_set_id ? context.evidence_set_id : data.active_evidence_set_id,
       feature_session_id: context && context.feature_session_id ? context.feature_session_id : data.active_feature_session_id,
       feature_photo_role: context && context.feature_photo_role ? context.feature_photo_role : "Context",
+      tree_identification_session_id: context && context.tree_identification_session_id ? context.tree_identification_session_id : (activeTreeSession() && activeTreeSession().tree_identification_session_id || null),
+      tree_material_association: context && context.tree_material_association ? context.tree_material_association : (document.getElementById("treeMaterialAssociation") && document.getElementById("treeMaterialAssociation").value || null),
+      tree_identifier_overlay_requested: Boolean(context && context.tree_identifier_overlay_requested != null ? context.tree_identifier_overlay_requested : (activeTreeSession() && document.getElementById("treeOverlayGuidance").checked)),
+      tree_analysis_requested: Boolean(context && context.tree_analysis_requested != null ? context.tree_analysis_requested : (activeTreeSession() && document.getElementById("treeQueueAnalysis").checked)),
       timber_tree_id: context && context.timber_tree_id ? context.timber_tree_id : (activeSetForPhoto && activeSetForPhoto.set_type === "Individual Tree" ? (activeSetForPhoto.subject_details && activeSetForPhoto.subject_details.timber_tree_id || activeSetForPhoto.tree_id) : (activePlotForPhoto && activePlotForPhoto.active_tree_id || null))
     });
     pendingPhotoRequestedAt = new Date().toISOString();
     try {
       await (photoHealthPromise || preparePhotoStorage());
+      if (pendingPhotoContext.tree_identifier_overlay_requested) {
+        const tree = treeIdentificationTools.sessionById(data, pendingPhotoContext.tree_identification_session_id);
+        if (tree && !confirm(`${tree.tree_identifier} is the active tree. Keep this tree centered, then continue to the camera. A separate labeled analysis copy will be saved; the original will remain unchanged.`)) { pendingPhotoRequestedAt = null; pendingPhotoContext = null; return; }
+      }
       photoInput.click();
     } catch (error) {
       pendingPhotoRequestedAt = null;
@@ -3673,6 +3868,9 @@
         ,evidence_set_id: photoContext.evidence_set_id || null
         ,feature_session_id: photoContext.feature_session_id || null
         ,feature_photo_role: photoContext.feature_photo_role || "Context"
+        ,tree_identification_session_id: photoContext.tree_identification_session_id || null
+        ,tree_material_association: photoContext.tree_material_association || null
+        ,tree_analysis_requested: Boolean(photoContext.tree_analysis_requested)
         ,timber_tree_id: photoContext.timber_tree_id || null
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
@@ -3697,13 +3895,22 @@
         metadata.original_sha256 = hashes[0];
         metadata.analysis_sha256 = hashes[1];
       }
+      let annotatedBlob = null;
+      if (photoContext.tree_identifier_overlay_requested && photoContext.tree_identification_session_id) {
+        const tree = treeIdentificationTools.sessionById(data, photoContext.tree_identification_session_id);
+        if (tree) {
+          annotatedBlob = await createTreeIdentifierDerivative(analysis.blob, tree.tree_identifier);
+          metadata.annotated_derivative = { derivative_id: `${id}:tree-identifier`, annotation_type: "TREE_IDENTIFIER", tree_identifier: tree.tree_identifier, source_copy: "analysis", original_unchanged: true, size_bytes: annotatedBlob.size, sha256: typeof packageTools.sha256Hex === "function" ? await packageTools.sha256Hex(annotatedBlob) : null, created_at: new Date().toISOString() };
+        }
+      }
       photoRecord = {
         id,
         inspection_id: data.inspection_id,
         metadata,
         event: photoEvent,
         originalBlob: file,
-        analysisBlob: analysis.blob
+        analysisBlob: analysis.blob,
+        annotatedBlob
       };
       await commitPhotoRecord(photoRecord, true);
       if (metadata.timber_tree_id && timberTools) timberTools.attachPhotoToTree(data, metadata.timber_tree_id, metadata.id, false);
@@ -3873,7 +4080,7 @@
           analysisProfile = { retained_existing_analysis_copy: true, optimization_error: error.message };
         }
       }
-      entries.push({ id: metadata.id, originalBlob: stored.originalBlob, analysisBlob, analysisWidth, analysisHeight, analysisProfile });
+      entries.push({ id: metadata.id, originalBlob: stored.originalBlob, analysisBlob, annotatedBlob: stored.annotatedBlob instanceof Blob ? stored.annotatedBlob : null, analysisWidth, analysisHeight, analysisProfile });
     }
     return entries;
   }
@@ -4133,7 +4340,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !valueTools || !fieldTruthTools || !missionTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !valueTools || !fieldTruthTools || !missionTools || !treeIdentificationTools || !fieldCoachTools || !measurementTools || !treeNetworkTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -4291,6 +4498,18 @@
   document.getElementById("featureGeometryBasis").addEventListener("change", updateFeatureSessionGeometry);
   ["featureOffsetBearing", "featureOffsetDistance", "featureOffsetMethod", "featureOffsetLimitation"].forEach(id => document.getElementById(id).addEventListener("change", updateFeatureSessionGeometry));
   document.getElementById("featureNote").addEventListener("input", saveFeatureDraft);
+  ["treeRecordType", "treePhotoRole", "treeMaterialAssociation", "treeOverlayGuidance", "treeMeasurementMode", "treeCircumference", "treeCircumferenceUnit", "treeCircumferenceTool", "treeCircumferenceClass", "treeMeasurementHeight", "treeMeasurementHeightUnit", "treeMeasurementHeightBasis", "treeStemId", "treeForkBelow", "treeOverallLeaf", "treeLeafStructure", "treeLeafArrangement", "treeBarkTexture", "treeNonstandardReason", "tapeCheckReference", "tapeCheckReading", "tapeCheckUnit", "treeQueueAnalysis", "yardstickWaterDepth", "yardstickWaterUnit", "yardstickBottom", "yardstickPenetration", "yardstickRole", "yardstickClass", "yardstickNote", "candidateType", "candidateLength", "candidateWidth", "candidateUnit", "candidateMethod", "candidatePhotoDirection"].forEach(id => { const element = document.getElementById(id); element.addEventListener("change", saveFeatureDraft); if (["INPUT", "TEXTAREA"].includes(element.tagName)) element.addEventListener("input", saveFeatureDraft); });
+  document.getElementById("fieldCaptureMode").addEventListener("change", event => { if (fieldCoachTools) fieldCoachTools.setMode(data, event.target.value, activeFeatureSessionId); saveState(); const session = fieldTruthTools.sessionById(data, activeFeatureSessionId); if (session) renderFeatureFields(session); setStatus(`${event.target.options[event.target.selectedIndex].text} selected. Evidence requirements and safety limits are unchanged.`, "active"); });
+  document.getElementById("featureStuck").addEventListener("click", recordFeatureHelp);
+  document.getElementById("featureSwitch").addEventListener("click", () => saveFeatureSession("defer"));
+  document.getElementById("treePhotoRole").addEventListener("change", event => { document.getElementById("featurePhotoRole").value = event.target.value; });
+  document.getElementById("treeEvidenceUnavailable").addEventListener("click", () => { const tree = activeTreeSession(); if (!tree) return; const role = document.getElementById("treePhotoRole").value; const reason = prompt("Why is this view unavailable? Too high, No leaves present, Unsafe, Dense vegetation, Poor lighting, Feature absent, Tree dead, Equipment unavailable, Other, or Unknown", "Dense vegetation") || "Unknown"; try { treeIdentificationTools.markEvidenceUnavailable(data, tree.tree_identification_session_id, role, reason, document.getElementById("featureNote").value.trim()); saveState(); renderSpecializedFeaturePanel(fieldTruthTools.sessionById(data, activeFeatureSessionId)); } catch (error) { setStatus(error.message, "error"); } });
+  document.getElementById("openTreeNetwork").addEventListener("click", openTreeNetworkDialog);
+  document.getElementById("toggleCandidatePerimeter").addEventListener("click", toggleCandidatePerimeter);
+  document.getElementById("candidatePhotoDirection").addEventListener("change", event => { const roles = document.getElementById("featurePhotoRole"); if (![...roles.options].some(option => option.value === event.target.value)) { const option = document.createElement("option"); option.value = event.target.value; option.textContent = event.target.value; roles.appendChild(option); } roles.value = event.target.value; });
+  document.getElementById("closeTreeNetwork").addEventListener("click", () => document.getElementById("treeNetworkDialog").close());
+  document.getElementById("saveTreeDistance").addEventListener("click", saveTreeNetworkDistance);
+  document.getElementById("treeNetworkDialog").addEventListener("cancel", event => { event.preventDefault(); document.getElementById("treeNetworkDialog").close(); });
   document.getElementById("saveMinimumFeature").addEventListener("click", () => saveFeatureSession("minimum"));
   document.getElementById("completeFeature").addEventListener("click", () => saveFeatureSession("complete"));
   document.getElementById("deferFeature").addEventListener("click", () => saveFeatureSession("defer"));

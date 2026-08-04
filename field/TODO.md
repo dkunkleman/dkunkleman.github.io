@@ -16,3 +16,6 @@ The schema now also separates guided mission plans/progress/skips/finish reviews
 
 - Build authoritative pre-field adapters against the documented adapter contracts. The current release provides the provenance/dossier model and mission inputs; it does not claim unavailable services were retrieved.
 - Complete the physical-iPhone acceptance run: background Safari, lock/unlock, rotate, capture at least 20 photos across missions, exercise offline voice prompts, and Finish with both resolved and honestly accepted gaps.
+- Validate the adaptive tree-identification capture, yardstick water workflow, candidate opening, and relative tree network on a physical iPhone in dense Pearson Road canopy. Desktop emulation cannot close this item.
+- Configure a secure server-side plant-identification provider proxy only after privacy, consent, retry, rate-limit, and provenance review. No provider credential belongs in the field client; offline capture remains complete without it.
+- Obtain licensed survey/control points only when decision value justifies the cost. Phone-GPS or public-parcel alignment must never be promoted to boundary-correct.

@@ -2,6 +2,8 @@
 
 The goal is not merely to build an inspection app. The goal is to build the operating system for understanding rural property.
 
+Guidance asks for the next highest-value safely obtainable fact, not blind checklist completion. Unknown, Unsafe, Unavailable, and Skip with Reason are honest outcomes. Tree IDs, water measurements, candidate openings, and relative tree networks reduce uncertainty only when their source measurements, direct-media links, confidence, alignment status, and professional limitations remain visible.
+
 Every proposed feature must materially accomplish at least one of these outcomes:
 
 1. Reduce uncertainty.

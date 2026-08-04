@@ -131,6 +131,12 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 Both modes contain:
 
+- permanent `TREE-001`-style tree sessions, direct diagnostic-photo relationships, original circumference, calculated diameter/radius provenance, provisional/provider/regional/expert identification layers, adaptive missing-evidence requests, and an identification map/report;
+- yardstick water measurements that keep visible water, sediment penetration, bottom reference, and combined insertion separate;
+- candidate-opening dimensions, cross-sections, segmented tape measurements, approximate walked perimeters, limitations, and related-feature distances;
+- a fully offline local relative tree-network solver with preserved bark-to-bark inputs, optional calculated center distances, fitted coordinates, residuals, uncertainty, disconnected/weak-geometry warnings, next-best-pair guidance, anchor provenance, and an always-visible not-a-survey limitation;
+- versioned offline field help, I’m Stuck responses, direct-media completeness, and honest Unknown/Unsafe/Skip-with-reason outcomes;
+
 - `AI_README.md`, the plain-English first-read contract that tells ChatGPT what the inspection contains, how evidence relates, and how to report uncertainty;
 - `AI_ANALYSIS.json`, the analysis-first view organized as Executive Summary, Property Information, Inspection Conditions, Inspection Statistics, GPS Track, Observations, Photographs, Voice Notes, Map Layers, Weather, Terrain, Contours, Parcel Boundary, Public Data, Evidence Relationships, Suggested Inspection Questions, and Metadata;
 - `DECISION_BRIEF.json`, the five-decision brief with routed evidence, possible strengths and weaknesses, material-unknown rules, an explained 0-100 confidence rubric, lowest-cost investigation requirements, and evidence-triggered professional follow-up;
@@ -176,6 +182,10 @@ node --check field\water-intelligence.js
 node --check field\evidence-governance.js
 node --check field\app.js
 node --check field\idb-recovery.js
+node --check field\tree-identification-engine.js
+node --check field\field-capture-coach.js
+node --check field\field-measurement-engine.js
+node --check field\tree-network-engine.js
 node --check repository\import-package.js
 node tests\idb-recovery.test.js
 node tests\inspection-coaching.test.js
@@ -184,6 +194,10 @@ node tests\evidence-governance.test.js
 node tests\evidence-sets.test.js
 node tests\chat-review.test.js
 node tests\inspection-package.test.js
+node tests\adaptive-tree-identification.test.js
+node tests\field-capture-coach.test.js
+node tests\field-measurement-engine.test.js
+node tests\tree-network-engine.test.js
 ```
 
 The recovery tests simulate stale cached connections, close events, transaction-creation failures, asynchronous aborts between image-copy serialization, read-back closure, pending-photo recovery, and later package inventory. Package tests independently parse and CRC-check both modes, recover exact originals, exercise the recorded 190-photo field scale, import report/full packages into the same inspection folder, verify content-addressed evidence, and prove that importing the same export twice is rejected instead of overwritten.

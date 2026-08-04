@@ -21,5 +21,12 @@ Package records:
 - `MISSION_EVIDENCE_REQUIREMENTS.json`: required/recommended evidence and direct IDs.
 - `MISSION_SKIP_RECORDS.json`: Skip, Not Applicable and Unsafe records with reasons.
 - `INSPECTION_FINISH_REVIEW.json`: append-only issue review and honest resolutions.
+- `TREE_IDENTIFICATION_*.json`: permanent inspection-level tree IDs, direct diagnostic media, field traits, provisional candidates, provider provenance, expert verification, regulatory flags, and adaptive evidence requests.
+- `TREE_CIRCUMFERENCE_MEASUREMENTS.json` and `TREE_CALCULATED_DBH.json`: preserved original circumference plus explicit diameter/radius formulas and calculated—not directly measured—results.
+- `YARDSTICK_WATER_MEASUREMENTS.json`: visible water depth, soft-sediment penetration, combined insertion, bottom reference, direct photographs, and limitations kept as separate fields.
+- `CANDIDATE_AREA_*.json`: approximate usable-opening dimensions, cross-sections, walked phone-GPS perimeter, limiting features, and relationships. These do not establish buildability or surveyed boundaries.
+- `TREE_NETWORK_*.json`: immutable tree-to-tree measurements, local adjusted coordinates, residuals, uncertainty, disconnected/weak geometry, next-best measurements, anchors, and explicit alignment status.
+
+`LOCAL_RELATIVE_TREE_NETWORK` never creates authoritative latitude/longitude. Phone GPS and public parcel alignment remain approximate. Survey/professional statuses require separately supplied anchors and provenance. Corrections are append-only and never rewrite an original distance.
 
 Legacy inspections are never assigned retrospective mission completion. They export `GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE` and `NO_RETROSPECTIVE_MISSION_STATUS` while preserving every original event exactly.

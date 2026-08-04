@@ -1,0 +1,15 @@
+"use strict";
+const assert = require("node:assert/strict");
+const Network = require("../field/tree-network-engine.js");
+function tree(n, circumference) { return { tree_id: `T${n}`, tree_display_id: `TREE-${String(n).padStart(3,"0")}`, tree_identifier: `TREE-${String(n).padStart(3,"0")}`, measurements: [{ measurement_type: "TREE_CIRCUMFERENCE", unit: "in", calculated_radius_exact: circumference / (2 * Math.PI) }] }; }
+const inspection = { inspection_id: "I1", property_id: "P17", tree_identification_sessions: [tree(1, 60), tree(2, 50), tree(3, 55), tree(4, 48)] }; Network.ensureModel(inspection);
+function distance(a,b,d,extra={}) { const s=Network.createDistanceSession(inspection,{from_tree_id:a,to_tree_id:b}); return Network.recordDistance(inspection,s.tree_distance_session_id,Object.assign({measured_value:d,unit:"ft",endpoint_basis:"APPROXIMATE_CENTER_TO_CENTER",distance_type:"APPROXIMATELY_HORIZONTAL",tape_alignment:"Taut and unobstructed"},extra)); }
+const bark = (()=>{const s=Network.createDistanceSession(inspection,{from_tree_id:"T1",to_tree_id:"T2"});return Network.recordDistance(inspection,s.tree_distance_session_id,{measured_value:20,unit:"ft",endpoint_basis:"CLEAR_BARK_TO_BARK",distance_type:"APPROXIMATELY_HORIZONTAL",tape_alignment:"Taut and unobstructed",segments:[{measured_value:20,unit:"ft"}]});})();
+assert.equal(bark.measured_value,20); assert.equal(bark.original_segments.length,1); assert(bark.approximate_center_distance>20); assert.equal(bark.source_preserved_immutable,true);
+distance("T1","T3",30); distance("T2","T3",25); let run=Network.runSolver(inspection); assert(run.disconnected_clusters.length===2); assert(run.next_measurement_recommendations[0].reason.includes("isolated")); assert(run.next_measurement_recommendations.length<=3);
+distance("T1","T4",22); distance("T2","T4",24); run=Network.runSolver(inspection); assert.equal(run.uncertainty.find(x=>x.tree_id==="T4").position_status,"POTENTIALLY_AMBIGUOUS");
+distance("T3","T4",18); run=Network.runSolver(inspection); assert(!["UNDERDETERMINED","POTENTIALLY_AMBIGUOUS"].includes(run.uncertainty.find(x=>x.tree_id==="T4").position_status));
+distance("T1","T3",80); run=Network.runSolver(inspection); assert(run.residuals.some(x=>x.probable_inconsistent_measurement));
+const originalValue=bark.measured_value; Network.addCorrection(inspection,bark.tree_distance_observation_id,{disposition:"Original confirmed",note:"Tape rechecked"}); assert.equal(bark.measured_value,originalValue); assert.equal(inspection.tree_network_corrections[0].append_only,true);
+assert.throws(()=>Network.setAlignment(inspection,"SURVEY_CONTROL_ALIGNMENT",{anchor_ids:["one"]}),/At least two/); Network.setAlignment(inspection,"PUBLIC_PARCEL_MAP_APPROXIMATE_ALIGNMENT",{}); assert.equal(inspection.tree_network_alignment_status.boundary_correct,false); assert.match(Network.mapHtml(inspection),/Not a boundary survey/);
+process.stdout.write("PASS: bark-gap provenance, radii conversion, segmented distance, offline WLS, ambiguity, residuals, cluster recommendation, corrections, and alignment limits.\n");

@@ -9,14 +9,18 @@
   const valueEngine = typeof module === "object" && module.exports ? require("./property-value-engine.js") : (root && root.PropertyValueEngine);
   const fieldTruth = typeof module === "object" && module.exports ? require("./field-truth-engine.js") : (root && root.FieldTruthEngine);
   const guidedMission = typeof module === "object" && module.exports ? require("./guided-mission-orchestrator.js") : (root && root.GuidedMissionOrchestrator);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, valueEngine, fieldTruth, guidedMission);
+  const treeIdentification = typeof module === "object" && module.exports ? require("./tree-identification-engine.js") : (root && root.TreeIdentificationEngine);
+  const fieldCaptureCoach = typeof module === "object" && module.exports ? require("./field-capture-coach.js") : (root && root.FieldCaptureCoach);
+  const fieldMeasurements = typeof module === "object" && module.exports ? require("./field-measurement-engine.js") : (root && root.FieldMeasurementEngine);
+  const treeNetwork = typeof module === "object" && module.exports ? require("./tree-network-engine.js") : (root && root.TreeNetworkEngine);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, valueEngine, fieldTruth, guidedMission, treeIdentification, fieldCaptureCoach, fieldMeasurements, treeNetwork);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, valueTools, fieldTruthTools, missionTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, valueTools, fieldTruthTools, missionTools, treeIdentificationTools, fieldCaptureCoachTools, fieldMeasurementTools, treeNetworkTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "2.1";
+  const FORMAT_VERSION = "2.2";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -603,6 +607,17 @@
         mission_skip_records: { source: "MISSION_SKIP_RECORDS.json", destination: `analysis/${exportId}/MISSION_SKIP_RECORDS.json` },
         inspection_finish_review: { source: "INSPECTION_FINISH_REVIEW.json", destination: `analysis/${exportId}/INSPECTION_FINISH_REVIEW.json` },
         guided_inspection_report_appendix: { source: "GUIDED_INSPECTION_REPORT_APPENDIX.md", destination: `analysis/${exportId}/GUIDED_INSPECTION_REPORT_APPENDIX.md` },
+        tree_identification: { source: "TREE_IDENTIFICATION_*.json", destination: `analysis/${exportId}/tree-identification/` },
+        tree_identification_report: { source: "TREE_IDENTIFICATION_REPORT.md", destination: `analysis/${exportId}/TREE_IDENTIFICATION_REPORT.md` },
+        tree_identification_map: { source: "tree-identification-map.html", destination: `maps/${exportId}/tree-identification-map.html` },
+        tree_identification_scale_card: { source: "TREE_IDENTIFICATION_SCALE_CARD.html", destination: `analysis/${exportId}/TREE_IDENTIFICATION_SCALE_CARD.html` },
+        field_capture_coaching: { source: "FEATURE_CAPTURE_*.json", destination: `analysis/${exportId}/field-capture/` },
+        field_help_and_troubleshooting: { source: "FIELD_*.json", destination: `analysis/${exportId}/field-capture/` },
+        field_measurements: { source: "CANDIDATE_AREA_*.json", destination: `analysis/${exportId}/measurements/` },
+        yardstick_water_measurements: { source: "YARDSTICK_WATER_MEASUREMENTS.json", destination: `analysis/${exportId}/measurements/YARDSTICK_WATER_MEASUREMENTS.json` },
+        tree_measurements: { source: "TREE_*MEASUREMENTS.json", destination: `analysis/${exportId}/measurements/` },
+        tree_network: { source: "TREE_NETWORK_*.json", destination: `analysis/${exportId}/tree-network/` },
+        tree_network_map: { source: "TREE_NETWORK_MAP.html", destination: `maps/${exportId}/TREE_NETWORK_MAP.html` },
         post_inspection_review: { source: "POST_INSPECTION_REVIEW.json", destination: `analysis/${exportId}/POST_INSPECTION_REVIEW.json` },
         chat_review_return_instructions: { source: "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", destination: `analysis/${exportId}/CHAT_REVIEW_RETURN_INSTRUCTIONS.md` },
         review_annotation_schema: { source: "schemas/property-intelligence-review-annotation.schema.json", destination: `analysis/${exportId}/schemas/property-intelligence-review-annotation.schema.json` },
@@ -1685,6 +1700,10 @@ Every observation also includes \`value_assessment_status\` and \`value_driver_l
 
 \`FIELD_TRUTH.json\` keeps desktop facts, screening hypotheses, field observations, field measurements, inspector interpretations, AI suggestions, professional determinations and remaining unknowns separate. Never blend these classes. \`FEATURE_CAPTURE_SESSIONS.json\` is canonical for new structured features. Media and measurements captured inside a session are direct relationships with explicit roles; do not replace them with nearest-time or nearest-location inference. Every feature records whether its geometry is at the feature, phone-location-only, measured offset, mapped polygon or walked line. Phone GPS is not survey-grade.
 
+For trees, begin with \`TREE_IDENTIFICATION_SESSIONS.json\`, then use \`TREE_IDENTIFICATION_MEDIA.json\`, \`TREE_MEASUREMENTS.json\`, and the candidate/provenance files. AI/provider candidates are provisional unless \`TREE_EXPERT_VERIFICATIONS.json\` contains an active verification. Mixed or uncertain fallen material is not proof that it came from the target tree. Calculated diameter and radius come from preserved circumference and are not directly measured.
+
+\`TREE_NETWORK_MAP.html\` and the \`TREE_NETWORK_*.json\` files describe a local relative network, not surveyed latitude/longitude or a parcel boundary. Always display \`TREE_NETWORK_ALIGNMENT_STATUS.json\` and its limitation. Residuals identify measurements worth checking; they do not authorize deletion. \`YARDSTICK_WATER_MEASUREMENTS.json\` keeps visible water depth and soft-sediment penetration separate. \`FEATURE_SESSION_COMPLETENESS.json\` records honest missing, unsafe, unknown, and skipped outcomes without inventing evidence.
+
 \`INSPECTION_MISSION_PLAN.json\`, \`INSPECTION_MISSION_PROGRESS.json\`, \`MISSION_EVIDENCE_REQUIREMENTS.json\`, \`MISSION_SKIP_RECORDS.json\`, and \`INSPECTION_FINISH_REVIEW.json\` explain what the guided inspection asked, what was completed, what was skipped or unsafe, and which gaps the inspector honestly accepted. For legacy inspections, \`GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE\` and \`NO_RETROSPECTIVE_MISSION_STATUS\` mean no completion was fabricated after the visit.
 
 ## How the evidence fits together
@@ -1954,6 +1973,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     if (valueTools) valueTools.ensureInspectionModel(sourceInspection);
     if (fieldTruthTools) fieldTruthTools.ensureInspectionModel(sourceInspection);
     if (missionTools) missionTools.ensureModel(sourceInspection);
+    if (treeIdentificationTools) treeIdentificationTools.ensureModel(sourceInspection);
+    if (fieldCaptureCoachTools) fieldCaptureCoachTools.ensureModel(sourceInspection);
+    if (fieldMeasurementTools) fieldMeasurementTools.ensureModel(sourceInspection);
+    if (treeNetworkTools) treeNetworkTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
     if (governanceTools) governanceTools.ensureGovernanceModel(sourceInspection, settings.exportedAt);
     const governanceView = governanceTools ? governanceTools.buildEffectiveInspection(sourceInspection) : { active: sourceInspection, audit_history: { corrections: [] } };
@@ -2008,11 +2031,15 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       if (!analysisBlob) throw new Error(`Photograph ${index + 1} is missing its analysis-safe image copy. Package creation stopped.`);
       const analysisExt = analysisBlob ? extensionFor("", analysisBlob.type, "jpg") : null;
       const analysisPath = analysisBlob ? `${auditPrefix}photos/${number}_analysis.${analysisExt}` : null;
+      const annotatedBlob = entry.annotatedBlob instanceof Blob && entry.annotatedBlob.size ? entry.annotatedBlob : null;
+      const annotatedPath = annotatedBlob ? `${auditPrefix}photos/${number}_tree-identifier-annotated.jpg` : null;
       const originalHash = await sha256Hex(entry.originalBlob);
       const analysisHash = analysisBlob ? await sha256Hex(analysisBlob) : null;
+      const annotatedHash = annotatedBlob ? await sha256Hex(annotatedBlob) : null;
       if (!originalHash || !analysisHash) throw new Error(`Photograph ${index + 1} could not be SHA-256 verified. Package creation stopped.`);
       if (metadata.original_sha256 && metadata.original_sha256 !== originalHash) throw new Error(`Photograph ${index + 1} original SHA-256 changed after capture. Package creation stopped.`);
       if (metadata.analysis_sha256 && metadata.analysis_sha256 !== analysisHash) throw new Error(`Photograph ${index + 1} analysis SHA-256 changed after capture. Package creation stopped.`);
+      if (metadata.annotated_derivative && metadata.annotated_derivative.sha256 && metadata.annotated_derivative.sha256 !== annotatedHash) throw new Error(`Photograph ${index + 1} annotated derivative SHA-256 changed after creation. Package creation stopped.`);
       const recordedAt = metadata.recorded_at || metadata.time || null;
 
       manifestPhotos.push({
@@ -2095,9 +2122,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
           path: analysisPath,
           shares_analysis_copy: true,
           purpose: "Gallery and map preview without duplicating image bytes"
-        } : null
+        } : null,
+        annotated_derivative: annotatedBlob ? { path: annotatedPath, mime_type: annotatedBlob.type || "image/jpeg", size_bytes: annotatedBlob.size, sha256: annotatedHash, annotation_metadata: metadata.annotated_derivative || null, original_unchanged: true } : null
       });
-      zipPhotos.push({ photoId: metadata.id, excludedFromFindings: Boolean(metadata.excluded_from_findings), originalPath, fullArchivePath, originalBlob: entry.originalBlob, analysisPath, analysisBlob });
+      zipPhotos.push({ photoId: metadata.id, excludedFromFindings: Boolean(metadata.excluded_from_findings), originalPath, fullArchivePath, originalBlob: entry.originalBlob, analysisPath, analysisBlob, annotatedPath, annotatedBlob });
     }
 
     for (let index = 0; index < sourceInspection.voice_notes.length; index += 1) {
@@ -2415,6 +2443,14 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
     const fieldTruthModel = fieldTruthTools ? fieldTruthTools.packageModel(sourceInspection) : { schema_name: "property-field-truth-layer", schema_version: "1.0", status: "NOT_AVAILABLE", feature_capture_sessions: [], heat_map_eligibility: { eligible: false, status: "INSUFFICIENT_SPATIAL_EVIDENCE", reason: "Field Truth module unavailable." } };
     const guidedMissionModel = missionTools ? missionTools.packageModel(sourceInspection) : { schema_name: "guided-inspection-mission-orchestrator", schema_version: "1.0", legacy_status: { status: "GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE", completion_status: "NO_RETROSPECTIVE_MISSION_STATUS" }, inspection_mission_plan: null };
+    const treeIdentificationModel = treeIdentificationTools ? treeIdentificationTools.packageModel(sourceInspection) : { schema_name: "property-intelligence-tree-identification", status: "NOT_AVAILABLE", sessions: [], legacy_status: { status: "TREE_IDENTIFICATION_NOT_AVAILABLE_AT_CAPTURE" } };
+    const fieldCaptureCoachModel = fieldCaptureCoachTools ? fieldCaptureCoachTools.packageModel(sourceInspection) : { schema_name: "foolproof-guided-field-capture", status: "NOT_AVAILABLE", feature_session_completeness: { sessions: [] } };
+    const fieldMeasurementModel = fieldMeasurementTools ? fieldMeasurementTools.packageModel(sourceInspection) : { schema_name: "field-measurement-and-candidate-opening", status: "NOT_AVAILABLE", yardstick_water_measurements: [], candidate_area_sessions: [] };
+    const treeNetworkModel = treeNetworkTools ? treeNetworkTools.packageModel(sourceInspection) : { schema_name: "adaptive-relative-tree-network", status: "NOT_AVAILABLE", distance_observations: [], local_coordinates: [], warning: "Relative tree-network module unavailable." };
+    const treeIdentificationReport = treeIdentificationTools ? treeIdentificationTools.reportMarkdown(sourceInspection) : "# Tree Identification Report\n\nTree identification was not available at capture.\n";
+    const treeNetworkMap = treeNetworkTools ? treeNetworkTools.mapHtml(sourceInspection) : "<!doctype html><title>Tree network unavailable</title>";
+    const treeIdentificationMap = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Tree Identification Map</title><style>body{font:16px system-ui;margin:20px;background:#f4f1e7;color:#17261b}.tree{padding:12px;margin:10px 0;background:white;border-left:7px solid #34734c}</style><h1>Tree Identification Sessions</h1><p>Phone GPS points are approximate and are not boundary-correct. Provisional AI suggestions are not expert confirmations.</p>${(treeIdentificationModel.sessions || []).map(tree => `<section class="tree"><h2>${htmlEscape(tree.tree_identifier)}</h2><p>Status: ${htmlEscape(tree.identification_status)} · GPS ${htmlEscape(tree.phone_gps && tree.phone_gps.latitude)}, ${htmlEscape(tree.phone_gps && tree.phone_gps.longitude)} · accuracy ${htmlEscape(tree.gps_accuracy)} m</p><p>Direct media: ${(tree.direct_media_relationships || []).length} · measurements: ${(tree.measurements || []).length}</p></section>`).join("")}`;
+    const treeScaleCard = `<!doctype html><meta charset="utf-8"><title>Tree Identification Scale Card</title><style>@page{size:letter;margin:.5in}*{box-sizing:border-box}body{font-family:Arial;color:#111}.card{border:4px solid #111;padding:.25in;width:7.5in;height:4.5in}.inch{height:.38in;border-left:2px solid;border-right:2px solid;background:repeating-linear-gradient(90deg,#111 0 1px,transparent 1px .125in)}.cm{height:1cm;border-left:2px solid;border-right:2px solid;background:repeating-linear-gradient(90deg,#111 0 1px,transparent 1px .1cm)}.tones{display:flex;height:.65in}.tones div{flex:1;padding:8px}.light{background:#eee}.medium{background:#888;color:#fff}.dark{background:#222;color:#fff}.code{font-size:28px;border:2px dashed;padding:8px}.arrow{font-size:42px;font-weight:bold}</style><section class="card"><h1>Tree Identification Scale Card</h1><div class="code">TREE-_____ / Session short code: __________</div><p><strong>8-inch reference</strong></p><div class="inch"></div><p><strong>20-centimeter reference</strong></p><div class="cm"></div><div class="tones"><div class="light">LIGHT</div><div class="medium">MEDIUM</div><div class="dark">DARK</div></div><p class="arrow">↑ TOP / ORIENTATION</p><p>Roles: whole tree · crown · bark · attached foliage · twig/bud · fruit/cone · measurement. This card supports scale and exposure comparison; it is not laboratory-grade color calibration. Print at 100% / Actual Size.</p></section>`;
     const propertyValueEngine = valueTools ? valueTools.buildValueEngine({
       observations,
       questions: inspection.investigation_questions,
@@ -2523,6 +2559,11 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,small_tract_water_cluster_count: smallTractWaterMap.water_area_clusters ? smallTractWaterMap.water_area_clusters.length : 0
         ,value_impact_count: propertyValueEngine.impacts ? propertyValueEngine.impacts.length : 0
         ,value_unassessed_observation_count: propertyValueEngine.unassessed_observation_ids ? propertyValueEngine.unassessed_observation_ids.length : observations.length
+        ,tree_identification_session_count: (treeIdentificationModel.sessions || []).length
+        ,yardstick_water_measurement_count: (fieldMeasurementModel.yardstick_water_measurements || []).length
+        ,candidate_area_session_count: (fieldMeasurementModel.candidate_area_sessions || []).length
+        ,tree_network_distance_count: (treeNetworkModel.distance_observations || []).length
+        ,tree_network_component_count: ((treeNetworkModel.adjustment_results || []).slice(-1)[0] || {}).component_count || 0
       },
       property: mapMetadata.subject_parcel,
       inspection: {
@@ -2565,6 +2606,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,property_value_engine: propertyValueEngine
         ,field_truth: fieldTruthModel
         ,guided_inspection_mission: guidedMissionModel
+        ,tree_identification: treeIdentificationModel
+        ,guided_field_capture: fieldCaptureCoachModel
+        ,field_measurements: fieldMeasurementModel
+        ,tree_network: treeNetworkModel
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
@@ -2577,6 +2622,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       property_value_engine: propertyValueEngine,
       field_truth: fieldTruthModel,
       guided_inspection_mission: guidedMissionModel,
+      tree_identification: treeIdentificationModel,
+      guided_field_capture: fieldCaptureCoachModel,
+      field_measurements: fieldMeasurementModel,
+      tree_network: treeNetworkModel,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2603,6 +2652,45 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         mission_skip_records: "MISSION_SKIP_RECORDS.json",
         inspection_finish_review: "INSPECTION_FINISH_REVIEW.json",
         guided_inspection_report_appendix: "GUIDED_INSPECTION_REPORT_APPENDIX.md",
+        tree_identification_sessions: "TREE_IDENTIFICATION_SESSIONS.json",
+        tree_identification_media: "TREE_IDENTIFICATION_MEDIA.json",
+        tree_field_traits: "TREE_FIELD_TRAITS.json",
+        tree_measurements: "TREE_MEASUREMENTS.json",
+        tree_regional_candidates: "TREE_REGIONAL_CANDIDATES.json",
+        tree_provider_results: "TREE_PROVIDER_RESULTS.json",
+        tree_combined_candidates: "TREE_COMBINED_CANDIDATES.json",
+        tree_adaptive_evidence_requests: "TREE_ADAPTIVE_EVIDENCE_REQUESTS.json",
+        tree_expert_verifications: "TREE_EXPERT_VERIFICATIONS.json",
+        tree_regulatory_flags: "TREE_REGULATORY_FLAGS.json",
+        tree_identification_report: "TREE_IDENTIFICATION_REPORT.md",
+        tree_identification_map: "tree-identification-map.html",
+        tree_identification_scale_card: "TREE_IDENTIFICATION_SCALE_CARD.html",
+        feature_capture_coaching_events: "FEATURE_CAPTURE_COACHING_EVENTS.json",
+        field_help_library_version: "FIELD_HELP_LIBRARY_VERSION.json",
+        field_troubleshooting_responses: "FIELD_TROUBLESHOOTING_RESPONSES.json",
+        field_ai_assistance_events: "FIELD_AI_ASSISTANCE_EVENTS.json",
+        feature_session_completeness: "FEATURE_SESSION_COMPLETENESS.json",
+        feature_session_direct_media: "FEATURE_SESSION_DIRECT_MEDIA.json",
+        measurement_tool_registry: "MEASUREMENT_TOOL_REGISTRY.json",
+        yardstick_water_measurements: "YARDSTICK_WATER_MEASUREMENTS.json",
+        tree_circumference_measurements: "TREE_CIRCUMFERENCE_MEASUREMENTS.json",
+        tree_calculated_dbh: "TREE_CALCULATED_DBH.json",
+        tree_tape_checks: "TREE_TAPE_CHECKS.json",
+        tree_stem_measurements: "TREE_STEM_MEASUREMENTS.json",
+        candidate_area_measurements: "CANDIDATE_AREA_MEASUREMENTS.json",
+        candidate_area_cross_sections: "CANDIDATE_AREA_CROSS_SECTIONS.json",
+        candidate_area_perimeters: "CANDIDATE_AREA_PERIMETERS.json",
+        candidate_area_related_distances: "CANDIDATE_AREA_RELATED_DISTANCES.json",
+        tree_network_distance_observations: "TREE_NETWORK_DISTANCE_OBSERVATIONS.json",
+        tree_network_calculated_distances: "TREE_NETWORK_CALCULATED_DISTANCES.json",
+        tree_network_local_coordinates: "TREE_NETWORK_LOCAL_COORDINATES.json",
+        tree_network_adjustment_results: "TREE_NETWORK_ADJUSTMENT_RESULTS.json",
+        tree_network_residuals: "TREE_NETWORK_RESIDUALS.json",
+        tree_network_uncertainty: "TREE_NETWORK_UNCERTAINTY.json",
+        tree_network_next_measurements: "TREE_NETWORK_NEXT_MEASUREMENT_RECOMMENDATIONS.json",
+        tree_network_anchors: "TREE_NETWORK_ANCHORS.json",
+        tree_network_alignment_status: "TREE_NETWORK_ALIGNMENT_STATUS.json",
+        tree_network_map: "TREE_NETWORK_MAP.html",
         value_driver_heat_maps: "VALUE_DRIVER_HEAT_MAPS.json",
         property_value_heat_map_interactive: "property-value-heat-map.html",
         authoritative_weather_context: "WEATHER_CONTEXT.json",
@@ -2746,6 +2834,45 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("MISSION_SKIP_RECORDS.json", JSON.stringify({ skip_records: guidedMissionModel.mission_skip_records || [], append_only_progress_events: guidedMissionModel.append_only_progress_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("INSPECTION_FINISH_REVIEW.json", JSON.stringify({ finish_reviews: guidedMissionModel.inspection_finish_reviews || [], rule: "Unknown, unsafe, skipped, and accepted-incomplete are honest outcomes; no missing answer is fabricated." }, null, 2) + "\n", { modifiedAt });
     zip.add("GUIDED_INSPECTION_REPORT_APPENDIX.md", missionTools ? missionTools.guidedAppendix(sourceInspection) : "# Guided Inspection Mission Appendix\n\nGUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE\n\nNO_RETROSPECTIVE_MISSION_STATUS\n", { modifiedAt });
+    zip.add("TREE_IDENTIFICATION_SESSIONS.json", JSON.stringify({ sessions: treeIdentificationModel.sessions || [], legacy_status: treeIdentificationModel.legacy_status || null }, null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_IDENTIFICATION_MEDIA.json", JSON.stringify({ relationships: treeIdentificationModel.direct_media || [], rule: "Only DIRECT-at-capture relationships identify target-tree evidence; mixed or uncertain ground material does not prove association." }, null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_FIELD_TRAITS.json", JSON.stringify(treeIdentificationModel.field_traits || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_MEASUREMENTS.json", JSON.stringify(treeIdentificationModel.measurements || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_REGIONAL_CANDIDATES.json", JSON.stringify(treeIdentificationModel.regional_candidates || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_PROVIDER_RESULTS.json", JSON.stringify(treeIdentificationModel.provider_results || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_COMBINED_CANDIDATES.json", JSON.stringify(treeIdentificationModel.combined_candidates || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_ADAPTIVE_EVIDENCE_REQUESTS.json", JSON.stringify(treeIdentificationModel.adaptive_requests || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_EXPERT_VERIFICATIONS.json", JSON.stringify(treeIdentificationModel.expert_verifications || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_REGULATORY_FLAGS.json", JSON.stringify(treeIdentificationModel.regulatory_flags || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_IDENTIFICATION_REPORT.md", treeIdentificationReport, { modifiedAt });
+    zip.add("tree-identification-map.html", treeIdentificationMap, { modifiedAt });
+    zip.add("TREE_IDENTIFICATION_SCALE_CARD.html", treeScaleCard, { modifiedAt });
+    zip.add("FEATURE_CAPTURE_COACHING_EVENTS.json", JSON.stringify(fieldCaptureCoachModel.coaching_events || [], null, 2) + "\n", { modifiedAt });
+    zip.add("FIELD_HELP_LIBRARY_VERSION.json", JSON.stringify(Object.assign({}, fieldCaptureCoachModel.field_help_library_version || {}, { library: fieldCaptureCoachModel.help_library || [] }), null, 2) + "\n", { modifiedAt });
+    zip.add("FIELD_TROUBLESHOOTING_RESPONSES.json", JSON.stringify(fieldCaptureCoachModel.troubleshooting_responses || [], null, 2) + "\n", { modifiedAt });
+    zip.add("FIELD_AI_ASSISTANCE_EVENTS.json", JSON.stringify(fieldCaptureCoachModel.ai_assistance_events || [], null, 2) + "\n", { modifiedAt });
+    zip.add("FEATURE_SESSION_COMPLETENESS.json", JSON.stringify(fieldCaptureCoachModel.feature_session_completeness || {}, null, 2) + "\n", { modifiedAt });
+    zip.add("FEATURE_SESSION_DIRECT_MEDIA.json", JSON.stringify(fieldCaptureCoachModel.feature_session_direct_media || [], null, 2) + "\n", { modifiedAt });
+    zip.add("MEASUREMENT_TOOL_REGISTRY.json", JSON.stringify(fieldMeasurementModel.measurement_tool_registry || [], null, 2) + "\n", { modifiedAt });
+    zip.add("YARDSTICK_WATER_MEASUREMENTS.json", JSON.stringify(fieldMeasurementModel.yardstick_water_measurements || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_CIRCUMFERENCE_MEASUREMENTS.json", JSON.stringify((treeIdentificationModel.measurements || []).filter(item => item.measurement_type === "TREE_CIRCUMFERENCE"), null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_CALCULATED_DBH.json", JSON.stringify((treeIdentificationModel.measurements || []).filter(item => item.measurement_type === "TREE_CIRCUMFERENCE").map(item => ({ tree_measurement_id: item.tree_measurement_id, tree_identifier: item.tree_identifier, original_circumference_value: item.original_circumference_value, original_circumference_unit: item.original_circumference_unit, calculation: item.calculation, limitation: item.limitations })), null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_TAPE_CHECKS.json", JSON.stringify(fieldMeasurementModel.tree_tape_checks || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_STEM_MEASUREMENTS.json", JSON.stringify((treeIdentificationModel.measurements || []).map(item => ({ tree_identifier: item.tree_identifier, stem_id: item.stem_id, measurement: item })), null, 2) + "\n", { modifiedAt });
+    zip.add("CANDIDATE_AREA_MEASUREMENTS.json", JSON.stringify(fieldMeasurementModel.candidate_area_measurements || [], null, 2) + "\n", { modifiedAt });
+    zip.add("CANDIDATE_AREA_CROSS_SECTIONS.json", JSON.stringify(fieldMeasurementModel.candidate_area_cross_sections || [], null, 2) + "\n", { modifiedAt });
+    zip.add("CANDIDATE_AREA_PERIMETERS.json", JSON.stringify(fieldMeasurementModel.candidate_area_perimeters || [], null, 2) + "\n", { modifiedAt });
+    zip.add("CANDIDATE_AREA_RELATED_DISTANCES.json", JSON.stringify(fieldMeasurementModel.candidate_area_related_distances || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_DISTANCE_OBSERVATIONS.json", JSON.stringify(treeNetworkModel.distance_observations || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_CALCULATED_DISTANCES.json", JSON.stringify(treeNetworkModel.calculated_distances || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_LOCAL_COORDINATES.json", JSON.stringify(treeNetworkModel.local_coordinates || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_ADJUSTMENT_RESULTS.json", JSON.stringify(treeNetworkModel.adjustment_results || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_RESIDUALS.json", JSON.stringify(treeNetworkModel.residuals || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_UNCERTAINTY.json", JSON.stringify(treeNetworkModel.uncertainty || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_NEXT_MEASUREMENT_RECOMMENDATIONS.json", JSON.stringify(treeNetworkModel.next_measurement_recommendations || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_ANCHORS.json", JSON.stringify(treeNetworkModel.anchors || [], null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_ALIGNMENT_STATUS.json", JSON.stringify(treeNetworkModel.alignment_status || {}, null, 2) + "\n", { modifiedAt });
+    zip.add("TREE_NETWORK_MAP.html", treeNetworkMap, { modifiedAt });
     zip.add("PROPERTY_VALUE_ENGINE.json", JSON.stringify(propertyValueEngine, null, 2) + "\n", { modifiedAt });
     zip.add("VALUE_DRIVER_HEAT_MAPS.json", JSON.stringify(propertyValueEngine.heat_maps, null, 2) + "\n", { modifiedAt });
     zip.add("property-value-heat-map.html", interactiveValueMap, { modifiedAt });
@@ -2803,6 +2930,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zipPhotos.forEach(photo => {
       if (includeOriginals) zip.add(photo.fullArchivePath, photo.originalBlob, { modifiedAt });
       if (photo.analysisBlob) zip.add(photo.analysisPath, photo.analysisBlob, { modifiedAt });
+      if (photo.annotatedBlob) zip.add(photo.annotatedPath, photo.annotatedBlob, { modifiedAt });
     });
     zipVoices.forEach(note => zip.add(note.path, note.audioBlob, { modifiedAt }));
     (professionalHandoffCards.cards || []).forEach(card => {

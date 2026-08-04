@@ -1,0 +1,14 @@
+"use strict";
+const assert = require("node:assert/strict");
+const Measure = require("../field/field-measurement-engine.js");
+const inspection = { inspection_id: "I1", property_id: "P17" }; Measure.ensureModel(inspection);
+assert(Measure.TOOL_REGISTRY.some(tool => tool.tool_id === "YARDSTICK"));
+const water = Measure.recordWaterMeasurement(inspection, { water_feature_session_id: "W1", measurement_value: 4, measurement_unit: "in", measurement_tool: "YARDSTICK", bottom_reference: "INTO_SOFT_SEDIMENT", rod_penetration_depth: 2.5, measurement_location_role: "Deepest safely reachable point", direct_photo_ids: ["P1", "P2"] });
+assert.equal(water.measurement_value, 4); assert.equal(water.rod_penetration_depth, 2.5); assert.equal(water.combined_total_insertion_depth, 6.5); assert.equal(water.depth_components_remain_separate, true); assert.deepEqual(water.direct_photo_ids, ["P1", "P2"]);
+const c = Measure.createCandidateAreaSession(inspection, { feature_capture_session_id: "H1", center_phone_gps: { latitude: 1, longitude: 2, accuracy_m: 4 }, candidate_type: "Existing clear opening" });
+Measure.recordDimension(inspection, c.candidate_area_session_id, { value: 180, unit: "ft", method: "100-foot measuring tape", dimension_type: "LONGEST_USABLE_LENGTH" });
+Measure.recordCrossSection(inspection, c.candidate_area_session_id, { width: 72, unit: "ft", method: "100-foot measuring tape", position_role: "Midpoint perpendicular width" });
+const segmented = Measure.recordSegmentedMeasurement(inspection, c.candidate_area_session_id, { segments: [{ value: 100, unit: "ft" }, { value: 80, unit: "ft" }] }); assert.equal(segmented.total_measured_distance, 180); assert.equal(segmented.segments.length, 2);
+assert.throws(() => Measure.calculateArea(inspection, c.candidate_area_session_id, { shape: "Irregular", formula: "length_times_maximum_width", calculated_area: 12000, unit: "sq ft" }), /Do not calculate/);
+const original = JSON.stringify(water); Measure.ensureModel(inspection); assert.equal(JSON.stringify(inspection.yardstick_water_measurements[0]), original);
+process.stdout.write("PASS: yardstick depth separation, direct feature photos, candidate opening, segmented tape, area safeguards, and recovery preservation.\n");

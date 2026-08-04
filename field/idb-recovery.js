@@ -125,6 +125,10 @@
     if (!stored.analysisBlob || !Number(stored.analysisBlob.size)) throw new Error("Analysis photograph bytes did not survive read-back.");
     if (Number(stored.originalBlob.size) !== Number(record.originalBlob.size)) throw new Error("Original photograph byte size changed during storage.");
     if (Number(stored.analysisBlob.size) !== Number(record.analysisBlob.size)) throw new Error("Analysis photograph byte size changed during storage.");
+    if (record.annotatedBlob) {
+      if (!stored.annotatedBlob || !Number(stored.annotatedBlob.size)) throw new Error("Annotated photograph derivative did not survive read-back.");
+      if (Number(stored.annotatedBlob.size) !== Number(record.annotatedBlob.size)) throw new Error("Annotated photograph derivative byte size changed during storage.");
+    }
     return stored;
   }
 

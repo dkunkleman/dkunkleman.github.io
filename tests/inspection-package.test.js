@@ -218,7 +218,7 @@ async function main() {
   inspection.photos[1].structured_measurement_ids = [testMeasurement.measurement_id];
 
   const basePhotoEntries = [
-    { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
+    { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }), annotatedBlob: new Blob([photoOneBytes], { type: "image/jpeg" }) },
     { id: "photo-2", originalBlob: new Blob([photoTwoBytes], { type: "image/png" }), analysisBlob: new Blob([photoTwoBytes], { type: "image/png" }) }
   ];
   const baseVoiceEntries = [{ id: "voice-1", audioBlob: new Blob([voiceBytes], { type: "audio/mp4" }) }];
@@ -246,11 +246,12 @@ async function main() {
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
     "FIELD_TRUTH.json", "FEATURE_CAPTURE_SESSIONS.json", "FIELD_MISSIONS.json", "PROFESSIONAL_DETERMINATIONS.json", "REPEAT_STATIONS.json", "PUBLIC_DATA_PROVENANCE.json", "INSPECTION_MISSION_PLAN.json", "INSPECTION_MISSION_PROGRESS.json", "MISSION_EVIDENCE_REQUIREMENTS.json", "MISSION_SKIP_RECORDS.json", "INSPECTION_FINISH_REVIEW.json", "GUIDED_INSPECTION_REPORT_APPENDIX.md", "PROPERTY_VALUE_ENGINE.json", "VALUE_DRIVER_HEAT_MAPS.json", "property-value-heat-map.html", "VALUE_DRIVER_REPORT_APPENDIX.md",
+    "TREE_IDENTIFICATION_SESSIONS.json", "TREE_IDENTIFICATION_MEDIA.json", "TREE_FIELD_TRAITS.json", "TREE_MEASUREMENTS.json", "TREE_REGIONAL_CANDIDATES.json", "TREE_PROVIDER_RESULTS.json", "TREE_COMBINED_CANDIDATES.json", "TREE_ADAPTIVE_EVIDENCE_REQUESTS.json", "TREE_EXPERT_VERIFICATIONS.json", "TREE_REGULATORY_FLAGS.json", "TREE_IDENTIFICATION_REPORT.md", "tree-identification-map.html", "TREE_IDENTIFICATION_SCALE_CARD.html", "FEATURE_CAPTURE_COACHING_EVENTS.json", "FIELD_HELP_LIBRARY_VERSION.json", "FIELD_TROUBLESHOOTING_RESPONSES.json", "FIELD_AI_ASSISTANCE_EVENTS.json", "FEATURE_SESSION_COMPLETENESS.json", "FEATURE_SESSION_DIRECT_MEDIA.json", "MEASUREMENT_TOOL_REGISTRY.json", "YARDSTICK_WATER_MEASUREMENTS.json", "TREE_CIRCUMFERENCE_MEASUREMENTS.json", "TREE_CALCULATED_DBH.json", "TREE_TAPE_CHECKS.json", "TREE_STEM_MEASUREMENTS.json", "CANDIDATE_AREA_MEASUREMENTS.json", "CANDIDATE_AREA_CROSS_SECTIONS.json", "CANDIDATE_AREA_PERIMETERS.json", "CANDIDATE_AREA_RELATED_DISTANCES.json", "TREE_NETWORK_DISTANCE_OBSERVATIONS.json", "TREE_NETWORK_CALCULATED_DISTANCES.json", "TREE_NETWORK_LOCAL_COORDINATES.json", "TREE_NETWORK_ADJUSTMENT_RESULTS.json", "TREE_NETWORK_RESIDUALS.json", "TREE_NETWORK_UNCERTAINTY.json", "TREE_NETWORK_NEXT_MEASUREMENT_RECOMMENDATIONS.json", "TREE_NETWORK_ANCHORS.json", "TREE_NETWORK_ALIGNMENT_STATUS.json", "TREE_NETWORK_MAP.html",
     "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "AUDIT_ONLY_GPS_POINTS.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "SEGMENTED_ROUTE.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "PROPERTY_INTELLIGENCE_REPORT.md", "property-intelligence-report.html", "printable-property-report.html", "AUDIENCE_REPORTS.json", "audience-reports/buyer-report.md", "audience-reports/seller-report.md", "audience-reports/builder-report.md", "audience-reports/forester-report.md", "audience-reports/drainage-engineer-report.md", "audience-reports/internal-report.md", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
-    "photos/001_original.png", "photos/001_analysis.png", "photos/002_original.png",
+    "photos/001_original.png", "photos/001_analysis.png", "photos/001_tree-identifier-annotated.jpg", "photos/002_original.png",
     "photos/002_analysis.png", "voice-notes/001_voice-note.m4a"
   ];
   requiredFiles.forEach(name => assert(files.has(name), `${name} must be in the one-file package`));
@@ -258,6 +259,7 @@ async function main() {
   assert.deepEqual(files.get("photos/001_original.png"), photoOneBytes, "photo 1 original bytes recovered exactly");
   assert.deepEqual(files.get("photos/002_original.png"), photoTwoBytes, "photo 2 original bytes recovered exactly");
   assert.deepEqual(files.get("photos/001_analysis.png"), photoOneBytes, "photo 1 analysis bytes recovered");
+  assert.deepEqual(files.get("photos/001_tree-identifier-annotated.jpg"), photoOneBytes, "optional identifier derivative is separate while the original remains byte-for-byte unchanged");
   assert.deepEqual(files.get("photos/002_analysis.png"), photoTwoBytes, "photo 2 analysis bytes recovered");
   assert.deepEqual(files.get("voice-notes/001_voice-note.m4a"), voiceBytes, "voice-note bytes recovered exactly");
   assert.deepEqual(files.get("context/usgs-terrain.png"), terrainBytes, "offline terrain recovered exactly");
@@ -265,7 +267,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "2.1");
+  assert.equal(manifest.format_version, "2.2");
   assert.equal(manifest.summary.evidence_set_count, 1);
   assert.equal(manifest.summary.value_impact_count, 2);
   assert.equal(manifest.summary.structured_measurement_count, 1);
