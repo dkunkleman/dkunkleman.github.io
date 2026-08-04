@@ -2,6 +2,24 @@
 
 Production, offline-first field evidence collection for the subject rural parcel. The iPhone workflow is deliberately simple: confirm **Offline ready**, tap **Start Inspection**, record observations while walking, then tap **Finish Inspection** and save the one resulting package to the Property Intelligence Repository. ChatGPT analyzes the permanent repository record rather than acting as file storage.
 
+## Guided Inspection Mission Orchestrator
+
+- **Start Inspection** creates the default **General Land Reconnaissance** plan and immediately opens Arrival and Road Frontage. Buyer, seller, builder, timber, access/clearing, water/drainage, and custom templates are also available before mission evidence is attached.
+- Fourteen glove-friendly missions cover arrival, entrance, access, traversability, water, land transitions, candidate uses, clearing, trees/timber, utilities, authorized soil reconnaissance, sensory conditions, coverage, and Finish Review. The inspector can jump between missions or record an unexpected feature without losing the current mission.
+- Each mission shows why it matters, instructions, required and recommended evidence, completed evidence, open questions, and explicit Complete, Skip for Now, Not Applicable, and Unsafe actions. Skip and unsafe actions require a permanent reason.
+- The persistent progress control reports completed/in-progress/skipped missions, incomplete Feature Capture Sessions, unassigned photographs, measurement gaps, traversed areas, observed-but-not-entered areas, and unknown areas. GPS-track proximity is never treated as proof that adjacent ground was inspected.
+- Optional offline voice guidance reads the next incomplete prompt, stops repeating completed prompts, pauses while audio is recorded, and respects silent mode.
+- Finish Review exposes incomplete sessions, unphotographed observations, unassigned photographs, measurement method/unit gaps, an active Value Lens, incomplete missions, unknown areas, repeat stations, and unanswered questions. The inspector may return, complete now, mark unknown, skip with reason, or honestly accept an incomplete record.
+
+## Property Field Truth layer
+
+- Every feature button immediately saves timestamp, phone GPS, accuracy, heading and orientation, then opens a feature-specific **Feature Capture Session**. The consistent routine is **Mark it, Measure it, Photograph it, Explain it, Connect it**.
+- Information classes remain separate: `desktop_source_fact`, `desktop_screening_hypothesis`, `field_observation`, `field_measurement`, `inspector_interpretation`, `ai_suggestion`, `professional_determination`, and `remaining_unknown`.
+- Every feature states whether geometry is `at_feature`, `phone_location_only`, `measured_offset`, `mapped_polygon`, or `walked_line`. Phone GPS is never called survey-grade.
+- **Save Minimum Record** accepts Unknown, Not measured, Not applicable and Unsafe to measure. Measured or estimated water depth cannot be saved without the value, unit, method and basis. Soil penetration requires owner authorization and underground-utility safety acknowledgments.
+- Photos, voice notes and measurements created inside a session have direct IDs and roles. Nearest-time or nearest-location inference is not used for those relationships. Drafts and active sessions survive local recovery.
+- Existing inspections are not rewritten. Missing structured detail remains unknown. Legacy mission output is `GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE` and `NO_RETROSPECTIVE_MISSION_STATUS`.
+
 ## Inspection Coaching
 
 - Create one or more investigation questions and select any question(s) the next evidence should answer.
@@ -14,11 +32,11 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 ## Property Value Engine
 
-- **Value Lens** is an optional persistent field context. The inspector selects one or more drivers, every value/cost/uncertainty effect that applies, importance from 1–5, confidence, and a short reason. One-tap observations inherit that context until it is cleared.
+- **Value Lens** is an optional persistent field context after an Intended Use Scenario is named. Field facts can still be recorded without a scenario; their value effect remains unassessed.
 - Supported drivers are Buildability, Development Potential, Timber, Water, Views, Privacy, Access, Utilities, Clearing Cost, Recreation, Agriculture, Horses, Wildlife, Beauty, Investment, Maintenance, Hazards, and Tree Preservation.
 - Every observation records either `INSPECTOR_ASSESSED` with its value-driver links or `NOT_ASSESSED`. The app may suggest likely drivers for unassessed evidence, but suggestions remain `SUGGESTED_UNCONFIRMED` and never enter findings, rankings, or maps without inspector confirmation.
-- `PROPERTY_VALUE_ENGINE.json` ends the report with Top 10 Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Every ranked item explains why, cites evidence, and preserves contrary evidence and uncertainty.
-- `VALUE_DRIVER_HEAT_MAPS.json` and `property-value-heat-map.html` provide Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water layers. They show only evidence influence zones around assessed observations; they do not interpolate across unvisited ground or claim appraised dollars.
+- `PROPERTY_VALUE_ENGINE.json` provides up to 10 strongest supported Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Lists are never padded.
+- `VALUE_DRIVER_HEAT_MAPS.json` and `property-value-heat-map.html` render only after an Intended Use Scenario, sufficient spatial Field Truth, evidence-linked effects, and coverage evidence exist. Otherwise they return **INSUFFICIENT_SPATIAL_EVIDENCE**. Beauty is subjective and scenario-dependent.
 - The same feature may increase both value and cost. The engine preserves both impacts instead of hiding the tradeoff in a single score.
 
 ## Correctable professional evidence

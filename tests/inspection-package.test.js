@@ -104,7 +104,7 @@ async function main() {
     observation_type: `field.${type}`,
     taxonomy_version: "property-observation-1.0",
     evidence_classification: type === "tree" ? "Measured" : "Observed",
-    value_driver_links: type === "wet" ? [{ value_driver_id: "water", effect: "increase_cost", magnitude: 4, confidence: "high", inspector_reason: "Standing water may require drainage work.", assessment_source: "inspector_selected" }] : (type === "homesite" ? [{ value_driver_id: "buildability", effect: "increase_value", magnitude: 4, confidence: "medium", inspector_reason: "Candidate building area was observed.", assessment_source: "inspector_selected" }] : []),
+    value_driver_links: type === "wet" ? [{ value_driver_id: "water", effect: "increase_cost", magnitude: 4, confidence: "high", inspector_reason: "Standing water may require drainage work.", assessment_source: "inspector_selected", intended_use_scenario_id: "scenario-test" }] : (type === "homesite" ? [{ value_driver_id: "buildability", effect: "increase_value", magnitude: 4, confidence: "medium", inspector_reason: "Candidate building area was observed.", assessment_source: "inspector_selected", intended_use_scenario_id: "scenario-test" }] : []),
     value_assessment_status: ["wet", "homesite"].includes(type) ? "INSPECTOR_ASSESSED" : "NOT_ASSESSED",
     button_label: type === "tree" ? "Specimen Tree" : type,
     note: type === "note" ? "Standing water reaches the flagged pine." : "",
@@ -154,6 +154,8 @@ async function main() {
     schema_version: "1.1",
     property_id: "parcel:221S280000001010000",
     inspection_id: "inspection-acceptance-test",
+    intended_use_scenarios: [{ scenario_id: "scenario-test", name: "Single-family homesite", customer_type: "Buyer", created_at: started }],
+    active_intended_use_scenario_id: "scenario-test",
     started,
     stopped: "2026-08-02T15:00:00.000Z",
     inspection_areas: [
@@ -243,7 +245,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "PROPERTY_VALUE_ENGINE.json", "VALUE_DRIVER_HEAT_MAPS.json", "property-value-heat-map.html", "VALUE_DRIVER_REPORT_APPENDIX.md",
+    "FIELD_TRUTH.json", "FEATURE_CAPTURE_SESSIONS.json", "FIELD_MISSIONS.json", "PROFESSIONAL_DETERMINATIONS.json", "REPEAT_STATIONS.json", "PUBLIC_DATA_PROVENANCE.json", "INSPECTION_MISSION_PLAN.json", "INSPECTION_MISSION_PROGRESS.json", "MISSION_EVIDENCE_REQUIREMENTS.json", "MISSION_SKIP_RECORDS.json", "INSPECTION_FINISH_REVIEW.json", "GUIDED_INSPECTION_REPORT_APPENDIX.md", "PROPERTY_VALUE_ENGINE.json", "VALUE_DRIVER_HEAT_MAPS.json", "property-value-heat-map.html", "VALUE_DRIVER_REPORT_APPENDIX.md",
     "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "AUDIT_ONLY_GPS_POINTS.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "SEGMENTED_ROUTE.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "PROPERTY_INTELLIGENCE_REPORT.md", "property-intelligence-report.html", "printable-property-report.html", "AUDIENCE_REPORTS.json", "audience-reports/buyer-report.md", "audience-reports/seller-report.md", "audience-reports/builder-report.md", "audience-reports/forester-report.md", "audience-reports/drainage-engineer-report.md", "audience-reports/internal-report.md", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
@@ -379,8 +381,12 @@ async function main() {
   assert(Object.hasOwn(aiAnalysis, "property_value_engine"), "AI analysis exposes the value engine");
   assert.equal(valueEngine.impacts.length, 2, "only inspector-assessed links become value impacts");
   assert.equal(valueEngine.rankings.top_10_cost_drivers[0].value_driver_id, "water");
-  assert.equal(valueEngine.heat_maps.layers.length, 8, "all eight required decision heat-map layers are generated");
-  assert.match(files.get("PROPERTY_INTELLIGENCE_REPORT.md").toString("utf8"), /Top 10 Cheapest Next Investigations/);
+  assert.equal(valueEngine.heat_maps.status, "INSUFFICIENT_SPATIAL_EVIDENCE", "legacy observations cannot produce a misleading heat map without structured spatial Field Truth");
+  assert.equal(valueEngine.heat_maps.layers.length, 0, "heat-map layers are withheld when the evidence gate fails");
+  const legacyMission = JSON.parse(files.get("INSPECTION_MISSION_PLAN.json").toString("utf8"));
+  assert.equal(legacyMission.status, "GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE");
+  assert.equal(legacyMission.completion_status, "NO_RETROSPECTIVE_MISSION_STATUS");
+  assert.match(files.get("PROPERTY_INTELLIGENCE_REPORT.md").toString("utf8"), /Cheapest Next Investigations — up to 10/);
   ["executive_summary", "decision_framework", "decision_brief", "investigation_questions", "inspection_areas", "coverage", "missing_evidence", "return_visit_plan", "field_efficiency", "stakeholder_questions", "property_information", "inspection_conditions", "weather_context", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "structured_measurements", "preliminary_timber_reconnaissance", "forester_handoff", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
   assert.equal(questionBrief.questions.length, 2, "every inspector question is packaged");
   assert(questionBrief.questions[0].photo_ids.includes("photo-1"), "question links directly to its photo evidence");
@@ -653,7 +659,7 @@ async function main() {
 
   const largeOriginal = new Blob([Buffer.alloc(1024, 0x4f)], { type: "image/jpeg" });
   const largeAnalysis = new Blob([Buffer.alloc(384, 0x41)], { type: "image/jpeg" });
-  const largePhotos = Array.from({ length: 190 }, (_, index) => ({
+  const largePhotos = Array.from({ length: 196 }, (_, index) => ({
     id: `large-photo-${index + 1}`,
     photo_number: `P${index + 1}`,
     associated_marker_id: `large-event-${index + 1}`,
@@ -677,18 +683,18 @@ async function main() {
   }));
   const largeMarkers = Array.from({ length: 252 }, (_, index) => ({
     id: `large-event-${index + 1}`,
-    type: index < 190 ? "photo" : "note",
-    observation_type: index < 190 ? "field.photo" : "field.note",
-    button_label: index < 190 ? "Photo" : "Free Note",
+    type: index < 196 ? "photo" : "note",
+    observation_type: index < 196 ? "field.photo" : "field.note",
+    button_label: index < 196 ? "Photo" : "Free Note",
     evidence_classification: "Observed",
     note: `Observation ${index + 1}`,
-    attributes: index < 190 ? { photo_number: `P${index + 1}` } : {},
+    attributes: index < 196 ? { photo_number: `P${index + 1}` } : {},
     time: new Date(Date.parse(started) + index * 20000).toISOString(),
     lat: 30.486 + (index % 21) * 0.00035,
     lon: -87.098 + Math.floor(index / 21) * 0.0004,
     gps_accuracy_m: 4,
     gps_position_at: started,
-    photo_id: index < 190 ? `large-photo-${index + 1}` : null,
+    photo_id: index < 196 ? `large-photo-${index + 1}` : null,
     voice_note_id: null
   }));
   const largePoints = Array.from({ length: 4964 }, (_, index) => ({
@@ -704,7 +710,7 @@ async function main() {
     schema_name: inspection.schema_name,
     schema_version: inspection.schema_version,
     property_id: inspection.property_id,
-    inspection_id: "inspection-190-photo-scale",
+    inspection_id: "inspection-196-photo-scale",
     started,
     stopped: "2026-08-02T16:00:00.000Z",
     lifecycle_events: inspection.lifecycle_events,
@@ -727,8 +733,8 @@ async function main() {
     voiceEntries: [{ audioBlob: { size: 1024 * 1024 } }, { audioBlob: { size: 1024 * 1024 } }],
     mapContext: { terrainBlob: { size: terrainBytes.length }, contourBlob: { size: contourBytes.length }, parcelsText }
   });
-  assert(simulatedSizes.reportBytes < 200 * 1024 * 1024, "190-photo report estimate stays preferably below 200 MB at 0.8 MB per analysis image");
-  assert(simulatedSizes.fullArchiveBytes > 1400 * 1024 * 1024, "190-photo full archive estimate honestly reflects approximately 1.4 GB of originals");
+  assert(simulatedSizes.reportBytes < 200 * 1024 * 1024, "196-photo report estimate stays preferably below 200 MB at 0.8 MB per analysis image");
+  assert(simulatedSizes.fullArchiveBytes > 1400 * 1024 * 1024, "196-photo full archive estimate honestly reflects approximately 1.4 GB of originals");
 
   const largeReport = await Package.createInspectionPackage({
     inspection: largeInspection,
@@ -739,16 +745,16 @@ async function main() {
     exportedAt: "2026-08-02T16:01:00.000Z"
   });
   const largeReportFiles = extractStoredZip(Buffer.from(await largeReport.blob.arrayBuffer()));
-  assert.equal([...largeReportFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo report package contains every analysis-quality photograph");
-  assert.equal([...largeReportFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 0, "190-photo report package contains no duplicate originals");
+  assert.equal([...largeReportFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 196, "196-photo report package contains every analysis-quality photograph");
+  assert.equal([...largeReportFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 0, "196-photo report package contains no duplicate originals");
   const largeReportManifest = JSON.parse(largeReportFiles.get("inspection.json").toString("utf8"));
   assert.equal(largeReportManifest.summary.gps_track_point_count, 4964);
   assert.equal(largeReportManifest.summary.field_event_count, 252);
   assert.equal(largeReportManifest.summary.device_orientation_sample_count, 944);
-  assert.equal(largeReportManifest.summary.photo_count, 190);
+  assert.equal(largeReportManifest.summary.photo_count, 196);
   assert.equal(largeReportManifest.summary.voice_note_count, 2);
   const largePrintableReport = largeReportFiles.get("printable-report.html").toString("utf8");
-  assert(largePrintableReport.includes('src="photos/190_analysis.jpg"'), "190th photograph resolves in the printable report");
+  assert(largePrintableReport.includes('src="photos/196_analysis.jpg"'), "196th photograph resolves in the printable report");
   assert(largePrintableReport.includes('loading="lazy"'), "large printable photo gallery uses browser lazy loading");
 
   const largeFullArchive = await Package.createInspectionPackage({
@@ -760,11 +766,11 @@ async function main() {
     exportedAt: "2026-08-02T16:02:00.000Z"
   });
   const largeFullFiles = extractStoredZip(Buffer.from(await largeFullArchive.blob.arrayBuffer()));
-  assert.equal([...largeFullFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 190, "190-photo full archive contains every original photograph");
-  assert.equal([...largeFullFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 190, "190-photo full archive contains every analysis copy");
+  assert.equal([...largeFullFiles.keys()].filter(name => /_original\.jpg$/.test(name)).length, 196, "196-photo full archive contains every original photograph");
+  assert.equal([...largeFullFiles.keys()].filter(name => /_analysis\.jpg$/.test(name)).length, 196, "196-photo full archive contains every analysis copy");
   assert(largeFullArchive.blob.size > largeReport.blob.size, "full archive is larger because it preserves exact originals");
 
-  process.stdout.write(`PASS: verified five-decision analysis, confidence and uncertainty-reduction rules, stakeholder questions, AI-ready relationships, exact photo recovery, append-only ingestion, and 190-photo scale.\n`);
+  process.stdout.write(`PASS: verified five-decision analysis, confidence and uncertainty-reduction rules, stakeholder questions, AI-ready relationships, exact photo recovery, append-only ingestion, and 196-photo scale.\n`);
 }
 
 main().catch(error => {

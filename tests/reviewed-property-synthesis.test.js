@@ -135,9 +135,9 @@ const appSource = fs.readFileSync(path.join(root, "field/app.js"), "utf8");
 const workerSource = fs.readFileSync(path.join(root, "field/sw.js"), "utf8");
 for (const label of ["Review Corrections", "Approve Evidence Sets", "Review Water Map", "Review Creek Map", "Review Vegetation Map", "Review Homesite Concepts", "Import ChatGPT Review", "Generate Property Report"]) assert(indexSource.includes(label), `${label} is present`);
 assert(indexSource.includes("NEW INSPECTION PHASE / RELOCATION"));
-assert(appSource.includes('const APP_VERSION = "3.14.0"'));
+assert(appSource.includes('const APP_VERSION = "3.15.0"'));
 assert(appSource.includes("pearsonAugust3ReviewCutoff") && appSource.includes('inspectionDate === "2026-08-03"') && appSource.includes("p3Time"), "display-only Pearson cleanup begins at the real P3 field sequence and cannot alter a later visit");
-assert(workerSource.includes("property-inspector-field-2026-08-04-v20"));
-assert(workerSource.includes("reviewed-property-synthesis.js?v=3.14.0"));
+assert(workerSource.includes("property-inspector-field-2026-08-04-v21"));
+assert(workerSource.includes("reviewed-property-synthesis.js?v=3.15.0"));
 
 process.stdout.write("PASS: segmented routes, confirmation-gated Pearson phases, reviewed maps, conceptual homesites, six audience views, and the 20-section understandable report are verified.\n");

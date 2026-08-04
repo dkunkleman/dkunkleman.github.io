@@ -37,6 +37,7 @@
     #workflow { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.98); border-bottom: 2px solid #a7a79d; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
     #nextStep { background: #111; color: #fff; border-left: 7px solid var(--focus); padding: 10px 11px; min-height: 48px; font-weight: 850; font-size: 16px; line-height: 1.3; }
     #primaryControls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    #missionProgressButton { width: 100%; min-height: 48px; margin-top: 8px; background: #173f60; border: 2px solid #fff; font-size: 14px; }
     button, .button-link { min-height: 54px; border: 0; border-radius: 8px; padding: 10px 8px; color: #fff; background: var(--green); font: 800 16px/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     button:active, .button-link:active { transform: scale(.985); }
     button:focus-visible, .button-link:focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; }
@@ -101,6 +102,28 @@
     .dialog-actions { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px max(10px, env(safe-area-inset-bottom)); background: #fff; border-top: 2px solid #bbb; }
     .dialog-actions .cancel { background: #59615c; }
     #moreCategories[hidden], .structured-fields[hidden] { display: none; }
+    #featureOffsetFields[hidden], #featureSessionBanner[hidden], #featureVoiceStatus[hidden] { display: none; }
+    #featureSessionBanner { margin-top: 10px; border: 4px solid #155fbd; border-radius: 9px; padding: 10px; background: #edf6ff; }
+    #featureSessionBanner strong, #featureSessionBanner span { display: block; margin-bottom: 5px; }
+    #featureFields { display: grid; gap: 2px; }
+    #featureFields .field-help { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .minimum-action { background: #155fbd; }
+    .complete-action { background: #176d38; }
+    .defer-action { background: #6b5513; }
+    #featureCaptureDialog .dialog-actions { grid-template-columns: 1fr; }
+    #featureWarning { border-left: 7px solid #a34300; padding: 9px; background: #fff4df; font-weight: 750; }
+    #featureImmediateRecord { border: 3px solid #176d38; padding: 9px; background: #e8f8ed; font-weight: 800; }
+    #missionStepList { display: grid; gap: 7px; margin-top: 10px; }
+    .mission-step-button { width: 100%; min-height: 48px; text-align: left; background: #4c5650; }
+    .mission-step-button[data-status="complete"] { background: #176d38; }
+    .mission-step-button[data-status="in_progress"] { background: #155fbd; border: 3px solid var(--focus); }
+    .mission-step-button[data-status="skipped_for_now"], .mission-step-button[data-status="not_applicable"], .mission-step-button[data-status="unsafe"] { background: #6b5513; }
+    #missionEvidenceStatus li { margin: 6px 0; }
+    #missionActions { display: grid; grid-template-columns: repeat(2,1fr); gap: 7px; }
+    #missionActions button { min-height: 50px; font-size: 14px; }
+    #markRouteCondition { width: 100%; margin-top: 8px; background: #8a4400; border: 3px solid var(--focus); }
+    .finish-issue { border: 2px solid #8a4400; border-radius: 8px; padding: 9px; margin: 8px 0; background: #fff7e8; }
+    .finish-issue select, .finish-issue input { width: 100%; min-height: 46px; margin-top: 6px; font-size: 16px; }
     #moreCategories { margin-top: 10px; border-top: 2px solid #aaa; padding-top: 10px; }
     #moreCategories h3 { margin: 0 0 8px; font-size: 16px; }
     #moreButtons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -240,6 +263,7 @@
       <button id="finish" disabled>Finish Inspection</button>
       <button id="stop" disabled>Pause GPS</button>
     </div>
+    <button id="missionProgressButton" type="button" disabled>MISSIONS: preparing guided inspection…</button>
     <div id="correctionControls">
       <button id="undoLast" type="button">UNDO LAST</button>
       <button id="correctRecord" type="button">REVIEW / CORRECT RECORDS</button>
@@ -285,6 +309,19 @@
         <label>Why might it matter?<input id="valueReason" type="text" placeholder="Short reason; do not guess dollars"></label>
         <button id="clearValueLens" class="cancel" type="button" style="width:100%;margin-top:8px">CLEAR VALUE LENS</button>
       </details>
+      <details id="intendedUsePanel" style="margin-top:12px">
+        <summary>INTENDED USE — required only before value conclusions</summary>
+        <p class="small">Field facts can be recorded without choosing a use. Value, cost, risk, opportunity and heat-map conclusions require a named scenario.</p>
+        <div class="coach-grid">
+          <label>Active intended use<select id="activeIntendedUse"><option value="">Not specified — value remains unassessed</option></select></label>
+          <span></span>
+        </div>
+        <div class="coach-grid" style="margin-top:8px">
+          <label>New intended use<input id="newIntendedUse" placeholder="Example: Single-family homesite"></label>
+          <button id="addIntendedUse" type="button">Add Scenario</button>
+        </div>
+      </details>
+      <label class="water-rule"><input id="featureVoicePrompts" type="checkbox">Read the next requested field aloud</label>
       <p id="activeValueLens" class="small"><strong>Value lens:</strong> Not assessed. Evidence can still be recorded.</p>
       <p id="coachNextAction">NEXT BEST EVIDENCE: Add an investigation question, then collect evidence that could answer it.</p>
       <details>
@@ -318,6 +355,7 @@
         <button id="note" class="note" disabled>Free Note</button>
         <button id="more" class="more" disabled>More Categories</button>
       </div>
+      <button id="markRouteCondition" type="button" disabled>MARK ROUTE CONDITION</button>
       <div id="moreCategories" hidden>
         <h3>More field observations</h3>
         <div id="moreButtons">
@@ -327,6 +365,10 @@
           <button id="timber" disabled>Timber Sample</button>
           <button id="hazard" disabled>Hazard</button>
           <button id="wildlife" disabled>Wildlife</button>
+          <button id="soilProbe" disabled>Soil Probe</button>
+          <button id="utility" disabled>Utility / Infrastructure</button>
+          <button id="boundary" disabled>Boundary Evidence</button>
+          <button id="sensory" disabled>Sensory / Marketability</button>
           <button id="other" disabled>Other</button>
           <button id="thought" class="thought" disabled>Inspector Thought</button>
           <button id="hypothesis" class="thought" disabled>Inspector Hypothesis</button>
@@ -339,6 +381,12 @@
         <span id="evidenceSetBannerCount">0 photographs saved</span>
         <button id="addPlotTree" type="button" hidden>ADD TREE TO PLOT</button>
         <button id="finishEvidenceSet" type="button">FINISH THIS SUBJECT</button>
+      </div>
+      <div id="featureSessionBanner" hidden>
+        <strong>ACTIVE FEATURE CAPTURE SESSION</strong>
+        <span id="featureSessionBannerName">Feature</span>
+        <span id="featureSessionBannerState">Draft safely stored on this phone.</span>
+        <button id="resumeFeatureSession" type="button">RESUME STRUCTURED CAPTURE</button>
       </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
     </section>
@@ -579,12 +627,44 @@
     </form>
   </dialog>
 
+  <dialog id="featureCaptureDialog">
+    <div class="dialog-body">
+      <h2 id="featureCaptureTitle">Feature Capture Session</h2>
+      <p id="featureImmediateRecord">GPS, timestamp, accuracy, heading and orientation were saved immediately.</p>
+      <p class="small"><strong>Unknown is acceptable.</strong> Never invent a measurement. Save Minimum Record as soon as the essential fields are complete; details can be finished during review.</p>
+      <label>Feature location basis<select id="featureGeometryBasis"><option value="at_feature">I am at the feature</option><option value="phone_location_only">Phone location only — feature may be elsewhere</option><option value="measured_offset">Measured bearing and distance to feature</option><option value="mapped_polygon">Mapped polygon</option><option value="walked_line">Walked line</option></select></label>
+      <div id="featureOffsetFields" hidden>
+        <label>Bearing to feature (degrees)<input id="featureOffsetBearing" type="number" min="0" max="360" step="1" inputmode="decimal"></label>
+        <label>Distance to feature (meters)<input id="featureOffsetDistance" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Distance method<select id="featureOffsetMethod"><option>Measured tape</option><option>Laser rangefinder</option><option>Paced</option><option>Estimated</option><option>Unknown</option></select></label>
+        <label>Accuracy / limitation<input id="featureOffsetLimitation" placeholder="Example: bearing affected by nearby metal"></label>
+      </div>
+      <div id="featureFields"></div>
+      <label>Inspector note<textarea id="featureNote" placeholder="Observed fact or short explanation"></textarea></label>
+      <label>Direct photograph role<select id="featurePhotoRole"></select></label>
+      <div class="choice-grid">
+        <label><input id="featureTakePhoto" type="checkbox">Take direct photograph</label>
+        <label><input id="featureTakeVoice" type="checkbox">Record direct voice note</label>
+        <label><input id="featureRepeatStation" type="checkbox">Make repeat station</label>
+      </div>
+      <p id="featureWarning" hidden></p>
+      <p id="featureVoiceStatus" class="small" hidden></p>
+    </div>
+    <div class="dialog-actions">
+      <button id="saveMinimumFeature" class="minimum-action" type="button">SAVE MINIMUM RECORD</button>
+      <button id="completeFeature" class="complete-action" type="button">SAVE &amp; COMPLETE FEATURE</button>
+      <button id="deferFeature" class="defer-action" type="button">FINISH DETAILS DURING REVIEW</button>
+    </div>
+  </dialog>
+
   <dialog id="departureDialog">
     <form method="dialog">
       <div class="dialog-body">
         <h2>Before you leave the property</h2>
         <p id="departureSummary" class="small"></p>
         <ol id="departureActions"></ol>
+        <h3>Guided Mission Finish Review</h3>
+        <div id="missionFinishIssues"><p class="small">Mission review is being calculated.</p></div>
         <p class="small"><strong>Finish anyway only when returning is safer or the remaining uncertainty is acceptable.</strong> Unknown acreage will remain labeled unknown in the report.</p>
       </div>
       <div class="dialog-actions">
@@ -592,6 +672,31 @@
         <button id="finishAfterReview" type="button">Finish &amp; Create Package</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="inspectionMissionDialog">
+    <div class="dialog-body">
+      <h2>Inspection Mission</h2>
+      <label>Mission template<select id="missionTemplate"><option>General Land Reconnaissance</option><option>Buyer Screening</option><option>Seller Listing Preparation</option><option>Builder Preliminary Review</option><option>Timber Reconnaissance</option><option>Access and Clearing</option><option>Water and Drainage</option><option>Custom Mission</option></select></label>
+      <p id="missionProgressSummary" class="field-warning">Guided mission is preparing.</p>
+      <h3 id="missionStepTitle">Arrival and road frontage</h3>
+      <p id="missionStepWhy"></p>
+      <p id="missionStepInstructions" class="field-warning"></p>
+      <h3>Five-step feature routine</h3>
+      <ol><li>Mark it</li><li>Measure it</li><li>Photograph it</li><li>Explain it</li><li>Connect it</li></ol>
+      <h3>Evidence</h3>
+      <ul id="missionEvidenceStatus"></ul>
+      <label>Skip / unsafe reason<input id="missionSkipReason" placeholder="Required when skipping, not applicable, or unsafe"></label>
+      <div id="missionActions">
+        <button id="missionStartCapture" type="button">START CAPTURE</button>
+        <button id="missionComplete" type="button">COMPLETE MISSION</button>
+        <button id="missionSkip" type="button">SKIP FOR NOW</button>
+        <button id="missionNotApplicable" type="button">NOT APPLICABLE</button>
+        <button id="missionUnsafe" type="button">UNSAFE</button>
+        <button id="missionClose" class="cancel" type="button">CLOSE — KEEP TRACKING</button>
+      </div>
+      <details><summary>Jump to any mission</summary><div id="missionStepList"></div></details>
+    </div>
   </dialog>
 
   <dialog id="photoExplanationDialog">
@@ -861,16 +966,18 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.14.0"></script>
-  <script src="./water-intelligence.js?v=3.14.0"></script>
-  <script src="./evidence-governance.js?v=3.14.0"></script>
-  <script src="./evidence-sets.js?v=3.14.0"></script>
-  <script src="./timber-reconnaissance.js?v=3.14.0"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.14.0"></script>
-  <script src="./authoritative-weather.js?v=3.14.0"></script>
-  <script src="./property-value-engine.js?v=3.14.0"></script>
-  <script src="./inspection-package.js?v=3.14.0"></script>
-  <script src="./idb-recovery.js?v=3.14.0"></script>
-  <script src="./app.js?v=3.14.0"></script>
+  <script src="./field-truth-engine.js?v=3.15.0"></script>
+  <script src="./guided-mission-orchestrator.js?v=3.15.0"></script>
+  <script src="./inspection-coaching.js?v=3.15.0"></script>
+  <script src="./water-intelligence.js?v=3.15.0"></script>
+  <script src="./evidence-governance.js?v=3.15.0"></script>
+  <script src="./evidence-sets.js?v=3.15.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.15.0"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.15.0"></script>
+  <script src="./authoritative-weather.js?v=3.15.0"></script>
+  <script src="./property-value-engine.js?v=3.15.0"></script>
+  <script src="./inspection-package.js?v=3.15.0"></script>
+  <script src="./idb-recovery.js?v=3.15.0"></script>
+  <script src="./app.js?v=3.15.0"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.14.0";
+  const APP_VERSION = "3.15.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -25,6 +25,8 @@
   const synthesisTools = window.ReviewedPropertySynthesis;
   const weatherTools = window.AuthoritativeWeather;
   const valueTools = window.PropertyValueEngine;
+  const fieldTruthTools = window.FieldTruthEngine;
+  const missionTools = window.GuidedMissionOrchestrator;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -62,14 +64,17 @@
   const hypothesisDialog = document.getElementById("hypothesisDialog");
   const structuredMeasurementDialog = document.getElementById("structuredMeasurementDialog");
   const plotTreeDialog = document.getElementById("plotTreeDialog");
+  const featureCaptureDialog = document.getElementById("featureCaptureDialog");
+  const inspectionMissionDialog = document.getElementById("inspectionMissionDialog");
+  const missionProgressButton = document.getElementById("missionProgressButton");
   const correctRecordBtn = document.getElementById("correctRecord");
   const undoLastBtn = document.getElementById("undoLast");
-  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "hypothesis", "photo", "startPhotoGroup", "voice", "more"].map(id => document.getElementById(id));
+  const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "soilProbe", "utility", "boundary", "sensory", "other", "note", "thought", "hypothesis", "photo", "startPhotoGroup", "voice", "more"].map(id => document.getElementById(id));
   const buttonLabels = {
     wet: "Wet", dry: "Dry", blocked: "Blocked Access", high: "High Ground", homesite: "Potential Homesite",
     culvert: "Culvert", tree: "Tree", entrance: "Road or Entrance", wildlife: "Wildlife",
     thick: "Thick Brush", open: "Open Area", ditch: "Ditch", timber: "Timber Sample",
-    hazard: "Hazard", other: "Other",
+    hazard: "Hazard", soilProbe: "Soil Probe", utility: "Utility or Infrastructure", boundary: "Boundary Evidence", sensory: "Sensory or Marketability", other: "Other",
     note: "Free Note", thought: "Inspector Thought", photo: "Photo", voice_note: "Voice Note"
   };
 
@@ -124,12 +129,13 @@
   let pendingSubjectChangePrompt = null;
   let pendingMeasurementPhotoId = null;
   let pendingPlotTreeId = null;
+  let activeFeatureSessionId = null;
   let routeDisplayCache = { key: "", model: null };
 
   function emptyInspection() {
     return {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.2",
+      schema_version: "1.3",
       property_id: "parcel:221S280000001010000",
       inspection_id: null,
       started: null,
@@ -208,6 +214,9 @@
   function updateNextStep() {
     if (pendingPhotoQueue.length) {
       nextStep.textContent = "NEXT: Tap Retry Pending Photo. Keep this page open.";
+    } else if (data.active_feature_session_id && fieldTruthTools) {
+      const active = fieldTruthTools.activeSession(data);
+      nextStep.textContent = `NEXT: Finish or safely defer ${active ? active.feature_label : "the active Feature Capture Session"}.`;
     } else if (data.active_evidence_set_id && evidenceSetTools) {
       const activeSet = evidenceSetTools.effectiveEvidenceSet(data, data.active_evidence_set_id);
       nextStep.textContent = `NEXT: Photograph or explain ${activeSet ? activeSet.label : "the active subject"}, then tap Finish This Subject.`;
@@ -260,6 +269,8 @@
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
     if (coachingTools) coachingTools.ensureInspectionModel(data);
     if (valueTools) valueTools.ensureInspectionModel(data);
+    if (fieldTruthTools) fieldTruthTools.ensureInspectionModel(data);
+    if (missionTools) missionTools.ensureModel(data);
     if (governanceTools) governanceTools.ensureGovernanceModel(data);
     if (evidenceSetTools) {
       evidenceSetTools.ensureEvidenceSetModel(data);
@@ -354,8 +365,15 @@
 
   function saveValueLens() {
     if (!valueTools) return;
-    data.active_value_driver_ids = [...document.querySelectorAll('#valueDriverChoices input[type="checkbox"]:checked')].map(input => input.value);
-    data.active_value_effects = [...document.querySelectorAll('#valueEffectChoices input[type="checkbox"]:checked')].map(input => input.value);
+    const selectedDrivers = [...document.querySelectorAll('#valueDriverChoices input[type="checkbox"]:checked')].map(input => input.value);
+    const selectedEffects = [...document.querySelectorAll('#valueEffectChoices input[type="checkbox"]:checked')].map(input => input.value);
+    if ((selectedDrivers.length || selectedEffects.length) && !data.active_intended_use_scenario_id) {
+      document.querySelectorAll('#valueDriverChoices input[type="checkbox"], #valueEffectChoices input[type="checkbox"]').forEach(input => { input.checked = false; });
+      data.active_value_driver_ids = []; data.active_value_effects = []; data.active_value_effect = ""; saveState(); renderValueLens();
+      setStatus("Choose an Intended Use before assigning value, cost, risk, or opportunity effects. The field evidence itself can still be recorded.", "warning"); return;
+    }
+    data.active_value_driver_ids = selectedDrivers;
+    data.active_value_effects = selectedEffects;
     data.active_value_effect = data.active_value_effects[0] || "";
     data.active_value_magnitude = Number(document.getElementById("valueMagnitude").value) || 3;
     data.active_value_confidence = document.getElementById("valueConfidence").value;
@@ -375,6 +393,231 @@
     saveState();
     renderValueLens();
     setStatus("Value lens cleared. New evidence will be recorded as not assessed until you select another value context.", "normal");
+  }
+
+  function renderFieldTruthControls() {
+    if (!fieldTruthTools) return;
+    fieldTruthTools.ensureInspectionModel(data);
+    const scenarioSelect = document.getElementById("activeIntendedUse");
+    const selected = data.active_intended_use_scenario_id || "";
+    scenarioSelect.innerHTML = '<option value="">Not specified — value remains unassessed</option>';
+    data.intended_use_scenarios.forEach(scenario => {
+      const option = document.createElement("option"); option.value = scenario.scenario_id; option.textContent = `${scenario.name} (${scenario.customer_type})`; scenarioSelect.appendChild(option);
+    });
+    scenarioSelect.value = selected;
+    document.getElementById("featureVoicePrompts").checked = Boolean(data.field_truth_settings.voice_prompts_enabled);
+    const active = fieldTruthTools.activeSession(data);
+    const banner = document.getElementById("featureSessionBanner");
+    banner.hidden = !active;
+    if (active) {
+      document.getElementById("featureSessionBannerName").textContent = active.feature_label;
+      document.getElementById("featureSessionBannerState").textContent = active.status === "minimum_saved" ? "Minimum record saved. Complete details now or during review." : "Draft and immediate field position safely stored on this phone.";
+    }
+  }
+
+  function addIntendedUseScenario() {
+    if (!fieldTruthTools) return;
+    const input = document.getElementById("newIntendedUse"); const name = input.value.trim();
+    if (!name) { setStatus("Name the intended use before adding the scenario.", "warning"); return; }
+    try {
+      const scenario = fieldTruthTools.createScenario(data, { name, customer_type: "Owner / decision maker" }); input.value = ""; saveState(); renderFieldTruthControls();
+      setStatus(`${scenario.name} is now the active intended use. Derived value effects may reference it; field facts remain independent.`, "success");
+    } catch (error) { setStatus(error.message, "error"); }
+  }
+
+  function speakFeaturePrompt(text) {
+    if (!data.field_truth_settings.voice_prompts_enabled || !("speechSynthesis" in window)) return;
+    try { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); } catch (error) { /* The visible prompt remains authoritative. */ }
+  }
+
+  function voiceFillFeatureField(input, label) {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) { setStatus("Voice field entry is unavailable in this Safari version. Use the large field control.", "warning"); return; }
+    const recognition = new Recognition(); recognition.lang = "en-US"; recognition.interimResults = false; recognition.maxAlternatives = 1;
+    const status = document.getElementById("featureVoiceStatus"); status.hidden = false; status.textContent = `Listening for ${label}…`;
+    recognition.onresult = event => {
+      const heard = event.results[0][0].transcript.trim();
+      if (!confirm(`I heard “${heard}” for ${label}. Save this entry?`)) { status.textContent = "Voice entry not saved. Tap the microphone button to try again."; return; }
+      if (input.tagName === "SELECT") {
+        const option = [...input.options].find(item => item.textContent.toLowerCase() === heard.toLowerCase() || heard.toLowerCase().includes(item.textContent.toLowerCase()));
+        if (!option) { status.textContent = `“${heard}” did not match a listed choice. Use the large selector.`; return; }
+        input.value = option.value;
+      } else input.value = heard.replace(/\b(inches?|feet|foot|meters?|centimeters?)\b/gi, "").trim();
+      status.textContent = `${label} confirmed and saved in the draft.`; saveFeatureDraft();
+    };
+    recognition.onerror = () => { status.textContent = "Voice entry was not captured. The draft is safe; use the field control or try again."; };
+    recognition.start();
+  }
+
+  function renderFeatureFields(session) {
+    const template = fieldTruthTools.templateFor(session.button_type); const container = document.getElementById("featureFields"); container.innerHTML = "";
+    template.fields.forEach(definition => {
+      const [key, labelText, kind, choices] = definition; const label = document.createElement("label");
+      const required = template.minimum.includes(key); label.appendChild(document.createTextNode(`${labelText}${required ? " — required minimum" : ""}`));
+      let input;
+      if (kind === "select") {
+        input = document.createElement("select"); (choices || []).forEach(choice => { const option = document.createElement("option"); option.value = choice; option.textContent = choice; input.appendChild(option); });
+        const unknown = [...input.options].find(item => /^(Unknown|Not measured)$/i.test(item.value)); if (unknown && !required) input.value = unknown.value;
+      } else if (kind === "textarea") input = document.createElement("textarea");
+      else { input = document.createElement("input"); input.type = kind === "number" ? "number" : "text"; if (kind === "number") { input.step = "any"; input.inputMode = "decimal"; } }
+      input.dataset.featureField = key; input.value = session.structured_attributes[key] == null ? input.value : session.structured_attributes[key]; input.addEventListener("change", saveFeatureDraft); input.addEventListener("input", () => { if (input.tagName !== "SELECT") saveFeatureDraft(); }); label.appendChild(input);
+      if ((window.SpeechRecognition || window.webkitSpeechRecognition) && ["number", "text", "select"].includes(kind)) {
+        const voice = document.createElement("button"); voice.type = "button"; voice.textContent = `Speak ${labelText}`; voice.style.cssText = "width:100%;margin-top:5px;background:#69468f"; voice.addEventListener("click", () => voiceFillFeatureField(input, labelText)); label.appendChild(voice);
+      }
+      container.appendChild(label);
+    });
+    const roles = document.getElementById("featurePhotoRole"); roles.innerHTML = ""; template.photo_roles.forEach(role => { const option = document.createElement("option"); option.value = role; option.textContent = role; roles.appendChild(option); });
+    document.getElementById("featureWarning").hidden = !session.warning; document.getElementById("featureWarning").textContent = session.warning || "";
+    const firstRequired = template.fields.find(item => template.minimum.includes(item[0])); if (firstRequired) speakFeaturePrompt(`Next, record ${firstRequired[1]}. Unknown is acceptable when you cannot determine it safely.`);
+  }
+
+  function featureAttributesFromDialog() {
+    const attributes = {};
+    document.querySelectorAll("#featureFields [data-feature-field]").forEach(input => { attributes[input.dataset.featureField] = typeof input.value === "string" ? input.value.trim() : input.value; });
+    const note = document.getElementById("featureNote").value.trim(); if (note) attributes.inspector_note = note;
+    return attributes;
+  }
+
+  function saveFeatureDraft() {
+    if (!fieldTruthTools || !activeFeatureSessionId) return;
+    try { fieldTruthTools.applySessionDraft(data, activeFeatureSessionId, featureAttributesFromDialog(), []); saveState(); renderFieldTruthControls(); } catch (error) { setStatus(`FEATURE DRAFT NOT SAVED: ${error.message}`, "error"); }
+  }
+
+  function updateFeatureSessionGeometry() {
+    if (!fieldTruthTools || !activeFeatureSessionId) return;
+    const basis = document.getElementById("featureGeometryBasis").value; document.getElementById("featureOffsetFields").hidden = basis !== "measured_offset";
+    const active = fieldTruthTools.sessionById(data, activeFeatureSessionId); if (!active) return;
+    fieldTruthTools.updateSessionGeometry(data, activeFeatureSessionId, {
+      geometry_basis: basis, phone_location: active.geometry.phone_location,
+      bearing_to_feature_deg: document.getElementById("featureOffsetBearing").value,
+      distance_to_feature_m: document.getElementById("featureOffsetDistance").value,
+      distance_method: document.getElementById("featureOffsetMethod").value,
+      offset_limitation: document.getElementById("featureOffsetLimitation").value.trim()
+    }); saveState();
+  }
+
+  function showFeatureSession(session) {
+    activeFeatureSessionId = session.feature_session_id; document.getElementById("featureCaptureTitle").textContent = session.feature_label;
+    document.getElementById("featureGeometryBasis").value = session.geometry.geometry_basis || "phone_location_only";
+    const offset = session.geometry.measured_offset || {}; document.getElementById("featureOffsetBearing").value = offset.bearing_to_feature_deg == null ? "" : offset.bearing_to_feature_deg;
+    document.getElementById("featureOffsetDistance").value = offset.distance_to_feature_m == null ? "" : offset.distance_to_feature_m; document.getElementById("featureOffsetMethod").value = offset.distance_method || "Unknown";
+    document.getElementById("featureOffsetLimitation").value = offset.accuracy_and_limitation || ""; document.getElementById("featureOffsetFields").hidden = session.geometry.geometry_basis !== "measured_offset";
+    document.getElementById("featureNote").value = session.structured_attributes.inspector_note || ""; document.getElementById("featureTakePhoto").checked = false; document.getElementById("featureTakeVoice").checked = false; document.getElementById("featureRepeatStation").checked = false;
+    renderFeatureFields(session); if (!featureCaptureDialog.open) featureCaptureDialog.showModal(); renderFieldTruthControls(); updateNextStep();
+  }
+
+  function openFeatureCaptureSession(type) {
+    if (!fieldTruthTools || !lastPosition) { setStatus("Waiting for the first current GPS location. Feature was not recorded.", "warning"); return; }
+    if (data.active_feature_session_id) { const active = fieldTruthTools.activeSession(data); setStatus(`Finish or defer ${active ? active.feature_label : "the active feature"} before starting another feature.`, "warning"); showFeatureSession(active); return; }
+    const context = currentEvidenceContext(); const activeQuestions = data.investigation_questions.filter(item => context.question_ids.includes(item.question_id));
+    const missionStep = missionTools ? missionTools.currentStep(data) : null;
+    try {
+      const session = fieldTruthTools.startFeatureSession(data, {
+        button_type: type, phone_location: { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m, recorded_at: lastPosition.time },
+        geometry_basis: type === "routeCondition" ? "walked_line" : "phone_location_only", compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : lastPosition.heading_deg,
+        device_orientation: latestOrientation ? { alpha_deg: latestOrientation.alpha_deg, beta_deg: latestOrientation.beta_deg, gamma_deg: latestOrientation.gamma_deg, absolute: latestOrientation.absolute } : null,
+        area_id: context.area_id, question_ids: context.question_ids, exact_question: activeQuestions.map(item => item.text || item.question).join("; "), mission_ids: missionStep ? [missionStep.mission_step_id] : [], weather_context_id: data.authoritative_weather && data.authoritative_weather.weather_context_id || null
+      });
+      if (type === "routeCondition") fieldTruthTools.appendWalkedLinePoint(data, session.feature_session_id, lastPosition);
+      const marker = markerFromPosition(type, "", null, session.opened_at, lastPosition, { source: "feature_capture_session", attributes: { feature_session_id: session.feature_session_id, feature_session_status_at_creation: "draft", geometry_basis: session.geometry.geometry_basis } });
+      data.markers.push(marker); fieldTruthTools.attachDirectEvidence(data, session.feature_session_id, "observation", marker.id); if (missionStep && missionTools) missionTools.attachEvidence(data, missionStep.mission_step_id, session.feature_session_id); saveState(); redraw(); renderCoaching(); renderMissionProgress(); showFeatureSession(session);
+      setStatus(`${session.feature_label} position and time are safe. Complete the required minimum fields; Unknown is acceptable.`, "active");
+    } catch (error) { setStatus(`FEATURE SESSION NOT STARTED: ${error.message}`, "error"); }
+  }
+
+  async function saveFeatureSession(mode) {
+    if (!fieldTruthTools || !activeFeatureSessionId) return;
+    try {
+      updateFeatureSessionGeometry(); const attributes = featureAttributesFromDialog();
+      const session = fieldTruthTools.saveMinimumSession(data, activeFeatureSessionId, attributes, []);
+      const photo = document.getElementById("featureTakePhoto").checked; const voice = document.getElementById("featureTakeVoice").checked; const repeat = document.getElementById("featureRepeatStation").checked; const role = document.getElementById("featurePhotoRole").value;
+      if (repeat && !session.repeat_station_id) fieldTruthTools.makeRepeatStation(data, session.feature_session_id, { camera_direction_deg: session.compass_heading_deg, photo_role_template: session.required_photo_roles, desired_trigger: "Scheduled date" });
+      if (mode === "complete") fieldTruthTools.completeSession(data, session.feature_session_id); else if (mode === "defer") fieldTruthTools.abandonDraftForLater(data, session.feature_session_id, "Complete structured details during review");
+      saveState();
+      if (mode !== "minimum" || photo || voice) featureCaptureDialog.close();
+      activeFeatureSessionId = mode === "minimum" ? session.feature_session_id : null; renderFieldTruthControls(); renderCoaching(); renderMissionProgress(); updateNextStep();
+      setStatus(mode === "complete" ? `${session.feature_label} completed as structured Field Truth.` : (mode === "defer" ? `${session.feature_label} minimum record saved for review. No evidence was discarded.` : `${session.feature_label} minimum record saved. Continue details now, or complete it during review.`), "success");
+      if (photo) await takePhoto({ category: session.feature_label, note: attributes.inspector_note || "", feature_session_id: session.feature_session_id, feature_photo_role: role, associatedObservationId: session.direct_observation_ids[0] || null });
+      if (voice) await startVoiceRecording({ purpose: "feature_session_explanation", feature_session_id: session.feature_session_id, prompt: `Explain why this ${session.feature_label.toLowerCase()} matters.`, area_id: session.area_id, question_ids: session.question_ids });
+    } catch (error) { setStatus(`FEATURE RECORD NOT SAVED: ${error.message}`, "error"); speakFeaturePrompt(error.message); }
+  }
+
+  function ensureMissionPlan() {
+    if (!missionTools || !data.started) return null;
+    if (!data.inspection_mission_plan) missionTools.createPlan(data, { template_name: "General Land Reconnaissance", created_at: data.started, customer_type: "Owner / inspector", user_action: "Start Inspection" });
+    return data.inspection_mission_plan;
+  }
+
+  function renderMissionProgress() {
+    if (!missionTools) return;
+    missionTools.ensureModel(data); const plan = data.inspection_mission_plan;
+    missionProgressButton.disabled = !data.started;
+    if (!plan) { missionProgressButton.textContent = data.started ? "MISSIONS: legacy inspection — no retrospective status" : "MISSIONS: begin after Start Inspection"; return; }
+    const progress = missionTools.progress(data);
+    missionProgressButton.textContent = `MISSIONS ${progress.missions_completed}/${progress.missions_total} · ${progress.incomplete_feature_sessions.length} incomplete feature${progress.incomplete_feature_sessions.length === 1 ? "" : "s"} · ${progress.photographs_not_directly_assigned.length} unassigned photo${progress.photographs_not_directly_assigned.length === 1 ? "" : "s"}`;
+    const summary = document.getElementById("missionProgressSummary");
+    if (summary) summary.textContent = `${progress.missions_completed} complete · ${progress.missions_in_progress} in progress · ${progress.missions_skipped} skipped / not applicable / unsafe · ${progress.areas_remaining_unknown.length} areas unknown. GPS-track proximity does not prove adjacent ground was inspected.`;
+  }
+
+  function missionRequirementText(requirement) { return `${requirement.status === "complete" ? "✓" : (requirement.status === "skipped" ? "—" : "○")} ${requirement.label}${requirement.requirement_level === "recommended" ? " (recommended)" : ""}`; }
+
+  function speakNextMissionPrompt() {
+    if (!missionTools || mediaRecorder && mediaRecorder.state === "recording") return;
+    data.mission_voice_state.silent = !data.field_truth_settings.voice_prompts_enabled;
+    const prompt = missionTools.nextVoicePrompt(data); if (!prompt || !("speechSynthesis" in window)) return;
+    try { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(prompt.text)); } catch (error) { /* Visible requirements remain available. */ }
+  }
+
+  function renderMissionDialog() {
+    const plan = ensureMissionPlan(); if (!plan) return;
+    renderMissionProgress(); const step = missionTools.currentStep(data) || plan.steps[0]; if (!step) return;
+    document.getElementById("missionTemplate").value = plan.template_name;
+    document.getElementById("missionTemplate").disabled = plan.steps.some(item => item.related_evidence_ids.length || item.status === "complete");
+    document.getElementById("missionStepTitle").textContent = `${step.sequence}. ${step.title}`; document.getElementById("missionStepWhy").textContent = step.why_it_matters; document.getElementById("missionStepInstructions").textContent = step.field_instructions;
+    const evidence = document.getElementById("missionEvidenceStatus"); evidence.innerHTML = ""; step.required_evidence.concat(step.recommended_evidence).forEach(requirement => { const item = document.createElement("li"); item.textContent = missionRequirementText(requirement); evidence.appendChild(item); });
+    document.getElementById("missionStartCapture").disabled = !step.default_feature_button || !lastPosition;
+    const list = document.getElementById("missionStepList"); list.innerHTML = ""; plan.steps.forEach(item => { const button = document.createElement("button"); button.type = "button"; button.className = "mission-step-button"; button.dataset.status = item.status; button.textContent = `${item.sequence}. ${item.title} — ${item.status.replaceAll("_", " ")}`; button.addEventListener("click", () => { missionTools.startStep(data, item.mission_step_id); saveState(); renderMissionDialog(); }); list.appendChild(button); });
+    saveState(); speakNextMissionPrompt();
+  }
+
+  function showMissionDialog() {
+    if (!data.started) { setStatus("Tap Start Inspection before opening the mission plan.", "warning"); return; }
+    ensureMissionPlan(); renderMissionDialog(); if (!inspectionMissionDialog.open) inspectionMissionDialog.showModal();
+  }
+
+  function skipCurrentMission(disposition) {
+    const step = missionTools.currentStep(data); const reason = document.getElementById("missionSkipReason").value.trim();
+    try { missionTools.skipStep(data, step.mission_step_id, disposition, reason); document.getElementById("missionSkipReason").value = ""; saveState(); renderMissionDialog(); setStatus(`${step.title} recorded as ${disposition.replaceAll("_", " ")}. The reason is preserved.`, "normal"); } catch (error) { setStatus(error.message, "warning"); }
+  }
+
+  function completeCurrentMission() {
+    const step = missionTools.currentStep(data); if (!step) return;
+    const openRequired = step.required_evidence.filter(item => item.status !== "complete");
+    if (openRequired.length && !confirm(`${openRequired.length} required evidence item(s) remain open. Complete this mission honestly with those gaps preserved?`)) return;
+    missionTools.completeStep(data, step.mission_step_id, { limitations: openRequired.map(item => `Incomplete required evidence: ${item.label}`) }); saveState(); renderMissionDialog(); setStatus(`${step.title} completed. Any missing evidence remains explicit.`, "success");
+  }
+
+  function startCurrentMissionCapture() {
+    const step = missionTools.currentStep(data); if (!step || !step.default_feature_button) { setStatus("This mission is a review step. Use the coverage or Finish Review controls.", "warning"); return; }
+    inspectionMissionDialog.close(); openFeatureCaptureSession(step.default_feature_button);
+  }
+
+  function renderMissionFinishReview(review) {
+    const container = document.getElementById("missionFinishIssues"); container.innerHTML = "";
+    if (!review || !review.issues.length) { container.innerHTML = '<p class="small"><strong>No guided-mission issues were detected.</strong> Review the general field-coaching items above.</p>'; return; }
+    review.issues.forEach(issue => {
+      const wrapper = document.createElement("div"); wrapper.className = "finish-issue"; const title = document.createElement("strong"); title.textContent = `${issue.message} (${issue.record_ids.length})`; wrapper.appendChild(title);
+      const select = document.createElement("select"); [["return_to_capture", "Return to Capture"], ["complete_now", "Complete Now"], ["mark_unknown", "Mark Unknown"], ["skip_with_reason", "Skip with Reason"], ["accept_incomplete_record", "Accept Incomplete Record"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label; select.appendChild(option); }); wrapper.appendChild(select);
+      const reason = document.createElement("input"); reason.placeholder = "Reason required for Unknown, Skip, or Accept Incomplete"; wrapper.appendChild(reason);
+      const apply = document.createElement("button"); apply.type = "button"; apply.textContent = "APPLY TO THIS ISSUE"; apply.addEventListener("click", () => {
+        try { missionTools.resolveFinishIssue(data, review.inspection_finish_review_id, issue.finish_issue_id, select.value, reason.value.trim()); saveState(); if (["return_to_capture", "complete_now"].includes(select.value)) { departureDialog.close(); setStatus("Return to the relevant mission or feature. The Finish Review is saved.", "active"); } else { wrapper.style.opacity = ".55"; apply.disabled = true; setStatus("Finish Review resolution saved without fabricating missing information.", "success"); } } catch (error) { setStatus(error.message, "warning"); }
+      }); wrapper.appendChild(apply); container.appendChild(wrapper);
+    });
+  }
+
+  function acceptOpenFinishIssues() {
+    if (!missionTools || !data.inspection_finish_reviews.length) return;
+    const review = data.inspection_finish_reviews[data.inspection_finish_reviews.length - 1]; review.issues.filter(issue => issue.status === "open").forEach(issue => missionTools.resolveFinishIssue(data, review.inspection_finish_review_id, issue.finish_issue_id, "accept_incomplete_record", "Inspector chose to finish with this limitation explicitly preserved.")); saveState();
   }
 
   function calculateCoachingState(force, forceCoverage) {
@@ -1248,6 +1491,8 @@
     if (missingExplanations.length) actions.unshift({ action: `${missingExplanations.length} photograph${missingExplanations.length === 1 ? " lacks" : "s lack"} a voice explanation. Explain the Critical photographs before leaving when safe.` });
     if (unreviewedWater.length) actions.unshift({ action: `${unreviewedWater.length} photograph${unreviewedWater.length === 1 ? " has" : "s have"} not been reviewed for visible water. Confirm Water, No, or Unsure before leaving.` });
     actions.forEach(action => { const item = document.createElement("li"); item.textContent = action.action; list.appendChild(item); });
+    const missionReview = missionTools ? missionTools.buildFinishReview(data) : null;
+    if (missionReview) { renderMissionFinishReview(missionReview); saveState(); }
     departureDialog.showModal();
   }
 
@@ -2123,6 +2368,9 @@
     document.getElementById("finishEvidenceSet").disabled = photoBusy || packageBusy || recordingVoice || !data.active_evidence_set_id;
     const activeSet = activeEvidenceSet();
     document.getElementById("addPlotTree").disabled = photoBusy || packageBusy || recordingVoice || !activeSet || activeSet.set_type !== "Timber Sample Plot";
+    missionProgressButton.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
+    document.getElementById("markRouteCondition").disabled = !tracking || photoBusy || packageBusy || recordingVoice;
+    renderMissionProgress();
     updateNextStep();
   }
 
@@ -2208,6 +2456,10 @@
     };
     point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;
     data.points.push(point);
+    if (fieldTruthTools && data.active_feature_session_id) {
+      const routeSession = fieldTruthTools.activeSession(data);
+      if (routeSession && routeSession.geometry && routeSession.geometry.geometry_basis === "walked_line") fieldTruthTools.appendWalkedLinePoint(data, routeSession.feature_session_id, point);
+    }
     coverageDirty = true;
     gpsWriteQueue = gpsWriteQueue
       .then(() => gpsPointPut(data.inspection_id, point))
@@ -2236,6 +2488,7 @@
     document.getElementById("accuracy").textContent = `${Math.round(coordinates.accuracy)} m`;
     document.getElementById("location").textContent = `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`;
     setStatus(`GPS active · accuracy ±${Math.round(coordinates.accuracy)} m · ${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}`, "active");
+    if (inspectionMissionDialog.open) renderMissionDialog();
   }
 
   function onGpsError(error) {
@@ -2274,6 +2527,8 @@
     }
     data.stopped = null;
     data.lifecycle_events.push({ type: resuming ? "inspection_resumed" : "inspection_started", time: startedAt, source: "button_press" });
+    if (!resuming) data.lifecycle_events.push({ type: "offline_ready_confirmed", time: startedAt, source: "start_inspection_gate", cache_ready: offlineReady });
+    if (!resuming && missionTools) ensureMissionPlan();
     lastPosition = null;
     saveState();
     updateTimeMetrics();
@@ -2285,6 +2540,8 @@
     refreshAuthoritativeWeather({ silent: true }).catch(() => {
       renderAuthoritativeWeather();
     });
+    renderMissionProgress();
+    if (!resuming) showMissionDialog();
   }
 
   function stopTracking(options) {
@@ -2506,10 +2763,12 @@
         purpose: settings.purpose || "general_field_note",
         photo_id: settings.photo_id || null,
         evidence_set_id: settings.evidence_set_id || data.active_evidence_set_id || null,
+        feature_session_id: settings.feature_session_id || data.active_feature_session_id || null,
         prompt: settings.prompt || null,
         recovered_after_interruption: false
       };
       data.pending_voice_note = activeVoiceNote;
+      if (missionTools) { missionTools.ensureModel(data); data.mission_voice_state.paused_for_recording = true; try { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); } catch (error) { /* Recording must still continue. */ } }
       saveState();
       voiceChunkSequence = 0;
       voiceChunkWrites = Promise.resolve();
@@ -2534,6 +2793,7 @@
       if (mediaRecorder && mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(track => track.stop());
       mediaRecorder = null;
       activeVoiceNote = null;
+      if (missionTools) { data.mission_voice_state.paused_for_recording = false; speakNextMissionPrompt(); }
       data.pending_voice_note = null;
       saveState();
       updateControls();
@@ -2624,7 +2884,7 @@
         taxonomy_version: "property-observation-1.0",
         button_label: "Voice Note",
         note: metadata.prompt || "",
-        attributes: { duration_ms: metadata.duration_ms, purpose: metadata.purpose || "general_field_note", photo_id: metadata.photo_id || null, evidence_set_id: metadata.evidence_set_id || null },
+        attributes: { duration_ms: metadata.duration_ms, purpose: metadata.purpose || "general_field_note", photo_id: metadata.photo_id || null, evidence_set_id: metadata.evidence_set_id || null, feature_session_id: metadata.feature_session_id || null },
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
@@ -2640,11 +2900,13 @@
         voice_note_id: metadata.id,
         photo_id: metadata.photo_id || null,
         evidence_set_id: metadata.evidence_set_id || null
+        ,feature_session_id: metadata.feature_session_id || null
       };
       await voiceStorePut({ id: metadata.id, inspection_id: data.inspection_id, metadata, event: voiceEvent, audioBlob });
       if (metadata.photo_id) await attachExplanationToPhoto(metadata.photo_id, metadata.id);
       data.voice_notes.push(metadata);
       if (metadata.evidence_set_id && evidenceSetTools) evidenceSetTools.attachRecord(data, metadata.evidence_set_id, "voice_note", metadata, { created_by: data.inspector_identity });
+      if (metadata.feature_session_id && fieldTruthTools) fieldTruthTools.attachDirectEvidence(data, metadata.feature_session_id, "voice_note", metadata.id, { role: metadata.purpose || "Feature explanation", recorded_at: metadata.started_at });
       data.pending_voice_note = null;
       data.markers.push(voiceEvent);
       saveState();
@@ -2851,6 +3113,7 @@
         location: photo ? { latitude: photo.lat, longitude: photo.lon, gps_accuracy_m: photo.gps_accuracy_m } : null
       });
       if (evidenceSetId && evidenceSetTools) evidenceSetTools.attachRecord(data, evidenceSetId, "measurement", measurement.measurement_id, { created_by: data.inspector_identity });
+      if (photo && photo.feature_session_id && fieldTruthTools) fieldTruthTools.attachDirectEvidence(data, photo.feature_session_id, "measurement", measurement.measurement_id, { measurement, role: measurement.measurement_type, recorded_at: measurement.recorded_at });
       const measurementIds = Array.from(new Set([...(photo && photo.structured_measurement_ids || []), measurement.measurement_id]));
       if (photo) {
         photo.structured_measurement_ids = measurementIds;
@@ -3132,6 +3395,17 @@
       const set = evidenceSetTools.effectiveEvidenceSet(data, metadata.evidence_set_id);
       if (set && !(set.photo_links || []).some(link => String(link.record_id) === String(metadata.id))) evidenceSetTools.attachRecord(data, metadata.evidence_set_id, "photo", metadata, { photo_role: "Context", created_by: data.inspector_identity });
     }
+    if (metadata.feature_session_id && fieldTruthTools) fieldTruthTools.attachDirectEvidence(data, metadata.feature_session_id, "photo", metadata.id, { role: metadata.feature_photo_role || "Context", recorded_at: metadata.recorded_at });
+    if (metadata.feature_session_id && fieldTruthTools && missionTools) {
+      const session = fieldTruthTools.sessionById(data, metadata.feature_session_id);
+      (session && session.mission_ids || []).forEach(stepId => {
+        const step = missionTools.stepById(data, stepId); const role = String(metadata.feature_photo_role || "").toLowerCase();
+        const requirement = step && step.required_evidence.concat(step.recommended_evidence).find(item => item.status === "open" && (role.includes(item.label.toLowerCase()) || item.label.toLowerCase().includes(role)));
+        missionTools.attachEvidence(data, stepId, metadata.id, requirement && requirement.mission_evidence_requirement_id);
+        if (requirement) missionTools.markPromptCompleted(data, requirement.mission_evidence_requirement_id);
+      });
+      renderMissionProgress();
+    }
     if (metadata.associated_observation_id) {
       const associatedObservation = data.markers.find(marker => String(marker.id) === String(metadata.associated_observation_id));
       if (associatedObservation) associatedObservation.photo_id = metadata.id;
@@ -3292,6 +3566,8 @@
       value_assessment_status: context && context.value_assessment_status ? context.value_assessment_status : coachingContext.value_assessment_status,
       photo_value: data.next_photo_value || "Helpful",
       evidence_set_id: context && context.evidence_set_id ? context.evidence_set_id : data.active_evidence_set_id,
+      feature_session_id: context && context.feature_session_id ? context.feature_session_id : data.active_feature_session_id,
+      feature_photo_role: context && context.feature_photo_role ? context.feature_photo_role : "Context",
       timber_tree_id: context && context.timber_tree_id ? context.timber_tree_id : (activeSetForPhoto && activeSetForPhoto.set_type === "Individual Tree" ? (activeSetForPhoto.subject_details && activeSetForPhoto.subject_details.timber_tree_id || activeSetForPhoto.tree_id) : (activePlotForPhoto && activePlotForPhoto.active_tree_id || null))
     });
     pendingPhotoRequestedAt = new Date().toISOString();
@@ -3395,6 +3671,8 @@
         value_assessment_status: photoContext.value_assessment_status || "NOT_ASSESSED",
         photo_value: photoContext.photo_value || "Helpful"
         ,evidence_set_id: photoContext.evidence_set_id || null
+        ,feature_session_id: photoContext.feature_session_id || null
+        ,feature_photo_role: photoContext.feature_photo_role || "Context"
         ,timber_tree_id: photoContext.timber_tree_id || null
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
@@ -3403,7 +3681,9 @@
           photo_number: metadata.photo_number,
           category: metadata.category,
           associated_observation_id: metadata.associated_observation_id,
-          observation_attributes: metadata.observation_attributes
+          observation_attributes: metadata.observation_attributes,
+          feature_session_id: metadata.feature_session_id,
+          feature_photo_role: metadata.feature_photo_role
         },
         areaId: metadata.area_id,
         questionIds: metadata.question_ids,
@@ -3428,7 +3708,7 @@
       await commitPhotoRecord(photoRecord, true);
       if (metadata.timber_tree_id && timberTools) timberTools.attachPhotoToTree(data, metadata.timber_tree_id, metadata.id, false);
       setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
-      if (metadata.evidence_set_id && evidenceSetTools) {
+    if (metadata.evidence_set_id && evidenceSetTools) {
         pendingGroupPhotoId = id;
         const active = evidenceSetTools.effectiveEvidenceSet(data, metadata.evidence_set_id);
         document.getElementById("groupPhotoPrompt").textContent = `${metadata.photo_number} was saved in ${active ? active.label : "this subject"}. Is it the same subject, a new subject, or the end of this subject?`;
@@ -3853,7 +4133,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !valueTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !valueTools || !fieldTruthTools || !missionTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -3894,6 +4174,7 @@
     redraw();
     renderCoaching();
     renderValueLens();
+    renderFieldTruthControls();
     renderAuditHistory();
     renderEvidenceSets();
     if (statusEl.dataset.kind !== "error") {
@@ -3905,6 +4186,19 @@
   startBtn.addEventListener("click", startTracking);
   stopBtn.addEventListener("click", () => stopTracking());
   finishBtn.addEventListener("click", () => finishInspection());
+  missionProgressButton.addEventListener("click", showMissionDialog);
+  document.getElementById("markRouteCondition").addEventListener("click", () => openFeatureCaptureSession("routeCondition"));
+  document.getElementById("missionStartCapture").addEventListener("click", startCurrentMissionCapture);
+  document.getElementById("missionComplete").addEventListener("click", completeCurrentMission);
+  document.getElementById("missionSkip").addEventListener("click", () => skipCurrentMission("skip_for_now"));
+  document.getElementById("missionNotApplicable").addEventListener("click", () => skipCurrentMission("not_applicable"));
+  document.getElementById("missionUnsafe").addEventListener("click", () => skipCurrentMission("unsafe"));
+  document.getElementById("missionClose").addEventListener("click", () => inspectionMissionDialog.close());
+  inspectionMissionDialog.addEventListener("cancel", event => { event.preventDefault(); inspectionMissionDialog.close(); });
+  document.getElementById("missionTemplate").addEventListener("change", event => {
+    if (data.inspection_mission_plan && data.inspection_mission_plan.steps.some(item => item.related_evidence_ids.length || item.status === "complete")) { event.target.value = data.inspection_mission_plan.template_name; setStatus("The mission template cannot be replaced after evidence or completion status exists. Mission history remains append-only.", "warning"); return; }
+    data.inspection_mission_plan = null; data.active_mission_step_id = null; missionTools.createPlan(data, { template_name: event.target.value, user_action: "Mission template selected" }); saveState(); renderMissionDialog();
+  });
   document.getElementById("addArea").addEventListener("click", addInspectionArea);
   document.getElementById("newInspectionPhase").addEventListener("click", markNewInspectionPhase);
   document.getElementById("newArea").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addInspectionArea(); } });
@@ -3923,6 +4217,17 @@
   ["valueMagnitude", "valueConfidence"].forEach(id => document.getElementById(id).addEventListener("change", saveValueLens));
   document.getElementById("valueReason").addEventListener("input", saveValueLens);
   document.getElementById("clearValueLens").addEventListener("click", clearValueLens);
+  document.getElementById("addIntendedUse").addEventListener("click", addIntendedUseScenario);
+  document.getElementById("newIntendedUse").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addIntendedUseScenario(); } });
+  document.getElementById("activeIntendedUse").addEventListener("change", event => {
+    data.active_intended_use_scenario_id = event.target.value || null; saveState(); renderFieldTruthControls();
+    setStatus(event.target.value ? "Intended use selected for later derived value effects." : "Intended use cleared. Field evidence remains safe; value conclusions are disabled.", "normal");
+  });
+  document.getElementById("featureVoicePrompts").addEventListener("change", event => {
+    data.field_truth_settings.voice_prompts_enabled = event.target.checked; saveState();
+    if (missionTools) { data.mission_voice_state.silent = !event.target.checked; if (!event.target.checked && "speechSynthesis" in window) window.speechSynthesis.cancel(); else speakNextMissionPrompt(); }
+    setStatus(event.target.checked ? "Feature prompts will be read aloud when supported." : "Spoken feature prompts are off.", "normal");
+  });
   document.getElementById("reviewEvidence").addEventListener("click", showDepartureReview);
   document.getElementById("reviewCorrections").addEventListener("click", () => document.querySelector(".audit-card").scrollIntoView({ behavior: "smooth", block: "start" }));
   document.getElementById("reviewPearsonPhases").addEventListener("click", () => renderReviewedSynthesis("phases"));
@@ -3935,22 +4240,8 @@
   document.getElementById("chatReviewInput").addEventListener("change", importChatReviewFile);
   document.getElementById("generatePropertyReport").addEventListener("click", () => finishInspection({ reviewed: true }));
   document.getElementById("continueInspecting").addEventListener("click", () => departureDialog.close());
-  document.getElementById("finishAfterReview").addEventListener("click", () => { departureDialog.close(); finishInspection({ reviewed: true }); });
-  document.getElementById("wet").addEventListener("click", () => openObservationDialog("wet"));
-  document.getElementById("dry").addEventListener("click", () => openObservationDialog("dry"));
-  document.getElementById("blocked").addEventListener("click", () => openObservationDialog("blocked"));
-  document.getElementById("high").addEventListener("click", () => addMarker("high"));
-  document.getElementById("homesite").addEventListener("click", () => addMarker("homesite"));
-  document.getElementById("culvert").addEventListener("click", () => addMarker("culvert"));
-  document.getElementById("tree").addEventListener("click", () => addMarker("tree"));
-  document.getElementById("entrance").addEventListener("click", () => addMarker("entrance"));
-  document.getElementById("wildlife").addEventListener("click", () => addMarker("wildlife"));
-  document.getElementById("thick").addEventListener("click", () => addMarker("thick"));
-  document.getElementById("open").addEventListener("click", () => addMarker("open"));
-  document.getElementById("ditch").addEventListener("click", () => addMarker("ditch"));
-  document.getElementById("timber").addEventListener("click", () => addMarker("timber"));
-  document.getElementById("hazard").addEventListener("click", () => addMarker("hazard"));
-  document.getElementById("other").addEventListener("click", () => addMarker("other"));
+  document.getElementById("finishAfterReview").addEventListener("click", () => { acceptOpenFinishIssues(); departureDialog.close(); finishInspection({ reviewed: true }); });
+  ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "soilProbe", "utility", "boundary", "sensory", "other"].forEach(type => document.getElementById(type).addEventListener("click", () => openFeatureCaptureSession(type)));
   document.getElementById("note").addEventListener("click", () => addMarker("note"));
   document.getElementById("thought").addEventListener("click", () => addMarker("thought"));
   document.getElementById("hypothesis").addEventListener("click", openHypothesisDialog);
@@ -3997,6 +4288,14 @@
   document.querySelectorAll('input[name="wetDepth"]').forEach(input => input.addEventListener("change", () => {
     document.getElementById("wetExactLabel").hidden = selectedRadioValue("wetDepth") !== "exact";
   }));
+  document.getElementById("featureGeometryBasis").addEventListener("change", updateFeatureSessionGeometry);
+  ["featureOffsetBearing", "featureOffsetDistance", "featureOffsetMethod", "featureOffsetLimitation"].forEach(id => document.getElementById(id).addEventListener("change", updateFeatureSessionGeometry));
+  document.getElementById("featureNote").addEventListener("input", saveFeatureDraft);
+  document.getElementById("saveMinimumFeature").addEventListener("click", () => saveFeatureSession("minimum"));
+  document.getElementById("completeFeature").addEventListener("click", () => saveFeatureSession("complete"));
+  document.getElementById("deferFeature").addEventListener("click", () => saveFeatureSession("defer"));
+  document.getElementById("resumeFeatureSession").addEventListener("click", () => { const session = fieldTruthTools.activeSession(data); if (session) showFeatureSession(session); });
+  featureCaptureDialog.addEventListener("cancel", event => { event.preventDefault(); setStatus("Use Save Minimum Record or Finish Details During Review so the captured field position remains recoverable.", "warning"); });
   voiceBtn.addEventListener("click", toggleVoiceNote);
   photoInput.addEventListener("change", handlePhotoFile);
   document.getElementById("stopPhotoExplanation").addEventListener("click", () => {

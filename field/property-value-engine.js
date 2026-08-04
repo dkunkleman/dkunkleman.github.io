@@ -120,7 +120,8 @@
       effects: data.active_value_effects.slice(),
       magnitude: data.active_value_magnitude,
       confidence: data.active_value_confidence,
-      reason: data.active_value_reason.trim()
+      reason: data.active_value_reason.trim(),
+      intended_use_scenario_id: data.active_intended_use_scenario_id || null
     };
   }
 
@@ -138,6 +139,7 @@
       confidence: CONFIDENCE.has(input.confidence) ? input.confidence : "medium",
       inspector_reason: String(input.reason || "").trim(),
       assessment_source: "inspector_selected",
+      intended_use_scenario_id: input.intended_use_scenario_id || null,
       assessed_at: recordedAt || new Date().toISOString()
     })));
   }
@@ -153,6 +155,7 @@
       confidence: CONFIDENCE.has(link.confidence) ? link.confidence : "medium",
       inspector_reason: String(link.inspector_reason || "").trim(),
       assessment_source: link.assessment_source || "inspector_selected",
+      intended_use_scenario_id: link.intended_use_scenario_id || null,
       assessed_at: link.assessed_at || observation.observed_at || observation.time || null
     }));
   }
@@ -251,7 +254,13 @@
       }));
   }
 
-  function heatMap(impacts, subjectParcel) {
+  function heatMap(impacts, subjectParcel, eligibility) {
+    if (!eligibility || eligibility.eligible !== true) return {
+      schema_name: "property-intelligence-value-driver-heat-maps", schema_version: "1.1", status: "INSUFFICIENT_SPATIAL_EVIDENCE",
+      reason: eligibility && eligibility.reason || "Specify an Intended Use Scenario and collect sufficient spatial Field Truth and coverage evidence.",
+      subject_parcel: subjectParcel || null, evidence_density: eligibility && eligibility.evidence_density || null, unknown_areas_visible: true, layers: [],
+      limitations: ["No heat map was rendered because the evidence gate did not pass.", "Unknown ground is not neutral, safe, dry, buildable, low cost, or low risk.", "Beauty is subjective and scenario-dependent."]
+    };
     const points = impacts.filter(impact => impact.location).map(impact => ({
       impact_id: impact.impact_id,
       observation_id: impact.observation_id,
@@ -269,6 +278,9 @@
     return {
       schema_name: "property-intelligence-value-driver-heat-maps",
       schema_version: "1.0",
+      status: "EVIDENCE_SUPPORTED",
+      intended_use_scenario_id: eligibility.scenario_id,
+      evidence_density: eligibility.evidence_density,
       method: "Evidence influence zones centered on inspector-assessed observations. No interpolation into unvisited or unsupported acreage.",
       subject_parcel: subjectParcel || null,
       layers: HEAT_LAYERS.map(layer => ({
@@ -295,7 +307,7 @@
       const attributes = observation.attributes || {};
       const inheritedAttachment = (type === "photo" && attributes.associated_observation_id) || (type === "voice_note" && attributes.photo_id);
       if (inheritedAttachment) return;
-      const links = normalizeLinks(observation);
+      const links = normalizeLinks(observation).filter(link => link.intended_use_scenario_id && link.intended_use_scenario_id === settings.activeIntendedUseScenarioId);
       if (!links.length) {
         const observationId = observation.observation_id || observation.id || `observation-${index + 1}`;
         unassessed.push(observationId);
@@ -363,7 +375,10 @@
         top_10_unanswered_questions: questions,
         top_10_cheapest_next_investigations: cheapest
       },
-      heat_maps: heatMap(impacts, settings.subjectParcel),
+      active_intended_use_scenario_id: settings.activeIntendedUseScenarioId || null,
+      intended_use_scenarios: Array.isArray(settings.intendedUseScenarios) ? settings.intendedUseScenarios : [],
+      legacy_or_unscoped_assessment_rule: "A value assessment without an Intended Use Scenario is preserved but excluded from derived rankings and heat maps.",
+      heat_maps: heatMap(impacts, settings.subjectParcel, settings.heatMapEligibility),
       report_rules: [
         "Every ranked item must explain why, cite supporting observations and photographs, identify contradicting evidence, state remaining uncertainty, and name the cheapest credible next investigation.",
         "Do not convert relative evidence scores into dollars, appraisal adjustments, ROI, probabilities, or tract-wide conclusions.",
@@ -378,6 +393,7 @@
   }
 
   function createHeatMapHtml(model) {
+    if (!model || model.status !== "EVIDENCE_SUPPORTED") return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property Value Heat Maps — insufficient evidence</title><style>body{font-family:Arial,sans-serif;margin:24px;background:#f4f1e8;color:#172016}.warning{max-width:760px;border:4px solid #8a4400;background:#fff3df;padding:18px;font-weight:800}</style></head><body><main class="warning"><h1>Insufficient spatial evidence</h1><p>${escapeHtml(model && model.reason || "Specify an Intended Use Scenario and collect sufficient spatial Field Truth and coverage evidence.")}</p><p>No heat map was rendered. Unknown ground remains visibly unknown. Beauty is subjective and scenario-dependent.</p></main></body></html>`;
     const payload = JSON.stringify(model).replace(/</g, "\\u003c");
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Property Value Driver Heat Maps</title><style>body{font-family:Arial,sans-serif;margin:0;background:#f4f1e8;color:#172016}header,main{max-width:1100px;margin:auto;padding:16px}.warning{border:3px solid #8a4400;background:#fff3df;padding:12px;font-weight:700}.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:14px 0}.layers label{background:#fff;border:2px solid #274c2c;padding:12px;font-weight:800}.map{height:68vh;min-height:480px;background:#e7eadf;border:4px solid #243b24;position:relative;overflow:hidden}.point{position:absolute;border-radius:50%;transform:translate(-50%,-50%);border:2px solid rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#111;cursor:pointer}.positive{background:rgba(21,145,60,.55)}.negative{background:rgba(199,54,40,.58)}.neutral{background:rgba(245,176,45,.6)}#details{background:#fff;border:2px solid #274c2c;padding:12px;margin-top:10px;min-height:48px}</style></head><body><header><h1>Property Value Driver Heat Maps</h1><p class="warning">These are evidence influence zones, not appraised values or parcel-wide conclusions. Unvisited or unsupported ground remains unknown.</p></header><main><div id="layers" class="layers"></div><div id="map" class="map" aria-label="Evidence influence map"></div><div id="details">Select an evidence circle to see why it matters.</div></main><script>const MODEL=${payload};const layers=document.getElementById('layers'),map=document.getElementById('map'),details=document.getElementById('details');let active=MODEL.layers[0]&&MODEL.layers[0].layer_id;function bounds(points){const xs=points.map(p=>p.longitude),ys=points.map(p=>p.latitude);return {minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)}}function draw(){map.innerHTML='';const layer=MODEL.layers.find(x=>x.layer_id===active),points=layer?layer.points:[];if(!points.length){map.innerHTML='<p style="padding:20px">No inspector-confirmed impacts were recorded for this layer.</p>';return}const b=bounds(points),dx=b.maxX-b.minX||.001,dy=b.maxY-b.minY||.001;points.forEach(p=>{const el=document.createElement('button');el.className='point '+(p.layer_score>0?'positive':p.layer_score<0?'negative':'neutral');el.style.left=(8+84*(p.longitude-b.minX)/dx)+'%';el.style.top=(92-84*(p.latitude-b.minY)/dy)+'%';const size=34+Math.min(42,Math.abs(p.layer_score)*7);el.style.width=size+'px';el.style.height=size+'px';el.textContent=p.observation_id;el.onclick=()=>details.textContent=p.why+' | '+p.value_driver_id+' | '+p.effect+' | confidence '+p.confidence+' | photos '+(p.supporting_photograph_ids.join(', ')||'none directly linked');map.appendChild(el)})}MODEL.layers.forEach((layer,i)=>{const label=document.createElement('label'),radio=document.createElement('input');radio.type='radio';radio.name='layer';radio.checked=i===0;radio.onchange=()=>{active=layer.layer_id;draw()};label.append(radio,document.createTextNode(' '+layer.label+' ('+layer.points.length+')'));layers.appendChild(label)});draw();</script></body></html>`;
   }

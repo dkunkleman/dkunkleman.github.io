@@ -26,7 +26,11 @@ Evidence collection exists to improve these decisions. Reports lead with decisio
 
 The product is learning which observed conditions create value, cost, risk, opportunity, and uncertainty. Every field record must either carry an inspector-confirmed Value Driver assessment or remain explicitly unassessed. Software-generated driver suggestions are review aids, never findings. Relative evidence scores organize attention; they must never be presented as appraised dollars, ROI, probabilities, bids, or parcel-wide conclusions.
 
-Every report ends with evidence-linked Top 10 Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Every map package includes Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water evidence layers. Unvisited ground remains unknown, and a feature that creates both benefit and cost retains both effects.
+Every report ends with up to 10 evidence-linked strongest Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Never pad a list. Heat maps exist only for a specified intended use with sufficient structured spatial evidence and visible evidence density; otherwise state Insufficient spatial evidence. Unvisited ground remains unknown, beauty remains subjective and scenario-dependent, and a feature that creates both benefit and cost retains both effects.
+
+The guided mission is a field mentor, not completeness theater. Unknown, not applicable, unsafe and accepted incomplete are honest outcomes. It must never fabricate completion or retrospectively assign mission status to a legacy inspection.
+
+Field Truth precedes value. Public facts, desktop screening hypotheses, field observations, field measurements, inspector interpretations, AI suggestions, professional determinations and remaining unknowns remain separate. Direct session media relationships always outrank proximity inference, and phone GPS is never presented as survey-grade feature geometry.
 
 The app is a field mentor, not a passive recorder. It should continuously answer: What should I do next? What evidence is missing? What would increase confidence most? What is the cheapest reliable way to remove the uncertainty? Named inspection areas and investigation questions must remain attached to evidence so later reports and property comparisons never guess where or why it was collected.
 

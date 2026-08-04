@@ -11,3 +11,8 @@ The field release deliberately remains offline-first and account-free. These ite
 - Version 10: one **Teach me this property** action that explains what was learned, what changed the assessment, remaining concerns, next investigation, the cheapest uncertainty-reduction step, and an owner-minded recommendation.
 
 The current package schema already separates property, inspection, GPS point, observation, attachment, lifecycle event, conditions, and map context records. Future systems should ingest those stable entities and extend namespaced observation attributes rather than changing historical packages.
+
+The schema now also separates guided mission plans/progress/skips/finish reviews, Intended Use Scenarios, Feature Capture Sessions, direct evidence, measurements, derived effects, professional determinations, repeat stations, public-data provenance, and remaining unknowns.
+
+- Build authoritative pre-field adapters against the documented adapter contracts. The current release provides the provenance/dossier model and mission inputs; it does not claim unavailable services were retrieved.
+- Complete the physical-iPhone acceptance run: background Safari, lock/unlock, rotate, capture at least 20 photos across missions, exercise offline voice prompts, and Finish with both resolved and honestly accepted gaps.

@@ -7,10 +7,12 @@
   const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
   const synthesis = typeof module === "object" && module.exports ? require("./reviewed-property-synthesis.js") : (root && root.ReviewedPropertySynthesis);
   const valueEngine = typeof module === "object" && module.exports ? require("./property-value-engine.js") : (root && root.PropertyValueEngine);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, valueEngine);
+  const fieldTruth = typeof module === "object" && module.exports ? require("./field-truth-engine.js") : (root && root.FieldTruthEngine);
+  const guidedMission = typeof module === "object" && module.exports ? require("./guided-mission-orchestrator.js") : (root && root.GuidedMissionOrchestrator);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, valueEngine, fieldTruth, guidedMission);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, valueTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, valueTools, fieldTruthTools, missionTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
@@ -589,6 +591,18 @@
         evidence_audit_history: { source: "EVIDENCE_AUDIT_HISTORY.json", destination: `analysis/${exportId}/EVIDENCE_AUDIT_HISTORY.json` },
         audit_only_gps_points: { source: "AUDIT_ONLY_GPS_POINTS.json", destination: `analysis/${exportId}/AUDIT_ONLY_GPS_POINTS.json` },
         evidence_sets: { source: "EVIDENCE_SETS.json", destination: `analysis/${exportId}/EVIDENCE_SETS.json` },
+        field_truth: { source: "FIELD_TRUTH.json", destination: `analysis/${exportId}/FIELD_TRUTH.json` },
+        feature_capture_sessions: { source: "FEATURE_CAPTURE_SESSIONS.json", destination: `analysis/${exportId}/FEATURE_CAPTURE_SESSIONS.json` },
+        field_missions: { source: "FIELD_MISSIONS.json", destination: `analysis/${exportId}/FIELD_MISSIONS.json` },
+        professional_determinations: { source: "PROFESSIONAL_DETERMINATIONS.json", destination: `analysis/${exportId}/PROFESSIONAL_DETERMINATIONS.json` },
+        repeat_stations: { source: "REPEAT_STATIONS.json", destination: `analysis/${exportId}/REPEAT_STATIONS.json` },
+        public_data_provenance: { source: "PUBLIC_DATA_PROVENANCE.json", destination: `analysis/${exportId}/PUBLIC_DATA_PROVENANCE.json` },
+        inspection_mission_plan: { source: "INSPECTION_MISSION_PLAN.json", destination: `analysis/${exportId}/INSPECTION_MISSION_PLAN.json` },
+        inspection_mission_progress: { source: "INSPECTION_MISSION_PROGRESS.json", destination: `analysis/${exportId}/INSPECTION_MISSION_PROGRESS.json` },
+        mission_evidence_requirements: { source: "MISSION_EVIDENCE_REQUIREMENTS.json", destination: `analysis/${exportId}/MISSION_EVIDENCE_REQUIREMENTS.json` },
+        mission_skip_records: { source: "MISSION_SKIP_RECORDS.json", destination: `analysis/${exportId}/MISSION_SKIP_RECORDS.json` },
+        inspection_finish_review: { source: "INSPECTION_FINISH_REVIEW.json", destination: `analysis/${exportId}/INSPECTION_FINISH_REVIEW.json` },
+        guided_inspection_report_appendix: { source: "GUIDED_INSPECTION_REPORT_APPENDIX.md", destination: `analysis/${exportId}/GUIDED_INSPECTION_REPORT_APPENDIX.md` },
         post_inspection_review: { source: "POST_INSPECTION_REVIEW.json", destination: `analysis/${exportId}/POST_INSPECTION_REVIEW.json` },
         chat_review_return_instructions: { source: "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", destination: `analysis/${exportId}/CHAT_REVIEW_RETURN_INSTRUCTIONS.md` },
         review_annotation_schema: { source: "schemas/property-intelligence-review-annotation.schema.json", destination: `analysis/${exportId}/schemas/property-intelligence-review-annotation.schema.json` },
@@ -1222,7 +1236,7 @@
       auto_start: true,
       user_questions_required_before_analysis: false,
       objective: "Reconstruct the field day from this ZIP alone, then reduce uncertainty about access, buildability, economic potential, cost/risk, and distinctive value without asking the field user to match evidence.",
-      start_here: ["AI_README.md", "EVIDENCE_AUDIT_HISTORY.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "PROPERTY_INTELLIGENCE_REPORT.md", "SEGMENTED_ROUTE.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
+      start_here: ["AI_README.md", "FIELD_TRUTH.json", "FEATURE_CAPTURE_SESSIONS.json", "INSPECTION_MISSION_PLAN.json", "INSPECTION_MISSION_PROGRESS.json", "INSPECTION_FINISH_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "PROPERTY_INTELLIGENCE_REPORT.md", "SEGMENTED_ROUTE.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
       required_outputs_in_order: [
         "Decision summary",
         "Strengths, weaknesses, and material unknowns",
@@ -1591,6 +1605,8 @@
       return_visit_plan: fieldCoaching ? fieldCoaching.return_visit_plan : null,
       field_efficiency: fieldCoaching ? fieldCoaching.field_efficiency : null,
       property_value_engine: manifest.property_value_engine || null,
+      field_truth: manifest.field_truth || null,
+      guided_inspection_mission: manifest.guided_inspection_mission || null,
       small_tract_water_map: manifest.small_tract_water_map || null,
       stakeholder_questions: questions.reduce((groups, question) => {
         const key = String(question.stakeholder || "Other").toLowerCase().replace(/[^a-z0-9]+/g, "_");
@@ -1653,7 +1669,7 @@
 
 ## Start here
 
-This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`EVIDENCE_AUDIT_HISTORY.json\`, \`REVIEWED_PROPERTY_SYNTHESIS.json\`, \`PROPERTY_INTELLIGENCE_REPORT.md\`, \`PROPERTY_VALUE_ENGINE.json\`, \`VALUE_DRIVER_HEAT_MAPS.json\`, \`SEGMENTED_ROUTE.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open the interactive maps, including \`property-value-heat-map.html\`, and \`professional-handoff-cards.html\` for one-page audience handoffs. Do not ask the user to identify files or relationships.
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`FIELD_TRUTH.json\`, \`FEATURE_CAPTURE_SESSIONS.json\`, \`EVIDENCE_AUDIT_HISTORY.json\`, \`REVIEWED_PROPERTY_SYNTHESIS.json\`, \`PROPERTY_INTELLIGENCE_REPORT.md\`, \`PROPERTY_VALUE_ENGINE.json\`, \`VALUE_DRIVER_HEAT_MAPS.json\`, \`SEGMENTED_ROUTE.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open interactive maps only when their status is \`EVIDENCE_SUPPORTED\`. Do not ask the user to identify files or relationships.
 
 The purpose is not to repeat the evidence. The purpose is to reduce uncertainty about five decisions:
 
@@ -1666,6 +1682,10 @@ The purpose is not to repeat the evidence. The purpose is to reduce uncertainty 
 Every observation includes \`decision_relevance\`. Treat its candidate effect as a routing aid, not a conclusion. Decide whether it is truly a strength, weakness, neutral fact, or unresolved issue only after reviewing the linked evidence and intended use.
 
 Every observation also includes \`value_assessment_status\` and \`value_driver_links\`. Only inspector-assessed links drive rankings or heat maps. Suggested drivers for legacy or unassessed observations remain unconfirmed and cannot become findings without inspector approval.
+
+\`FIELD_TRUTH.json\` keeps desktop facts, screening hypotheses, field observations, field measurements, inspector interpretations, AI suggestions, professional determinations and remaining unknowns separate. Never blend these classes. \`FEATURE_CAPTURE_SESSIONS.json\` is canonical for new structured features. Media and measurements captured inside a session are direct relationships with explicit roles; do not replace them with nearest-time or nearest-location inference. Every feature records whether its geometry is at the feature, phone-location-only, measured offset, mapped polygon or walked line. Phone GPS is not survey-grade.
+
+\`INSPECTION_MISSION_PLAN.json\`, \`INSPECTION_MISSION_PROGRESS.json\`, \`MISSION_EVIDENCE_REQUIREMENTS.json\`, \`MISSION_SKIP_RECORDS.json\`, and \`INSPECTION_FINISH_REVIEW.json\` explain what the guided inspection asked, what was completed, what was skipped or unsafe, and which gaps the inspector honestly accepted. For legacy inspections, \`GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE\` and \`NO_RETROSPECTIVE_MISSION_STATUS\` mean no completion was fabricated after the visit.
 
 ## How the evidence fits together
 
@@ -1684,7 +1704,7 @@ Every observation also includes \`value_assessment_status\` and \`value_driver_l
 - \`REVIEWED_PROPERTY_SYNTHESIS.json\` distinguishes approved Pearson review phases from pending or rejected interpretations. Pending items are not findings.
 - \`PROPERTY_INTELLIGENCE_REPORT.md\` is the inspector-reviewed, plain-English report. Its audience variants change emphasis only; they never change evidence.
 - \`PROPERTY_VALUE_ENGINE.json\` preserves each selected driver, value/cost/uncertainty effect, magnitude, confidence, reason, GPS location, and direct evidence links. Scores prioritize evidence; they are not dollars, appraisal adjustments, probabilities, bids, or ROI.
-- \`VALUE_DRIVER_HEAT_MAPS.json\` and \`property-value-heat-map.html\` provide Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water layers. Circles are evidence influence zones, not feature boundaries. Unsupported acreage remains unknown.
+- \`VALUE_DRIVER_HEAT_MAPS.json\` and \`property-value-heat-map.html\` provide Value, Cost, Risk, Opportunity, Beauty, Buildability, Tree Preservation, and Water layers only when an intended-use scenario, adequate Field Truth and coverage evidence exist. \`INSUFFICIENT_SPATIAL_EVIDENCE\` means do not render or interpret a heat map. Unsupported acreage remains unknown. Beauty is subjective and scenario-dependent.
 - \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.48-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
 - \`FLOWING_WATER_CORRIDORS.json\` contains only inspector-confirmed creek Evidence Sets. Treat exact photographed points as observations; treat dashed centerlines and flow arrows as inferences. Never convert a centerline into a surveyed boundary or extend it through uninspected ground.
 - Always report a confirmed creek as: "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified."
@@ -1721,7 +1741,7 @@ The \`weather\` section and \`WEATHER_CONTEXT.json\` keep four things separate: 
 6. Answer the buyer, seller, builder, developer, engineer, and forester questions that the evidence supports. Put unresolved matters under Questions Remaining without interrupting report generation to ask the user.
 7. Recommend professional follow-up only when evidence justifies it. Name the professional, the exact question, the triggering evidence, and which decision the answer could change.
 8. Recommend the lowest-cost next evidence-gathering step before expensive professional work whenever that step can reliably reduce the uncertainty.
-9. End every report with Top 10 Value Drivers, Top 10 Cost Drivers, Top 10 Risks, Top 10 Opportunities, Top 10 Unanswered Questions, and Top 10 Cheapest Next Investigations. Explain why, cite evidence, identify contradictions and unknowns, and preserve opposing value/cost effects.
+9. End every report with up to 10 strongest Value Drivers, Cost Drivers, Risks, Opportunities, Unanswered Questions, and Cheapest Next Investigations. Never pad a list. Explain why, cite evidence, identify contradictions and unknowns, and preserve opposing value/cost effects.
 
 ## Unanswered-question rule
 
@@ -1863,7 +1883,7 @@ End the report with these six sections in this order. Use only inspector-confirm
 
   function createValueEngineReportAppendix(engine) {
     const rankings = engine && engine.rankings || {};
-    return `\n# Property Value Engine — Decision Rankings\n\nThese rankings organize inspector-confirmed field impacts. Scores are relative evidence weights, not appraised dollars, ROI, probabilities, bids, or parcel-wide conclusions. A feature may create both value and cost.\n\n${valueRankingMarkdown("Top 10 Value Drivers", rankings.top_10_value_drivers, "driver")}\n${valueRankingMarkdown("Top 10 Cost Drivers", rankings.top_10_cost_drivers, "driver")}\n${valueRankingMarkdown("Top 10 Risks", rankings.top_10_risks, "risk")}\n${valueRankingMarkdown("Top 10 Opportunities", rankings.top_10_opportunities, "opportunity")}\n${valueRankingMarkdown("Top 10 Unanswered Questions", rankings.top_10_unanswered_questions, "question")}\n${valueRankingMarkdown("Top 10 Cheapest Next Investigations", rankings.top_10_cheapest_next_investigations, "investigation")}\n`;
+    return `\n# Property Value Engine — Decision Rankings\n\nThese lists contain up to 10 supported items and are never padded. Scores are relative evidence weights, not appraised dollars, ROI, probabilities, bids, or parcel-wide conclusions. A feature may create both value and cost.\n\n${valueRankingMarkdown("Strongest Value Drivers — up to 10", rankings.top_10_value_drivers, "driver")}\n${valueRankingMarkdown("Cost Drivers — up to 10", rankings.top_10_cost_drivers, "driver")}\n${valueRankingMarkdown("Risks — up to 10", rankings.top_10_risks, "risk")}\n${valueRankingMarkdown("Opportunities — up to 10", rankings.top_10_opportunities, "opportunity")}\n${valueRankingMarkdown("Material Unanswered Questions — up to 10", rankings.top_10_unanswered_questions, "question")}\n${valueRankingMarkdown("Cheapest Next Investigations — up to 10", rankings.top_10_cheapest_next_investigations, "investigation")}\n`;
   }
 
   function valueEngineAppendixHtml(markdown) {
@@ -1932,6 +1952,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     if (timberTools) timberTools.ensureModel(sourceInspection);
     if (synthesisTools) synthesisTools.ensureModel(sourceInspection);
     if (valueTools) valueTools.ensureInspectionModel(sourceInspection);
+    if (fieldTruthTools) fieldTruthTools.ensureInspectionModel(sourceInspection);
+    if (missionTools) missionTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
     if (governanceTools) governanceTools.ensureGovernanceModel(sourceInspection, settings.exportedAt);
     const governanceView = governanceTools ? governanceTools.buildEffectiveInspection(sourceInspection) : { active: sourceInspection, audit_history: { corrections: [] } };
@@ -2001,6 +2023,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         category: metadata.category || "Other",
         photo_value: metadata.photo_value || "Helpful",
         evidence_set_id: metadata.evidence_set_id || null,
+        feature_session_id: metadata.feature_session_id || null,
+        feature_photo_role: metadata.feature_photo_role || null,
         record_status: metadata.record_status || "active",
         excluded_from_findings: Boolean(metadata.excluded_from_findings),
         correction_ids: metadata.correction_ids || [],
@@ -2096,6 +2120,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         purpose: metadata.purpose || "general_field_note",
         photo_id: metadata.photo_id || null,
         evidence_set_id: metadata.evidence_set_id || null,
+        feature_session_id: metadata.feature_session_id || null,
         prompt: metadata.prompt || null,
         record_status: metadata.record_status || "active",
         excluded_from_findings: Boolean(metadata.excluded_from_findings),
@@ -2317,9 +2342,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.11",
+      schema_version: "1.12",
       purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
-      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "structured_measurement", "timber_tree", "timber_sample_plot", "preliminary_timber_reconnaissance", "professional_handoff_card", "water_evidence", "water_area_cluster", "value_driver", "value_impact", "value_heat_layer", "map_context", "coverage_estimate", "return_visit_plan"],
+      stable_entities: ["property", "intended_use_scenario", "decision", "field_mission", "inspection_mission_plan", "mission_step", "mission_question", "mission_evidence_requirement", "mission_progress", "mission_skip_record", "inspection_finish_review", "investigation_question", "feature_capture_session", "original_evidence", "structured_measurement", "derived_finding", "derived_value_effect", "remaining_unknown", "next_investigation", "professional_determination", "repeat_station", "public_data_record", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "timber_tree", "timber_sample_plot", "preliminary_timber_reconnaissance", "professional_handoff_card", "water_evidence", "water_area_cluster", "value_driver", "value_impact", "value_heat_layer", "map_context", "coverage_estimate", "return_visit_plan"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
         classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance", "value_assessment_status", "value_driver_links", "area_id", "question_ids", "question_links"],
@@ -2338,6 +2363,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       measurement_contract: "The inspector-entered numeric value, unit, and basis are authoritative field data. A photograph supports the measurement but must never become the sole source for reading or replacing the entered number. Pending suggested values remain inactive until inspector confirmation.",
       timber_contract: "Permanent tree and plot IDs preserve preliminary identification, measurement method, confidence, defects, purposes, plot design and limitations. Never label reconnaissance as a certified cruise, appraisal, sale volume, or market valuation, and never generalize convenience or sparse plots as statistically valid.",
       property_value_contract: "Only inspector-assessed Value Driver links enter rankings and heat maps. Preserve effect, magnitude, confidence, reason, GPS, and evidence IDs. Relative scores organize evidence and must never be represented as dollars, appraisal adjustments, ROI, probabilities, bids, or unsupported parcel-wide conditions.",
+      field_truth_contract: "Desktop source facts, desktop screening hypotheses, field observations, field measurements, inspector interpretations, AI suggestions, professional determinations and remaining unknowns remain separate. Feature Capture Sessions preserve geometry basis, structured attributes, methods, skip reasons and direct media relationships. Original evidence is immutable; later layers are append-only.",
+      heat_map_gate: "Do not render a value, cost, risk, opportunity, beauty, buildability, tree-preservation or water heat map without a specified Intended Use Scenario, adequate spatial Field Truth, evidence-linked effects and recorded coverage. Otherwise return INSUFFICIENT_SPATIAL_EVIDENCE.",
+      guided_mission_contract: "Mission plans, steps, questions, requirements, progress, skip reasons and Finish Reviews are append-only guidance records. Unknown, unsafe, not applicable and accepted incomplete are valid. No legacy mission status may be inferred retrospectively.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
@@ -2385,18 +2413,28 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const structuredMeasurements = sourceInspection.measurements || [];
     const timberReconnaissance = timberTools ? timberTools.createReconnaissance(sourceInspection) : { schema_name: "property-intelligence-preliminary-timber-reconnaissance", schema_version: "1.0", title: "Preliminary Timber Reconnaissance", trees: [], sampling_method_summary: { plot_count: 0, plots: [] }, builder_and_clearing_summary: {}, disclaimer: "Timber reconnaissance module unavailable." };
     const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
+    const fieldTruthModel = fieldTruthTools ? fieldTruthTools.packageModel(sourceInspection) : { schema_name: "property-field-truth-layer", schema_version: "1.0", status: "NOT_AVAILABLE", feature_capture_sessions: [], heat_map_eligibility: { eligible: false, status: "INSUFFICIENT_SPATIAL_EVIDENCE", reason: "Field Truth module unavailable." } };
+    const guidedMissionModel = missionTools ? missionTools.packageModel(sourceInspection) : { schema_name: "guided-inspection-mission-orchestrator", schema_version: "1.0", legacy_status: { status: "GUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE", completion_status: "NO_RETROSPECTIVE_MISSION_STATUS" }, inspection_mission_plan: null };
     const propertyValueEngine = valueTools ? valueTools.buildValueEngine({
       observations,
       questions: inspection.investigation_questions,
       propertyId: mapMetadata.subject_parcel.property_id,
       inspectionId: inspection.inspection_id,
-      subjectParcel: Object.assign({}, mapMetadata.subject_parcel, { geometry: subjectFeature.geometry || null })
+      subjectParcel: Object.assign({}, mapMetadata.subject_parcel, { geometry: subjectFeature.geometry || null }),
+      intendedUseScenarios: fieldTruthModel.intended_use_scenarios || [],
+      activeIntendedUseScenarioId: sourceInspection.active_intended_use_scenario_id || null,
+      featureCaptureSessions: fieldTruthModel.feature_capture_sessions || [],
+      coverageClassifications: fieldTruthModel.coverage_classifications || [],
+      derivedValueEffects: fieldTruthModel.derived_value_effects || [],
+      heatMapEligibility: fieldTruthModel.heat_map_eligibility
     }) : { schema_name: "property-intelligence-value-engine", schema_version: "1.0", status: "NOT_AVAILABLE", impacts: [], rankings: {}, heat_maps: { layers: [] } };
     mapMetadata.layers.value_driver_heat_maps = {
       path: "VALUE_DRIVER_HEAT_MAPS.json",
       interactive_path: "property-value-heat-map.html",
       method: "Inspector-confirmed evidence influence zones; no interpolation into unsupported acreage.",
-      available: Boolean(propertyValueEngine.impacts && propertyValueEngine.impacts.length)
+      available: Boolean(propertyValueEngine.heat_maps && propertyValueEngine.heat_maps.status === "EVIDENCE_SUPPORTED"),
+      status: propertyValueEngine.heat_maps && propertyValueEngine.heat_maps.status || "INSUFFICIENT_SPATIAL_EVIDENCE",
+      reason: propertyValueEngine.heat_maps && propertyValueEngine.heat_maps.reason || null
     };
 
     const manifest = {
@@ -2447,6 +2485,14 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         source_voice_note_record_count: sourceInspection.voice_notes.length,
         audit_only_voice_note_count: auditOnlyVoices.length,
         correction_count: (sourceInspection.corrections || []).length,
+        feature_capture_session_count: (fieldTruthModel.feature_capture_sessions || []).length,
+        field_mission_count: (fieldTruthModel.field_missions || []).length,
+        intended_use_scenario_count: (fieldTruthModel.intended_use_scenarios || []).length,
+        professional_determination_count: (fieldTruthModel.professional_determinations || []).length,
+        repeat_station_count: (fieldTruthModel.repeat_stations || []).length,
+        guided_mission_step_count: guidedMissionModel.inspection_mission_plan ? guidedMissionModel.inspection_mission_plan.steps.length : 0,
+        guided_mission_completed_count: guidedMissionModel.mission_progress ? guidedMissionModel.mission_progress.missions_completed : 0,
+        guided_mission_skip_count: (guidedMissionModel.mission_skip_records || []).length,
         voided_record_count: (auditHistory.voided_record_ids || []).length,
         inspector_hypothesis_count: (inspection.inspector_hypotheses || []).length,
         professional_handoff_card_count: (professionalHandoffCards.cards || []).length,
@@ -2517,6 +2563,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,reviewed_map_status: sourceInspection.reviewed_map_status || {}
         ,imported_chat_review_annotations: sourceInspection.imported_chat_review_annotations || []
         ,property_value_engine: propertyValueEngine
+        ,field_truth: fieldTruthModel
+        ,guided_inspection_mission: guidedMissionModel
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
@@ -2527,6 +2575,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       preliminary_timber_reconnaissance: timberReconnaissance,
       forester_handoff: foresterHandoff,
       property_value_engine: propertyValueEngine,
+      field_truth: fieldTruthModel,
+      guided_inspection_mission: guidedMissionModel,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2541,6 +2591,18 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         post_inspection_review: "POST_INSPECTION_REVIEW.json",
         weather_context: "WEATHER_CONTEXT.json",
         property_value_engine: "PROPERTY_VALUE_ENGINE.json",
+        field_truth: "FIELD_TRUTH.json",
+        feature_capture_sessions: "FEATURE_CAPTURE_SESSIONS.json",
+        field_missions: "FIELD_MISSIONS.json",
+        professional_determinations: "PROFESSIONAL_DETERMINATIONS.json",
+        repeat_stations: "REPEAT_STATIONS.json",
+        public_data_provenance: "PUBLIC_DATA_PROVENANCE.json",
+        inspection_mission_plan: "INSPECTION_MISSION_PLAN.json",
+        inspection_mission_progress: "INSPECTION_MISSION_PROGRESS.json",
+        mission_evidence_requirements: "MISSION_EVIDENCE_REQUIREMENTS.json",
+        mission_skip_records: "MISSION_SKIP_RECORDS.json",
+        inspection_finish_review: "INSPECTION_FINISH_REVIEW.json",
+        guided_inspection_report_appendix: "GUIDED_INSPECTION_REPORT_APPENDIX.md",
         value_driver_heat_maps: "VALUE_DRIVER_HEAT_MAPS.json",
         property_value_heat_map_interactive: "property-value-heat-map.html",
         authoritative_weather_context: "WEATHER_CONTEXT.json",
@@ -2672,6 +2734,18 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("EVIDENCE_SETS.json", JSON.stringify({ summaries: evidenceSetSummaries, pending_suggestions: evidenceSetSuggestions, append_only_events: sourceInspection.evidence_set_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("POST_INSPECTION_REVIEW.json", JSON.stringify(postInspectionReview, null, 2) + "\n", { modifiedAt });
     zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "2.0", inspection_id: manifest.inspection_id, authoritative_weather: manifest.inspection.authoritative_weather || null, manual_weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation.", "Calculated departures and percentages must be labeled as derived from cited official station records.", "Station rainfall may differ from parcel rainfall."] }, null, 2) + "\n", { modifiedAt });
+    zip.add("FIELD_TRUTH.json", JSON.stringify(fieldTruthModel, null, 2) + "\n", { modifiedAt });
+    zip.add("FEATURE_CAPTURE_SESSIONS.json", JSON.stringify({ schema_name: "property-feature-capture-sessions", schema_version: "1.0", sessions: fieldTruthModel.feature_capture_sessions || [], append_only_events: fieldTruthModel.feature_session_events || [], migration: fieldTruthModel.migration }, null, 2) + "\n", { modifiedAt });
+    zip.add("FIELD_MISSIONS.json", JSON.stringify({ intended_use_scenarios: fieldTruthModel.intended_use_scenarios || [], field_missions: fieldTruthModel.field_missions || [], remaining_unknowns: fieldTruthModel.remaining_unknowns || [], next_investigations: fieldTruthModel.next_investigations || [] }, null, 2) + "\n", { modifiedAt });
+    zip.add("PROFESSIONAL_DETERMINATIONS.json", JSON.stringify({ rule: "Professional determinations are append-only and never overwrite original evidence or inspector interpretation.", determinations: fieldTruthModel.professional_determinations || [] }, null, 2) + "\n", { modifiedAt });
+    zip.add("REPEAT_STATIONS.json", JSON.stringify({ stations: fieldTruthModel.repeat_stations || [] }, null, 2) + "\n", { modifiedAt });
+    zip.add("PUBLIC_DATA_PROVENANCE.json", JSON.stringify({ information_class: "desktop_source_fact", records: fieldTruthModel.public_data_provenance || [], rule: "Public layers are screening context and do not establish access, boundaries, buildability, septic suitability, wetlands status, utility availability, timber value, engineering sufficiency or cost." }, null, 2) + "\n", { modifiedAt });
+    zip.add("INSPECTION_MISSION_PLAN.json", JSON.stringify(guidedMissionModel.inspection_mission_plan || guidedMissionModel.legacy_status, null, 2) + "\n", { modifiedAt });
+    zip.add("INSPECTION_MISSION_PROGRESS.json", JSON.stringify(guidedMissionModel.mission_progress || guidedMissionModel.legacy_status, null, 2) + "\n", { modifiedAt });
+    zip.add("MISSION_EVIDENCE_REQUIREMENTS.json", JSON.stringify({ requirements: guidedMissionModel.mission_evidence_requirements || [], legacy_status: guidedMissionModel.legacy_status || null }, null, 2) + "\n", { modifiedAt });
+    zip.add("MISSION_SKIP_RECORDS.json", JSON.stringify({ skip_records: guidedMissionModel.mission_skip_records || [], append_only_progress_events: guidedMissionModel.append_only_progress_events || [] }, null, 2) + "\n", { modifiedAt });
+    zip.add("INSPECTION_FINISH_REVIEW.json", JSON.stringify({ finish_reviews: guidedMissionModel.inspection_finish_reviews || [], rule: "Unknown, unsafe, skipped, and accepted-incomplete are honest outcomes; no missing answer is fabricated." }, null, 2) + "\n", { modifiedAt });
+    zip.add("GUIDED_INSPECTION_REPORT_APPENDIX.md", missionTools ? missionTools.guidedAppendix(sourceInspection) : "# Guided Inspection Mission Appendix\n\nGUIDED_MISSION_NOT_AVAILABLE_AT_CAPTURE\n\nNO_RETROSPECTIVE_MISSION_STATUS\n", { modifiedAt });
     zip.add("PROPERTY_VALUE_ENGINE.json", JSON.stringify(propertyValueEngine, null, 2) + "\n", { modifiedAt });
     zip.add("VALUE_DRIVER_HEAT_MAPS.json", JSON.stringify(propertyValueEngine.heat_maps, null, 2) + "\n", { modifiedAt });
     zip.add("property-value-heat-map.html", interactiveValueMap, { modifiedAt });
