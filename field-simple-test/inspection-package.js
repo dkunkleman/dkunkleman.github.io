@@ -6,10 +6,11 @@
   const evidenceSets = typeof module === "object" && module.exports ? require("./evidence-sets.js") : (root && root.EvidenceSets);
   const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
   const synthesis = typeof module === "object" && module.exports ? require("./reviewed-property-synthesis.js") : (root && root.ReviewedPropertySynthesis);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis);
+  const frontage = typeof module === "object" && module.exports ? require("./frontage-workflow.js") : (root && root.PropertyFrontageWorkflow);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, frontage);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, frontageTools) {
   "use strict";
 
   const FORMAT = "property-inspector-home-test-313-package";
@@ -1273,7 +1274,7 @@
       auto_start: true,
       user_questions_required_before_analysis: false,
       objective: "Reconstruct the field day from this ZIP alone, then reduce uncertainty about access, buildability, economic potential, cost/risk, and distinctive value without asking the field user to match evidence.",
-      start_here: ["AI_README.md", "EVIDENCE_AUDIT_HISTORY.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "PROPERTY_INTELLIGENCE_REPORT.md", "SEGMENTED_ROUTE.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
+      start_here: ["AI_README.md", "FRONTAGE_AND_CROSSING.json", "EVIDENCE_AUDIT_HISTORY.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "PROPERTY_INTELLIGENCE_REPORT.md", "SEGMENTED_ROUTE.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
       required_outputs_in_order: [
         "Decision summary",
         "Strengths, weaknesses, and material unknowns",
@@ -2377,6 +2378,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const structuredMeasurements = sourceInspection.measurements || [];
     const timberReconnaissance = timberTools ? timberTools.createReconnaissance(sourceInspection) : { schema_name: "property-intelligence-preliminary-timber-reconnaissance", schema_version: "1.0", title: "Preliminary Timber Reconnaissance", trees: [], sampling_method_summary: { plot_count: 0, plots: [] }, builder_and_clearing_summary: {}, disclaimer: "Timber reconnaissance module unavailable." };
     const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
+    const frontageAnalysis = frontageTools ? frontageTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-frontage-crossing-workflow", schema_version: "1.0", status: "NOT_AVAILABLE", vehicle_crossing_options: [], frontage_ends: [], parking_and_staging: [] };
 
     const manifest = {
       format: FORMAT,
@@ -2454,6 +2456,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,authoritative_weather_station_id: inspection.authoritative_weather && inspection.authoritative_weather.station ? inspection.authoritative_weather.station.station_id : null
         ,small_tract_water_photo_count: smallTractWaterMap.water_photographs ? smallTractWaterMap.water_photographs.length : 0
         ,small_tract_water_cluster_count: smallTractWaterMap.water_area_clusters ? smallTractWaterMap.water_area_clusters.length : 0
+        ,vehicle_crossing_option_count: frontageAnalysis.vehicle_crossing_options.length
+        ,frontage_end_count: frontageAnalysis.frontage_ends.length
+        ,parking_staging_record_count: frontageAnalysis.parking_and_staging.length
       },
       property: mapMetadata.subject_parcel,
       inspection: {
@@ -2485,6 +2490,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         water_observation_rule: inspection.water_observation_rule || null,
         build_mode: sourceInspection.build_mode || null,
         simple_capture_sessions: sourceInspection.simple_sessions || []
+        ,frontage_and_crossing: frontageAnalysis
         ,structured_measurements: structuredMeasurements
         ,measurement_suggestions: sourceInspection.measurement_suggestions || []
         ,preliminary_timber_reconnaissance: timberReconnaissance
@@ -2504,6 +2510,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       structured_measurements: structuredMeasurements,
       preliminary_timber_reconnaissance: timberReconnaissance,
       forester_handoff: foresterHandoff,
+      frontage_and_crossing: frontageAnalysis,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2523,6 +2530,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         professional_handoff_cards: "PROFESSIONAL_HANDOFF_CARDS.json",
         professional_handoff_printable: "professional-handoff-cards.html",
         return_visit_plan: "RETURN_VISIT_PLAN.json",
+        frontage_and_crossing: "FRONTAGE_AND_CROSSING.json",
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
         segmented_route: "SEGMENTED_ROUTE.json",
@@ -2667,6 +2675,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("PRELIMINARY_TIMBER_RECONNAISSANCE.json", JSON.stringify(timberReconnaissance, null, 2) + "\n", { modifiedAt });
     zip.add("FORESTER_HANDOFF.json", JSON.stringify(foresterHandoff, null, 2) + "\n", { modifiedAt });
     zip.add("FORESTER_HANDOFF.md", foresterHandoffMarkdown, { modifiedAt });
+    zip.add("FRONTAGE_AND_CROSSING.json", JSON.stringify(frontageAnalysis, null, 2) + "\n", { modifiedAt });
     zip.add("small-tract-water-map.html", interactiveWaterMap, { modifiedAt });
     zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
     zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });

@@ -1,19 +1,20 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-offline-v2";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.2";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v3";
+const INDEX_URL = "./index.html?v=3.13.0-home-test.3";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.13.0-home-test.2",
-  "./water-intelligence.js?v=3.13.0-home-test.2",
-  "./evidence-governance.js?v=3.13.0-home-test.2",
-  "./evidence-sets.js?v=3.13.0-home-test.2",
-  "./timber-reconnaissance.js?v=3.13.0-home-test.2",
-  "./reviewed-property-synthesis.js?v=3.13.0-home-test.2",
-  "./authoritative-weather.js?v=3.13.0-home-test.2",
-  "./app.js?v=3.13.0-home-test.2",
-  "./idb-recovery.js?v=3.13.0-home-test.2",
-  "./inspection-package.js?v=3.13.0-home-test.2",
+  "./inspection-coaching.js?v=3.13.0-home-test.3",
+  "./water-intelligence.js?v=3.13.0-home-test.3",
+  "./evidence-governance.js?v=3.13.0-home-test.3",
+  "./evidence-sets.js?v=3.13.0-home-test.3",
+  "./timber-reconnaissance.js?v=3.13.0-home-test.3",
+  "./reviewed-property-synthesis.js?v=3.13.0-home-test.3",
+  "./authoritative-weather.js?v=3.13.0-home-test.3",
+  "./frontage-workflow.js?v=3.13.0-home-test.3",
+  "./app.js?v=3.13.0-home-test.3",
+  "./idb-recovery.js?v=3.13.0-home-test.3",
+  "./inspection-package.js?v=3.13.0-home-test.3",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];

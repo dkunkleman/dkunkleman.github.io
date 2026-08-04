@@ -274,6 +274,21 @@
     .simple-capture-actions button { min-height: 60px; font-size: 17px; }
     .simple-return { background: #f2cf28 !important; color: #161200 !important; border: 3px solid #111 !important; font-weight: 950 !important; }
     .simple-capture-actions details { padding: 0 9px 9px; border: 2px solid #777; border-radius: 8px; }
+    .frontage-step { max-width: 620px; margin: 0 auto; padding: 14px; border: 3px solid #173b24; border-radius: 12px; background: #fff; }
+    .frontage-step h2 { margin: 0 0 8px; font-size: 22px; }
+    .frontage-instruction { margin: 8px 0 12px; padding: 11px; border-left: 8px solid #f2cf28; background: #111; color: #fff; font-size: 17px; font-weight: 850; line-height: 1.35; }
+    .frontage-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+    .frontage-grid button { min-height: 76px; padding: 9px; font-size: 16px; }
+    .frontage-grid .wide { grid-column: 1 / -1; }
+    .frontage-crossing { background: #205f84; }
+    .frontage-condition { background: #6d5520; }
+    .frontage-end { background: #176b36; }
+    .frontage-review-row { margin: 9px 0; padding: 10px; border: 3px solid #5e6862; border-radius: 8px; background: #f7f7f2; }
+    .frontage-review-row[data-lowest="true"] { border-color: #15703a; background: #eaffef; }
+    .frontage-review-row strong, .frontage-review-row span { display: block; margin: 3px 0; }
+    .frontage-warning { padding: 9px; border: 2px solid #8a5c00; border-radius: 7px; background: #fff5d7; font-weight: 750; }
+    .frontage-support-actions { display: grid; gap: 8px; margin-top: 12px; }
+    .frontage-support-actions button { min-height: 62px; font-size: 16px; }
     .simple-finish > button, #simplePackageResult button, #simplePackageResult a { display: block; width: 100%; min-height: 68px; margin-top: 10px; font-size: 17px; }
     .simple-finish > button:first-of-type { background: #11652d; }
     #simplePackageResult { margin-top: 14px; padding-top: 12px; border-top: 3px solid #173b24; }
@@ -285,6 +300,8 @@
       .simple-grid .simple-feature { min-height: 74px; font-size: 16px; }
       .simple-fields.three { grid-template-columns: repeat(3,minmax(0,1fr)); }
       .simple-capture input, .simple-capture select { font-size: 17px; }
+      .frontage-grid { grid-template-columns: 1fr; }
+      .frontage-grid .wide { grid-column: auto; }
     }
     @media (orientation: landscape) and (max-height: 500px) {
       .simple-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
@@ -923,15 +940,16 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.13.0-home-test.2"></script>
-  <script src="./water-intelligence.js?v=3.13.0-home-test.2"></script>
-  <script src="./evidence-governance.js?v=3.13.0-home-test.2"></script>
-  <script src="./evidence-sets.js?v=3.13.0-home-test.2"></script>
-  <script src="./timber-reconnaissance.js?v=3.13.0-home-test.2"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.13.0-home-test.2"></script>
-  <script src="./authoritative-weather.js?v=3.13.0-home-test.2"></script>
-  <script src="./inspection-package.js?v=3.13.0-home-test.2"></script>
-  <script src="./idb-recovery.js?v=3.13.0-home-test.2"></script>
-  <script src="./app.js?v=3.13.0-home-test.2"></script>
+  <script src="./inspection-coaching.js?v=3.13.0-home-test.3"></script>
+  <script src="./water-intelligence.js?v=3.13.0-home-test.3"></script>
+  <script src="./evidence-governance.js?v=3.13.0-home-test.3"></script>
+  <script src="./evidence-sets.js?v=3.13.0-home-test.3"></script>
+  <script src="./timber-reconnaissance.js?v=3.13.0-home-test.3"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.13.0-home-test.3"></script>
+  <script src="./authoritative-weather.js?v=3.13.0-home-test.3"></script>
+  <script src="./frontage-workflow.js?v=3.13.0-home-test.3"></script>
+  <script src="./inspection-package.js?v=3.13.0-home-test.3"></script>
+  <script src="./idb-recovery.js?v=3.13.0-home-test.3"></script>
+  <script src="./app.js?v=3.13.0-home-test.3"></script>
 </body>
 </html>

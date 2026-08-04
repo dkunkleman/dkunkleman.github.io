@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.2";
+  const APP_VERSION = "3.13.0-home-test.3";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -26,6 +26,7 @@
   const timberTools = window.TimberReconnaissance;
   const synthesisTools = window.ReviewedPropertySynthesis;
   const weatherTools = window.AuthoritativeWeather;
+  const frontageTools = window.PropertyFrontageWorkflow;
   const pendingPhotoCacheName = "property-inspector-home-test-313-pending-v1";
 
   const svg = document.getElementById("overlay");
@@ -175,6 +176,7 @@
       simple_sessions: [],
       simple_counters: {},
       active_simple_session_id: null,
+      frontage_workflow: null,
       land_use_concepts: [],
       reviewed_map_status: {},
       imported_chat_review_annotations: [],
@@ -258,6 +260,7 @@
     data.simple_counters = data.simple_counters && typeof data.simple_counters === "object" ? data.simple_counters : {};
     data.active_simple_session_id = data.active_simple_session_id || null;
     simpleActiveSessionId = data.active_simple_session_id;
+    if (frontageTools) frontageTools.ensureModel(data);
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
     data.weather_context = Object.assign(emptyInspection().weather_context, data.weather_context || {});
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
@@ -2585,7 +2588,7 @@
         const session = simpleSessionById(metadata.simple_session_id);
         const linkedPhoto = metadata.photo_id ? data.photos.find(item => String(item.id) === String(metadata.photo_id)) : null;
         if (session) session.voice_note_count = simpleSessionVoiceNotes(session).length;
-        if (currentSimpleSession()) renderSimpleCapture(); else renderSimpleHeader();
+        if (currentSimpleSession()) renderActiveSimpleSession(); else renderSimpleHeader();
         simpleSetStatus(linkedPhoto ? `VOICE NOTE SAVED FOR ${linkedPhoto.simple_photo_id || linkedPhoto.photo_number}` : `VOICE NOTE SAVED${session ? ` FOR ${session.feature_id}` : ""}`, "saved");
       }
     } catch (error) {
@@ -3334,6 +3337,7 @@
         ,feature_id: photoContext.feature_id || null
         ,simple_photo_id: photoContext.simple_photo_id || null
         ,simple_feature_sequence: photoContext.simple_feature_sequence || null
+        ,photo_role: photoContext.photo_role || null
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
         evidenceClassification: metadata.evidence_classification,
@@ -3374,7 +3378,7 @@
           session.pending_photo_id = null;
         }
         saveState();
-        renderSimpleCapture();
+        renderActiveSimpleSession();
         simpleSetStatus(`PHOTO SAVED AND VERIFIED - ${metadata.simple_photo_id || metadata.photo_number} - ${metadata.feature_id || "general photo"}`, "saved");
       } else if (metadata.evidence_set_id && evidenceSetTools) {
         pendingGroupPhotoId = id;
@@ -3766,7 +3770,11 @@
   const simpleFeatureNames = {
     water: "WATER", tree: "TREE", ditch: "DITCH / SWALE", culvert: "CULVERT",
     brush: "BRUSH", blocked: "BLOCKED", entrance: "ROAD / ENTRANCE",
-    open: "OPEN AREA", highlow: "HIGH / LOW", other: "OTHER", photo: "PHOTO"
+    open: "OPEN AREA", highlow: "HIGH / LOW", other: "OTHER", photo: "PHOTO",
+    frontage_end: "FRONTAGE END", vehicle_crossing: "VEHICLE CROSSING OPTION",
+    ditch_change: "DITCH CHANGE", frontage_trees_brush: "TREES / BRUSH",
+    frontage_wet_soft: "WET / SOFT", frontage_steep_slope: "STEEP SLOPE",
+    frontage_photo: "FRONTAGE PHOTO", parking_staging: "PARKING / STAGING"
   };
 
   function simpleSessionById(id) {
@@ -3854,6 +3862,14 @@
         completion_status: session.completion_status
       });
     }
+    if (session.frontage_record_id && frontageTools) {
+      const record = frontageModel().records.find(item => String(item.record_id) === String(session.frontage_record_id));
+      if (record) {
+        record.attributes = Object.assign({}, record.attributes || {}, session.details || {});
+        record.completion_status = session.completion_status;
+        record.updated_at = session.updated_at;
+      }
+    }
     saveState();
     if (settings.feedback) {
       simpleLastSavedMessage = `${settings.feedback} SAVED - ${session.feature_id}`;
@@ -3871,6 +3887,16 @@
     session.voice_note_count = simpleSessionVoiceNotes(session).length;
     const marker = data.markers.find(item => String(item.id) === String(session.observation_id));
     if (marker) marker.attributes = Object.assign({}, marker.attributes || {}, { completion_status: session.completion_status, photo_count: session.photo_count, voice_note_count: session.voice_note_count });
+    if (session.frontage_record_id && frontageTools) {
+      const record = frontageModel().records.find(item => String(item.record_id) === String(session.frontage_record_id));
+      if (record) {
+        record.attributes = Object.assign({}, record.attributes || {}, session.details || {});
+        record.completion_status = session.completion_status;
+        record.photo_count = session.photo_count;
+        record.voice_note_count = session.voice_note_count;
+        record.updated_at = session.finished_at;
+      }
+    }
     data.active_simple_session_id = null;
     simpleActiveSessionId = null;
     saveState();
@@ -3948,6 +3974,267 @@
     return `<button type="button" class="simple-feature ${cssClass || ""}" data-simple-feature="${type}">${label}</button>`;
   }
 
+  function frontageModel() {
+    return frontageTools.ensureModel(data);
+  }
+
+  function lastGpsSequence() {
+    const last = data.points.length ? data.points[data.points.length - 1] : null;
+    return last && last.sequence != null ? last.sequence : data.points.length;
+  }
+
+  function simpleLocatorMarkup() {
+    return `<section class="simple-locator"><div><strong id="simpleLocatorState">LOCATION UNAVAILABLE</strong><span>Approximate field locator - not a survey or legal boundary determination.</span></div><div id="simpleLocatorMap"></div><div class="simple-locator-actions"><button id="simpleCenterMap" type="button">CENTER ON ME</button><button id="simpleExpandMap" type="button">EXPAND MAP</button></div></section>`;
+  }
+
+  function bindSimpleLocator() {
+    const center = document.getElementById("simpleCenterMap");
+    const expand = document.getElementById("simpleExpandMap");
+    if (center) center.addEventListener("click", renderSimpleLocator);
+    if (expand) expand.addEventListener("click", () => { document.body.classList.add("simple-advanced-open"); document.getElementById("mapFrame").scrollIntoView({ block: "start" }); });
+    renderSimpleLocator();
+  }
+
+  function setFrontageScreen(screen) {
+    const model = frontageModel();
+    model.screen = screen;
+    model.updated_at = new Date().toISOString();
+    saveState();
+  }
+
+  function frontageMarkerType(recordType) {
+    return ({ frontage_end: "frontage_end", vehicle_crossing: "vehicle_crossing", ditch_change: "ditch", frontage_trees_brush: "thick", frontage_wet_soft: "wet", frontage_steep_slope: "blocked", frontage_photo: "photo", parking_staging: "parking_staging" })[recordType] || "other";
+  }
+
+  function saveFrontageRecord(recordType, attributes) {
+    if (!lastPosition) {
+      simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning");
+      return null;
+    }
+    const now = new Date().toISOString();
+    const record = frontageTools.createRecord(data, recordType, lastPosition, latestOrientation, attributes || {}, now);
+    const marker = markerFromPosition(frontageMarkerType(recordType), "", null, now, lastPosition, {
+      evidenceClassification: "Observed",
+      attributes: Object.assign({ frontage_record_id: record.record_id, frontage_record_type: recordType }, record.attributes)
+    });
+    record.observation_id = marker.id;
+    data.markers.push(marker);
+    data.lifecycle_events.push({ type: "frontage_record_saved", time: now, record_id: record.record_id, record_type: recordType, source: "button_press" });
+    saveState();
+    redraw();
+    simpleSetStatus(`${record.record_id} SAVED`, "saved");
+    return record;
+  }
+
+  function activateFrontageSession(record, returnScreen) {
+    if (!record) return null;
+    if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
+    const session = {
+      schema_name: "property-inspector-simple-capture-session", schema_version: "1.0",
+      simple_session_id: makeId("simple-session"), feature_id: record.record_id, feature_type: record.record_type,
+      frontage_record_id: record.record_id, return_screen: returnScreen,
+      started_at: record.recorded_at, updated_at: record.recorded_at, finished_at: null,
+      completion_status: "ACTIVE", details: Object.assign({}, record.attributes || {}),
+      lat: record.latitude, lon: record.longitude, gps_accuracy_m: record.gps_accuracy_m,
+      gps_position_at: record.gps_position_at, compass_heading_deg: record.compass_heading_deg,
+      device_orientation: record.device_orientation, observation_id: record.observation_id
+    };
+    data.simple_sessions.push(session);
+    data.active_simple_session_id = session.simple_session_id;
+    simpleActiveSessionId = session.simple_session_id;
+    saveState();
+    return session;
+  }
+
+  function renderFrontageStepOne() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 1 - GO TO ONE END OF THE ROAD FRONTAGE</h2><p class="frontage-instruction">Walk to the nearest approximate end of the property's road frontage. Use the parcel outline and blue location dot as a guide.</p><div class="frontage-grid"><button id="markFrontageEnd" class="frontage-end" type="button">MARK FRONTAGE END</button><button id="unknownFrontageEnd" class="frontage-condition" type="button">I CANNOT TELL WHERE THE END IS</button><button id="frontageImportant" type="button">MARK SOMETHING IMPORTANT</button><button id="frontageStepVoice" type="button">OPTIONAL VOICE NOTE</button><button id="frontageStepReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    document.getElementById("markFrontageEnd").addEventListener("click", () => saveFrontageEnd("APPROXIMATE_END_MARKED"));
+    document.getElementById("unknownFrontageEnd").addEventListener("click", () => saveFrontageEnd("END_LOCATION_UNKNOWN"));
+    document.getElementById("frontageImportant").addEventListener("click", () => openSimpleCapture("other", "STEP_1"));
+    document.getElementById("frontageStepVoice").addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      else await startVoiceRecording({ purpose: "frontage_step_1_voice_note", simple_session_id: null });
+    });
+    document.getElementById("frontageStepReturn").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function saveFrontageEnd(confidence) {
+    const record = saveFrontageRecord("frontage_end", { boundary_confidence: confidence, surveyed_boundary_claim: false });
+    if (!record) return;
+    activateFrontageSession(record, "STEP_2");
+    setFrontageScreen("FRONTAGE_END_SAVED");
+    renderFrontageEndSaved();
+  }
+
+  function renderFrontageEndSaved() {
+    const session = currentSimpleSession();
+    if (!session || session.feature_type !== "frontage_end") { renderFrontageStepTwo(); return; }
+    const photos = simpleSessionPhotos(session);
+    const currentPhoto = photos.length ? photos[photos.length - 1] : null;
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="frontage-step"><h2>${session.feature_id} SAVED</h2><p class="frontage-instruction">The approximate frontage-end point, GPS, time, accuracy, and heading are saved.</p><div id="simplePhotoPreview" class="simple-photo-preview"></div><div class="frontage-support-actions"><button id="frontageEndPhoto" type="button">OPTIONAL PHOTO</button><button id="frontageEndVoice" type="button">${currentPhoto ? `OPTIONAL VOICE NOTE FOR ${currentPhoto.simple_photo_id || currentPhoto.photo_number}` : `OPTIONAL VOICE NOTE FOR ${session.feature_id}`}</button><button id="frontageEndContinue" class="frontage-end" type="button">CONTINUE</button><button id="frontageEndReturn" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    document.getElementById("frontageEndPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("frontageEndPhoto").addEventListener("click", () => simpleTakePhoto("Frontage end context"));
+    document.getElementById("frontageEndVoice").addEventListener("click", () => toggleSimpleSessionVoice(session, currentPhoto));
+    document.getElementById("frontageEndContinue").addEventListener("click", () => { simpleFinalizeActive("BASIC_RECORD_SAVED"); setFrontageScreen("STEP_2"); renderFrontageStepTwo(); });
+    document.getElementById("frontageEndReturn").addEventListener("click", simpleReturnToFieldButtons);
+    renderSimplePhotoPreview(session).catch(() => simpleSetStatus("The frontage end is saved. Photo preview is temporarily unavailable.", "warning"));
+    renderSimpleHeader();
+  }
+
+  function renderFrontageStepTwo() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 2 - WALK THE ROAD FRONTAGE</h2><p class="frontage-instruction">Walk toward the other frontage end. Mark locations where the visible work required for a vehicle crossing or the roadside conditions materially change.</p><div class="frontage-grid"><button id="startFrontageWalk" class="frontage-end wide" type="button">START FRONTAGE WALK</button><button id="frontageStepTwoReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    document.getElementById("startFrontageWalk").addEventListener("click", () => {
+      frontageTools.beginFrontageWalk(data, lastGpsSequence(), new Date().toISOString()); saveState(); renderFrontageWalk();
+    });
+    document.getElementById("frontageStepTwoReturn").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function saveCrossing(workClass) {
+    const record = saveFrontageRecord("vehicle_crossing", { crossing_work_class: workClass, permission_established: false, engineered: false, legally_approved: false, construction_ready: false });
+    if (!record) return;
+    activateFrontageSession(record, "FRONTAGE_WALK");
+    setFrontageScreen("FRONTAGE_SUPPORT");
+    renderFrontageSupportCapture();
+  }
+
+  function saveRoadsideCondition(recordType) {
+    const record = saveFrontageRecord(recordType, {});
+    if (!record) return;
+    activateFrontageSession(record, "FRONTAGE_WALK");
+    setFrontageScreen("FRONTAGE_SUPPORT");
+    renderFrontageSupportCapture();
+  }
+
+  function renderFrontageWalk() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>FRONTAGE WALK ACTIVE</h2><p class="frontage-instruction">Walk toward the other frontage end. Tap the first answer that matches what you see. It saves immediately.</p><div class="frontage-grid"><button data-crossing-class="NO_CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - NO CULVERT NEEDED</button><button data-crossing-class="CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - CULVERT NEEDED</button><button data-crossing-class="EXISTING_CROSSING" class="frontage-crossing" type="button">EXISTING CULVERT / CROSSING</button><button data-crossing-class="MAJOR_VISIBLE_WORK" class="frontage-crossing" type="button">CROSSING - MAJOR WORK</button><button data-frontage-condition="ditch_change" class="frontage-condition" type="button">DITCH CHANGED</button><button data-frontage-condition="frontage_trees_brush" class="frontage-condition" type="button">TREES / BRUSH</button><button data-frontage-condition="frontage_wet_soft" class="frontage-condition" type="button">WET / SOFT</button><button data-frontage-condition="frontage_steep_slope" class="frontage-condition" type="button">STEEP SLOPE</button><button data-frontage-condition="frontage_photo" type="button">PHOTO</button><button id="frontageWalkVoice" type="button">OPTIONAL VOICE NOTE</button><button id="markOtherFrontageEnd" class="frontage-end" type="button">MARK OTHER FRONTAGE END</button><button id="endFrontageWalk" type="button">END FRONTAGE WALK</button><button id="frontageWalkContinue" class="frontage-end wide" type="button">SAVE WHAT I HAVE & CONTINUE FRONTAGE WALK</button><button id="frontageWalkReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.querySelectorAll("[data-crossing-class]").forEach(button => button.addEventListener("click", () => saveCrossing(button.dataset.crossingClass)));
+    content.querySelectorAll("[data-frontage-condition]").forEach(button => button.addEventListener("click", () => saveRoadsideCondition(button.dataset.frontageCondition)));
+    document.getElementById("frontageWalkVoice").addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      else await startVoiceRecording({ purpose: "simple_frontage_walk_voice_note", simple_session_id: null });
+    });
+    document.getElementById("markOtherFrontageEnd").addEventListener("click", () => {
+      const record = saveFrontageRecord("frontage_end", { boundary_confidence: "APPROXIMATE_END_MARKED", surveyed_boundary_claim: false, opposite_end: true });
+      if (!record) return;
+      frontageTools.endFrontageWalk(data, lastGpsSequence(), "MARKED", new Date().toISOString()); saveState(); renderFrontageReview();
+    });
+    document.getElementById("endFrontageWalk").addEventListener("click", () => { frontageTools.endFrontageWalk(data, lastGpsSequence(), frontageModel().frontage_end_ids.length >= 2 ? "MARKED" : "UNKNOWN", new Date().toISOString()); saveState(); renderFrontageReview(); });
+    document.getElementById("frontageWalkContinue").addEventListener("click", () => simpleSetStatus("FRONTAGE WALK CONTINUES - GPS BREADCRUMBS ARE SAVING", "saved"));
+    document.getElementById("frontageWalkReturn").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function toggleSimpleSessionVoice(session, currentPhoto) {
+    if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); return; }
+    return startVoiceRecording({ purpose: currentPhoto ? "simple_photo_note" : "simple_feature_note", photo_id: currentPhoto ? currentPhoto.id : null, simple_session_id: session.simple_session_id, evidence_set_id: null });
+  }
+
+  function frontageSupportFieldNames(session) {
+    if (session.feature_type === "vehicle_crossing") return ["ditch_width", "ditch_depth", "clear_crossing_width"];
+    if (session.feature_type === "ditch_change") return ["width", "depth"];
+    if (session.feature_type === "parking_staging") return ["length", "width"];
+    return [];
+  }
+
+  function renderFrontageSupportCapture() {
+    const session = currentSimpleSession();
+    if (!session) { renderFrontageWalk(); return; }
+    if (session.feature_type === "frontage_end") { renderFrontageEndSaved(); return; }
+    const photos = simpleSessionPhotos(session);
+    const currentPhoto = photos.length ? photos[photos.length - 1] : null;
+    const workClass = session.details.crossing_work_class;
+    const workLabel = workClass && frontageTools.WORK_CLASSES[workClass] ? frontageTools.WORK_CLASSES[workClass] : null;
+    const returnLabel = session.return_screen === "PARKING_REVIEW" ? "SAVE WHAT I HAVE & CONTINUE PARKING CHECK" : "SAVE WHAT I HAVE & CONTINUE FRONTAGE WALK";
+    const photoButtons = session.feature_type === "vehicle_crossing"
+      ? `<button data-frontage-photo-role="Road into property" type="button">TAKE PHOTO LOOKING FROM ROAD INTO PROPERTY</button><button data-frontage-photo-role="Along ditch" type="button">TAKE PHOTO LOOKING ALONG DITCH</button>`
+      : `<button data-frontage-photo-role="Context" type="button">${photos.length ? "ADD ANOTHER PHOTO" : "OPTIONAL PHOTO"}</button>`;
+    const measureButtons = frontageSupportFieldNames(session).map(name => `<button data-focus-field="${name}" type="button">MEASURE ${name.replace(/_/g, " ").toUpperCase()}</button>`).join("");
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="simple-capture"><h2>${session.feature_id} SAVED</h2>${workLabel ? `<p class="frontage-instruction">${workLabel}</p>` : ""}<p class="simple-next-line">GPS, time, accuracy, heading, and the selected answer are already saved. Everything below is optional.</p><div id="simplePhotoPreview" class="simple-photo-preview"></div><form id="simpleCaptureForm">${simpleFieldsFor(session.feature_type)}<label>Optional typed note<textarea name="note" placeholder="optional"></textarea></label></form><div class="frontage-support-actions">${photoButtons}${measureButtons}${currentPhoto ? `<button id="frontageSupportPhotoVoice" type="button">OPTIONAL VOICE NOTE FOR ${currentPhoto.simple_photo_id || currentPhoto.photo_number}</button>` : ""}<button id="frontageSupportFeatureVoice" type="button">OPTIONAL VOICE NOTE FOR ${session.feature_id}</button><button id="frontageSupportContinue" class="frontage-end" type="button">${returnLabel}</button><button id="frontageSupportReturn" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    const form = document.getElementById("simpleCaptureForm");
+    Object.entries(session.details || {}).forEach(([name, value]) => { const field = form.elements.namedItem(name); if (field && value != null) field.value = value; });
+    form.addEventListener("input", simpleSaveDraft);
+    form.addEventListener("change", () => simpleSaveDraft({ feedback: "OPTIONAL DETAIL" }));
+    content.querySelectorAll("[data-frontage-photo-role]").forEach(button => { button.addEventListener("pointerdown", preparePhotoStorage); button.addEventListener("click", () => simpleTakePhoto(button.dataset.frontagePhotoRole)); });
+    content.querySelectorAll("[data-focus-field]").forEach(button => button.addEventListener("click", () => { const field = form.elements.namedItem(button.dataset.focusField); if (field) field.focus(); }));
+    const photoVoice = document.getElementById("frontageSupportPhotoVoice");
+    if (photoVoice) photoVoice.addEventListener("click", () => toggleSimpleSessionVoice(session, currentPhoto));
+    document.getElementById("frontageSupportFeatureVoice").addEventListener("click", () => toggleSimpleSessionVoice(session, null));
+    document.getElementById("frontageSupportContinue").addEventListener("click", () => {
+      const target = session.return_screen || "FRONTAGE_WALK"; simpleFinalizeActive("BASIC_RECORD_SAVED"); setFrontageScreen(target); renderFrontageWorkflow();
+    });
+    document.getElementById("frontageSupportReturn").addEventListener("click", simpleReturnToFieldButtons);
+    renderSimplePhotoPreview(session).catch(() => simpleSetStatus("The record is saved. Photo preview is temporarily unavailable.", "warning"));
+    renderSimpleHeader();
+  }
+
+  function renderFrontageReview() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const model = frontageModel();
+    const comparisons = frontageTools.compareCrossings(data);
+    const rows = comparisons.length ? comparisons.map(item => `<div class="frontage-review-row" data-lowest="${item.lowest_visible_work}"><strong>${item.record_id}</strong><span>${item.comparison_label}</span><span>${item.lowest_visible_work ? "LOWEST VISIBLE WORK BASED ON RECORDED EVIDENCE" : "Compared from recorded evidence"}</span><button data-select-crossing="${item.record_id}" type="button">SELECT ${item.record_id}</button></div>`).join("") : `<p class="frontage-warning">No vehicle-crossing option was recorded. Crossing conditions remain unknown.</p>`;
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>END FRONTAGE WALK REVIEW</h2><p>${model.frontage_end_ids.length} approximate frontage ends | ${comparisons.length} vehicle-crossing options | ${model.ditch_change_ids.length} ditch changes</p><p class="frontage-warning">The GPS route is approximate. Any frontage not walked remains UNKNOWN.</p>${rows}<h3>Which recorded crossing currently appears to require the least work or provide the most useful alignment with the property?</h3><div class="frontage-grid"><button data-selection-type="TWO_OR_MORE_REMAIN_SIMILAR" type="button">TWO OR MORE REMAIN SIMILAR</button><button data-selection-type="NEED_TO_INSPECT_BEHIND_THEM" type="button">NEED TO INSPECT BEHIND THEM</button><button data-selection-type="INSUFFICIENT_INFORMATION" type="button">INSUFFICIENT INFORMATION</button><button data-selection-type="SKIP_FOR_NOW" type="button">SKIP FOR NOW</button><button id="reviewReturnWalk" class="frontage-end wide" type="button">RETURN TO FRONTAGE WALK</button><button id="reviewReturnField" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.querySelectorAll("[data-select-crossing]").forEach(button => button.addEventListener("click", () => chooseProvisionalCrossing("SELECTED_RECORDED_CROSSING", button.dataset.selectCrossing)));
+    content.querySelectorAll("[data-selection-type]").forEach(button => button.addEventListener("click", () => {
+      if (button.dataset.selectionType === "SKIP_FOR_NOW") { frontageTools.selectProvisionalCrossing(data, "SKIP_FOR_NOW", null); setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome(); }
+      else chooseProvisionalCrossing(button.dataset.selectionType, null);
+    }));
+    document.getElementById("reviewReturnWalk").addEventListener("click", () => { frontageTools.beginFrontageWalk(data, lastGpsSequence(), new Date().toISOString()); saveState(); renderFrontageWalk(); });
+    document.getElementById("reviewReturnField").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function chooseProvisionalCrossing(selectionType, crossingId) {
+    frontageTools.selectProvisionalCrossing(data, selectionType, crossingId, new Date().toISOString());
+    saveState(); renderParkingReview();
+  }
+
+  function renderParkingReview() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const model = frontageModel();
+    const selected = model.provisional_crossing_interpretation && model.provisional_crossing_interpretation.selected_crossing_id;
+    const origin = selected || "the crossing area under review";
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 3 - CHECK PARKING, UNLOADING, TURNING, OR STAGING</h2><p class="frontage-instruction">Starting from ${origin}, inspect nearby ground for enough usable space for a vehicle to stop, park, unload, turn, or stage equipment.</p><p class="frontage-warning">Do not assume one area serves every purpose. Record only ground actually inspected.</p><div class="frontage-grid">${["PASSENGER-VEHICLE PARKING","PICKUP PARKING","TRAILER UNLOADING","EQUIPMENT STAGING","TURNAROUND","NONE OBSERVED","UNKNOWN"].map(label => `<button data-parking-class="${label.replace(/ /g, "_")}" type="button">${label}</button>`).join("")}<button id="finishParkingReview" class="frontage-end wide" type="button">FINISH PARKING CHECK</button><button id="parkingReturnField" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.querySelectorAll("[data-parking-class]").forEach(button => button.addEventListener("click", () => {
+      const classification = button.dataset.parkingClass;
+      const record = saveFrontageRecord("parking_staging", { classification, related_vehicle_crossing_id: selected || null, capture_method: "POINT_PLUS_OPTIONAL_DIMENSIONS" });
+      if (!record) return;
+      if (["NONE_OBSERVED", "UNKNOWN"].includes(classification)) { simpleSetStatus(`${record.record_id} SAVED - ${classification.replace(/_/g, " ")}`, "saved"); renderParkingReview(); return; }
+      activateFrontageSession(record, "PARKING_REVIEW"); setFrontageScreen("FRONTAGE_SUPPORT"); renderFrontageSupportCapture();
+    }));
+    document.getElementById("finishParkingReview").addEventListener("click", () => { model.parking_review_status = "COMPLETE"; model.status = "ARRIVAL_SEQUENCE_COMPLETE"; setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome(); });
+    document.getElementById("parkingReturnField").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderFrontageWorkflow() {
+    const screen = frontageModel().screen;
+    if (screen === "STEP_1") renderFrontageStepOne();
+    else if (screen === "FRONTAGE_END_SAVED") renderFrontageEndSaved();
+    else if (screen === "STEP_2") renderFrontageStepTwo();
+    else if (screen === "FRONTAGE_WALK") renderFrontageWalk();
+    else if (screen === "FRONTAGE_SUPPORT") renderFrontageSupportCapture();
+    else if (screen === "FRONTAGE_REVIEW") renderFrontageReview();
+    else if (screen === "PARKING_REVIEW") renderParkingReview();
+    else renderSimpleHome();
+  }
+
+  function simpleReturnToFieldButtons() {
+    if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
+    simpleCloseDialogs(); restoreSimplePageScrolling(); setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome();
+  }
+
   function renderSimpleHome() {
     const content = document.getElementById("simpleContent");
     if (!content) return;
@@ -3960,12 +4247,21 @@
       renderSimpleHeader();
       return;
     }
+    const arrival = frontageModel();
+    if (["NOT_STARTED", null, undefined].includes(arrival.screen)) {
+      arrival.status = "IN_PROGRESS";
+      arrival.screen = "STEP_1";
+      arrival.created_at = arrival.created_at || data.started || new Date().toISOString();
+      saveState();
+    }
+    if (arrival.screen !== "FIELD_BUTTONS") { renderFrontageWorkflow(); return; }
     if (currentSimpleSession()) {
       const recovered = simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
       simpleLastSavedMessage = `${recovered.feature_id} SAVED - RETURNED TO FIELD BUTTONS`;
       simpleSetStatus(simpleLastSavedMessage, "saved");
     }
-    content.innerHTML = `<section class="simple-locator"><div><strong id="simpleLocatorState">LOCATION UNAVAILABLE</strong><span>Approximate field locator - not a survey or legal boundary determination.</span></div><div id="simpleLocatorMap"></div><div class="simple-locator-actions"><button id="simpleCenterMap" type="button">CENTER ON ME</button><button id="simpleExpandMap" type="button">EXPAND MAP</button></div></section><section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section><div class="simple-grid">
+    const frontageResumeLabel = arrival.status === "ARRIVAL_SEQUENCE_COMPLETE" ? "REVIEW ROAD FRONTAGE" : (arrival.frontage_walk.active ? "CONTINUE FRONTAGE WALK" : "CONTINUE ROAD FRONTAGE");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section><button id="simpleResumeFrontage" class="simple-feature entrance" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:68px" type="button">${frontageResumeLabel}</button><div class="simple-grid">
       ${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("brush", "BRUSH", "brush")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
       <button id="simpleVoice" type="button" class="simple-feature voice">${mediaRecorder && mediaRecorder.state === "recording" ? "STOP & SAVE VOICE NOTE" : "VOICE NOTE"}</button>
       <button id="simpleFinish" type="button" class="simple-feature finish">FINISH</button></div>
@@ -3978,20 +4274,31 @@
       setTimeout(renderSimpleHome, 100);
     });
     document.getElementById("simpleFinish").addEventListener("click", renderSimpleFinish);
+    document.getElementById("simpleResumeFrontage").addEventListener("click", () => {
+      if (arrival.status === "ARRIVAL_SEQUENCE_COMPLETE") arrival.screen = "FRONTAGE_REVIEW";
+      else if (arrival.frontage_walk.active) arrival.screen = "FRONTAGE_WALK";
+      else if (arrival.frontage_end_ids.length) arrival.screen = "STEP_2";
+      else arrival.screen = "STEP_1";
+      saveState(); renderFrontageWorkflow();
+    });
     document.getElementById("simpleOpenAdvanced").addEventListener("click", () => document.body.classList.add("simple-advanced-open"));
-    document.getElementById("simpleCenterMap").addEventListener("click", renderSimpleLocator);
-    document.getElementById("simpleExpandMap").addEventListener("click", () => { document.body.classList.add("simple-advanced-open"); document.getElementById("mapFrame").scrollIntoView({ block: "start" }); });
-    renderSimpleLocator();
+    bindSimpleLocator();
     renderSimpleHeader();
   }
 
   function simpleFieldsFor(type) {
-    if (type === "water") return `<div class="simple-fields three"><label>Length<input name="length" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Width<input name="width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Depth<input name="depth" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><div class="simple-fields two"><label>Length / width unit<select name="surface_unit"><option>ft</option><option>in</option><option>yd</option></select></label><label>Depth tool<select name="depth_tool"><option>Yardstick</option><option>Tape</option><option>Estimated</option><option>Other</option></select></label></div>`;
+    if (type === "water") return `<div class="simple-fields three"><label>Length<input name="length" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Width<input name="width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Depth<input name="depth" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><div class="simple-fields two"><label>Measurement unit<select name="surface_unit"><option value="in">inches</option><option value="ft">feet</option><option value="yd">yards</option></select></label><label>Depth tool<select name="depth_tool"><option>Yardstick</option><option>Tape</option><option>Estimated</option><option>Other</option></select></label></div>`;
     if (type === "tree") return `<label class="simple-primary-input">Circumference in inches<input name="circumference_in" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Tree kind<select name="tree_kind"><option>Unknown</option><option>Longleaf pine</option><option>Slash pine</option><option>Loblolly pine</option><option>Other pine</option><option>Magnolia</option><option>Oak</option><option>Sweetgum</option><option>Cypress</option><option>Other</option></select></label><p class="simple-help">Tool: flexible hospital/baby tape | Height: 54 inches | Ground: uphill side. DBH is calculated automatically.</p>`;
     if (type === "ditch") return `<div class="simple-fields three"><label>Width<input name="width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Depth<input name="depth" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Visible length<input name="visible_length" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><label>Water present<select name="water_present"><option>Unknown</option><option>Yes</option><option>No</option></select></label>`;
     if (type === "brush") return `<label>Brush severity<select name="severity"><option>Unknown</option><option>Light</option><option>Medium</option><option>Heavy</option><option>Impassable</option></select></label><label>Approximate length or area<input name="approximate_extent" type="text" placeholder="optional"></label><label>Dominant obstruction<input name="dominant_obstruction" type="text" placeholder="optional"></label>`;
     if (type === "culvert") return `<div class="simple-fields two"><label>Barrel count<input name="barrel_count" type="number" min="1" step="1" inputmode="numeric" placeholder="optional"></label><label>Barrel diameter / width<input name="barrel_size" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Total crossing width<input name="crossing_width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Visible blockage %<input name="blockage_percent" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="optional"></label></div><label>Water present<select name="water_present"><option>Unknown</option><option>Yes</option><option>No</option></select></label>`;
     if (type === "highlow") return `<label>Ground position<select name="ground_position"><option>Unknown</option><option>High</option><option>Low</option></select></label>`;
+    if (type === "vehicle_crossing") return `<div class="simple-fields three"><label>Ditch width<input name="ditch_width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Ditch depth<input name="ditch_depth" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Clear crossing width<input name="clear_crossing_width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><label>Measurement unit<select name="measurement_unit"><option value="in">inches</option><option value="ft">feet</option></select></label>`;
+    if (type === "ditch_change") return `<div class="simple-fields two"><label>Width<input name="width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Depth<input name="depth" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><label>Water present<select name="water_present"><option>Unknown</option><option>Yes</option><option>No</option></select></label><label>Measurement unit<select name="measurement_unit"><option value="in">inches</option><option value="ft">feet</option></select></label>`;
+    if (type === "frontage_trees_brush") return `<label>Visible clearing burden<select name="visible_clearing_burden"><option>Unknown</option><option>Light</option><option>Moderate</option><option>Heavy</option></select></label>`;
+    if (type === "frontage_wet_soft") return `<label>Ground firmness<select name="ground_firmness"><option>Unknown</option><option>Firm</option><option>Soft</option><option>Very soft</option></select></label>`;
+    if (type === "frontage_steep_slope") return `<label>Visible slope severity<select name="visible_slope_severity"><option>Unknown</option><option>Moderate</option><option>Steep</option><option>Very steep</option></select></label>`;
+    if (type === "parking_staging") return `<div class="simple-fields two"><label>Approximate length<input name="length" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Approximate width<input name="width" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label></div><label>Measurement unit<select name="measurement_unit"><option value="ft">feet</option><option value="yd">yards</option></select></label><label>Capture method<select name="capture_method"><option value="POINT_PLUS_OPTIONAL_DIMENSIONS">Point plus approximate dimensions</option><option value="PHOTO_AND_OPTIONAL_VOICE">Photo and optional voice note</option><option value="APPROXIMATE_WALKED_PERIMETER">Walked approximate usable perimeter</option></select></label>`;
     return "";
   }
 
@@ -4018,6 +4325,7 @@
   function renderSimpleCapture() {
     const session = currentSimpleSession();
     if (!session) { renderSimpleHome(); return; }
+    if (session.frontage_record_id) { renderFrontageSupportCapture(); return; }
     const content = document.getElementById("simpleContent");
     const photos = simpleSessionPhotos(session);
     const voices = simpleSessionVoiceNotes(session);
@@ -4058,7 +4366,7 @@
     renderSimpleHeader();
   }
 
-  function openSimpleCapture(type) {
+  function openSimpleCapture(type, returnScreen) {
     if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready yet. The feature was not recorded.", "warning"); return; }
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     simpleCloseDialogs();
@@ -4068,7 +4376,7 @@
       schema_name: "property-inspector-simple-capture-session", schema_version: "1.0",
       simple_session_id: makeId("simple-session"), feature_id: featureId, feature_type: type,
       started_at: now, updated_at: now, finished_at: null,
-      completion_status: "ACTIVE", details: type === "water" ? { depth_tool: "Yardstick", surface_unit: "ft" } : {},
+      completion_status: "ACTIVE", return_screen: returnScreen || "FIELD_BUTTONS", details: type === "water" ? { depth_tool: "Yardstick", surface_unit: "in" } : {},
       lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m,
       gps_position_at: lastPosition.time, compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : lastPosition.heading_deg,
       device_orientation: latestOrientation ? { alpha_deg: latestOrientation.alpha_deg, beta_deg: latestOrientation.beta_deg, gamma_deg: latestOrientation.gamma_deg, absolute: latestOrientation.absolute } : null
@@ -4087,7 +4395,7 @@
     renderSimpleCapture();
   }
 
-  function simpleTakePhoto() {
+  function simpleTakePhoto(photoRole) {
     const session = simpleSaveDraft();
     if (!session) return;
     const photoNumber = Number(data.simple_counters.PHOTO || 0) + 1;
@@ -4102,24 +4410,28 @@
       note: session.details.note || "",
       associatedObservationId: session.observation_id,
       evidenceClassification: "Observed",
-      observationAttributes: Object.assign({}, session.details, { simple_session_id: session.simple_session_id, feature_id: session.feature_id }),
+      observationAttributes: Object.assign({}, session.details, { simple_session_id: session.simple_session_id, feature_id: session.feature_id, photo_role: photoRole || "Context" }),
       simple_capture: true,
       simple_session_id: session.simple_session_id,
       feature_id: session.feature_id,
       simple_photo_id: simplePhotoId,
       simple_feature_sequence: sequence,
       evidence_set_id: null,
+      photo_role: photoRole || "Context",
       question_ids: [], question_links: []
     });
   }
 
   function simpleSaveAndReturn() {
     try {
+      const active = currentSimpleSession();
+      const returnScreen = active && active.return_screen;
       const session = simpleFinalizeActive("BASIC_RECORD_SAVED");
       if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
       simpleCloseDialogs();
       const summary = session ? `${session.feature_id} SAVED - ${simpleSessionPhotos(session).length} photos` : "EVERYTHING SAVED";
-      renderSimpleHome();
+      if (returnScreen && returnScreen !== "FIELD_BUTTONS") { setFrontageScreen(returnScreen); renderFrontageWorkflow(); }
+      else { setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome(); }
       simpleSetStatus(summary, "saved");
     } catch (error) {
       simpleCloseDialogs();
@@ -4129,6 +4441,13 @@
       renderSimpleHome();
       simpleSetStatus(`RETURNED TO BUTTONS. Saved evidence remains on this phone. ${error.message}`, "warning");
     }
+  }
+
+  function renderActiveSimpleSession() {
+    const session = currentSimpleSession();
+    if (!session) { renderSimpleHeader(); return; }
+    if (session.frontage_record_id) renderFrontageSupportCapture();
+    else renderSimpleCapture();
   }
 
   function simpleReturnFromAdvanced() {
@@ -4212,7 +4531,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !frontageTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -4261,7 +4580,7 @@
       setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
     }
     installSimpleReturnButtons();
-    document.getElementById("simpleTopReturn").addEventListener("click", simpleSaveAndReturn);
+    document.getElementById("simpleTopReturn").addEventListener("click", simpleReturnToFieldButtons);
     document.getElementById("simpleTopFinish").addEventListener("click", renderSimpleFinish);
     document.getElementById("simpleAdvancedReturn").addEventListener("click", simpleReturnFromAdvanced);
     renderSimpleHome();
