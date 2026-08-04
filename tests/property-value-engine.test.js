@@ -89,9 +89,9 @@ assert.match(html, /Buildability Heat Map/);
 const app = fs.readFileSync(path.join(__dirname, "../field/app.js"), "utf8");
 const index = fs.readFileSync(path.join(__dirname, "../field/index.html"), "utf8");
 const worker = fs.readFileSync(path.join(__dirname, "../field/sw.js"), "utf8");
-assert(app.includes('const APP_VERSION = "3.16.2"'));
+assert(app.includes('const APP_VERSION = "3.16.3"'));
 assert(app.includes("value_driver_links") && app.includes("value_assessment_status"));
 assert(index.includes('id="valueLens"') && index.includes('id="valueDriverChoices"'));
-assert(worker.includes("property-value-engine.js?v=3.16.2") && worker.includes("v24-recovery"), "the value engine is available completely offline");
+assert(worker.includes("property-value-engine.js?v=3.16.3") && worker.includes("v25-simple-send"), "the value engine is available completely offline");
 
 process.stdout.write("PASS: inspector-confirmed value impacts, six effect types, evidence rankings, uncertainty rules, all eight heat maps, and offline field controls are verified.\n");

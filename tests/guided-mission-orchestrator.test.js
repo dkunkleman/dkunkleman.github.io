@@ -77,6 +77,6 @@ const index = fs.readFileSync(path.join(__dirname, "../field/index.html"), "utf8
 const worker = fs.readFileSync(path.join(__dirname, "../field/sw.js"), "utf8");
 assert(app.includes("showMissionDialog") && app.includes("buildFinishReview") && app.includes("mission_voice_state.paused_for_recording"));
 assert(index.includes('id="inspectionMissionDialog"') && index.includes("MARK ROUTE CONDITION") && index.includes("Five-step feature routine"));
-assert(worker.includes("guided-mission-orchestrator.js?v=3.16.2"));
+assert(worker.includes("guided-mission-orchestrator.js?v=3.16.3"));
 
 process.stdout.write("PASS: default guided plan, arrival roles, mission progress, unexpected capture, honest skips, voice state, Finish Review, recovery model, and legacy non-fabrication are verified.\n");

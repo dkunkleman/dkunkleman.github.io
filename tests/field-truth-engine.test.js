@@ -83,8 +83,8 @@ assert(model.warnings.some(item => /legal access/i.test(item)));
 const app = fs.readFileSync(path.join(__dirname, "../field/app.js"), "utf8");
 const index = fs.readFileSync(path.join(__dirname, "../field/index.html"), "utf8");
 const worker = fs.readFileSync(path.join(__dirname, "../field/sw.js"), "utf8");
-assert(app.includes('const APP_VERSION = "3.16.2"') && app.includes('openFeatureCaptureSession("routeCondition")'));
+assert(app.includes('const APP_VERSION = "3.16.3"') && app.includes('openFeatureCaptureSession("routeCondition")'));
 assert(index.includes('id="featureCaptureDialog"') && index.includes("SAVE MINIMUM RECORD") && index.includes('id="soilProbe"'));
-assert(worker.includes("field-truth-engine.js?v=3.16.2") && worker.includes("v24-recovery"));
+assert(worker.includes("field-truth-engine.js?v=3.16.3") && worker.includes("v25-simple-send"));
 
 process.stdout.write("PASS: Field Truth sessions, geometry basis, direct evidence, measurement gates, scenario effects, professional limits, migration safety, and heat-map refusal are verified.\n");

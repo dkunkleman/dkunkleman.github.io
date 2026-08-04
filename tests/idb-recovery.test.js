@@ -52,7 +52,7 @@ async function main() {
   assert(appSource.includes("await gpsWriteQueue;") && appSource.includes("await voiceChunkWrites;") && appSource.includes("await revalidatePhotoDb();"), "package creation drains writes and revalidates IndexedDB before inventory");
   assert(appSource.includes("Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo."), "second photo failure exposes the required recoverable queue message");
   assert(appSource.includes("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear."), "package failure exposes the required safe recovery instruction");
-  assert(appSource.includes("const maxDimension = 1900") && appSource.includes('"image/jpeg", 0.8'), "analysis photographs use the requested 1600–2000px and 0.75–0.82 quality range");
+  assert(appSource.includes("const maxDimension = 1600") && appSource.includes('"image/jpeg", 0.75'), "analysis photographs use the requested 1600–2000px and 0.75–0.82 quality range");
   assert(appSource.includes("const galleryPageSize = 12") && appSource.includes('image.loading = "lazy"'), "large photo galleries are paginated and lazy-loaded");
   assert(appSource.includes("elapsedSinceSave >= 30000") && appSource.includes("headingChanged || tiltChanged"), "orientation samples are retained on meaningful change instead of every five seconds");
   assert(!appSource.includes("indexedDB.deleteDatabase"), "the repair never deletes the existing evidence database");
