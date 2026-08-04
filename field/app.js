@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.12.1";
+  const APP_VERSION = "3.13.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -23,6 +23,7 @@
   const evidenceSetTools = window.EvidenceSets;
   const timberTools = window.TimberReconnaissance;
   const synthesisTools = window.ReviewedPropertySynthesis;
+  const weatherTools = window.AuthoritativeWeather;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -127,7 +128,7 @@
   function emptyInspection() {
     return {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.1",
+      schema_version: "1.2",
       property_id: "parcel:221S280000001010000",
       inspection_id: null,
       started: null,
@@ -174,6 +175,7 @@
         weather_station_distance_from_parcel: "", inspector_reported_recent_local_rain: "", potentially_relevant_mechanism: "unknown",
         source_limit: "Weather context does not establish site causation or year-round conditions."
       },
+      authoritative_weather: null,
       conditions: {
         inspection_date: "",
         weather_summary: "",
@@ -282,6 +284,20 @@
     const subject = subjectParcel();
     const acres = subject && subject.attributes ? Number(subject.attributes.CALC_ACRE) : NaN;
     return Number.isFinite(acres) && acres > 0 ? acres : null;
+  }
+
+  function weatherPropertyLocation() {
+    const rings = subjectRings();
+    const points = rings.reduce((all, ring) => all.concat(Array.isArray(ring) ? ring : []), []);
+    if (points.length) {
+      return {
+        longitude: points.reduce((sum, point) => sum + Number(point[0]), 0) / points.length,
+        latitude: points.reduce((sum, point) => sum + Number(point[1]), 0) / points.length,
+        method: "Recorded subject parcel geometry reference point"
+      };
+    }
+    const gps = data.points[0] || lastPosition;
+    return gps ? { longitude: Number(gps.lon), latitude: Number(gps.lat), method: "First recorded inspection GPS point" } : null;
   }
 
   function currentEvidenceContext() {
@@ -1558,6 +1574,77 @@
     saveState();
   }
 
+  function renderAuthoritativeWeather() {
+    const panel = document.getElementById("authoritativeWeatherPanel");
+    const status = document.getElementById("authoritativeWeatherStatus");
+    const details = document.getElementById("authoritativeWeatherDetails");
+    if (!panel || !status || !details) return;
+    const record = data.authoritative_weather;
+    if (!record || record.status !== "VERIFIED_OFFICIAL_RECORD") {
+      panel.dataset.state = record ? "warning" : "pending";
+      status.textContent = record ? "Official record not yet verified" : "Waiting for inspection date";
+      details.textContent = record && record.limitations ? record.limitations[0] : "The app retrieves official historical weather automatically and preserves a verified offline copy.";
+      return;
+    }
+    const windows = record.precipitation_windows;
+    panel.dataset.state = "verified";
+    status.textContent = "Official NOAA weather verified and saved";
+    details.innerHTML = `<strong>${record.station.name} (${record.station.station_id})</strong><br>${record.station.distance_from_property_miles} miles west by ${record.station.distance_method.toLowerCase()}; inspector approximation ${record.station.inspector_supplied_approximation_miles} miles.<br><strong>Previous day:</strong> ${windows.previous_calendar_day.observed_in} in / ${windows.previous_calendar_day.normal_in} in normal (${windows.previous_calendar_day.times_normal}x).<br><strong>Previous 7 full days:</strong> ${windows.previous_7_full_days.observed_in} in / ${windows.previous_7_full_days.normal_in} in normal (${windows.previous_7_full_days.times_normal}x).<br><strong>Previous 30 full days:</strong> ${windows.previous_30_full_days.observed_in} in / ${windows.previous_30_full_days.normal_in} in normal (${windows.previous_30_full_days.percent_above_or_below_normal}% above).<br><span class="small">Station rainfall may differ from parcel rainfall. Weather context does not prove site causation or year-round conditions.</span>`;
+  }
+
+  function applyAuthoritativeWeatherToConditions(record) {
+    if (!record || record.status !== "VERIFIED_OFFICIAL_RECORD") return;
+    const windows = record.precipitation_windows;
+    const assignOfficialIfNotManual = (key, value) => {
+      const existing = String(data.conditions[key] || "");
+      if (!existing || / at US[A-Z0-9]+; parcel rainfall may differ$/i.test(existing)) data.conditions[key] = value;
+    };
+    assignOfficialIfNotManual("rainfall_previous_24_hours", `${windows.previous_calendar_day.observed_in} in at ${record.station.station_id}; parcel rainfall may differ`);
+    assignOfficialIfNotManual("rainfall_previous_7_days", `${windows.previous_7_full_days.observed_in} in at ${record.station.station_id}; parcel rainfall may differ`);
+    assignOfficialIfNotManual("rainfall_previous_30_days", `${windows.previous_30_full_days.observed_in} in at ${record.station.station_id}; parcel rainfall may differ`);
+    data.weather_context.authoritative_rainfall_totals = weatherTools.summary(record);
+    data.weather_context.weather_station_distance_from_parcel = `${record.station.distance_from_property_miles} miles straight-line from recorded parcel reference point; inspector approximation ${record.station.inspector_supplied_approximation_miles} miles`;
+    if (!data.weather_context.named_event) data.weather_context.named_event = (record.significant_weather_events || []).map(item => item.event_name).join("; ");
+    if (!data.weather_context.event_dates) data.weather_context.event_dates = (record.significant_weather_events || []).map(item => item.event_dates).join("; ");
+  }
+
+  async function refreshAuthoritativeWeather(options) {
+    const settings = options || {};
+    if (!weatherTools) throw new Error("Authoritative weather tools did not load.");
+    const inspectionDate = data.conditions.inspection_date || (data.started ? data.started.slice(0, 10) : "");
+    if (!inspectionDate) {
+      renderAuthoritativeWeather();
+      return null;
+    }
+    const previousVerified = weatherTools.contextIsComplete(data.authoritative_weather, inspectionDate);
+    if (!settings.silent) setStatus("Retrieving official NOAA historical weather and preserving its source record...", "active");
+    const record = await weatherTools.resolve({
+      inspectionDate,
+      propertyLocation: weatherPropertyLocation(),
+      existing: settings.force ? null : data.authoritative_weather,
+      fetchImpl: navigator.onLine ? window.fetch.bind(window) : null,
+      retrievedAt: new Date().toISOString()
+    });
+    data.authoritative_weather = record;
+    applyAuthoritativeWeatherToConditions(record);
+    if (!previousVerified && record.status === "VERIFIED_OFFICIAL_RECORD") {
+      data.lifecycle_events.push({
+        type: "authoritative_weather_context_attached",
+        time: new Date().toISOString(),
+        source: "automatic_finish_workflow",
+        station_id: record.station.station_id,
+        inspection_date: inspectionDate
+      });
+    }
+    saveState();
+    renderConditions();
+    renderAuthoritativeWeather();
+    if (!settings.silent) {
+      setStatus(record.status === "VERIFIED_OFFICIAL_RECORD" ? "Official NOAA historical weather verified and saved with the inspection." : "Official weather could not yet be verified. The inspection remains safe; reconnect and retry before final repository storage.", record.status === "VERIFIED_OFFICIAL_RECORD" ? "success" : "warning");
+    }
+    return record;
+  }
+
   function markerStyle(type) {
     return {
       wet: { fill: "#1c6bd1", label: "WET" },
@@ -2122,6 +2209,9 @@
     updateControls();
     await keepAwake();
     setStatus("GPS starting. Wait for the first precise location before adding evidence.", "active");
+    refreshAuthoritativeWeather({ silent: true }).catch(() => {
+      renderAuthoritativeWeather();
+    });
   }
 
   function stopTracking(options) {
@@ -3458,6 +3548,7 @@
   }
 
   async function buildPackageWithRecovery(packageMode, packageKind) {
+    await refreshAuthoritativeWeather({ silent: true });
     let lastError = null;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -3659,7 +3750,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -3690,6 +3781,7 @@
     }
     redraw();
     renderConditions();
+    renderAuthoritativeWeather();
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
     coverageSnapshot = null;
@@ -3862,6 +3954,7 @@
     element.addEventListener("change", saveConditionsFromUi);
     element.addEventListener("blur", saveConditionsFromUi);
   });
+  document.getElementById("refreshAuthoritativeWeather").addEventListener("click", () => refreshAuthoritativeWeather());
   document.getElementById("csv").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.csv", "text/csv", packageTools.createCsv(data, [])));
   document.getElementById("geojson").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.geojson", "application/geo+json", packageTools.createGeoJSON(data, [])));
   document.getElementById("gpx").addEventListener("click", () => downloadText("Pearson_Road_Field_Track.gpx", "application/gpx+xml", packageTools.createGpx(data, [])));

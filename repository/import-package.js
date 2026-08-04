@@ -206,7 +206,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
   ]) {
     if (entries.has(source)) addWrite(writes, inspectionRoot, destination, entries.get(source));
   }
-  addWrite(writes, inspectionRoot, `weather/${contract.export_id}/conditions.json`, JSON.stringify({ inspection_id: manifest.inspection_id, export_id: contract.export_id, conditions: manifest.inspection.conditions || {}, weather_context: manifest.inspection.weather_context || {} }, null, 2) + "\n");
+  addWrite(writes, inspectionRoot, `weather/${contract.export_id}/conditions.json`, JSON.stringify({ inspection_id: manifest.inspection_id, export_id: contract.export_id, conditions: manifest.inspection.conditions || {}, weather_context: manifest.inspection.weather_context || {}, authoritative_weather: manifest.inspection.authoritative_weather || null }, null, 2) + "\n");
 
   for (const photo of manifest.photographs || []) {
     for (const kind of ["original", "analysis"]) {

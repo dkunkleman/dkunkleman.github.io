@@ -81,6 +81,12 @@
     .metric span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
     .metric strong { display: block; margin-top: 3px; overflow-wrap: anywhere; font-size: 17px; }
     .condition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+    .weather-verification { margin: 10px 0 14px; padding: 12px; border: 3px solid #8b6a12; border-radius: 9px; background: #fff9dd; }
+    .weather-verification[data-state="verified"] { border-color: #176d38; background: #e8f8ed; }
+    .weather-verification[data-state="warning"] { border-color: #a3261d; background: #fff0ee; }
+    .weather-verification h3 { margin: 0 0 6px; font-size: 17px; }
+    .weather-verification p { margin: 5px 0; }
+    .weather-verification button { width: 100%; margin-top: 8px; }
     .condition-grid label { margin-top: 4px; }
     .condition-grid input, .condition-grid select, .condition-grid textarea,
     dialog input, dialog select, dialog textarea { width: 100%; min-height: 48px; margin-top: 5px; border: 2px solid #777; border-radius: 7px; padding: 9px; background: #fff; color: #111; font: 16px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
@@ -331,6 +337,12 @@
     <section class="card" aria-labelledby="conditions-heading">
       <h2 id="conditions-heading">Inspection conditions</h2>
       <p class="small">Optional. Enter what you know; entries save automatically on this phone and are included in the package.</p>
+      <div id="authoritativeWeatherPanel" class="weather-verification" data-state="pending" aria-live="polite">
+        <h3>Automatic authoritative weather</h3>
+        <p id="authoritativeWeatherStatus"><strong>Waiting for inspection date</strong></p>
+        <p id="authoritativeWeatherDetails" class="small">The app retrieves official NOAA historical weather automatically and preserves a verified offline copy.</p>
+        <button id="refreshAuthoritativeWeather" type="button">Refresh Official NOAA Weather</button>
+      </div>
       <div class="condition-grid">
         <label>Inspection date<input id="conditionDate" type="date"></label>
         <label>Weather summary<input id="conditionWeather" type="text" placeholder="Clear, cloudy, light rain…"></label>
@@ -826,14 +838,15 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.12.1"></script>
-  <script src="./water-intelligence.js?v=3.12.1"></script>
-  <script src="./evidence-governance.js?v=3.12.1"></script>
-  <script src="./evidence-sets.js?v=3.12.1"></script>
-  <script src="./timber-reconnaissance.js?v=3.12.1"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.12.1"></script>
-  <script src="./inspection-package.js?v=3.12.1"></script>
-  <script src="./idb-recovery.js?v=3.12.1"></script>
-  <script src="./app.js?v=3.12.1"></script>
+  <script src="./inspection-coaching.js?v=3.13.0"></script>
+  <script src="./water-intelligence.js?v=3.13.0"></script>
+  <script src="./evidence-governance.js?v=3.13.0"></script>
+  <script src="./evidence-sets.js?v=3.13.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.13.0"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.13.0"></script>
+  <script src="./authoritative-weather.js?v=3.13.0"></script>
+  <script src="./inspection-package.js?v=3.13.0"></script>
+  <script src="./idb-recovery.js?v=3.13.0"></script>
+  <script src="./app.js?v=3.13.0"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ const os = require("node:os");
 const path = require("node:path");
 const Package = require("../field/inspection-package.js");
 const Timber = require("../field/timber-reconnaissance.js");
+const Weather = require("../field/authoritative-weather.js");
 const Repository = require("../repository/import-package.js");
 
 function findEndOfCentralDirectory(bytes) {
@@ -174,6 +175,7 @@ async function main() {
     orientation_samples: [{ time: "2026-08-02T14:00:05.000Z", alpha_deg: 270, beta_deg: 1, gamma_deg: -1, absolute: true, compass_heading_deg: 90, compass_accuracy_deg: 5, lat: 30.4891, lon: -87.0941, gps_accuracy_m: 3.2 }],
     conditions: { inspection_date: "2026-08-02", weather_summary: "Cloudy", rainfall_previous_24_hours: "2 inches", rainfall_previous_7_days: "3.1 inches", rainfall_previous_30_days: "6 inches", temperature: "84 F", ground_condition: "Mixed", rain_during_inspection: "no", evidence_classification: "Estimated" },
     weather_context: { named_event: "Test storm", event_dates: "2026-07-31 to 2026-08-01", days_between_event_and_inspection: "1", authoritative_rainfall_totals: "2.0 inches at Test Station", weather_station_distance_from_parcel: "8 miles", inspector_reported_recent_local_rain: "Heavy rain reported locally", potentially_relevant_mechanism: "rainfall" },
+    authoritative_weather: Weather.pearsonVerifiedContext({ latitude: 30.48987, longitude: -87.09007 }, "2026-08-04T12:00:00.000Z"),
     photos: [
       { id: "photo-1", photo_number: "P1", associated_marker_id: "event-photo-1", associated_observation_id: "event-1", category: "Wet", note: "Standing water at wet marker", evidence_classification: "Observed", observation_attributes: { water_depth: "1–3 inches", water_depth_basis: "Estimated" }, explanation_voice_note_id: "voice-1", explanation_voice_note_ids: ["voice-1"], water_confirmation: "yes", water: { water_type: "standing", water_depth_band: "1-3_inches", measurement_basis: "Estimated", water_width_ft: 3, water_length_ft: 5, water_behavior: "isolated_depression", significance: "Minor localized depression" }, camera_opened_at: "2026-08-02T14:02:55.000Z", recorded_at: "2026-08-02T14:03:00.000Z", source_file_last_modified_at: "2026-08-02T14:03:00.000Z", lat: 30.4895, lon: -87.0932, gps_accuracy_m: 2.9, gps_position_at: points[1].time, gps_position_age_ms: 100, location_source: "live_browser_geolocation", compass_heading_deg: 88, sensor_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2, absolute: true }, device_screen_orientation: "portrait-primary", device_screen_angle_deg: 0, width_px: 192, height_px: 192, pixel_orientation: "square", exif_orientation: 1, exif_orientation_description: "normal", original_filename: "field-one.png", original_mime_type: "image/png", original_size_bytes: photoOneBytes.length },
       { id: "photo-2", photo_number: "P2", associated_marker_id: "event-photo-2", associated_observation_id: "event-4", category: "High Ground", note: "High-ground view", evidence_classification: "Observed", observation_attributes: {}, camera_opened_at: "2026-08-02T14:03:55.000Z", recorded_at: "2026-08-02T14:04:00.000Z", source_file_last_modified_at: "2026-08-02T14:04:00.000Z", lat: 30.4901, lon: -87.0922, gps_accuracy_m: 3.5, gps_position_at: points[2].time, gps_position_age_ms: 150, location_source: "live_browser_geolocation", compass_heading_deg: 44, sensor_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0, absolute: true }, device_screen_orientation: "landscape-primary", device_screen_angle_deg: 90, width_px: 512, height_px: 512, pixel_orientation: "square", exif_orientation: 6, exif_orientation_description: "rotated 90 degrees clockwise", original_filename: "field-two.png", original_mime_type: "image/png", original_size_bytes: photoTwoBytes.length }
@@ -272,8 +274,12 @@ async function main() {
   const foresterHandoff = JSON.parse(files.get("FORESTER_HANDOFF.json").toString("utf8"));
   assert.equal(foresterHandoff.raw_measurements[0].measurement_id, testMeasurement.measurement_id);
   assert.equal(manifest.inspection.weather_context.named_event, "Test storm");
+  assert.equal(manifest.inspection.authoritative_weather.station.station_id, "USW00013899");
   const weatherContext = JSON.parse(files.get("WEATHER_CONTEXT.json").toString("utf8"));
-  assert.equal(weatherContext.weather_context.weather_station_distance_from_parcel, "8 miles");
+  assert.equal(weatherContext.manual_weather_context.weather_station_distance_from_parcel, "8 miles");
+  assert.equal(weatherContext.authoritative_weather.precipitation_windows.previous_calendar_day.observed_in, 1.53);
+  assert.equal(weatherContext.authoritative_weather.exact_daily_station_records.length, 30);
+  assert(weatherContext.authoritative_weather.official_sources.every(source => source.url), "every official weather source retains its exact URL");
   assert(weatherContext.interpretation_rules.some(rule => rule.includes("year-round")), "weather package prevents a one-day condition from becoming a year-round claim");
   const evidenceSets = JSON.parse(files.get("EVIDENCE_SETS.json").toString("utf8"));
   assert.equal(evidenceSets.summaries.sets[0].photograph_count, 2, "package explains two views as one subject");

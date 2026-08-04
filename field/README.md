@@ -90,8 +90,10 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 ## Weather context
 
-- Each inspection can record a named storm/event, event dates, elapsed days, authoritative rainfall total and source, station distance, inspector-reported local rain, and whether rainfall, surge, or both may be relevant.
-- `WEATHER_CONTEXT.json`, `AI_ANALYSIS.json`, and the printable report keep weather context, observed site conditions, inferred causes, and year-round conditions not established as separate analytical categories.
+- `Finish Inspection` automatically resolves the previous calendar day, previous 7 full days, and previous 30 full days from the nearest supported official NOAA/NWS/NCEI station. It records station name/ID/coordinates, straight-line distance and method, retrieval time, exact daily station records, 1991-2020 normals, derived amount/percentage departures, source record IDs/URLs, and significant-event context.
+- A verified result is saved with the inspection for offline reuse. Pearson Road on August 3, 2026 has a bundled, source-identified NOAA snapshot so a no-service finish still includes the actual official record. Other historical dates retrieve NCEI daily summaries and station normals when online and then retain the verified record on the phone.
+- Manual local-rain knowledge remains separate and is never overwritten as parcel rainfall. `WEATHER_CONTEXT.json`, `AI_ANALYSIS.json`, the repository weather record, and the printable report keep official station context, inspector-reported local conditions, observed site conditions, inferred causes, and year-round conditions not established as separate analytical categories.
+- Station rainfall may differ materially from parcel rainfall. Named storms provide regional context; they do not prove that a parcel condition or particular rainfall total was caused by that storm.
 
 ## Two one-file package modes
 
@@ -115,7 +117,7 @@ Both modes contain:
 - `REPORT_TEMPLATE.md`, with the required professional Property Intelligence Report sections;
 - `INSPECTOR_THOUGHTS.md`, which preserves the inspector's judgment, theories, concerns, and preferences while explicitly separating them from observed facts;
 - `EVIDENCE_RELATIONSHIPS.json`, which directly joins observations, photographs, voice notes, and stable GPS-point IDs;
-- `WEATHER_CONTEXT.json`, which preserves named-event and rainfall context with station-distance and causation limitations;
+- `WEATHER_CONTEXT.json`, which preserves the structured authoritative NOAA record, exact daily station evidence, 1991-2020 normal calculations, source URLs, named-event context, manual local context, superseded working estimates, and station-distance/causation limitations;
 - `SUGGESTED_INSPECTION_QUESTIONS.md`, which distinguishes questions answerable from the package from questions requiring additional evidence;
 - `repository-import.json`, which assigns an immutable property folder, inspection folder, export ID, extraction map, and reject-on-collision policy;
 - `repository-comparison.json`, a compact normalized record for future comparisons of standing water, trees, construction, improvements, and recurring observations;

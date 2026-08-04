@@ -13,6 +13,7 @@ import io
 import json
 import math
 import os
+import subprocess
 import sys
 import zipfile
 from datetime import datetime
@@ -99,6 +100,20 @@ REPORT_TASK_DEPENDENCIES = {
     "Confidence Scores": ("decision_framework", "observations:confidence"),
     "Final Recommendation": ("decision_framework", "observations", "questions_remaining"),
 }
+
+
+def authoritative_weather_context(inspection_date: str | None) -> dict | None:
+    """Read the same versioned weather evidence used by the field app."""
+    if inspection_date != "2026-08-03":
+        return None
+    module_path = Path(__file__).resolve().parents[1] / "field" / "authoritative-weather.js"
+    script = (
+        "const w=require(process.argv[1]);"
+        "process.stdout.write(JSON.stringify(w.pearsonVerifiedContext("
+        "{latitude:30.48987163,longitude:-87.0900716},'2026-08-04T12:00:00.000Z')));"
+    )
+    completed = subprocess.run(["node", "-e", script, str(module_path)], check=True, capture_output=True, text=True)
+    return json.loads(completed.stdout)
 
 
 def iso_seconds(value: str | None) -> float | None:
@@ -366,12 +381,16 @@ def build(source_path: Path, output_path: Path) -> dict:
             if attachments.get("voice_note_id") is not None:
                 direct_voice_observation[str(attachments["voice_note_id"])] = observation
 
+        inspection_date = manifest["inspection"].get("conditions", {}).get("inspection_date")
+        official_weather = manifest["inspection"].get("authoritative_weather") or authoritative_weather_context(inspection_date)
         weather = {
             "weather_record_id": WEATHER_ID,
-            "source": "Inspector-entered conditions from the real field inspection",
+            "source": "Official NOAA/NWS/NCEI station context plus separately preserved inspector-entered conditions",
             "evidence_classification": manifest["inspection"].get("conditions", {}).get("evidence_classification") or "Observed",
-            "values": manifest["inspection"].get("conditions") or {},
-            "limitations": "No authoritative station rainfall history is included. Blank rainfall fields remain unknown and must not be inferred.",
+            "observed_site_conditions": manifest["inspection"].get("conditions") or {},
+            "manual_context": manifest["inspection"].get("weather_context") or {},
+            "authoritative_context": official_weather,
+            "limitations": "Official station rainfall may differ materially from parcel rainfall. Weather context does not prove site causation, extent, duration, recurrence, or year-round conditions.",
         }
 
         photo_records = []
@@ -641,6 +660,7 @@ Begin immediately. Do not ask the user to identify photographs, observations, lo
 ## What is here
 
 - `AI_ANALYSIS.json` is the single canonical analysis record. It contains the executive-summary inputs, statistics, five decisions, property, conditions, every GPS point, every observation, photograph and voice index, inspector-thought status, terrain, contours, parcel boundary, weather, evidence relationships, questions remaining, suggested next visit, public data, and metadata.
+- `WEATHER_CONTEXT.json` preserves the authoritative NOAA station record, exact daily rainfall, 1991-2020 normal calculations, significant-event context, source IDs/URLs, limitations, and superseded working-estimate audit note.
 - `photos/` contains all {len(photo_records)} actual analysis-quality photographs. Each photograph record supplies its exact file path, GPS point, observation, time, heading, direction, weather record, evidence classification, map location, source hash, and derived-file hash.
 - `voice_notes/` contains all {len(voice_records)} actual recordings. Each is linked to time, GPS, and an observation.
 - `map_context/terrain.png`, `map_context/contours_2ft.png`, and `map_context/parcel_boundary.geojson` provide the actual map context.
@@ -704,6 +724,7 @@ No explicit Inspector Thought records exist in this source inspection. Do not in
             write_member(target, "CHATGPT_START_HERE.md", start_here.encode("utf-8"), compress=True)
             write_member(target, "CHATGPT_TASKS.md", tasks_md.encode("utf-8"), compress=True)
             write_member(target, "AI_ANALYSIS.json", json_bytes(analysis), compress=True)
+            write_member(target, "WEATHER_CONTEXT.json", json_bytes(weather), compress=True)
             for name, data in photo_bytes_by_path.items():
                 write_member(target, name, data)
             for name, data in voice_bytes_by_path.items():
@@ -752,9 +773,19 @@ def validate(package_path: Path) -> dict:
         if bad_crc:
             failures.append(f"CRC failure: {bad_crc}")
         names = set(package.namelist())
-        required = {"CHATGPT_START_HERE.md", "CHATGPT_TASKS.md", "AI_ANALYSIS.json", "map_context/terrain.png", "map_context/contours_2ft.png", "map_context/parcel_boundary.geojson"}
+        required = {"CHATGPT_START_HERE.md", "CHATGPT_TASKS.md", "AI_ANALYSIS.json", "WEATHER_CONTEXT.json", "map_context/terrain.png", "map_context/contours_2ft.png", "map_context/parcel_boundary.geojson"}
         failures.extend(f"Missing required member: {name}" for name in sorted(required - names))
+        if "AI_ANALYSIS.json" not in names or "WEATHER_CONTEXT.json" not in names:
+            return {"package_path": str(package_path), "failures": failures, "passed": False}
         analysis = json.loads(package.read("AI_ANALYSIS.json"))
+        weather = json.loads(package.read("WEATHER_CONTEXT.json"))
+        official_weather = weather.get("authoritative_context") or {}
+        if official_weather.get("status") != "VERIFIED_OFFICIAL_RECORD":
+            failures.append("Authoritative weather record is missing or unverified")
+        if not official_weather.get("exact_daily_station_records"):
+            failures.append("Authoritative weather exact daily source records are missing")
+        if not all(item.get("url") for item in official_weather.get("official_sources") or []):
+            failures.append("Authoritative weather source URL is missing")
         for map_path in ("map_context/terrain.png", "map_context/contours_2ft.png"):
             if map_path in names:
                 try:

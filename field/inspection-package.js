@@ -652,6 +652,7 @@
       finished_at: manifest.inspection.finished_at,
       conditions: manifest.inspection.conditions,
       weather_context: manifest.inspection.weather_context || {},
+      authoritative_weather: manifest.inspection.authoritative_weather || null,
       metrics: manifest.inspection.metrics,
       observation_counts_by_type: counts,
       recurring_observations: observations.map(observation => ({
@@ -966,6 +967,7 @@
     const metrics = manifest.inspection.metrics;
     const conditions = manifest.inspection.conditions || {};
     const weatherContext = manifest.inspection.weather_context || {};
+    const authoritativeWeather = manifest.inspection.authoritative_weather || null;
     const zones = detailRegions(manifest.inspection.observations);
     const decisionBrief = createDecisionBrief(manifest);
     const decisionRows = decisionBrief.decisions.map(decision => `<tr><th>${htmlEscape(decision.question)}</th><td>${decision.evidence_observation_ids.length}</td><td>${decision.possible_strength_observation_ids.length}</td><td>${decision.possible_weakness_observation_ids.length}</td><td>Analyze linked evidence; state material unknowns and explained 0-100 confidence.</td></tr>`).join("");
@@ -1035,7 +1037,15 @@
       ["Rain — previous 7 days", conditions.rainfall_previous_7_days], ["Rain — previous 30 days", conditions.rainfall_previous_30_days],
       ["Temperature", conditions.temperature], ["Ground condition", conditions.ground_condition], ["Rain during inspection", conditions.rain_during_inspection]
     ].map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value || "Not entered")}</td><td>${htmlEscape(conditions.evidence_classification || "Observed")}</td></tr>`).join("");
+    const officialWindows = authoritativeWeather && authoritativeWeather.precipitation_windows || {};
     const weatherRows = [
+      ["Official station", authoritativeWeather && authoritativeWeather.station ? `${authoritativeWeather.station.name} (${authoritativeWeather.station.station_id})` : "Not verified"],
+      ["Official station coordinates", authoritativeWeather && authoritativeWeather.station ? `${authoritativeWeather.station.latitude}, ${authoritativeWeather.station.longitude}` : "Not verified"],
+      ["Station distance / method", authoritativeWeather && authoritativeWeather.station ? `${authoritativeWeather.station.distance_from_property_miles} miles; ${authoritativeWeather.station.distance_method}` : "Not verified"],
+      ["Previous calendar day vs normal", officialWindows.previous_calendar_day ? `${officialWindows.previous_calendar_day.observed_in} in vs ${officialWindows.previous_calendar_day.normal_in} in; ${officialWindows.previous_calendar_day.times_normal}x normal` : "Not verified"],
+      ["Previous 7 full days vs normal", officialWindows.previous_7_full_days ? `${officialWindows.previous_7_full_days.observed_in} in vs ${officialWindows.previous_7_full_days.normal_in} in; ${officialWindows.previous_7_full_days.times_normal}x normal` : "Not verified"],
+      ["Previous 30 full days vs normal", officialWindows.previous_30_full_days ? `${officialWindows.previous_30_full_days.observed_in} in vs ${officialWindows.previous_30_full_days.normal_in} in; ${officialWindows.previous_30_full_days.percent_above_or_below_normal}% above normal` : "Not verified"],
+      ["Official retrieval date", authoritativeWeather && authoritativeWeather.retrieval ? authoritativeWeather.retrieval.retrieved_at : "Not verified"],
       ["Named storm or major event", weatherContext.named_event], ["Event dates", weatherContext.event_dates],
       ["Days between event and inspection", weatherContext.days_between_event_and_inspection], ["Authoritative rainfall totals / source", weatherContext.authoritative_rainfall_totals],
       ["Weather-station distance limitation", weatherContext.weather_station_distance_from_parcel], ["Inspector-reported recent local rain", weatherContext.inspector_reported_recent_local_rain],
@@ -1582,6 +1592,7 @@
       property_information: manifest.property,
       inspection_conditions: manifest.inspection.conditions,
       weather_context: manifest.inspection.weather_context || {},
+      authoritative_weather: manifest.inspection.authoritative_weather || null,
       inspection_statistics: manifest.inspection.metrics,
       gps_track: manifest.inspection.gps_track,
       observations: manifest.inspection.observations,
@@ -1602,7 +1613,7 @@
         rule: "Ignore voided records in findings. Do not erase or reinterpret their original audit entries."
       },
       map_layers: manifest.map_context.layers,
-      weather: { weather_record_id: "weather-inspection-conditions", observed_site_conditions: manifest.inspection.conditions, context: manifest.inspection.weather_context || {}, limitations: "Weather context, observed site conditions, and inferred causes are separate. Station data may not represent the parcel, and one inspection does not establish year-round conditions." },
+      weather: { weather_record_id: "weather-inspection-conditions", observed_site_conditions: manifest.inspection.conditions, manual_context: manifest.inspection.weather_context || {}, authoritative_context: manifest.inspection.authoritative_weather || null, limitations: "Weather context, observed site conditions, and inferred causes are separate. Station data may not represent the parcel, and one inspection does not establish year-round conditions." },
       terrain: manifest.map_context.layers.terrain,
       contours: manifest.map_context.layers.contours,
       parcel_boundary: manifest.map_context.subject_parcel,
@@ -1685,7 +1696,7 @@ The walked route is in \`track.geojson\` and \`track.gpx\`. Parcel geometry is i
 
 ## Weather
 
-The \`weather\` section and \`WEATHER_CONTEXT.json\` keep four things separate: weather context, observed site conditions, inferred causes, and year-round conditions not established. Preserve any named event, its dates, elapsed days, source rainfall total, station-distance limitation, inspector-reported local rain, and whether rainfall, surge, or both may be relevant. If authoritative weather history is absent, say so under Questions Remaining; do not invent rainfall, station precision, causation, or year-round behavior.
+The \`weather\` section and \`WEATHER_CONTEXT.json\` keep four things separate: authoritative station weather context, observed site conditions, inferred causes, and year-round conditions not established. The authoritative record preserves station name/ID/coordinates, distance method, retrieval date, exact daily values, 1991-2020 normal boundaries, derived comparisons, significant-event context, exact source records and URLs, and audit corrections. Cite it when discussing rainfall. Never convert station rainfall into parcel rainfall, attribute a parcel condition to a storm without evidence, or imply year-round conditions. If the authoritative record status is not \`VERIFIED_OFFICIAL_RECORD\`, state that limitation under Questions Remaining rather than inventing values.
 
 ## Generate the decision report
 
@@ -2382,6 +2393,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         well_inspected_percent_estimate: coverage.well_inspected ? coverage.well_inspected.percent : null,
         lightly_inspected_percent_estimate: coverage.lightly_inspected ? coverage.lightly_inspected.percent : null,
         not_inspected_percent_estimate: coverage.not_inspected ? coverage.not_inspected.percent : null
+        ,authoritative_weather_status: inspection.authoritative_weather ? inspection.authoritative_weather.status : "NOT_ATTACHED"
+        ,authoritative_weather_station_id: inspection.authoritative_weather && inspection.authoritative_weather.station ? inspection.authoritative_weather.station.station_id : null
         ,small_tract_water_photo_count: smallTractWaterMap.water_photographs ? smallTractWaterMap.water_photographs.length : 0
         ,small_tract_water_cluster_count: smallTractWaterMap.water_area_clusters ? smallTractWaterMap.water_area_clusters.length : 0
       },
@@ -2391,6 +2404,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         finished_at: inspection.stopped || null,
         conditions: inspection.conditions || {},
         weather_context: inspection.weather_context || {},
+        authoritative_weather: inspection.authoritative_weather || null,
         metrics,
         lifecycle_events: inspection.lifecycle_events,
         gps_track: gpsTrack,
@@ -2444,6 +2458,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         evidence_sets: "EVIDENCE_SETS.json",
         post_inspection_review: "POST_INSPECTION_REVIEW.json",
         weather_context: "WEATHER_CONTEXT.json",
+        authoritative_weather_context: "WEATHER_CONTEXT.json",
         chat_review_return_instructions: "CHAT_REVIEW_RETURN_INSTRUCTIONS.md",
         review_annotation_schema: "schemas/property-intelligence-review-annotation.schema.json",
         professional_handoff_cards: "PROFESSIONAL_HANDOFF_CARDS.json",
@@ -2562,7 +2577,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("AUDIT_ONLY_GPS_POINTS.json", JSON.stringify({ schema_name: "property-intelligence-audit-only-gps", schema_version: "1.0", inspection_id: manifest.inspection_id, reason: "Excluded prior-day app-test GPS points remain permanently recoverable but do not affect the active route or findings.", points: auditHistory.audit_only_gps_points || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("EVIDENCE_SETS.json", JSON.stringify({ summaries: evidenceSetSummaries, pending_suggestions: evidenceSetSuggestions, append_only_events: sourceInspection.evidence_set_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("POST_INSPECTION_REVIEW.json", JSON.stringify(postInspectionReview, null, 2) + "\n", { modifiedAt });
-    zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "1.0", inspection_id: manifest.inspection_id, weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation."] }, null, 2) + "\n", { modifiedAt });
+    zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "2.0", inspection_id: manifest.inspection_id, authoritative_weather: manifest.inspection.authoritative_weather || null, manual_weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation.", "Calculated departures and percentages must be labeled as derived from cited official station records.", "Station rainfall may differ from parcel rainfall."] }, null, 2) + "\n", { modifiedAt });
     zip.add("CHAT_REVIEW_RETURN_INSTRUCTIONS.md", chatReviewInstructions, { modifiedAt });
     zip.add("schemas/property-intelligence-review-annotation.schema.json", JSON.stringify(reviewAnnotationSchema, null, 2) + "\n", { modifiedAt });
     zip.add("PROFESSIONAL_HANDOFF_CARDS.json", JSON.stringify(professionalHandoffCards, null, 2) + "\n", { modifiedAt });

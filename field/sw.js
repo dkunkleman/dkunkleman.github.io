@@ -1,18 +1,19 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-03-v18";
-const INDEX_URL = "./index.html?v=3.12.1";
+const CACHE_NAME = "property-inspector-field-2026-08-04-v19";
+const INDEX_URL = "./index.html?v=3.13.0";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.12.1",
-  "./water-intelligence.js?v=3.12.1",
-  "./evidence-governance.js?v=3.12.1",
-  "./evidence-sets.js?v=3.12.1",
-  "./timber-reconnaissance.js?v=3.12.1",
-  "./reviewed-property-synthesis.js?v=3.12.1",
-  "./app.js?v=3.12.1",
-  "./idb-recovery.js?v=3.12.1",
-  "./inspection-package.js?v=3.12.1",
+  "./inspection-coaching.js?v=3.13.0",
+  "./water-intelligence.js?v=3.13.0",
+  "./evidence-governance.js?v=3.13.0",
+  "./evidence-sets.js?v=3.13.0",
+  "./timber-reconnaissance.js?v=3.13.0",
+  "./reviewed-property-synthesis.js?v=3.13.0",
+  "./authoritative-weather.js?v=3.13.0",
+  "./app.js?v=3.13.0",
+  "./idb-recovery.js?v=3.13.0",
+  "./inspection-package.js?v=3.13.0",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];
