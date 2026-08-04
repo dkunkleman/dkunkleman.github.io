@@ -8,15 +8,16 @@
 
   const FLOWING_WATER_SET_TYPE = "Flowing Water / Creek Corridor";
   const FLOWING_WATER_REPORT_LIMIT = "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified.";
-  const SET_TYPES = ["Water Area", FLOWING_WATER_SET_TYPE, "Individual Tree", "Tree Group / Canopy", "Potential Homesite", "Drainage Feature", "Road / Access", "Boundary Marker", "View", "Vegetation / Clearing", "Other"];
-  const PHOTO_ROLES = ["Context", "Close-up", "Measurement", "Relationship to surroundings", "Opposite direction", "Whole subject", "Detail", "Before", "After", "Upstream view", "Downstream view", "Across-channel view", "Channel width", "Water depth", "Flow Evidence", "Adjacent Higher-Ground / Tree Context", "Scenic Context", "Building-Avoidance Context", "Creek / homesite or road relationship", "Whole tree", "Bark", "Base / ground", "Lower trunk to first fork", "Crown / canopy", "Visible crown segment", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud", "Fruit / seed / cone / flower", "Scale photograph", "Visible defect", "Root condition", "Targets", "Surrounding canopy", "360-degree panorama", "Transition", "Other"];
-  const PREFIXES = { "Water Area": "WG", [FLOWING_WATER_SET_TYPE]: "FW", "Individual Tree": "TR", "Tree Group / Canopy": "TG", "Potential Homesite": "HS", "Drainage Feature": "DF", "Road / Access": "AC", "Boundary Marker": "BM", View: "VW", "Vegetation / Clearing": "VG", Other: "ES" };
+  const SET_TYPES = ["Water Area", FLOWING_WATER_SET_TYPE, "Individual Tree", "Tree Group / Canopy", "Timber Sample Plot", "Potential Homesite", "Drainage Feature", "Road / Access", "Boundary Marker", "View", "Vegetation / Clearing", "Other"];
+  const PHOTO_ROLES = ["Context", "Close-up", "Measurement", "Relationship to surroundings", "Opposite direction", "Whole subject", "Detail", "Before", "After", "Upstream view", "Downstream view", "Across-channel view", "Channel width", "Water depth", "Flow Evidence", "Adjacent Higher-Ground / Tree Context", "Scenic Context", "Building-Avoidance Context", "Creek / homesite or road relationship", "Whole tree", "Bark", "Base / ground", "Lower trunk to first fork", "Crown / canopy", "Visible crown segment", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud", "Fruit / seed / cone / flower", "Scale photograph", "DBH tape position", "Visible defect", "Root condition", "Targets", "Surrounding canopy", "Plot center / radius", "Access / wet ground", "360-degree panorama", "Transition", "Other"];
+  const PREFIXES = { "Water Area": "WG", [FLOWING_WATER_SET_TYPE]: "FW", "Individual Tree": "TR", "Tree Group / Canopy": "TG", "Timber Sample Plot": "TP", "Potential Homesite": "HS", "Drainage Feature": "DF", "Road / Access": "AC", "Boundary Marker": "BM", View: "VW", "Vegetation / Clearing": "VG", Other: "ES" };
   const REQUIRED_ROLES = {
     "Individual Tree": ["Bark", "Base / ground", "Crown / canopy"],
     "Tree Group / Canopy": ["Context", "Surrounding canopy"],
     "Potential Homesite": ["Context"],
     "Water Area": ["Context", "Measurement", "Transition"],
-    [FLOWING_WATER_SET_TYPE]: ["Upstream view", "Downstream view", "Across-channel view", "Creek / homesite or road relationship"]
+    [FLOWING_WATER_SET_TYPE]: ["Upstream view", "Downstream view", "Across-channel view", "Creek / homesite or road relationship"],
+    "Timber Sample Plot": ["Plot center / radius", "Context", "Access / wet ground"]
   };
   const TREE_VISIBILITY = ["Yes", "No — canopy blocks it", "No — nearby trees block it", "No — brush blocks it", "No — water or unsafe ground blocks it", "No — property boundary or access prevents it", "Unsure"];
   const SPECIES_DETERMINATIONS = ["Inspector confirmed", "Probable", "Possible", "Unknown", "Professional identification requested"];
@@ -69,7 +70,7 @@
     const createdAt = nowIso(input.created_at);
     const set = {
       schema_name: "property-intelligence-evidence-set",
-      schema_version: "1.0",
+      schema_version: "1.1",
       evidence_set_id: id,
       property_id: data.property_id || null,
       inspection_id: data.inspection_id || null,
@@ -253,6 +254,17 @@
         boundary_rule: "All photographed points are observed. Any connecting outline is inferred and must be styled differently from observed points."
       };
     }
+    if (effective.set_type === "Timber Sample Plot") {
+      summary.preliminary_timber_plot = {
+        plot_id: effective.subject_details && effective.subject_details.plot_id || null,
+        plot_size: effective.subject_details && effective.subject_details.plot_size || null,
+        plot_acres: effective.subject_details && effective.subject_details.plot_acres || null,
+        radius_ft: effective.subject_details && effective.subject_details.radius_ft || null,
+        sampling_method: effective.subject_details && effective.subject_details.sampling_method || "Fixed-radius field sample",
+        tree_ids: effective.subject_details && effective.subject_details.tree_ids || [],
+        report_rule: "Report this as preliminary fixed-radius reconnaissance. Do not imply that convenience, targeted, or sparse sampling is a formal statistically valid timber cruise."
+      };
+    }
     if (effective.set_type === FLOWING_WATER_SET_TYPE) {
       const water = photos.map(item => ({ photo: item.photo, roles: item.link.photo_roles || [item.link.photo_role], water: item.photo.water || {} }));
       const measured = item => String(item.water.measurement_basis || "").toLowerCase() === "measured" || item.roles.includes("Measurement");
@@ -296,6 +308,8 @@
     else if (purpose === "species identification") required = ["Bark", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud"];
     else if (purpose === "forest character") required = ["Context", "Surrounding canopy", "Relationship to surroundings"];
     else required = ["Bark", "Base / ground", "Visible crown segment"];
+    const significantDefects = (info.defects_and_quality || []).filter(defect => !["Straight", "Unknown"].includes(defect));
+    if (significantDefects.length && !required.includes("Visible defect")) required.push("Visible defect");
     if (visibility === "Yes") required.unshift("Whole tree");
     else required.unshift("Lower trunk to first fork");
     return {
@@ -386,6 +400,20 @@
         report_classification: FLOWING_WATER_REPORT_LIMIT
       });
     }
+    addRange("pearson-p158-p159-shallow-puddle", "Water Area", [158, 159], ["Context", "Measurement"], "Localized shallow puddle P158-P159");
+    addRange("pearson-p162-p163-shallow-puddle", "Water Area", [162, 163], ["Context", "Measurement"], "Second localized shallow puddle P162-P163");
+    const firstPuddle = data.evidence_set_suggestions.find(item => item.suggestion_id === "pearson-p158-p159-shallow-puddle");
+    if (firstPuddle) Object.assign(firstPuddle, {
+      suggested_subject_details: { water_feature_type: "Isolated puddle", preliminary_depth_range_in: { minimum: 3, maximum: 4 }, description: "Localized shallow puddle, approximately 3–4 inches at the measured point" },
+      suggested_measurement: { measurement_type: "Water depth", unit: "in", approximate_minimum: 3, approximate_maximum: 4, measurement_photo_number: "P159", exact_value: null, inspector_confirmation_required: true },
+      basis: "Inspector-directed Pearson Road review. The photographs and approximate range are proposed; the exact depth remains inactive until inspector confirmation."
+    });
+    const secondPuddle = data.evidence_set_suggestions.find(item => item.suggestion_id === "pearson-p162-p163-shallow-puddle");
+    if (secondPuddle) Object.assign(secondPuddle, {
+      suggested_subject_details: { water_feature_type: "Isolated puddle", preliminary_depth_range_in: { minimum: 4, maximum: 5 }, description: "Second localized shallow puddle, approximately 4–5 inches at the measured point" },
+      suggested_measurement: { measurement_type: "Water depth", unit: "in", approximate_minimum: 4, approximate_maximum: 5, measurement_photo_number: "P163", exact_value: null, inspector_confirmation_required: true },
+      basis: "Inspector-directed Pearson Road review. The photographs and approximate range are proposed; the exact depth remains inactive until inspector confirmation."
+    });
     return data.evidence_set_suggestions;
   }
 
@@ -427,16 +455,45 @@
     return null;
   }
 
-  function confirmSuggestion(inspection, suggestionId, createdBy) {
+  function confirmSuggestion(inspection, suggestionId, createdBy, confirmation) {
     const data = ensureEvidenceSetModel(inspection);
     const suggestion = data.evidence_set_suggestions.find(item => item.suggestion_id === suggestionId);
     if (!suggestion) throw new Error("The grouping suggestion was not found.");
     if (suggestion.status === "confirmed") return effectiveEvidenceSet(data, suggestion.evidence_set_id);
+    const measurementRequest = suggestion.suggested_measurement || null;
+    const exactValue = measurementRequest ? Number(confirmation && confirmation.exact_value) : null;
+    if (measurementRequest && (!Number.isFinite(exactValue) || exactValue <= 0)) throw new Error("Enter the inspector-confirmed exact measurement before activating this water group.");
     const previousActive = data.active_evidence_set_id;
     data.active_evidence_set_id = null;
-    const set = startEvidenceSet(data, { set_type: suggestion.set_type, label: suggestion.suggested_label, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}`, inspector_confirmed: true });
+    const confirmedDetails = Object.assign({}, clone(suggestion.suggested_subject_details || {}), measurementRequest ? { inspector_confirmed_depth_in: exactValue, measurement_status: "inspector_confirmed" } : {});
+    const set = startEvidenceSet(data, { set_type: suggestion.set_type, label: suggestion.suggested_label, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}`, inspector_confirmed: true, subject_details: confirmedDetails });
     [...(suggestion.suggested_photo_roles || []), ...(suggestion.suggested_context_photo_roles || [])].forEach(item => attachRecord(data, set.evidence_set_id, "photo", item.photo_id, { photo_role: item.role, photo_roles: item.roles || [item.role], created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}` }));
-    finishEvidenceSet(data, set.evidence_set_id, { source_suggestion_id: suggestionId });
+    if (measurementRequest) {
+      data.measurements = Array.isArray(data.measurements) ? data.measurements : [];
+      const measurementPhoto = (suggestion.suggested_photo_roles || []).find(item => item.photo_number === measurementRequest.measurement_photo_number) || (suggestion.suggested_photo_roles || []).find(item => item.role === "Measurement");
+      const measurement = {
+        schema_name: "property-intelligence-structured-measurement", schema_version: "1.0",
+        measurement_id: `measurement:${suggestionId}`,
+        inspection_id: data.inspection_id || null, property_id: data.property_id || null,
+        measurement_type: measurementRequest.measurement_type, authoritative_value: exactValue, unit: measurementRequest.unit,
+        basis: "Measured", reached_true_endpoint: confirmation && confirmation.reached_true_endpoint || "Unknown",
+        approximately_vertical_or_level: confirmation && confirmation.approximately_aligned || "Unknown",
+        instrument: confirmation && confirmation.instrument || "Visible measuring device; instrument not specified",
+        photo_id: measurementPhoto && measurementPhoto.photo_id || null, evidence_set_id: set.evidence_set_id, subject_id: set.evidence_set_id,
+        voice_note_ids: [], recorded_at: new Date().toISOString(), recorded_by: createdBy || data.inspector_identity || "Field Inspector",
+        water_context: { bottom_type: confirmation && confirmation.water_bottom_type || "Unknown", water_feature_type: "Isolated puddle", approximate_surface_length: Number(confirmation && confirmation.surface_length) || null, approximate_surface_width: Number(confirmation && confirmation.surface_width) || null, surface_unit: "ft" },
+        authority_rule: "The inspector-confirmed numeric value is the authoritative field measurement. The photograph is supporting evidence and must not be re-read as the sole source of the number.",
+        photograph_role: "supporting measurement evidence", inspector_confirmed: true, source_suggestion_id: suggestionId
+      };
+      data.measurements.push(measurement);
+      attachRecord(data, set.evidence_set_id, "measurement", measurement.measurement_id, { created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}` });
+      const sourcePhoto = (data.photos || []).find(item => String(item.id) === String(measurement.photo_id));
+      if (sourcePhoto) {
+        sourcePhoto.water_confirmation = "yes";
+        sourcePhoto.water = Object.assign({}, sourcePhoto.water || {}, { water_type: "standing", water_behavior: "isolated_depression", water_depth_exact_in: exactValue, water_depth_band: "exact", measurement_basis: "Measured", structured_measurement_id: measurement.measurement_id });
+      }
+    }
+    finishEvidenceSet(data, set.evidence_set_id, Object.assign({ source_suggestion_id: suggestionId }, confirmedDetails));
     suggestion.status = "confirmed";
     suggestion.confirmed_at = new Date().toISOString();
     suggestion.confirmed_by = createdBy || data.inspector_identity || "Field Inspector";

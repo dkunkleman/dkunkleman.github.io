@@ -79,6 +79,8 @@ Tree evidence remains purpose- and safety-aware after ingestion. Whole-tree obst
 
 Confirmed creek Evidence Sets are retained in `FLOWING_WATER_CORRIDORS.json`. Exact photographs and measurements remain observed evidence; dashed centerlines and flow arrows remain explicit inferences. Pending group suggestions never enter the current map, and uninspected watercourse extent is never filled in.
 
+Authoritative field measurements are retained under `measurements/<export_id>/STRUCTURED_MEASUREMENTS.json`. Preliminary tree, fixed-radius plot, builder/clearing, and forester-handoff records are retained under `timber/<export_id>/`. Every version preserves its methods and limitations; no later interpretation overwrites an earlier inspection.
+
 `printable_report.pdf.pending.json` tells the future repository service to render `printable-report.html` into a PDF. PDF rendering and ChatGPT analysis are deliberately repository responsibilities rather than field-phone work.
 
 ## Upload boundary

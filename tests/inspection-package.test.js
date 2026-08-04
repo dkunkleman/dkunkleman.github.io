@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const Package = require("../field/inspection-package.js");
+const Timber = require("../field/timber-reconnaissance.js");
 const Repository = require("../repository/import-package.js");
 
 function findEndOfCentralDirectory(bytes) {
@@ -203,6 +204,12 @@ async function main() {
     { event_id: "set-finish", evidence_set_id: "evidence-set-test", event_type: "set_finished", finished_at: "2026-08-02T14:04:02.000Z", recorded_at: "2026-08-02T14:04:02.000Z", inspector_confirmed: true, immutable: true }
   ];
   inspection.evidence_set_suggestions = [];
+  Timber.ensureModel(inspection);
+  const testPlot = Timber.createSamplePlot(inspection, { plot_size: "1/10 acre", plot_acres: 0.1, center: { latitude: 30.4901, longitude: -87.0922, accuracy_m: 3.5 }, sampling_method: "Fixed-radius field sample", canopy: "moderate", understory: "light", access_conditions: "good", wet_ground_conditions: "firm" });
+  const testTree = Timber.createTimberTree(inspection, { plot_id: testPlot.plot_id, probable_species: "loblolly pine", identification_status: "Probable", identification_confidence: "medium", dbh_method: "Diameter tape reading", dbh_in: 18.2, dbh_instrument: "diameter tape", dbh_confidence: "high", merchantable_height_ft: 48, usable_16ft_logs: 3, height_method: "Visual estimate", product_category: "Sawtimber", defects_and_quality: ["Straight"], purposes: ["Likely timber sample"], photo_ids: ["photo-2"] });
+  const testMeasurement = Timber.recordMeasurement(inspection, { measurement_type: "Tree diameter", value: 18.2, unit: "in", basis: "Measured", instrument: "diameter tape", reached_true_endpoint: "Yes", approximately_aligned: "Not applicable", subject_id: testTree.tree_id, timber_tree_id: testTree.tree_id, timber_plot_id: testPlot.plot_id, photo_id: "photo-2", location: testTree.location || { latitude: 30.4901, longitude: -87.0922, gps_accuracy_m: 3.5 } });
+  inspection.photos[1].timber_tree_id = testTree.tree_id;
+  inspection.photos[1].structured_measurement_ids = [testMeasurement.measurement_id];
 
   const basePhotoEntries = [
     { id: "photo-1", originalBlob: new Blob([photoOneBytes], { type: "image/png" }), analysisBlob: new Blob([photoOneBytes], { type: "image/png" }) },
@@ -232,7 +239,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -253,6 +260,17 @@ async function main() {
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
   assert.equal(manifest.format_version, "2.0");
   assert.equal(manifest.summary.evidence_set_count, 1);
+  assert.equal(manifest.summary.structured_measurement_count, 1);
+  assert.equal(manifest.summary.timber_tree_count, 1);
+  assert.equal(manifest.summary.timber_sample_plot_count, 1);
+  const structuredMeasurements = JSON.parse(files.get("STRUCTURED_MEASUREMENTS.json").toString("utf8"));
+  assert.equal(structuredMeasurements.measurements[0].authoritative_value, 18.2);
+  assert.match(structuredMeasurements.authority_rule, /Inspector-entered numeric values are authoritative/);
+  const timberReconnaissance = JSON.parse(files.get("PRELIMINARY_TIMBER_RECONNAISSANCE.json").toString("utf8"));
+  assert.equal(timberReconnaissance.trees[0].tree_id, testTree.tree_id);
+  assert.match(timberReconnaissance.disclaimer, /not a certified timber cruise, timber appraisal, sale volume or market valuation/);
+  const foresterHandoff = JSON.parse(files.get("FORESTER_HANDOFF.json").toString("utf8"));
+  assert.equal(foresterHandoff.raw_measurements[0].measurement_id, testMeasurement.measurement_id);
   assert.equal(manifest.inspection.weather_context.named_event, "Test storm");
   const weatherContext = JSON.parse(files.get("WEATHER_CONTEXT.json").toString("utf8"));
   assert.equal(weatherContext.weather_context.weather_station_distance_from_parcel, "8 miles");
@@ -347,7 +365,7 @@ async function main() {
   const aiReadme = files.get("AI_README.md").toString("utf8");
   const reportTemplate = files.get("REPORT_TEMPLATE.md").toString("utf8");
   const thoughtDocument = files.get("INSPECTOR_THOUGHTS.md").toString("utf8");
-  ["executive_summary", "decision_framework", "decision_brief", "investigation_questions", "inspection_areas", "coverage", "missing_evidence", "return_visit_plan", "field_efficiency", "stakeholder_questions", "property_information", "inspection_conditions", "weather_context", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
+  ["executive_summary", "decision_framework", "decision_brief", "investigation_questions", "inspection_areas", "coverage", "missing_evidence", "return_visit_plan", "field_efficiency", "stakeholder_questions", "property_information", "inspection_conditions", "weather_context", "inspection_statistics", "gps_track", "observations", "photographs", "voice_notes", "structured_measurements", "preliminary_timber_reconnaissance", "forester_handoff", "map_layers", "weather", "terrain", "contours", "parcel_boundary", "public_data", "evidence_relationships", "suggested_inspection_questions", "metadata"].forEach(section => assert(Object.hasOwn(aiAnalysis, section), `AI analysis exposes ${section}`));
   assert.equal(questionBrief.questions.length, 2, "every inspector question is packaged");
   assert(questionBrief.questions[0].photo_ids.includes("photo-1"), "question links directly to its photo evidence");
   assert.equal(fieldCoaching.coverage.status, "ESTIMATED", "coverage is explicitly estimated");
@@ -366,6 +384,8 @@ async function main() {
   assert.equal(relationships.observations.length, manifest.summary.observation_count);
   assert.equal(relationships.photographs.length, 2);
   assert.equal(relationships.voice_notes.length, 1);
+  assert.equal(relationships.structured_measurements[0].measurement_id, testMeasurement.measurement_id);
+  assert.equal(relationships.timber_trees[0].tree_id, testTree.tree_id);
   assert(aiReadme.includes("Can I access it?") && aiReadme.includes("Every observation directly names its GPS point") && aiReadme.includes("not observed facts") && aiReadme.includes("Absence of an observation is not proof") && aiReadme.includes("0-100 confidence score"), "AI README explains decisions, relationships, thought boundaries, uncertainty, and confidence in plain English");
   ["Decision Summary", "Property Overview", "Inspection Conditions", "Decision Matrix", "Can I Access It?", "Can I Build Here?", "Can I Make Money Here?", "What Might Cost Me Money?", "What Makes This Property Special?", "Strengths", "Weaknesses", "Unknowns and Coverage Gaps", "What Changed the Assessment", "Inspection Statistics", "Questions Answered", "Questions Remaining", "Inspection Areas", "Coverage: Well Inspected, Lightly Inspected, Not Inspected", "Lowest-Cost Next Investigation", "Estimated Confidence", "Return Visit Plan", "Field Efficiency", "Buyer Questions", "Seller Transparency", "Builder Questions", "Developer Questions", "Engineer Questions", "Forester Questions", "Recommended Professional Follow-up", "Evidence Appendix"].forEach(heading => assert(reportTemplate.includes(`## ${heading}`), `report template includes ${heading}`));
   assert(thoughtDocument.includes("I think the road berm may be causing this standing water.") && thoughtDocument.includes("NOT AN OBSERVED FACT"), "inspector reasoning is preserved and explicitly separated from facts");
@@ -387,6 +407,7 @@ async function main() {
   assert(report.includes("Inspection Coaching") && report.includes("Well inspected") && report.includes("Not inspected"), "printable report explains coaching and conservative coverage");
   assert(report.includes("Weather Context") && report.includes("Test storm") && report.includes("inferred causes are separate"), "printable report separates weather context, observed site conditions, inference, and year-round unknowns");
   assert(report.includes("Photo value") && report.includes("Critical") && report.includes("question-berm"), "printable report prioritizes and explains question-linked photo evidence");
+  assert(report.includes("Preliminary Timber Reconnaissance") && report.includes("not a certified timber cruise"), "printable report carries preliminary timber evidence and the exact professional limitation");
   ["Complete Route", "Water and Drainage", "Dry Ground and Homesites", "Access and Obstacles", "Trees and Timber", "Photos", "Inspection Conditions"].forEach(section => assert(report.includes(section), `${section} report section exists`));
   assert(report.indexOf("Complete Route") < report.indexOf("Pearson Road Property Inspection"), "complete parcel route is report page 1");
   assert(report.includes("miles walked") && report.includes("elapsed") && report.includes("numbered detail zone"), "page 1 carries date, distance, duration, and numbered zones");
@@ -409,6 +430,7 @@ async function main() {
   const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
   assert(reportFiles.has("SMALL_TRACT_WATER_MAP.json"), "package includes the AI-readable small-tract water model");
   assert(reportFiles.has("FLOWING_WATER_CORRIDORS.json"), "package includes the AI-readable confirmed creek-corridor model");
+  assert(reportFiles.has("STRUCTURED_MEASUREMENTS.json") && reportFiles.has("PRELIMINARY_TIMBER_RECONNAISSANCE.json") && reportFiles.has("FORESTER_HANDOFF.json"), "report package includes authoritative measurements and timber handoff evidence");
   assert(reportFiles.has("small-tract-water-map.html"), "package includes the interactive human-readable small-tract water map");
   const reportImportContract = JSON.parse(reportFiles.get("repository-import.json").toString("utf8"));
   assert.equal(reportImportContract.artifact.repository_filename, "AI_ANALYSIS_REPORT_PACKAGE_export_report_test.zip", "repository retains the AI package identity after ingestion");
@@ -465,6 +487,9 @@ async function main() {
     assert.equal(fs.readdirSync(path.join(storedInspection, "voice")).length, 1, "voice evidence is recovered into the repository");
     assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "WEATHER_CONTEXT.json")), "inspection weather context is preserved in its repository evidence folder per export");
     assert(fs.existsSync(path.join(storedInspection, "maps", "export_report_test", "FLOWING_WATER_CORRIDORS.json")), "confirmed creek-corridor intelligence is preserved with versioned maps");
+    assert(fs.existsSync(path.join(storedInspection, "measurements", "export_report_test", "STRUCTURED_MEASUREMENTS.json")), "authoritative measurements are preserved in a versioned repository folder");
+    assert(fs.existsSync(path.join(storedInspection, "timber", "export_report_test", "PRELIMINARY_TIMBER_RECONNAISSANCE.json")), "timber reconnaissance is preserved in a versioned repository folder");
+    assert(fs.existsSync(path.join(storedInspection, "timber", "export_report_test", "FORESTER_HANDOFF.json")), "forester handoff is preserved beside the reconnaissance");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
     for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {

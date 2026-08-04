@@ -4,10 +4,11 @@
   const water = typeof module === "object" && module.exports ? require("./water-intelligence.js") : (root && root.WaterIntelligence);
   const governance = typeof module === "object" && module.exports ? require("./evidence-governance.js") : (root && root.EvidenceGovernance);
   const evidenceSets = typeof module === "object" && module.exports ? require("./evidence-sets.js") : (root && root.EvidenceSets);
-  const api = factory(coaching, water, governance, evidenceSets);
+  const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
+  const api = factory(coaching, water, governance, evidenceSets, timber);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
@@ -580,6 +581,10 @@
         return_visit_plan: { source: "RETURN_VISIT_PLAN.json", destination: `analysis/${exportId}/RETURN_VISIT_PLAN.json` },
         small_tract_water_map: { source: "SMALL_TRACT_WATER_MAP.json", destination: `maps/${exportId}/SMALL_TRACT_WATER_MAP.json` },
         flowing_water_corridors: { source: "FLOWING_WATER_CORRIDORS.json", destination: `maps/${exportId}/FLOWING_WATER_CORRIDORS.json` },
+        structured_measurements: { source: "STRUCTURED_MEASUREMENTS.json", destination: `measurements/${exportId}/STRUCTURED_MEASUREMENTS.json` },
+        preliminary_timber_reconnaissance: { source: "PRELIMINARY_TIMBER_RECONNAISSANCE.json", destination: `timber/${exportId}/PRELIMINARY_TIMBER_RECONNAISSANCE.json` },
+        forester_handoff: { source: "FORESTER_HANDOFF.json", destination: `timber/${exportId}/FORESTER_HANDOFF.json` },
+        forester_handoff_markdown: { source: "FORESTER_HANDOFF.md", destination: `timber/${exportId}/FORESTER_HANDOFF.md` },
         small_tract_water_map_interactive: { source: "small-tract-water-map.html", destination: `maps/${exportId}/small-tract-water-map.html` },
         report_template: { source: "REPORT_TEMPLATE.md", destination: `analysis/${exportId}/REPORT_TEMPLATE.md` },
         inspector_thoughts: { source: "INSPECTOR_THOUGHTS.md", destination: `analysis/${exportId}/INSPECTOR_THOUGHTS.md` },
@@ -932,6 +937,9 @@
     const decisionBrief = createDecisionBrief(manifest);
     const decisionRows = decisionBrief.decisions.map(decision => `<tr><th>${htmlEscape(decision.question)}</th><td>${decision.evidence_observation_ids.length}</td><td>${decision.possible_strength_observation_ids.length}</td><td>${decision.possible_weakness_observation_ids.length}</td><td>Analyze linked evidence; state material unknowns and explained 0-100 confidence.</td></tr>`).join("");
     const decisionPage = `<section class="page portrait"><h1>Decision Brief</h1><p>This field evidence is organized to answer five decisions. Counts route evidence for analysis; they are not conclusions and do not establish feasibility, value, or cost.</p><table><thead><tr><th>Decision</th><th>Relevant observations</th><th>Possible strengths</th><th>Possible weaknesses</th><th>Required analysis</th></tr></thead><tbody>${decisionRows}</tbody></table><h2>Required decision output</h2><p>For each decision: answer directly, cite material evidence, identify strengths and weaknesses, state material unknowns, explain confidence, and name the lowest-cost credible investigation. Every next step must state what uncertainty it removes.</p><div class="disclaimer">A recorded condition is not automatically a strength or weakness. Review its location, note, photographs, voice notes, inspection conditions, map context, and intended use.</div></section>`;
+    const reportTimber = manifest.preliminary_timber_reconnaissance || {};
+    const reportTimberPlots = reportTimber.sampling_method_summary && reportTimber.sampling_method_summary.plots || [];
+    const timberReportPage = `<section class="page portrait"><h1>Preliminary Timber Reconnaissance</h1><p><strong>Recorded trees:</strong> ${htmlEscape((reportTimber.trees || []).length)} · <strong>Fixed-radius plots:</strong> ${htmlEscape(reportTimberPlots.length)}</p><h2>Sampling method</h2><pre>${htmlEscape(JSON.stringify(reportTimber.sampling_method_summary || {}, null, 2))}</pre><h2>Builder / clearing observations</h2><pre>${htmlEscape(JSON.stringify(reportTimber.builder_and_clearing_summary || {}, null, 2))}</pre><div class="disclaimer">${htmlEscape(reportTimber.disclaimer || "Preliminary timber information requires professional verification.")}</div></section>`;
     const coaching = manifest.inspection.field_coaching || {};
     const coverage = coaching.coverage || {};
     const efficiency = coaching.field_efficiency || {};
@@ -948,6 +956,7 @@
     const mapPage = (title, groups, extra) => `<section class="page landscape${extra && extra.summary ? " route-page" : ""}"><h1>${htmlEscape(title)}</h1>${extra && extra.summary ? `<div class="route-summary"><strong>${htmlEscape(conditions.inspection_date || manifest.inspection.started_at || "Date not recorded")}</strong><span>${metrics.distance_walked_miles.toFixed(2)} miles walked</span><span>${formatReportDuration(metrics.elapsed_time_ms)} elapsed</span><span>${zones.length} numbered detail zone${zones.length === 1 ? "" : "s"}</span></div>` : ""}${createReportMapSvg({ manifest, parcels, groups, terrainDataUrl, contourDataUrl, zones: extra && extra.zones ? zones : [], view: extra && extra.view, title })}<p class="map-note">Numbered symbols match the observation and photograph records. Red line: subject parcel. Yellow/black line: walked route.</p></section>`;
     const mapPages = [
       coachingPage,
+      timberReportPage,
       mapPage("Complete Route", null, { zones: true, summary: true }),
       mapPage("Water and Drainage", ["water"]),
       mapPage("Dry Ground and Homesites", ["dry"]),
@@ -1000,6 +1009,10 @@
       ["Potentially relevant mechanism", weatherContext.potentially_relevant_mechanism]
     ].map(([label, value]) => `<tr><th>${htmlEscape(label)}</th><td>${htmlEscape(value || "Not entered")}</td></tr>`).join("");
     const observationRows = (manifest.inspection.observations || []).map((item, index) => `<tr><td>${index + 1}</td><td>${htmlEscape(item.observed_at)}</td><td>${htmlEscape(item.label)}</td><td>${htmlEscape(item.evidence_classification)}</td><td>${htmlEscape(item.gps.latitude)}, ${htmlEscape(item.gps.longitude)}</td><td>${htmlEscape(item.note || "")}</td></tr>`).join("");
+    const timber = manifest.preliminary_timber_reconnaissance || {};
+    const timberPlotRows = (timber.sampling_method_summary && timber.sampling_method_summary.plots || []).map(plot => `<tr><td>${htmlEscape(plot.plot_id)}</td><td>${htmlEscape(plot.plot_acres)} acre / ${htmlEscape(plot.radius_ft)} ft</td><td>${htmlEscape(plot.tree_count)}</td><td>${htmlEscape(plot.trees_per_acre == null ? "Not calculated" : plot.trees_per_acre)}</td><td>${htmlEscape(plot.average_dbh_in == null ? "Not measured" : `${plot.average_dbh_in} in`)}</td><td>${htmlEscape(plot.basal_area_sq_ft_per_acre == null ? "Not calculated" : plot.basal_area_sq_ft_per_acre)}</td></tr>`).join("") || `<tr><td colspan="6">No fixed-radius timber sample plot was completed.</td></tr>`;
+    const timberTreeRows = (timber.trees || []).map(tree => `<tr><td>${htmlEscape(tree.tree_id)}</td><td>${htmlEscape(tree.probable_species)} (${htmlEscape(tree.identification_status)} / ${htmlEscape(tree.identification_confidence)})</td><td>${htmlEscape(tree.dbh && tree.dbh.dbh_in == null ? "Not measured" : `${tree.dbh.dbh_in} in`)}</td><td>${htmlEscape(tree.dbh && tree.dbh.method || "Not measured")}</td><td>${htmlEscape(tree.merchantable_height_ft == null ? "Not measured" : `${tree.merchantable_height_ft} ft`)}</td><td>${htmlEscape((tree.defects_and_quality || []).join(", ") || "None recorded")}</td></tr>`).join("") || `<tr><td colspan="6">No preliminary timber trees were recorded.</td></tr>`;
+    const timberPage = `<section class="page portrait"><h1>Preliminary Timber Reconnaissance</h1><p><strong>Recorded trees:</strong> ${htmlEscape((timber.trees || []).length)} · <strong>Sample plots:</strong> ${htmlEscape(timber.sampling_method_summary && timber.sampling_method_summary.plot_count || 0)}</p><h2>Fixed-radius plots</h2><table><thead><tr><th>Plot ID</th><th>Size / radius</th><th>Trees</th><th>Trees/acre</th><th>Average DBH</th><th>Basal area/acre</th></tr></thead><tbody>${timberPlotRows}</tbody></table><h2>Tree records</h2><table><thead><tr><th>Tree ID</th><th>Probable species</th><th>DBH</th><th>Method</th><th>Merchantable height</th><th>Defects</th></tr></thead><tbody>${timberTreeRows}</tbody></table><div class="disclaimer">${htmlEscape(timber.disclaimer || "Preliminary timber information requires professional verification.")}</div></section>`;
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pearson Road Inspection Report</title><style>
       @page portrait{size:letter portrait;margin:.45in}@page landscape{size:letter landscape;margin:.35in}*{box-sizing:border-box}body{margin:0;color:#111;font-family:Arial,sans-serif;background:#ddd}.page{background:#fff;margin:16px auto;padding:.35in;page-break-after:always;break-after:page}.portrait{page:portrait;width:8.5in;min-height:11in}.landscape{page:landscape;width:11in;min-height:8.5in}h1{margin:0 0 10px;font-size:24px}h2{margin:18px 0 8px}.report-map{display:block;width:100%;height:6.75in;border:2px solid #111;background:#ddd}.route-page .report-map{height:6.2in}.route-summary{display:flex;gap:20px;align-items:center;margin:-3px 0 7px;padding:7px 10px;background:#eee;border:1px solid #777;font-size:13px}.map-note{margin:6px 0;font-size:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.summary div{border:1px solid #777;padding:9px}.summary strong{display:block;font-size:20px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #777;padding:6px;text-align:left;vertical-align:top}.photo-page img{display:block;max-width:100%;max-height:7.1in;margin:0 auto 12px;object-fit:contain}.photo-page dl{display:grid;grid-template-columns:1.55in 1fr;margin:0}.photo-page dt,.photo-page dd{margin:0;border-top:1px solid #aaa;padding:6px}.photo-page dt{font-weight:bold}.disclaimer{border:3px solid #111;padding:12px;font-weight:bold}.photo-marker{cursor:pointer}.photo-marker:hover circle,.photo-marker:focus circle{stroke:#00ffff;stroke-width:12}#photoHover{position:fixed;z-index:20;display:none;width:280px;padding:7px;background:#fff;border:3px solid #111;box-shadow:0 4px 20px #0008}#photoHover img{display:block;width:100%;max-height:220px;object-fit:contain}dialog{max-width:min(92vw,760px);border:3px solid #111}dialog img{max-width:100%;max-height:75vh}@media print{body{background:#fff}.page{margin:0}#photoHover,dialog{display:none!important}}@media(max-width:800px){.page,.portrait,.landscape{width:100%;min-height:0;margin:0 0 12px;padding:12px}.report-map,.route-page .report-map{height:auto;aspect-ratio:6/5}.route-summary{display:grid;grid-template-columns:1fr 1fr}.summary{grid-template-columns:1fr 1fr}}
     </style></head><body>${rasterDefinitions}${smallWaterPages}${waterDetailPages}${mapPages}${decisionPage}<section class="page portrait"><h1>Pearson Road Property Inspection</h1><p><strong>Inspection ID:</strong> ${htmlEscape(manifest.inspection_id)}</p><div class="summary"><div><span>Distance walked</span><strong>${metrics.distance_walked_miles.toFixed(2)} mi</strong></div><div><span>Elapsed field time</span><strong>${formatReportDuration(metrics.elapsed_time_ms)}</strong></div><div><span>Active movement</span><strong>${formatReportDuration(metrics.active_movement_time_ms)}</strong></div><div><span>Stopped time</span><strong>${formatReportDuration(metrics.stopped_time_ms)}</strong></div><div><span>GPS points</span><strong>${metrics.gps_point_count}</strong></div><div><span>Photographs / observations</span><strong>${metrics.photograph_count} / ${metrics.observation_count}</strong></div></div><h2>Observed Inspection Conditions</h2><table><thead><tr><th>Condition</th><th>Recorded value</th><th>Evidence</th></tr></thead><tbody>${conditionRows}</tbody></table><h2>Weather Context</h2><table><thead><tr><th>Context</th><th>Recorded value</th></tr></thead><tbody>${weatherRows}</tbody></table><p><strong>Weather context, observed site conditions, and inferred causes are separate. Neither the weather record nor one inspection establishes year-round conditions.</strong></p><div class="disclaimer">This report is preliminary property intelligence and field reconnaissance. It is not a boundary survey, engineering report, appraisal, wetland delineation, septic approval, timber appraisal, or legal opinion. Items marked Interpretation or Needs Professional Verification are not presented as proven facts.</div></section>${detailPages}${evidenceSetPages}<section class="page portrait"><h1>Evidence Index</h1><table><thead><tr><th>#</th><th>Time</th><th>Observation</th><th>Evidence</th><th>Coordinates</th><th>Note</th></tr></thead><tbody>${observationRows}</tbody></table></section>${photoPages}<div id="photoHover"><strong id="photoHoverLabel"></strong><img id="photoHoverImage" alt="Photograph preview"></div><dialog id="photoDialog"><button id="closePhotoDialog">Close</button><h2 id="photoDialogLabel"></h2><img id="photoDialogImage" alt="Inspection photograph"></dialog><script>(()=>{const markers=[...document.querySelectorAll('.photo-marker')],hover=document.getElementById('photoHover'),hoverImage=document.getElementById('photoHoverImage'),hoverLabel=document.getElementById('photoHoverLabel'),dialog=document.getElementById('photoDialog'),dialogImage=document.getElementById('photoDialogImage'),dialogLabel=document.getElementById('photoDialogLabel');function source(id){return document.getElementById('photo-'+id)}function showHover(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;hoverImage.src=img.src;hoverLabel.textContent=id;hover.style.left=Math.min(innerWidth-300,event.clientX+12)+'px';hover.style.top=Math.max(8,event.clientY-240)+'px';hover.style.display='block'}function openPhoto(event){const id=event.currentTarget.dataset.photoId,img=source(id);if(!img)return;dialogImage.src=img.src;dialogLabel.textContent=id;dialog.showModal()}markers.forEach(marker=>{marker.addEventListener('mouseenter',showHover);marker.addEventListener('mousemove',showHover);marker.addEventListener('mouseleave',()=>hover.style.display='none');marker.addEventListener('click',openPhoto);marker.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openPhoto(event)}})});document.getElementById('closePhotoDialog').addEventListener('click',()=>dialog.close())})()</script></body></html>`;
@@ -1108,6 +1121,9 @@
       "- RETURN_VISIT_PLAN.json: unvisited-zone waypoints and the highest-value remaining measurements and photographs.",
       "- SMALL_TRACT_WATER_MAP.json: exact small-tract ring, small-tract-only route and evidence, conservative water clusters, dry-corridor rule, unknown acreage, and preliminary building-avoidance reasoning.",
       "- FLOWING_WATER_CORRIDORS.json: inspector-confirmed creek Evidence Sets, exact photographed points, inferred centerlines, reported flow direction, safe measurements, amenity/avoidance context, and explicit uninspected extent.",
+      "- STRUCTURED_MEASUREMENTS.json: authoritative inspector-entered numeric measurements, units, methods, endpoint/alignment checks, subjects, supporting photos, and pending confirmation-gated measurement suggestions.",
+      "- PRELIMINARY_TIMBER_RECONNAISSANCE.json: permanent tree and plot IDs, raw DBH/height/method/defect records, clearly limited sample summaries, and builder/clearing observations.",
+      "- FORESTER_HANDOFF.json and FORESTER_HANDOFF.md: plot design, raw measurements, species confidence, defect photos, access/wet-ground observations, and unanswered questions for a consulting forester.",
       "- small-tract-water-map.html: interactive human-readable map whose water markers open the actual photograph and attached voice explanation.",
       "- REPORT_TEMPLATE.md: required professional Property Intelligence Report structure.",
       "- INSPECTOR_THOUGHTS.md: inspector reasoning kept separate from observed evidence.",
@@ -1324,6 +1340,8 @@
         analysis_path: photo.analysis && photo.analysis.path,
         photo_value: photo.photo_value,
         evidence_set_id: photo.evidence_set_id || null,
+        structured_measurement_ids: photo.structured_measurement_ids || [],
+        timber_tree_id: photo.timber_tree_id || null,
         photo_meaning: photo.photo_meaning,
         explanation_voice_note_ids: photo.explanation_voice_note_ids,
         water_confirmation: photo.water_confirmation,
@@ -1348,6 +1366,8 @@
         question_links: voice.question_links
       })),
       evidence_sets: manifest.inspection.evidence_set_summaries || { sets: [] },
+      structured_measurements: (manifest.structured_measurements || []).map(item => ({ measurement_id: item.measurement_id, measurement_type: item.measurement_type, authoritative_value: item.authoritative_value, unit: item.unit, basis: item.basis, photo_id: item.photo_id, evidence_set_id: item.evidence_set_id, subject_id: item.subject_id, timber_tree_id: item.timber_tree_id, timber_plot_id: item.timber_plot_id, authority_rule: item.authority_rule })),
+      timber_trees: (manifest.preliminary_timber_reconnaissance && manifest.preliminary_timber_reconnaissance.trees || []).map(tree => ({ tree_id: tree.tree_id, plot_id: tree.plot_id, evidence_set_id: tree.evidence_set_id, photo_ids: tree.photo_ids, defect_photo_ids: tree.defect_photo_ids })),
       approved_review_annotations: manifest.inspection.post_inspection_review ? manifest.inspection.post_inspection_review.active_annotations : [],
       inspector_thoughts: manifest.inspection.inspector_thoughts.map(thought => ({
         thought_id: thought.thought_id,
@@ -1527,6 +1547,9 @@
       observations: manifest.inspection.observations,
       photographs: manifest.photographs,
       voice_notes: manifest.voice_notes,
+      structured_measurements: manifest.structured_measurements || [],
+      preliminary_timber_reconnaissance: manifest.preliminary_timber_reconnaissance || null,
+      forester_handoff: manifest.forester_handoff || null,
       inspector_thoughts: manifest.inspection.inspector_thoughts,
       inspector_hypotheses: manifest.inspection.inspector_hypotheses || [],
       field_evidence_review: manifest.inspection.field_evidence_review || null,
@@ -1598,6 +1621,9 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.49-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
 - \`FLOWING_WATER_CORRIDORS.json\` contains only inspector-confirmed creek Evidence Sets. Treat exact photographed points as observations; treat dashed centerlines and flow arrows as inferences. Never convert a centerline into a surveyed boundary or extend it through uninspected ground.
 - Always report a confirmed creek as: "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified."
+- \`STRUCTURED_MEASUREMENTS.json\` contains inspector-entered numbers, units, methods, alignment/endpoint checks, subjects, and supporting photographs. The entered number is authoritative; never substitute a value guessed from image pixels.
+- \`PRELIMINARY_TIMBER_RECONNAISSANCE.json\` contains permanent tree/plot IDs, raw DBH and height methods, defects, purposes, sample-plot summaries, and builder/clearing observations. It is not a certified cruise, timber appraisal, sale volume, or market valuation.
+- \`FORESTER_HANDOFF.json\` carries raw measurements, plot design, species confidence, defect-photo links, access, wet-ground conditions, and unanswered questions. Sparse, targeted, or convenience plots must never be generalized as statistically valid tract-wide sampling.
 - \`small-tract-water-map.html\` provides layer toggles and opens the actual photograph and photo-linked voice explanation from each water marker.
 - Every observation, photograph, and voice note records its inspection area and optional question relationships. Photographs are labeled Critical, Helpful, Reference, or Duplicate.
 - \`INSPECTOR_THOUGHTS.md\` contains experience, theories, concerns, and preferences. These are useful interpretations, but they are not observed facts and must never be silently converted into facts.
@@ -1726,6 +1752,10 @@ Report estimated time walking, stopped, and documenting; observation spacing; ph
 
 ## Forester Questions
 
+## Preliminary Timber Reconnaissance
+
+State the number and design of plots, permanent tree IDs, measurement methods, species confidence, defects, access and wet-ground observations. Separate timber potential from builder/clearing value. Include this exact limitation: "This reconnaissance documents field observations and preliminary measurements. It is not a certified timber cruise, timber appraisal, sale volume or market valuation. Sampling design, species, product classification, volume and value should be verified by a qualified consulting forester before a timber sale or financial decision."
+
 ## Recommended Professional Follow-up
 
 Name the professional, exact question, triggering evidence, expected decision value, and whether a cheaper preliminary step should happen first.
@@ -1780,6 +1810,11 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     sourceInspection.lifecycle_events = Array.isArray(sourceInspection.lifecycle_events) ? sourceInspection.lifecycle_events : [];
     sourceInspection.investigation_questions = Array.isArray(sourceInspection.investigation_questions) ? sourceInspection.investigation_questions : [];
     sourceInspection.inspection_areas = Array.isArray(sourceInspection.inspection_areas) ? sourceInspection.inspection_areas : [];
+    sourceInspection.measurements = Array.isArray(sourceInspection.measurements) ? sourceInspection.measurements : [];
+    sourceInspection.timber_plots = Array.isArray(sourceInspection.timber_plots) ? sourceInspection.timber_plots : [];
+    sourceInspection.timber_trees = Array.isArray(sourceInspection.timber_trees) ? sourceInspection.timber_trees : [];
+    sourceInspection.measurement_suggestions = Array.isArray(sourceInspection.measurement_suggestions) ? sourceInspection.measurement_suggestions : [];
+    if (timberTools) timberTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
     if (governanceTools) governanceTools.ensureGovernanceModel(sourceInspection, settings.exportedAt);
     const governanceView = governanceTools ? governanceTools.buildEffectiveInspection(sourceInspection) : { active: sourceInspection, audit_history: { corrections: [] } };
@@ -1865,6 +1900,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         water_confirmation: metadata.water_confirmation || null,
         water_reviewed_at: metadata.water_reviewed_at || null,
         water: metadata.water || null,
+        structured_measurement_ids: Array.isArray(metadata.structured_measurement_ids) ? metadata.structured_measurement_ids.slice() : [],
+        timber_tree_id: metadata.timber_tree_id || null,
         camera_opened_at: metadata.camera_opened_at || null,
         recorded_at: recordedAt,
         source_file_last_modified_at: metadata.source_file_last_modified_at || null,
@@ -2155,9 +2192,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.9",
+      schema_version: "1.10",
       purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
-      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "professional_handoff_card", "water_evidence", "water_area_cluster", "map_context", "coverage_estimate", "return_visit_plan"],
+      stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "structured_measurement", "timber_tree", "timber_sample_plot", "preliminary_timber_reconnaissance", "professional_handoff_card", "water_evidence", "water_area_cluster", "map_context", "coverage_estimate", "return_visit_plan"],
       observation_contract: {
         identity: ["observation_id", "inspection_id", "property_id"],
         classification: ["taxonomy_version", "observation_type", "label", "evidence_classification", "decision_relevance", "area_id", "question_ids", "question_links"],
@@ -2173,6 +2210,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       proximity_rule: "Spatial or temporal proximity is a discovery aid only. Never promote a nearby observation into a confirmed photograph or voice-note relationship.",
       coaching_contract: "Coverage is an explicitly limited route-proximity estimate. Questions and areas are permanent evidence relationships. Every recommendation must cite support, contradictions, remaining uncertainty, and the cheapest reliable next investigation.",
       water_contract: "User-confirmed water photographs are facts about inspection-time observations. Only an inspector-confirmed Flowing Water / Creek Corridor Evidence Set may create a conservative centerline. Centerlines, cluster outlines, flow arrows, and building-avoidance areas are interpretations, must retain every supporting evidence ID, and never establish a surveyed watercourse boundary, ordinary high-water limit, wetland, drainage right, setback, soil, septic, groundwater, or year-round condition.",
+      measurement_contract: "The inspector-entered numeric value, unit, and basis are authoritative field data. A photograph supports the measurement but must never become the sole source for reading or replacing the entered number. Pending suggested values remain inactive until inspector confirmation.",
+      timber_contract: "Permanent tree and plot IDs preserve preliminary identification, measurement method, confidence, defects, purposes, plot design and limitations. Never label reconnaissance as a certified cruise, appraisal, sale volume, or market valuation, and never generalize convenience or sparse plots as statistically valid.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
@@ -2217,6 +2256,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       correction_count: (sourceInspection.corrections || []).length,
       active_view_rule: "All report findings, maps, decision briefs, and AI evidence relationships use only active/corrected records. Voided records remain physically preserved here and under audit/ attachment paths."
     });
+    const structuredMeasurements = sourceInspection.measurements || [];
+    const timberReconnaissance = timberTools ? timberTools.createReconnaissance(sourceInspection) : { schema_name: "property-intelligence-preliminary-timber-reconnaissance", schema_version: "1.0", title: "Preliminary Timber Reconnaissance", trees: [], sampling_method_summary: { plot_count: 0, plots: [] }, builder_and_clearing_summary: {}, disclaimer: "Timber reconnaissance module unavailable." };
+    const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
 
     const manifest = {
       format: FORMAT,
@@ -2271,6 +2313,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         professional_handoff_card_count: (professionalHandoffCards.cards || []).length,
         evidence_set_count: (evidenceSetSummaries.sets || []).length,
         pending_evidence_set_suggestion_count: evidenceSetSuggestions.filter(item => item.status === "pending_inspector_confirmation").length,
+        structured_measurement_count: structuredMeasurements.length,
+        timber_tree_count: (timberReconnaissance.trees || []).length,
+        timber_sample_plot_count: timberReconnaissance.sampling_method_summary && timberReconnaissance.sampling_method_summary.plot_count || 0,
         active_review_annotation_count: activeReviewAnnotations.length,
         elapsed_time_ms: metrics.elapsed_time_ms,
         active_movement_time_ms: metrics.active_movement_time_ms,
@@ -2314,12 +2359,19 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         inspection_areas: inspection.inspection_areas,
         field_coaching: fieldCoaching,
         water_observation_rule: inspection.water_observation_rule || null
+        ,structured_measurements: structuredMeasurements
+        ,measurement_suggestions: sourceInspection.measurement_suggestions || []
+        ,preliminary_timber_reconnaissance: timberReconnaissance
+        ,forester_handoff: foresterHandoff
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
       audit_history: auditHistory,
       small_tract_water_map: smallTractWaterMap,
       flowing_water_corridors: flowingWaterCorridorModel.corridors || [],
+      structured_measurements: structuredMeasurements,
+      preliminary_timber_reconnaissance: timberReconnaissance,
+      forester_handoff: foresterHandoff,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2340,6 +2392,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
         flowing_water_corridors: "FLOWING_WATER_CORRIDORS.json",
+        structured_measurements: "STRUCTURED_MEASUREMENTS.json",
+        preliminary_timber_reconnaissance: "PRELIMINARY_TIMBER_RECONNAISSANCE.json",
+        forester_handoff: "FORESTER_HANDOFF.json",
+        forester_handoff_markdown: "FORESTER_HANDOFF.md",
         report_template: "REPORT_TEMPLATE.md",
         inspector_thoughts: "INSPECTOR_THOUGHTS.md",
         inspector_hypotheses: "INSPECTOR_HYPOTHESES.md",
@@ -2393,6 +2449,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const suggestedQuestionsMarkdown = createSuggestedQuestionsMarkdown(suggestedQuestions);
     const professionalHandoffMarkdown = governanceTools ? governanceTools.handoffCardsMarkdown(professionalHandoffCards) : "# Professional Handoff Cards\n\nUnavailable.\n";
     const professionalHandoffHtml = createProfessionalHandoffHtml(professionalHandoffCards);
+    const foresterHandoffMarkdown = `# Forester Handoff — Preliminary Timber Reconnaissance\n\n${foresterHandoff.disclaimer}\n\n## Orientation\n\n- Property ID: ${manifest.property_id}\n- Inspection ID: ${manifest.inspection_id}\n- Sample plots: ${(foresterHandoff.plot_designs || []).length}\n- Recorded trees: ${(foresterHandoff.raw_tree_records || []).length}\n- Timber measurements: ${(foresterHandoff.raw_measurements || []).length}\n- Map: ${foresterHandoff.tree_and_plot_map_reference}\n\n## Unanswered questions\n\n${(foresterHandoff.unanswered_questions || []).map(item => `- ${item}`).join("\n") || "- No timber questions were generated."}\n\nReview FORESTER_HANDOFF.json for raw measurements, methods, plot design, species confidence, access, wet-ground observations, and photograph IDs.\n`;
     const repositoryImport = createRepositoryImportManifest(manifest, fileName);
     const comparisonRecord = createRepositoryComparisonRecord(manifest);
     const printableReport = await createPrintableReport(manifest, parcels, mapContext, zipPhotos.filter(photo => !photo.excludedFromFindings).map(photo => ({ analysisBlob: photo.analysisBlob })));
@@ -2417,6 +2474,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("RETURN_VISIT_PLAN.json", JSON.stringify(returnVisitPlan, null, 2) + "\n", { modifiedAt });
     zip.add("SMALL_TRACT_WATER_MAP.json", JSON.stringify(smallTractWaterMap, null, 2) + "\n", { modifiedAt });
     zip.add("FLOWING_WATER_CORRIDORS.json", JSON.stringify(flowingWaterCorridorModel, null, 2) + "\n", { modifiedAt });
+    zip.add("STRUCTURED_MEASUREMENTS.json", JSON.stringify({ schema_name: "property-intelligence-structured-measurement-index", schema_version: "1.0", inspection_id: manifest.inspection_id, authority_rule: "Inspector-entered numeric values are authoritative. Photographs are supporting evidence, not the sole source for reading measurements.", measurements: structuredMeasurements, pending_suggestions: (sourceInspection.evidence_set_suggestions || []).filter(item => item.suggested_measurement && item.status === "pending_inspector_confirmation") }, null, 2) + "\n", { modifiedAt });
+    zip.add("PRELIMINARY_TIMBER_RECONNAISSANCE.json", JSON.stringify(timberReconnaissance, null, 2) + "\n", { modifiedAt });
+    zip.add("FORESTER_HANDOFF.json", JSON.stringify(foresterHandoff, null, 2) + "\n", { modifiedAt });
+    zip.add("FORESTER_HANDOFF.md", foresterHandoffMarkdown, { modifiedAt });
     zip.add("small-tract-water-map.html", interactiveWaterMap, { modifiedAt });
     zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
     zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });

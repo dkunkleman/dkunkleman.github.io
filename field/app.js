@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.10.0";
+  const APP_VERSION = "3.11.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -21,6 +21,7 @@
   const waterTools = window.WaterIntelligence;
   const governanceTools = window.EvidenceGovernance;
   const evidenceSetTools = window.EvidenceSets;
+  const timberTools = window.TimberReconnaissance;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -56,6 +57,8 @@
   const photoMeaningDialog = document.getElementById("photoMeaningDialog");
   const correctionDialog = document.getElementById("correctionDialog");
   const hypothesisDialog = document.getElementById("hypothesisDialog");
+  const structuredMeasurementDialog = document.getElementById("structuredMeasurementDialog");
+  const plotTreeDialog = document.getElementById("plotTreeDialog");
   const correctRecordBtn = document.getElementById("correctRecord");
   const undoLastBtn = document.getElementById("undoLast");
   const markerButtons = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "wildlife", "thick", "open", "ditch", "timber", "hazard", "other", "note", "thought", "hypothesis", "photo", "startPhotoGroup", "voice", "more"].map(id => document.getElementById(id));
@@ -116,6 +119,8 @@
   let pendingUndoTarget = null;
   let openNewEvidenceSetAfterPhotoReview = false;
   let pendingSubjectChangePrompt = null;
+  let pendingMeasurementPhotoId = null;
+  let pendingPlotTreeId = null;
 
   function emptyInspection() {
     return {
@@ -151,6 +156,11 @@
       evidence_set_suggestions: [],
       active_evidence_set_id: null,
       evidence_set_counters: {},
+      measurements: [],
+      measurement_suggestions: [],
+      timber_plots: [],
+      timber_trees: [],
+      timber_counters: {},
       inspector_identity: "Field Inspector",
       weather_context: {
         named_event: "", event_dates: "", days_between_event_and_inspection: "", authoritative_rainfall_totals: "",
@@ -234,6 +244,7 @@
       evidenceSetTools.ensureEvidenceSetModel(data);
       evidenceSetTools.addPearsonSuggestions(data);
     }
+    if (timberTools) timberTools.ensureModel(data);
   }
 
   function saveState() {
@@ -468,6 +479,7 @@
       document.getElementById("evidenceSetBannerName").textContent = active.label;
       document.getElementById("evidenceSetBannerCount").textContent = `${active.photo_links.length} photograph${active.photo_links.length === 1 ? "" : "s"} saved`;
     }
+    document.getElementById("addPlotTree").hidden = !active || active.set_type !== "Timber Sample Plot";
     const container = document.getElementById("evidenceSetList");
     container.innerHTML = "";
     const summaries = evidenceSetTools.createEvidenceSetSummaries(data).sets;
@@ -497,18 +509,35 @@
       const select = document.createElement("button"); select.type = "button"; select.textContent = "Select which photos";
       const later = document.createElement("button"); later.type = "button"; later.textContent = "Ask me later"; later.className = "cancel";
       yes.addEventListener("click", () => {
-        try { evidenceSetTools.confirmSuggestion(data, suggestion.suggestion_id, data.inspector_identity); saveState(); renderEvidenceSets(); redraw(); setStatus("Evidence set confirmed. The photos will be reported as one subject.", "success"); }
+        try {
+          let confirmation = null;
+          if (suggestion.suggested_measurement && suggestion.suggested_measurement.inspector_confirmation_required) {
+            const range = `${suggestion.suggested_measurement.approximate_minimum}–${suggestion.suggested_measurement.approximate_maximum} ${suggestion.suggested_measurement.unit}`;
+            const entered = prompt(`Inspector confirmation required. Enter the exact measured value for ${suggestion.suggested_measurement.measurement_photo_number}. The review described approximately ${range}.`, "");
+            if (entered === null) return;
+            confirmation = { exact_value: Number(entered), reached_true_endpoint: "Unknown", approximately_aligned: "Unknown", water_bottom_type: "Unknown" };
+          }
+          evidenceSetTools.confirmSuggestion(data, suggestion.suggestion_id, data.inspector_identity, confirmation); saveState(); renderEvidenceSets(); redraw(); setStatus("Evidence set confirmed. The photos and inspector-entered measurement will be reported as one subject.", "success");
+        }
         catch (error) { setStatus(error.message, "error"); }
       });
       no.addEventListener("click", () => { suggestion.status = "rejected_by_inspector"; suggestion.reviewed_at = new Date().toISOString(); saveState(); renderEvidenceSets(); setStatus("Grouping rejected. The photographs remain separate evidence.", "active"); });
       select.addEventListener("click", () => {
-        const offered = (suggestion.suggested_photo_roles || []).map(item => item.photo_number || item.photo_id).join(", ");
-        const response = prompt("Enter the photo numbers that belong together, separated by commas.", offered);
-        if (response === null) return;
-        const wanted = new Set(response.split(",").map(item => item.trim().toUpperCase()).filter(Boolean));
-        suggestion.suggested_photo_roles = (suggestion.suggested_photo_roles || []).filter(item => wanted.has(String(item.photo_number || item.photo_id).toUpperCase()));
-        if (suggestion.suggested_photo_roles.length < 2) { setStatus("Choose at least two photographs for a group.", "warning"); return; }
-        evidenceSetTools.confirmSuggestion(data, suggestion.suggestion_id, data.inspector_identity); saveState(); renderEvidenceSets(); setStatus("Selected photographs confirmed as one subject.", "success");
+        try {
+          const offered = (suggestion.suggested_photo_roles || []).map(item => item.photo_number || item.photo_id).join(", ");
+          const response = prompt("Enter the photo numbers that belong together, separated by commas.", offered);
+          if (response === null) return;
+          const wanted = new Set(response.split(",").map(item => item.trim().toUpperCase()).filter(Boolean));
+          suggestion.suggested_photo_roles = (suggestion.suggested_photo_roles || []).filter(item => wanted.has(String(item.photo_number || item.photo_id).toUpperCase()));
+          if (suggestion.suggested_photo_roles.length < 2) { setStatus("Choose at least two photographs for a group.", "warning"); return; }
+          let confirmation = null;
+          if (suggestion.suggested_measurement && suggestion.suggested_measurement.inspector_confirmation_required) {
+            const entered = prompt(`Enter the inspector-confirmed exact value for ${suggestion.suggested_measurement.measurement_photo_number} in ${suggestion.suggested_measurement.unit}.`, "");
+            if (entered === null) return;
+            confirmation = { exact_value: Number(entered), reached_true_endpoint: "Unknown", approximately_aligned: "Unknown", water_bottom_type: "Unknown" };
+          }
+          evidenceSetTools.confirmSuggestion(data, suggestion.suggestion_id, data.inspector_identity, confirmation); saveState(); renderEvidenceSets(); setStatus("Selected photographs confirmed as one subject.", "success");
+        } catch (error) { setStatus(error.message, "error"); }
       });
       later.addEventListener("click", () => { suggestion.last_deferred_at = new Date().toISOString(); saveState(); setStatus("Suggestion kept for later review. Nothing was grouped.", "active"); });
       actions.append(yes, no, select, later); row.append(title, detail, actions); container.appendChild(row);
@@ -522,10 +551,26 @@
     document.getElementById("treeSetFields").hidden = !["Individual Tree", "Tree Group / Canopy"].includes(type);
     document.getElementById("flowingWaterSetFields").hidden = type !== "Flowing Water / Creek Corridor";
     document.getElementById("forestSetFields").hidden = type !== "Tree Group / Canopy";
+    document.getElementById("timberPlotFields").hidden = type !== "Timber Sample Plot";
     document.getElementById("homesiteSetFields").hidden = type !== "Potential Homesite";
     if (type === "Tree Group / Canopy" && document.getElementById("treePurpose").value === "species identification") document.getElementById("treePurpose").value = "forest character";
     renderTreeEvidencePlan();
     renderFlowingWaterEvidencePlan();
+    renderTimberPlotRadius();
+  }
+
+  function checkedValues(containerId) {
+    return [...document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)].map(input => input.value);
+  }
+
+  function renderTimberPlotRadius() {
+    if (!timberTools) return;
+    const selected = document.getElementById("timberPlotSize").value;
+    const custom = selected === "custom";
+    document.getElementById("timberPlotCustomLabel").hidden = !custom;
+    const acres = custom ? Number(document.getElementById("timberPlotCustomAcres").value) : Number(selected);
+    const radius = timberTools.plotRadiusFeet(acres);
+    document.getElementById("timberPlotRadius").innerHTML = `<strong>Radius:</strong> ${radius == null ? "Enter custom acres" : `${radius} feet from the GPS center`}.`;
   }
 
   function renderFlowingWaterEvidencePlan() {
@@ -573,12 +618,16 @@
 
   function evidenceSetDetails(type) {
     const treeDetails = {
-      likely_species: document.getElementById("treeSpecies").value.trim() || "unknown", species_confidence: document.getElementById("treeSpeciesConfidence").value,
+      likely_species: document.getElementById("treeSpecies").value.trim() || "unknown", alternative_species: document.getElementById("treeAlternativeSpecies").value.split(",").map(item => item.trim()).filter(Boolean), species_confidence: document.getElementById("treeSpeciesConfidence").value,
       species_determination: document.getElementById("treeSpeciesStatus").value,
       whole_tree_visibility: document.getElementById("treeVisibility").value,
       whole_tree_visibility_reason: document.getElementById("treeVisibility").value === "Yes" ? null : document.getElementById("treeVisibility").value,
-      dbh_in: Number(document.getElementById("treeDbh").value) || null, dbh_basis: document.getElementById("treeDbhBasis").value,
+      dbh_in: Number(document.getElementById("treeDbh").value) || null, circumference_in: Number(document.getElementById("treeCircumference").value) || null,
+      dbh_method: document.getElementById("treeDbhMethod").value, dbh_instrument: document.getElementById("treeDbhInstrument").value.trim(), dbh_confidence: document.getElementById("treeDbhConfidence").value,
+      dbh_complications: checkedValues("treeDbhComplications"),
       total_height_estimate_ft: Number(document.getElementById("treeHeight").value) || null, usable_log_estimate_ft: Number(document.getElementById("treeLogHeight").value) || null,
+      usable_16ft_logs: Number(document.getElementById("treeUsableLogs").value) || null, height_method: document.getElementById("treeHeightMethod").value,
+      usable_timber_end_reason: checkedValues("treeUsableEnd"), defects_and_quality: checkedValues("treeDefects"), purposes: checkedValues("treePurposes"),
       condition: document.getElementById("treeCondition").value, purpose: document.getElementById("treePurpose").value,
       creek_or_homesite_relationship: document.getElementById("treeCreekRelationship").value.trim(), inspector_explanation: document.getElementById("treeExplanation").value.trim()
     };
@@ -598,6 +647,19 @@
       inspector_explanation: document.getElementById("creekWhyMatters").value.trim() || "not recorded",
       safety_confirmation: "Evidence recorded from safe, authorized ground; no channel crossing or standing in moving water was required."
     };
+    if (type === "Timber Sample Plot") {
+      const selected = document.getElementById("timberPlotSize").value;
+      const acres = selected === "custom" ? Number(document.getElementById("timberPlotCustomAcres").value) : Number(selected);
+      return {
+        plot_size: selected === "custom" ? "Custom" : document.getElementById("timberPlotSize").selectedOptions[0].textContent,
+        plot_acres: acres || null, radius_ft: timberTools ? timberTools.plotRadiusFeet(acres) : null,
+        sampling_method: document.getElementById("timberSamplingMethod").value,
+        canopy: document.getElementById("timberPlotCanopy").value, understory: document.getElementById("timberPlotUnderstory").value,
+        access_conditions: document.getElementById("timberPlotAccess").value.trim(), wet_ground_conditions: document.getElementById("timberPlotWetGround").value.trim(),
+        inclusion_rule: document.getElementById("timberPlotInclusionRule").value.trim(), selected_volume_equation: document.getElementById("timberVolumeEquation").value.trim() || null,
+        tree_ids: []
+      };
+    }
     if (type === "Potential Homesite") return { candidate_area_center: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m } : null, estimated_footprint_or_outline: document.getElementById("homesiteFootprint").value.trim(), view_direction: document.getElementById("homesiteViewDirection").value.trim(), access_direction: document.getElementById("homesiteAccessDirection").value.trim(), ground_observations: document.getElementById("homesiteGround").value.trim(), mature_trees_to_preserve: document.getElementById("homesitePreserve").value.trim(), brush_or_trees_to_remove: document.getElementById("homesiteRemove").value.trim(), nearby_water_evidence: document.getElementById("homesiteWater").value.trim(), inspector_explanation: document.getElementById("homesiteExplanation").value.trim() };
     return {};
   }
@@ -605,8 +667,32 @@
   function createEvidenceSetFromDialog() {
     try {
       const type = document.getElementById("evidenceSetType").value;
-      const set = evidenceSetTools.startEvidenceSet(data, { set_type: type, label: document.getElementById("evidenceSetName").value.trim() || null, created_by: data.inspector_identity, subject_details: evidenceSetDetails(type) });
+      const detailsBeforeStart = evidenceSetDetails(type);
+      if (type === "Timber Sample Plot" && (!Number.isFinite(Number(detailsBeforeStart.plot_acres)) || Number(detailsBeforeStart.plot_acres) <= 0)) throw new Error("Enter a valid fixed plot size before starting.");
+      if (type === "Timber Sample Plot" && !lastPosition) throw new Error("Wait for a current GPS position before starting the sample plot.");
+      const set = evidenceSetTools.startEvidenceSet(data, { set_type: type, label: document.getElementById("evidenceSetName").value.trim() || null, created_by: data.inspector_identity, subject_details: detailsBeforeStart });
       if (["Individual Tree", "Tree Group / Canopy"].includes(type)) evidenceSetTools.recordSpeciesDetermination(data, set.evidence_set_id, document.getElementById("treeSpeciesStatus").value, document.getElementById("treeSpecies").value.trim() || "Unknown", data.inspector_identity);
+      if (type === "Individual Tree" && timberTools) {
+        const details = set.subject_details || {};
+        const timberTree = timberTools.createTimberTree(data, {
+          tree_id: set.tree_id, evidence_set_id: set.evidence_set_id, location: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m } : null,
+          probable_species: details.likely_species, alternative_species: details.alternative_species, identification_confidence: details.species_confidence, identification_status: details.species_determination,
+          dbh_in: details.dbh_in, circumference_in: details.circumference_in, dbh_method: details.dbh_method, dbh_instrument: details.dbh_instrument, dbh_confidence: details.dbh_confidence, dbh_complications: details.dbh_complications,
+          total_height_ft: details.total_height_estimate_ft, merchantable_height_ft: details.usable_log_estimate_ft, usable_16ft_logs: details.usable_16ft_logs, height_method: details.height_method,
+          usable_timber_end_reason: details.usable_timber_end_reason, defects_and_quality: details.defects_and_quality, purposes: details.purposes, inspector_explanation: details.inspector_explanation
+        });
+        set.subject_details.timber_tree_id = timberTree.tree_id;
+      }
+      if (type === "Timber Sample Plot" && timberTools) {
+        const details = set.subject_details || {};
+        const plot = timberTools.createSamplePlot(data, {
+          evidence_set_id: set.evidence_set_id, plot_size: details.plot_size, plot_acres: details.plot_acres,
+          center: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m, recorded_at: lastPosition.time } : null,
+          sampling_method: details.sampling_method, convenience_or_targeted_location: /targeted|convenience/i.test(details.sampling_method), canopy: details.canopy, understory: details.understory,
+          access_conditions: details.access_conditions, wet_ground_conditions: details.wet_ground_conditions, inclusion_rule: details.inclusion_rule, selected_volume_equation: details.selected_volume_equation
+        });
+        set.subject_details.plot_id = plot.plot_id;
+      }
       document.getElementById("evidenceSetDialog").close();
       saveState(); renderEvidenceSets(); updateControls();
       setStatus(`${set.label} started. Every photo and voice note now attaches to this subject until you finish it.`, "active");
@@ -614,9 +700,76 @@
     } catch (error) { setStatus(error.message, "error"); }
   }
 
+  function openPlotTreeDialog() {
+    const active = activeEvidenceSet();
+    if (!active || active.set_type !== "Timber Sample Plot" || !timberTools) return;
+    const plot = data.timber_plots.find(item => item.evidence_set_id === active.evidence_set_id);
+    if (!plot) { setStatus("The active timber plot record could not be found.", "error"); return; }
+    pendingPlotTreeId = plot.plot_id;
+    document.getElementById("plotTreePlotName").textContent = `${active.label}: record every qualifying tree rooted within ${plot.radius_ft} feet of the GPS center.`;
+    ["plotTreeSpecies", "plotTreeAlternatives", "plotTreeDbh", "plotTreeCircumference", "plotTreeInstrument", "plotTreeMerchantableHeight", "plotTreeLogs", "plotTreeDefects", "plotTreePurposes", "plotTreeExplanation"].forEach(id => { document.getElementById(id).value = ""; });
+    document.getElementById("plotTreeStatus").value = "Unknown";
+    document.getElementById("plotTreeConfidence").value = "low";
+    document.getElementById("plotTreeDbhMethod").value = "Not measured";
+    document.getElementById("plotTreeDbhConfidence").value = "unknown";
+    document.getElementById("plotTreeHeightMethod").value = "Unknown";
+    document.getElementById("plotTreeProduct").value = "Unknown";
+    document.getElementById("plotTreePhoto").checked = true;
+    plotTreeDialog.showModal();
+  }
+
+  function commaValues(id) {
+    return document.getElementById(id).value.split(",").map(item => item.trim()).filter(Boolean);
+  }
+
+  function savePlotTree() {
+    const active = activeEvidenceSet();
+    const plot = timberTools && data.timber_plots.find(item => item.plot_id === pendingPlotTreeId);
+    if (!active || !plot) return;
+    try {
+      const method = document.getElementById("plotTreeDbhMethod").value;
+      const tree = timberTools.createTimberTree(data, {
+        plot_id: plot.plot_id, evidence_set_id: active.evidence_set_id,
+        location: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m, recorded_at: lastPosition.time } : null,
+        probable_species: document.getElementById("plotTreeSpecies").value.trim() || "Unknown",
+        alternative_species: commaValues("plotTreeAlternatives"), identification_status: document.getElementById("plotTreeStatus").value, identification_confidence: document.getElementById("plotTreeConfidence").value,
+        dbh_method: method, dbh_in: document.getElementById("plotTreeDbh").value, circumference_in: document.getElementById("plotTreeCircumference").value,
+        dbh_instrument: document.getElementById("plotTreeInstrument").value.trim(), dbh_confidence: document.getElementById("plotTreeDbhConfidence").value,
+        merchantable_height_ft: document.getElementById("plotTreeMerchantableHeight").value, usable_16ft_logs: document.getElementById("plotTreeLogs").value,
+        height_method: document.getElementById("plotTreeHeightMethod").value, product_category: document.getElementById("plotTreeProduct").value,
+        defects_and_quality: commaValues("plotTreeDefects"), purposes: commaValues("plotTreePurposes"), inspector_explanation: document.getElementById("plotTreeExplanation").value.trim()
+      });
+      const sourceSet = data.evidence_sets.find(item => item.evidence_set_id === active.evidence_set_id);
+      if (sourceSet) sourceSet.subject_details.tree_ids = plot.tree_ids.slice();
+      plot.active_tree_id = tree.tree_id;
+      if (tree.dbh && tree.dbh.dbh_in && tree.dbh.basis !== "Not measured") {
+        const measurement = timberTools.recordMeasurement(data, {
+          measurement_type: "Tree diameter", value: tree.dbh.dbh_in, unit: "in", basis: tree.dbh.basis === "Estimated" ? "Estimated" : "Measured",
+          instrument: tree.dbh.instrument, reached_true_endpoint: "Yes", approximately_aligned: "Not applicable",
+          subject_id: tree.tree_id, evidence_set_id: active.evidence_set_id, timber_tree_id: tree.tree_id, timber_plot_id: plot.plot_id,
+          location: tree.location, recorded_by: data.inspector_identity
+        });
+        evidenceSetTools.attachRecord(data, active.evidence_set_id, "measurement", measurement.measurement_id, { created_by: data.inspector_identity });
+      }
+      const takeSupportingPhoto = document.getElementById("plotTreePhoto").checked;
+      plotTreeDialog.close();
+      pendingPlotTreeId = null;
+      saveState(); renderEvidenceSets();
+      setStatus(`${tree.tree_id} saved in ${active.label}. ${plot.tree_ids.length} qualifying tree${plot.tree_ids.length === 1 ? "" : "s"} recorded.`, "success");
+      if (takeSupportingPhoto) takePhoto({ evidence_set_id: active.evidence_set_id, timber_tree_id: tree.tree_id, category: "Timber Sample", note: `Supporting photograph for ${tree.tree_id}` });
+    } catch (error) { setStatus(`PLOT TREE NOT SAVED: ${error.message}`, "error"); }
+  }
+
   function finishActiveEvidenceSet() {
     const active = activeEvidenceSet();
     if (!active) return;
+    if (active.set_type === "Timber Sample Plot" && timberTools) {
+      const plot = data.timber_plots.find(item => item.evidence_set_id === active.evidence_set_id || item.plot_id === (active.subject_details && active.subject_details.plot_id));
+      if (plot) {
+        timberTools.finishPlot(data, plot.plot_id);
+        active.subject_details.tree_ids = plot.tree_ids.slice();
+      }
+    }
     const finished = evidenceSetTools.finishEvidenceSet(data, active.evidence_set_id, active.subject_details || {});
     saveState(); renderEvidenceSets(); updateControls();
     const summary = evidenceSetTools.summarizeEvidenceSet(data, finished);
@@ -658,7 +811,20 @@
     try {
       const role = document.getElementById("groupPhotoRole").value;
       evidenceSetTools.setPhotoRole(data, active.evidence_set_id, photoId, role, { created_by: data.inspector_identity });
+      const photo = data.photos.find(item => String(item.id) === String(photoId));
+      if (photo && ["Measurement", "Water depth", "Channel width", "Scale photograph", "DBH tape position"].includes(role)) photo.structured_measurement_required = true;
       if (["Leaf upper surface", "Leaf underside"].includes(role)) evidenceSetTools.recordLeafProvenance(data, active.evidence_set_id, photoId, document.getElementById("leafProvenance").value, data.inspector_identity);
+      if (photo && photo.timber_tree_id && timberTools) {
+        const tree = timberTools.attachPhotoToTree(data, photo.timber_tree_id, photoId, role === "Visible defect");
+        if (tree) {
+          tree.identification_evidence = tree.identification_evidence || {};
+          if (role === "Bark") tree.identification_evidence.bark = true;
+          if (role === "Twig / terminal bud") tree.identification_evidence.twig_and_bud = true;
+          if (role === "Fruit / seed / cone / flower") tree.identification_evidence.reproductive_material = true;
+          if (role === "Connected branch" || (["Leaf upper surface", "Leaf underside"].includes(role) && document.getElementById("leafProvenance").value.startsWith("Yes"))) tree.identification_evidence.connected_leaf_or_needle = true;
+          if (role === "DBH tape position") tree.dbh.tape_position_photo_id = photoId;
+        }
+      }
       if (action === "remove") evidenceSetTools.detachRecord(data, active.evidence_set_id, "photo", photoId, "inspector_removed_after_capture");
       if (["finish", "new"].includes(action)) evidenceSetTools.finishEvidenceSet(data, active.evidence_set_id, active.subject_details || {});
       document.getElementById("groupPhotoDialog").close(); pendingGroupPhotoId = null; saveState(); renderEvidenceSets();
@@ -1642,6 +1808,8 @@
     undoLastBtn.disabled = photoBusy || packageBusy || recordingVoice || !governanceTools || !governanceTools.recordsForCorrection(data).some(item => governanceTools.recordStatus(data, item.record_type, item.record_id) !== "voided");
     document.getElementById("startPhotoGroup").disabled = !tracking || photoBusy || packageBusy || recordingVoice || Boolean(data.active_evidence_set_id);
     document.getElementById("finishEvidenceSet").disabled = photoBusy || packageBusy || recordingVoice || !data.active_evidence_set_id;
+    const activeSet = activeEvidenceSet();
+    document.getElementById("addPlotTree").disabled = photoBusy || packageBusy || recordingVoice || !activeSet || activeSet.set_type !== "Timber Sample Plot";
     updateNextStep();
   }
 
@@ -2214,6 +2382,7 @@
     const meaning = photo && photo.photo_meaning || {};
     document.getElementById("photoMeaningSubject").value = meaning.subject || "";
     document.getElementById("photoMeaningMeasurement").value = meaning.measurement_status || "Not measured";
+    document.getElementById("photoShowsMeasuringDevice").value = meaning.measuring_device_visible || (photo && photo.structured_measurement_required ? "Yes" : "");
     document.getElementById("photoMeaningExtent").value = meaning.represented_extent || "Single point or object";
     document.getElementById("photoMeaningImportance").value = meaning.decision_importance || "General reference";
     document.getElementById("photoMeaningNote").value = meaning.clarification || "";
@@ -2232,11 +2401,16 @@
         recorded_at: new Date().toISOString(),
         subject: document.getElementById("photoMeaningSubject").value || null,
         measurement_status: document.getElementById("photoMeaningMeasurement").value,
+        measuring_device_visible: document.getElementById("photoShowsMeasuringDevice").value,
         represented_extent: document.getElementById("photoMeaningExtent").value,
         decision_importance: document.getElementById("photoMeaningImportance").value,
         evidence_roles: [...document.querySelectorAll('input[name="photoEvidenceRole"]:checked')].map(input => input.value),
         clarification: document.getElementById("photoMeaningNote").value.trim()
       };
+      if (!meaning.measuring_device_visible) {
+        setStatus("Answer whether a measuring device is visible before continuing.", "warning");
+        return;
+      }
       if (status === "complete" && !meaning.subject) {
         setStatus("Choose what the photograph shows before saving its meaning.", "warning");
         return;
@@ -2253,9 +2427,117 @@
       photoMeaningDialog.close();
       pendingPhotoMeaningId = null;
       await renderGallery();
-      openWaterClassification(photoId);
+      if (meaning.measuring_device_visible === "Yes") openStructuredMeasurement(photoId);
+      else openWaterClassification(photoId);
     } catch (error) {
       setStatus(`PHOTO MEANING NOT SAVED: ${error.message}`, "error");
+    }
+  }
+
+  function measurementTypeForPhoto(photo) {
+    const set = photo && photo.evidence_set_id && evidenceSetTools ? evidenceSetTools.effectiveEvidenceSet(data, photo.evidence_set_id) : null;
+    const link = set && (set.photo_links || []).find(item => String(item.record_id) === String(photo.id));
+    const roles = link ? (link.photo_roles || [link.photo_role]) : [];
+    if (roles.includes("Water depth") || (photo.photo_meaning && photo.photo_meaning.subject === "Drainage or water")) return "Water depth";
+    if (roles.includes("Channel width")) return "Width";
+    if (roles.includes("DBH tape position") || (photo.photo_meaning && photo.photo_meaning.subject === "Timber or tree")) return "Tree diameter";
+    return "Other";
+  }
+
+  function updateMeasurementFields() {
+    const type = document.getElementById("measurementType").value;
+    document.getElementById("measurementWaterFields").hidden = type !== "Water depth";
+    if (type === "Water depth") document.getElementById("measurementUnit").value = "in";
+    if (["Width", "Length", "Distance"].includes(type) && document.getElementById("measurementUnit").value === "in") document.getElementById("measurementUnit").value = "ft";
+    if (type === "Tree diameter") document.getElementById("measurementUnit").value = "in";
+  }
+
+  function openStructuredMeasurement(photoId) {
+    pendingMeasurementPhotoId = photoId;
+    const photo = data.photos.find(item => String(item.id) === String(photoId));
+    document.getElementById("measurementType").value = measurementTypeForPhoto(photo);
+    document.getElementById("measurementValue").value = "";
+    document.getElementById("measurementOtherUnit").value = "";
+    document.getElementById("measurementOtherUnitLabel").hidden = true;
+    document.getElementById("measurementBasis").value = "Measured";
+    document.getElementById("measurementInstrument").value = "";
+    document.getElementById("measurementReachedEnd").value = "Unknown";
+    document.getElementById("measurementAligned").value = "Unknown";
+    document.getElementById("measurementWaterBottom").value = "Unknown";
+    document.getElementById("measurementWaterContext").value = "";
+    document.getElementById("measurementSurfaceLength").value = "";
+    document.getElementById("measurementSurfaceWidth").value = "";
+    const subject = document.getElementById("measurementSubject");
+    subject.innerHTML = "";
+    const selfOption = document.createElement("option");
+    selfOption.value = `photo:${photoId}`;
+    selfOption.textContent = `${photo && photo.photo_number || "This photograph"} — ungrouped subject`;
+    subject.appendChild(selfOption);
+    (data.evidence_sets || []).filter(set => set.status !== "voided").forEach(set => {
+      const option = document.createElement("option");
+      option.value = set.evidence_set_id;
+      option.textContent = set.label;
+      subject.appendChild(option);
+    });
+    if (photo && photo.evidence_set_id) subject.value = photo.evidence_set_id;
+    updateMeasurementFields();
+    structuredMeasurementDialog.showModal();
+  }
+
+  async function saveStructuredMeasurement() {
+    if (!pendingMeasurementPhotoId || !timberTools) return;
+    const photoId = pendingMeasurementPhotoId;
+    const photo = data.photos.find(item => String(item.id) === String(photoId));
+    const subjectId = document.getElementById("measurementSubject").value;
+    const evidenceSetId = subjectId.startsWith("photo:") ? null : subjectId;
+    const unitChoice = document.getElementById("measurementUnit").value;
+    try {
+      const measurement = timberTools.recordMeasurement(data, {
+        measurement_type: document.getElementById("measurementType").value,
+        value: document.getElementById("measurementValue").value,
+        unit: unitChoice === "other" ? document.getElementById("measurementOtherUnit").value.trim() : unitChoice,
+        basis: document.getElementById("measurementBasis").value,
+        instrument: document.getElementById("measurementInstrument").value.trim(),
+        reached_true_endpoint: document.getElementById("measurementReachedEnd").value,
+        approximately_aligned: document.getElementById("measurementAligned").value,
+        subject_id: subjectId, evidence_set_id: evidenceSetId, photo_id: photoId,
+        timber_tree_id: photo && photo.timber_tree_id || null,
+        water_bottom_type: document.getElementById("measurementWaterBottom").value,
+        water_feature_type: document.getElementById("measurementWaterContext").value,
+        surface_length: document.getElementById("measurementSurfaceLength").value,
+        surface_width: document.getElementById("measurementSurfaceWidth").value,
+        voice_note_ids: photo && photo.explanation_voice_note_ids || [],
+        recorded_at: new Date().toISOString(), recorded_by: data.inspector_identity,
+        location: photo ? { latitude: photo.lat, longitude: photo.lon, gps_accuracy_m: photo.gps_accuracy_m } : null
+      });
+      if (evidenceSetId && evidenceSetTools) evidenceSetTools.attachRecord(data, evidenceSetId, "measurement", measurement.measurement_id, { created_by: data.inspector_identity });
+      const measurementIds = Array.from(new Set([...(photo && photo.structured_measurement_ids || []), measurement.measurement_id]));
+      if (photo) {
+        photo.structured_measurement_ids = measurementIds;
+        photo.structured_measurement_required = false;
+      }
+      saveState();
+      let reverseLinkWarning = false;
+      try {
+        const stored = await photoStoreGet(photoId);
+        if (!stored || !stored.metadata) throw new Error("The supporting photograph could not be read back.");
+        stored.metadata.structured_measurement_ids = Array.from(new Set([...(stored.metadata.structured_measurement_ids || []), measurement.measurement_id]));
+        stored.metadata.structured_measurement_required = false;
+        if (stored.event) stored.event.attributes = Object.assign({}, stored.event.attributes || {}, { structured_measurement_ids: stored.metadata.structured_measurement_ids });
+        await photoStorePut(stored);
+      } catch (error) {
+        reverseLinkWarning = true;
+      }
+      if (measurement.measurement_type === "Tree diameter" && photo && photo.timber_tree_id) {
+        const tree = data.timber_trees.find(item => item.tree_id === photo.timber_tree_id);
+        if (tree) tree.dbh = Object.assign({}, tree.dbh || {}, { dbh_in: measurement.authoritative_value, method: measurement.instrument, basis: measurement.basis, confidence: "field-entered", tape_position_photo_id: photoId });
+      }
+      structuredMeasurementDialog.close();
+      pendingMeasurementPhotoId = null;
+      setStatus(`${measurement.measurement_type} saved as ${measurement.authoritative_value} ${measurement.unit}. The photograph is supporting evidence.${reverseLinkWarning ? " Its reverse index will be rebuilt from the saved measurement during packaging." : ""}`, reverseLinkWarning ? "warning" : "success");
+      openWaterClassification(photoId);
+    } catch (error) {
+      setStatus(`MEASUREMENT NOT SAVED: ${error.message}`, "error");
     }
   }
 
@@ -2358,6 +2640,8 @@
 
   async function saveConfirmedWaterClassification() {
     if (!pendingWaterPhotoId || !activeWaterType) return;
+    const photoMetadata = data.photos.find(photo => String(photo.id) === String(pendingWaterPhotoId));
+    const structuredDepth = (data.measurements || []).slice().reverse().find(item => item.photo_id === pendingWaterPhotoId && item.measurement_type === "Water depth" && item.inspector_confirmed !== false);
     const depthBand = document.getElementById("photoWaterDepth").value;
     const exact = Number(document.getElementById("photoWaterExact").value);
     const width = Number(document.getElementById("photoWaterWidth").value);
@@ -2365,16 +2649,19 @@
     const water = {
       water_type: activeWaterType,
       water_depth_band: depthBand,
-      water_depth_exact_in: depthBand === "exact" && Number.isFinite(exact) ? exact : null,
-      measurement_basis: document.getElementById("photoWaterBasis").value,
-      water_width_ft: Number.isFinite(width) && width > 0 ? width : null,
-      water_length_ft: Number.isFinite(length) && length > 0 ? length : null,
+      water_depth_exact_in: structuredDepth ? structuredDepth.authoritative_value : (depthBand === "exact" && Number.isFinite(exact) ? exact : null),
+      measurement_basis: structuredDepth ? structuredDepth.basis : document.getElementById("photoWaterBasis").value,
+      water_width_ft: Number.isFinite(width) && width > 0 ? width : (structuredDepth && structuredDepth.water_context && structuredDepth.water_context.approximate_surface_width || null),
+      water_length_ft: Number.isFinite(length) && length > 0 ? length : (structuredDepth && structuredDepth.water_context && structuredDepth.water_context.approximate_surface_length || null),
       water_behavior: document.getElementById("photoWaterBehavior").value,
-      significance: null
+      significance: null,
+      structured_measurement_id: structuredDepth ? structuredDepth.measurement_id : null,
+      bottom_type: structuredDepth && structuredDepth.water_context ? structuredDepth.water_context.bottom_type : null,
+      authoritative_measurement_rule: structuredDepth ? structuredDepth.authority_rule : null
     };
     try {
       await saveWaterMetadata(pendingWaterPhotoId, "yes", water);
-      const metadata = data.photos.find(photo => String(photo.id) === String(pendingWaterPhotoId));
+      const metadata = photoMetadata;
       waterClassificationDialog.close();
       setStatus(`${metadata && metadata.photo_number ? metadata.photo_number : "Photograph"} saved as ${water.water_type.replaceAll("_", " ")} water evidence.`, "active");
       pendingWaterPhotoId = null;
@@ -2655,12 +2942,15 @@
       return;
     }
     const coachingContext = currentEvidenceContext();
+    const activeSetForPhoto = data.active_evidence_set_id && evidenceSetTools ? evidenceSetTools.effectiveEvidenceSet(data, data.active_evidence_set_id) : null;
+    const activePlotForPhoto = activeSetForPhoto && activeSetForPhoto.set_type === "Timber Sample Plot" && timberTools ? data.timber_plots.find(item => item.evidence_set_id === activeSetForPhoto.evidence_set_id) : null;
     pendingPhotoContext = Object.assign({}, context || {}, {
       area_id: context && context.area_id ? context.area_id : coachingContext.area_id,
       question_ids: context && Array.isArray(context.question_ids) ? context.question_ids.slice() : coachingContext.question_ids,
       question_links: context && Array.isArray(context.question_links) ? context.question_links.map(link => Object.assign({}, link)) : coachingContext.question_links,
       photo_value: data.next_photo_value || "Helpful",
-      evidence_set_id: context && context.evidence_set_id ? context.evidence_set_id : data.active_evidence_set_id
+      evidence_set_id: context && context.evidence_set_id ? context.evidence_set_id : data.active_evidence_set_id,
+      timber_tree_id: context && context.timber_tree_id ? context.timber_tree_id : (activeSetForPhoto && activeSetForPhoto.set_type === "Individual Tree" ? (activeSetForPhoto.subject_details && activeSetForPhoto.subject_details.timber_tree_id || activeSetForPhoto.tree_id) : (activePlotForPhoto && activePlotForPhoto.active_tree_id || null))
     });
     pendingPhotoRequestedAt = new Date().toISOString();
     try {
@@ -2761,6 +3051,7 @@
         question_links: Array.isArray(photoContext.question_links) ? photoContext.question_links.map(link => Object.assign({}, link)) : [],
         photo_value: photoContext.photo_value || "Helpful"
         ,evidence_set_id: photoContext.evidence_set_id || null
+        ,timber_tree_id: photoContext.timber_tree_id || null
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
         evidenceClassification: metadata.evidence_classification,
@@ -2789,6 +3080,7 @@
         analysisBlob: analysis.blob
       };
       await commitPhotoRecord(photoRecord, true);
+      if (metadata.timber_tree_id && timberTools) timberTools.attachPhotoToTree(data, metadata.timber_tree_id, metadata.id, false);
       setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
       if (metadata.evidence_set_id && evidenceSetTools) {
         pendingGroupPhotoId = id;
@@ -2801,6 +3093,9 @@
         } else if (active && active.set_type === "Flowing Water / Creek Corridor") {
           const usedRoles = new Set((active.photo_links || []).filter(link => String(link.record_id) !== String(id)).flatMap(link => link.photo_roles || [link.photo_role]));
           suggestedRole = evidenceSetTools.flowingWaterEvidencePlan().required_roles.find(role => !usedRoles.has(role)) || "Flow Evidence";
+        } else if (active && active.set_type === "Timber Sample Plot") {
+          const usedRoles = new Set((active.photo_links || []).filter(link => String(link.record_id) !== String(id)).flatMap(link => link.photo_roles || [link.photo_role]));
+          suggestedRole = (evidenceSetTools.REQUIRED_ROLES["Timber Sample Plot"] || []).find(role => !usedRoles.has(role)) || "Context";
         }
         document.getElementById("groupPhotoRole").value = suggestedRole;
         document.getElementById("leafProvenanceLabel").hidden = !["Leaf upper surface", "Leaf underside"].includes(suggestedRole);
@@ -3299,9 +3594,12 @@
   document.getElementById("startPhotoGroup").addEventListener("click", openEvidenceSetDialog);
   document.getElementById("startPhotoGroup").addEventListener("pointerdown", preparePhotoStorage);
   document.getElementById("finishEvidenceSet").addEventListener("click", finishActiveEvidenceSet);
+  document.getElementById("addPlotTree").addEventListener("click", openPlotTreeDialog);
   document.getElementById("evidenceSetType").addEventListener("change", showEvidenceSetFields);
   document.getElementById("treeVisibility").addEventListener("change", renderTreeEvidencePlan);
   document.getElementById("treePurpose").addEventListener("change", renderTreeEvidencePlan);
+  document.getElementById("timberPlotSize").addEventListener("change", renderTimberPlotRadius);
+  document.getElementById("timberPlotCustomAcres").addEventListener("input", renderTimberPlotRadius);
   document.getElementById("cancelEvidenceSet").addEventListener("click", () => document.getElementById("evidenceSetDialog").close());
   document.getElementById("createEvidenceSet").addEventListener("click", createEvidenceSetFromDialog);
   document.getElementById("continueEvidenceSet").addEventListener("click", () => completeGroupPhotoChoice("continue"));
@@ -3312,6 +3610,19 @@
   document.getElementById("groupPhotoRole").addEventListener("change", event => {
     document.getElementById("leafProvenanceLabel").hidden = !["Leaf upper surface", "Leaf underside"].includes(event.target.value);
   });
+  document.getElementById("measurementType").addEventListener("change", updateMeasurementFields);
+  document.getElementById("measurementUnit").addEventListener("change", event => { document.getElementById("measurementOtherUnitLabel").hidden = event.target.value !== "other"; });
+  document.getElementById("saveStructuredMeasurement").addEventListener("click", saveStructuredMeasurement);
+  document.getElementById("cancelStructuredMeasurement").addEventListener("click", () => {
+    const photoId = pendingMeasurementPhotoId;
+    structuredMeasurementDialog.close(); pendingMeasurementPhotoId = null;
+    setStatus("Measurement not saved. Change the measuring-device answer or enter the authoritative value before continuing.", "warning");
+    if (photoId) openPhotoMeaning(photoId);
+  });
+  structuredMeasurementDialog.addEventListener("cancel", event => event.preventDefault());
+  document.getElementById("savePlotTree").addEventListener("click", savePlotTree);
+  document.getElementById("cancelPlotTree").addEventListener("click", () => { pendingPlotTreeId = null; plotTreeDialog.close(); });
+  plotTreeDialog.addEventListener("cancel", event => event.preventDefault());
   document.getElementById("more").addEventListener("click", () => {
     moreCategories.hidden = !moreCategories.hidden;
     document.getElementById("more").textContent = moreCategories.hidden ? "More Categories" : "Hide Categories";
@@ -3339,6 +3650,9 @@
   document.getElementById("savePhotoMeaning").addEventListener("click", () => persistPhotoMeaning("complete"));
   document.getElementById("photoMeaningLater").addEventListener("click", () => persistPhotoMeaning("explain_later"));
   photoMeaningDialog.addEventListener("cancel", event => event.preventDefault());
+  document.getElementById("photoShowsMeasuringDevice").addEventListener("change", event => {
+    if (event.target.value === "Yes") document.getElementById("photoMeaningMeasurement").value = "Scale visible in photograph";
+  });
   correctRecordBtn.addEventListener("click", () => openCorrectionDialog());
   undoLastBtn.addEventListener("click", openUndoLast);
   document.getElementById("keepLastAction").addEventListener("click", () => { pendingUndoTarget = null; document.getElementById("undoDialog").close(); });

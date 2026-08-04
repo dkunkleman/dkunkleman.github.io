@@ -1,16 +1,17 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-field-2026-08-03-v15";
-const INDEX_URL = "./index.html?v=3.10.0";
+const CACHE_NAME = "property-inspector-field-2026-08-03-v16";
+const INDEX_URL = "./index.html?v=3.11.0";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.10.0",
-  "./water-intelligence.js?v=3.10.0",
-  "./evidence-governance.js?v=3.10.0",
-  "./evidence-sets.js?v=3.10.0",
-  "./app.js?v=3.10.0",
-  "./idb-recovery.js?v=3.10.0",
-  "./inspection-package.js?v=3.10.0",
+  "./inspection-coaching.js?v=3.11.0",
+  "./water-intelligence.js?v=3.11.0",
+  "./evidence-governance.js?v=3.11.0",
+  "./evidence-sets.js?v=3.11.0",
+  "./timber-reconnaissance.js?v=3.11.0",
+  "./app.js?v=3.11.0",
+  "./idb-recovery.js?v=3.11.0",
+  "./inspection-package.js?v=3.11.0",
   "./manifest.webmanifest",
   "./assets/parcels.json"
 ];

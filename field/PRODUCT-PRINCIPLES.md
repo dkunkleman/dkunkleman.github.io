@@ -30,6 +30,10 @@ The app must communicate inspection intent, not merely coordinates. A photograph
 
 Flowing-water corridors are linear subjects, not puddle clusters. A creek centerline may be inferred only through connected, inspector-confirmed flowing-water evidence and must never be presented as a surveyed boundary. Field coaching must never require crossing a channel or standing in moving water.
 
+A photographed measuring device never becomes the numeric source. Ask immediately, preserve the inspector-entered value as authoritative, and retain the image only as supporting evidence.
+
+Timber observations reduce uncertainty for landowners, builders, foresters, and buyers, but preliminary field reconnaissance must never masquerade as a certified cruise, appraisal, sale volume, or market value. Permanent tree and plot identities must preserve method, confidence, sampling design, defects, purposes, and limitations.
+
 Professional evidence must be correctable without becoming erasable. The original record is immutable; every correction is a dated, attributed audit event. Voided evidence remains recoverable but must never influence active findings. Spatial or temporal proximity is not a confirmed evidence relationship.
 
 Several photographs may document one subject. Evidence Sets preserve each image, location, timestamp, and role while preventing one tree or water area from becoming several findings. Automatic grouping is always a proposal requiring inspector confirmation.

@@ -11,7 +11,7 @@ function photo(number, seconds, lat, lon) {
 }
 
 const photos = [];
-for (let number = 44; number <= 145; number += 1) photos.push(photo(number, number, 30.4900 + (number - 68) * 0.000005, -87.0900 + (number - 68) * 0.000005));
+for (let number = 44; number <= 163; number += 1) photos.push(photo(number, number, 30.4900 + (number - 68) * 0.000005, -87.0900 + (number - 68) * 0.000005));
 photos.find(item => item.photo_number === "P44").associated_observation_id = "homesite-p44";
 photos.find(item => item.photo_number === "P72").water = { water_type: "standing", water_depth_exact_in: 3, measurement_basis: "Measured", water_length_ft: 18, water_width_ft: 6 };
 for (const number of [...Array.from({ length: 12 }, (_, index) => 107 + index), ...Array.from({ length: 5 }, (_, index) => 121 + index), ...Array.from({ length: 5 }, (_, index) => 132 + index), 143, 144, 145]) photos.find(item => item.photo_number === `P${number}`).water = { water_type: "creek_stream", water_behavior: "apparent_creek_channel", measurement_basis: number === 145 ? "Measured" : "Estimated", water_depth_exact_in: number === 145 ? 9 : null, water_width_ft: number === 145 ? 7 : null };
@@ -51,6 +51,19 @@ assert.equal(creekSuggestion.suggested_photo_roles.find(item => item.photo_numbe
 assert.equal(creekSuggestion.suggested_photo_roles.find(item => item.photo_number === "P144").role, "Downstream view");
 assert.equal(creekSuggestion.suggested_context_photo_roles[0].photo_number, "P139");
 assert.equal(creekSuggestion.suggested_context_photo_roles[0].role, "Adjacent Higher-Ground / Tree Context");
+const puddleOneSuggestion = inspection.evidence_set_suggestions.find(item => item.suggestion_id === "pearson-p158-p159-shallow-puddle");
+const puddleTwoSuggestion = inspection.evidence_set_suggestions.find(item => item.suggestion_id === "pearson-p162-p163-shallow-puddle");
+assert.equal(puddleOneSuggestion.status, "pending_inspector_confirmation");
+assert.deepEqual(puddleOneSuggestion.suggested_subject_details.preliminary_depth_range_in, { minimum: 3, maximum: 4 });
+assert.deepEqual(puddleTwoSuggestion.suggested_subject_details.preliminary_depth_range_in, { minimum: 4, maximum: 5 });
+assert.equal((inspection.measurements || []).length, 0, "approximate Pearson review ranges do not silently become measurements");
+assert.throws(() => EvidenceSets.confirmSuggestion(inspection, puddleOneSuggestion.suggestion_id, "Daniel Kunkleman"), /inspector-confirmed exact measurement/, "exact depth is required before activating the first water group");
+const confirmedPuddleOne = EvidenceSets.confirmSuggestion(inspection, puddleOneSuggestion.suggestion_id, "Daniel Kunkleman", { exact_value: 3.5, reached_true_endpoint: "Yes", approximately_aligned: "Yes", water_bottom_type: "Firm bottom" });
+assert.equal(confirmedPuddleOne.subject_details.inspector_confirmed_depth_in, 3.5);
+assert.equal(inspection.measurements[0].authoritative_value, 3.5);
+assert.equal(inspection.measurements[0].photo_id, photos.find(item => item.photo_number === "P159").id);
+assert.equal(photos.find(item => item.photo_number === "P159").water.structured_measurement_id, inspection.measurements[0].measurement_id);
+assert.equal(puddleTwoSuggestion.status, "pending_inspector_confirmation", "the second puddle remains separate and pending");
 
 const waterSet = EvidenceSets.confirmSuggestion(inspection, "pearson-p68-p72-water", "Daniel Kunkleman");
 const waterSummary = EvidenceSets.summarizeEvidenceSet(inspection, waterSet);
@@ -115,6 +128,6 @@ assert(indexSource.includes("START PHOTO GROUP") && indexSource.includes("FINISH
 assert(indexSource.includes("Can most of the tree be photographed safely and clearly?") && indexSource.includes("Leaf underside") && indexSource.includes("Professional identification requested"), "adaptive tree-identification controls are present");
 assert(indexSource.includes("Flowing Water / Creek Corridor") && indexSource.includes("Do not cross the channel or stand in moving water") && indexSource.includes("Direction of flow"), "safe flowing-water corridor controls are present");
 assert(appSource.includes("suggestRecentGroup") && appSource.includes("confirmSuggestion") && appSource.includes("Select which photos"), "automatic grouping remains a confirmable suggestion");
-assert(workerSource.includes("evidence-sets.js?v=3.10.0"), "Evidence Sets are available offline");
+assert(workerSource.includes("evidence-sets.js?v=3.11.0"), "Evidence Sets are available offline");
 
-process.stdout.write("PASS: Pearson standing-water, tree, and P107-P145 creek suggestions remain confirmation-gated; adaptive multi-photo summaries, safety rules, permanent tree IDs, and append-only undo are verified.\n");
+process.stdout.write("PASS: Pearson standing-water, P158-P163 measurement, tree, and P107-P145 creek suggestions remain confirmation-gated; adaptive summaries, safety rules, permanent tree IDs, and append-only undo are verified.\n");

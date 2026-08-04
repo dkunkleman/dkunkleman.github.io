@@ -299,6 +299,7 @@
         <strong>ACTIVE PHOTO GROUP</strong>
         <span id="evidenceSetBannerName">Subject</span>
         <span id="evidenceSetBannerCount">0 photographs saved</span>
+        <button id="addPlotTree" type="button" hidden>ADD TREE TO PLOT</button>
         <button id="finishEvidenceSet" type="button">FINISH THIS SUBJECT</button>
       </div>
       <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
@@ -549,6 +550,7 @@
       <p class="small">Use short answers. These prevent a nearby button press from being mistaken for the photograph's meaning.</p>
       <label>What does it show?<select id="photoMeaningSubject"><option value="">Choose one</option><option>Access or road</option><option>Drainage or water</option><option>Homesite or buildability</option><option>Timber or tree</option><option>Hazard or cost concern</option><option>Boundary or relationship</option><option>General context</option><option>Other</option></select></label>
       <label>Measurement status<select id="photoMeaningMeasurement"><option>Not measured</option><option>Measured</option><option>Estimated</option><option>Scale visible in photograph</option><option>Unknown</option></select></label>
+      <label>Does this photograph show a tape, ruler, staff, diameter tape, or other measuring device?<select id="photoShowsMeasuringDevice"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Unsure</option></select></label>
       <label>Area represented<select id="photoMeaningExtent"><option>Single point or object</option><option>Small localized area</option><option>Part of the tract</option><option>Broad site condition</option><option>Unknown</option></select></label>
       <label>Why might it matter?<select id="photoMeaningImportance"><option>Access decision</option><option>Buildability decision</option><option>Economic or timber decision</option><option>Cost or risk decision</option><option>Distinctive property feature</option><option>Professional verification</option><option>General reference</option></select></label>
       <fieldset><legend>Four-photo evidence role</legend><div class="evidence-role-grid">
@@ -598,22 +600,46 @@
     <div class="dialog-body">
       <h2>Start Photo Group</h2>
       <p class="small">Choose the one subject these photographs will document.</p>
-      <label>Subject type<select id="evidenceSetType"><option>Water Area</option><option>Flowing Water / Creek Corridor</option><option>Individual Tree</option><option>Tree Group / Canopy</option><option>Potential Homesite</option><option>Drainage Feature</option><option>Road / Access</option><option>Boundary Marker</option><option>View</option><option>Vegetation / Clearing</option><option>Other</option></select></label>
+      <label>Subject type<select id="evidenceSetType"><option>Water Area</option><option>Flowing Water / Creek Corridor</option><option>Individual Tree</option><option>Tree Group / Canopy</option><option>Timber Sample Plot</option><option>Potential Homesite</option><option>Drainage Feature</option><option>Road / Access</option><option>Boundary Marker</option><option>View</option><option>Vegetation / Clearing</option><option>Other</option></select></label>
       <label>Optional subject name<input id="evidenceSetName" placeholder="The app will create a permanent group name"></label>
       <div id="treeSetFields" class="structured-fields" hidden>
         <label>Likely species<input id="treeSpecies" placeholder="Unknown is acceptable"></label>
+        <label>Alternative species<input id="treeAlternativeSpecies" placeholder="Separate possibilities with commas"></label>
         <label>Species confidence<select id="treeSpeciesConfidence"><option>low</option><option>medium</option><option>high</option></select></label>
         <label>Identification status<select id="treeSpeciesStatus"><option>Unknown</option><option>Inspector confirmed</option><option>Probable</option><option>Possible</option><option>Professional identification requested</option></select></label>
         <label>Can most of the tree be photographed safely and clearly?<select id="treeVisibility"><option>Yes</option><option>No — canopy blocks it</option><option>No — nearby trees block it</option><option>No — brush blocks it</option><option>No — water or unsafe ground blocks it</option><option>No — property boundary or access prevents it</option><option>Unsure</option></select></label>
-        <label>DBH in inches<input id="treeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
-        <label>DBH basis<select id="treeDbhBasis"><option>Not entered</option><option>Measured</option><option>Estimated</option></select></label>
+        <p class="field-warning"><strong>DBH:</strong> Measure 54 inches above ground on the uphill side. Never silently treat an estimate as measured.</p>
+        <label>DBH method<select id="treeDbhMethod"><option>Not measured</option><option>Diameter tape reading</option><option>Circumference converted to diameter</option><option>Biltmore-stick estimate</option><option>Visual estimate</option></select></label>
+        <label>Diameter reading (inches)<input id="treeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Circumference reading (inches)<input id="treeCircumference" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Instrument<input id="treeDbhInstrument" placeholder="Diameter tape, Biltmore stick, tape measure…"></label>
+        <label>Measurement confidence<select id="treeDbhConfidence"><option>unknown</option><option>low</option><option>medium</option><option>high</option></select></label>
+        <fieldset><legend>DBH complications</legend><div class="choice-grid" id="treeDbhComplications"><label><input type="checkbox" value="Leaning tree">Leaning tree</label><label><input type="checkbox" value="Fork below breast height">Fork below breast height</label><label><input type="checkbox" value="Butt swell">Butt swell</label><label><input type="checkbox" value="Irregular trunk">Irregular trunk</label><label><input type="checkbox" value="Slope / uphill side">Slope / uphill side</label><label><input type="checkbox" value="Multiple stems">Multiple stems</label></div></fieldset>
         <label>Total-height estimate (feet)<input id="treeHeight" type="number" min="0" step="1" inputmode="decimal"></label>
-        <label>Usable-log estimate (feet)<input id="treeLogHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Merchantable-height estimate (feet)<input id="treeLogHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Usable 16-foot logs, nearest half-log<input id="treeUsableLogs" type="number" min="0" step="0.5" inputmode="decimal"></label>
+        <label>Height method<select id="treeHeightMethod"><option>Unknown</option><option>Laser rangefinder/clinometer</option><option>Tree scale stick</option><option>Phone estimate</option><option>Visual estimate</option></select></label>
+        <fieldset><legend>Where usable timber ends</legend><div class="choice-grid" id="treeUsableEnd"><label><input type="checkbox" value="Major fork">Major fork</label><label><input type="checkbox" value="Serious sweep">Serious sweep</label><label><input type="checkbox" value="Broken top">Broken top</label><label><input type="checkbox" value="Decay">Decay</label><label><input type="checkbox" value="Minimum usable diameter">Minimum usable diameter</label><label><input type="checkbox" value="Excessive limbs">Excessive limbs</label><label><input type="checkbox" value="Other defect">Other defect</label></div></fieldset>
         <label>Condition<select id="treeCondition"><option>live</option><option>dead</option><option>damaged</option><option>leaning</option><option>forked</option></select></label>
         <label>Purpose<select id="treePurpose"><option>species identification</option><option>timber sample</option><option>landscape</option><option>preserve</option><option>hazard</option><option>forest character</option><option>unknown</option></select></label>
         <label>Relationship to creek and proposed homesite, if relevant<textarea id="treeCreekRelationship" placeholder="Record only what is safely visible"></textarea></label>
+        <fieldset><legend>Bole quality and visible defects</legend><div class="choice-grid" id="treeDefects"><label><input type="checkbox" value="Straight">Straight</label><label><input type="checkbox" value="Slight sweep">Slight sweep</label><label><input type="checkbox" value="Severe sweep">Severe sweep</label><label><input type="checkbox" value="Leaning">Leaning</label><label><input type="checkbox" value="Forked">Forked</label><label><input type="checkbox" value="Multiple stems">Multiple stems</label><label><input type="checkbox" value="Visible rot">Visible rot</label><label><input type="checkbox" value="Hollow">Hollow</label><label><input type="checkbox" value="Lightning scar">Lightning scar</label><label><input type="checkbox" value="Fire scar">Fire scar</label><label><input type="checkbox" value="Insect damage">Insect damage</label><label><input type="checkbox" value="Broken top">Broken top</label><label><input type="checkbox" value="Dead top">Dead top</label><label><input type="checkbox" value="Excessive knots">Excessive knots</label><label><input type="checkbox" value="Large limbs">Large limbs</label><label><input type="checkbox" value="Mechanical damage">Mechanical damage</label><label><input type="checkbox" value="Unknown">Unknown</label></div></fieldset>
+        <fieldset><legend>Tree purpose — choose all that apply</legend><div class="choice-grid" id="treePurposes"><label><input type="checkbox" value="Likely timber sample">Likely timber sample</label><label><input type="checkbox" value="Preserve for shade">Preserve for shade</label><label><input type="checkbox" value="Landscape/specimen tree">Landscape/specimen tree</label><label><input type="checkbox" value="Wildlife tree">Wildlife tree</label><label><input type="checkbox" value="Hazard concern">Hazard concern</label><label><input type="checkbox" value="Clearing obstacle">Clearing obstacle</label><label><input type="checkbox" value="Property buffer">Property buffer</label><label><input type="checkbox" value="Unknown">Unknown</label></div></fieldset>
         <label>Inspector explanation<textarea id="treeExplanation"></textarea></label>
         <div id="treeEvidencePlan" class="field-warning small"></div>
+      </div>
+      <div id="timberPlotFields" class="structured-fields" hidden>
+        <p class="field-warning"><strong>Preliminary Timber Reconnaissance:</strong> This is not a certified timber cruise, appraisal, sale volume, or market valuation.</p>
+        <label>Fixed plot size<select id="timberPlotSize"><option value="0.05">1/20 acre</option><option value="0.1" selected>1/10 acre</option><option value="0.2">1/5 acre</option><option value="0.25">1/4 acre</option><option value="0.5">1/2 acre</option><option value="1">1 acre</option><option value="custom">Custom</option></select></label>
+        <label id="timberPlotCustomLabel" hidden>Custom plot acres<input id="timberPlotCustomAcres" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+        <p id="timberPlotRadius" class="field-warning"><strong>Radius:</strong> 37.2 feet from the GPS center.</p>
+        <label>Sampling method<select id="timberSamplingMethod"><option>Fixed-radius field sample</option><option>Targeted example plot</option><option>Convenience plot</option></select></label>
+        <label>Canopy<select id="timberPlotCanopy"><option>unknown</option><option>open</option><option>moderate</option><option>closed</option></select></label>
+        <label>Understory<select id="timberPlotUnderstory"><option>unknown</option><option>light</option><option>moderate</option><option>dense</option></select></label>
+        <label>Equipment access conditions<textarea id="timberPlotAccess"></textarea></label>
+        <label>Wet-ground conditions<textarea id="timberPlotWetGround"></textarea></label>
+        <label>Qualifying-tree rule<textarea id="timberPlotInclusionRule">Every qualifying tree rooted within the stated fixed radius</textarea></label>
+        <label>Published volume equation/table, if selected<input id="timberVolumeEquation" placeholder="Leave blank unless a qualified method is selected"></label>
       </div>
       <div id="flowingWaterSetFields" class="structured-fields" hidden>
         <p class="field-warning"><strong>Safety first:</strong> Do not cross the channel or stand in moving water. Collect only evidence available from safe, authorized ground.</p>
@@ -657,7 +683,7 @@
     <div class="dialog-body">
       <h2>Same subject?</h2>
       <p id="groupPhotoPrompt">Choose this photograph's role and what to do next.</p>
-      <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Upstream view</option><option>Downstream view</option><option>Across-channel view</option><option>Channel width</option><option>Water depth</option><option>Flow Evidence</option><option>Adjacent Higher-Ground / Tree Context</option><option>Scenic Context</option><option>Building-Avoidance Context</option><option>Creek / homesite or road relationship</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
+      <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Upstream view</option><option>Downstream view</option><option>Across-channel view</option><option>Channel width</option><option>Water depth</option><option>Flow Evidence</option><option>Adjacent Higher-Ground / Tree Context</option><option>Scenic Context</option><option>Building-Avoidance Context</option><option>Creek / homesite or road relationship</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>DBH tape position</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>Plot center / radius</option><option>Access / wet ground</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
       <label id="leafProvenanceLabel" hidden>Are you confident this leaf came from this tree?<select id="leafProvenance"><option>Yes — watched it fall or traced it to this tree</option><option>Probably</option><option>Unsure</option></select></label>
     </div>
     <div class="dialog-actions" style="grid-template-columns:1fr 1fr">
@@ -666,6 +692,55 @@
       <button id="newAfterGroupPhoto" type="button">New subject</button>
       <button id="removeFromEvidenceSet" class="cancel" type="button">Remove from group</button>
     </div>
+  </dialog>
+
+  <dialog id="structuredMeasurementDialog">
+    <div class="dialog-body">
+      <h2>What did you measure?</h2>
+      <p class="field-warning"><strong>Enter the number now.</strong> This value—not a later attempt to read the photograph—is the authoritative field measurement.</p>
+      <label>Measurement type<select id="measurementType"><option>Water depth</option><option>Width</option><option>Length</option><option>Tree diameter</option><option>Distance</option><option>Other</option></select></label>
+      <label>Exact recorded value<input id="measurementValue" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label>Unit<select id="measurementUnit"><option value="in">inches</option><option value="ft">feet</option><option value="yd">yards</option><option value="m">meters</option><option value="cm">centimeters</option><option value="mm">millimeters</option><option value="other">other</option></select></label>
+      <label id="measurementOtherUnitLabel" hidden>Other unit<input id="measurementOtherUnit"></label>
+      <label>Measured or estimated?<select id="measurementBasis"><option>Measured</option><option>Estimated</option></select></label>
+      <label>Instrument<input id="measurementInstrument" placeholder="Tape, ruler, staff, diameter tape…"></label>
+      <label>Did the device reach the true bottom/end point?<select id="measurementReachedEnd"><option>Unknown</option><option>Yes</option><option>No</option></select></label>
+      <label>Was the device approximately vertical or level?<select id="measurementAligned"><option>Unknown</option><option>Yes</option><option>No</option><option>Not applicable</option></select></label>
+      <label>Subject or photo group<select id="measurementSubject"></select></label>
+      <div id="measurementWaterFields" class="structured-fields">
+        <label>Bottom condition<select id="measurementWaterBottom"><option>Unknown</option><option>Soft bottom</option><option>Firm bottom</option></select></label>
+        <label>Water setting<select id="measurementWaterContext"><option value="">Choose one</option><option>Isolated puddle</option><option>Pooled area</option><option>Ditch</option><option>Creek</option></select></label>
+        <label>Approximate surface length (feet)<input id="measurementSurfaceLength" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Approximate surface width (feet)<input id="measurementSurfaceWidth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      </div>
+      <p class="small">Optional voice explanation: the voice explanation already recorded for this photograph remains directly linked to this measurement.</p>
+    </div>
+    <div class="dialog-actions"><button id="cancelStructuredMeasurement" class="cancel" type="button">Cancel</button><button id="saveStructuredMeasurement" type="button">Save Measurement</button></div>
+  </dialog>
+
+  <dialog id="plotTreeDialog">
+    <div class="dialog-body">
+      <h2>Add qualifying plot tree</h2>
+      <p id="plotTreePlotName" class="field-warning">Record every qualifying tree rooted inside the stated radius.</p>
+      <label>Probable species<input id="plotTreeSpecies" placeholder="Unknown is acceptable"></label>
+      <label>Alternative species<input id="plotTreeAlternatives" placeholder="Comma separated"></label>
+      <label>Identification status<select id="plotTreeStatus"><option>Unknown</option><option>Inspector confirmed</option><option>Probable</option><option>Possible</option><option>Professional identification requested</option></select></label>
+      <label>Identification confidence<select id="plotTreeConfidence"><option>low</option><option>medium</option><option>high</option></select></label>
+      <label>DBH method<select id="plotTreeDbhMethod"><option>Not measured</option><option>Diameter tape reading</option><option>Circumference converted to diameter</option><option>Biltmore-stick estimate</option><option>Visual estimate</option></select></label>
+      <label>Diameter reading (inches)<input id="plotTreeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <label>Circumference reading (inches)<input id="plotTreeCircumference" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <label>DBH instrument<input id="plotTreeInstrument"></label>
+      <label>DBH confidence<select id="plotTreeDbhConfidence"><option>unknown</option><option>low</option><option>medium</option><option>high</option></select></label>
+      <label>Merchantable height (feet)<input id="plotTreeMerchantableHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+      <label>Usable 16-foot logs, nearest half-log<input id="plotTreeLogs" type="number" min="0" step="0.5" inputmode="decimal"></label>
+      <label>Height method<select id="plotTreeHeightMethod"><option>Unknown</option><option>Laser rangefinder/clinometer</option><option>Tree scale stick</option><option>Phone estimate</option><option>Visual estimate</option></select></label>
+      <label>Product category<select id="plotTreeProduct"><option>Unknown</option><option>Pulpwood</option><option>Chip-n-saw</option><option>Sawtimber</option><option>Veneer candidate</option><option>Nonmerchantable</option></select></label>
+      <label>Visible defects<input id="plotTreeDefects" placeholder="Comma separated; photograph every significant defect"></label>
+      <label>Purposes<input id="plotTreePurposes" placeholder="Timber, preserve, clearing obstacle…"></label>
+      <label>Inspector explanation<textarea id="plotTreeExplanation"></textarea></label>
+      <label class="water-rule"><input id="plotTreePhoto" type="checkbox" checked>Take supporting photograph after saving</label>
+    </div>
+    <div class="dialog-actions"><button id="cancelPlotTree" class="cancel" type="button">Cancel</button><button id="savePlotTree" type="button">Save Plot Tree</button></div>
   </dialog>
 
   <dialog id="hypothesisDialog">
@@ -722,12 +797,13 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.10.0"></script>
-  <script src="./water-intelligence.js?v=3.10.0"></script>
-  <script src="./evidence-governance.js?v=3.10.0"></script>
-  <script src="./evidence-sets.js?v=3.10.0"></script>
-  <script src="./inspection-package.js?v=3.10.0"></script>
-  <script src="./idb-recovery.js?v=3.10.0"></script>
-  <script src="./app.js?v=3.10.0"></script>
+  <script src="./inspection-coaching.js?v=3.11.0"></script>
+  <script src="./water-intelligence.js?v=3.11.0"></script>
+  <script src="./evidence-governance.js?v=3.11.0"></script>
+  <script src="./evidence-sets.js?v=3.11.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.11.0"></script>
+  <script src="./inspection-package.js?v=3.11.0"></script>
+  <script src="./idb-recovery.js?v=3.11.0"></script>
+  <script src="./app.js?v=3.11.0"></script>
 </body>
 </html>
