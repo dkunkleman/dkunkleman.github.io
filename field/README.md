@@ -28,6 +28,8 @@ Production, offline-first field evidence collection for the subject rural parcel
 - Automatic grouping is suggestion-only. The app offers **Yes, same subject**, **No, separate subjects**, **Select which photos**, and **Ask me later**; it never activates a group silently.
 - `EVIDENCE_SETS.json` contains effective set summaries, pending suggestions, and append-only relationship events. Printable reports use one group marker and list individual photo roles and locations under the subject.
 - Pearson P45-P59, P64-P67, P68-P72, and P73 review patterns are preloaded only as pending inspector-confirmation suggestions. P72 is suggested as Measurement and P73 as Transition.
+- **Flowing Water / Creek Corridor** is a distinct subject type. It requests safely obtainable upstream, downstream, across-channel, measurement, flow, bank, high-ground, amenity, avoidance, road/homesite relationship, and voice evidence without asking the inspector to cross a channel or stand in moving water.
+- The real Pearson P107-P118, P121-P125, P132-P136, and P143-P145 sequence is proposed as the pending **Northwest Creek / Flowing-Water Corridor**. P145 is proposed as Measurement plus Flow Evidence; P135/P136 as Scenic Context; P139 as related Adjacent Higher-Ground / Tree Context; and P143/P144 as Upstream/Downstream views. Nothing activates without inspector approval.
 
 ## Post-inspection Chat Review
 
@@ -49,7 +51,10 @@ Production, offline-first field evidence collection for the subject rural parcel
 - The verified parcel's smaller exterior ring is automatically isolated as the approximately 5.49-acre **Small Tract**. Evidence outside that ring is excluded even when it occurred close in time.
 - Nearby compatible photographs may form a conservative `WA-#` cluster. A single photo without dimensions stays a point. Entered dimensions constrain outlines; flowing water never merges indiscriminately with isolated standing puddles.
 - The live map and package distinguish actual blue photo points, estimated dashed blue outlines, preliminary red building-avoidance areas, inspected corridor with no standing water observed, and uninspected/unknown acreage.
+- An inspector-confirmed creek set adds exact flowing-water points, a dashed conservative centerline, reported flow-direction arrows, measured depth/width points, adjacent high-ground evidence, scenic/amenity photographs, and building-avoidance context. Pending groups never create a centerline.
+- Creek reports always state: **Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified.** Creek alignment beyond connected photographed evidence remains uninspected/unknown.
 - `SMALL_TRACT_WATER_MAP.json` is the AI-readable model. `small-tract-water-map.html` is the interactive human-readable map; its markers open the actual photograph and photo-linked voice explanation. The printable report adds four landscape small-tract water pages.
+- `FLOWING_WATER_CORRIDORS.json` separates the confirmed creek corridor, adjacent wooded ground, isolated puddles elsewhere, inferred alignment, and uninspected watercourse extent for immediate ChatGPT analysis.
 
 ## Reliability model
 
@@ -64,7 +69,7 @@ Production, offline-first field evidence collection for the subject rural parcel
 
 ## Adaptive tree-identification evidence
 
-- Individual Tree and Tree Group sets first ask whether most of the subject can be photographed from a safe standing position. Canopy, nearby trees, brush, water or unsafe ground, boundaries, and access restrictions are valid limitations.
+- Individual Tree and Tree Group sets first ask whether most of the subject can be photographed safely and clearly. Canopy, nearby trees, brush, water or unsafe ground, boundaries, and access restrictions are valid limitations. Creek-side tree evidence can record the tree's relationship to the creek and proposed homesite without requiring a crossing.
 - If the whole subject is unavailable, the app stops requesting that view and switches to purpose-specific obtainable evidence: base/ground, bark, lower trunk, visible crown, connected branch, leaf surfaces, twig/bud, reproductive material, opposite-side trunk, or a slow panorama when safe.
 - Species-identification, timber, landscape/preserve, hazard, and forest-character purposes each receive a different evidence sequence. The app never directs the inspector across water, into unsafe brush, outside authorized property, up a tree, or into traffic.
 - AI species suggestions retain alternatives, visible features, missing features, and a confidence level, but remain explicitly **AI suggestion — not confirmed**. Only Inspector confirmed, Probable, Possible, Unknown, or Professional identification requested may become the recorded determination.

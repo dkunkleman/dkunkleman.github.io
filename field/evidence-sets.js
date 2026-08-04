@@ -6,14 +6,17 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const SET_TYPES = ["Water Area", "Individual Tree", "Tree Group / Canopy", "Potential Homesite", "Drainage Feature", "Road / Access", "Boundary Marker", "View", "Vegetation / Clearing", "Other"];
-  const PHOTO_ROLES = ["Context", "Close-up", "Measurement", "Relationship to surroundings", "Opposite direction", "Whole subject", "Detail", "Before", "After", "Whole tree", "Bark", "Base / ground", "Lower trunk to first fork", "Crown / canopy", "Visible crown segment", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud", "Fruit / seed / cone / flower", "Scale photograph", "Visible defect", "Root condition", "Targets", "Surrounding canopy", "360-degree panorama", "Transition", "Other"];
-  const PREFIXES = { "Water Area": "WG", "Individual Tree": "TR", "Tree Group / Canopy": "TG", "Potential Homesite": "HS", "Drainage Feature": "DF", "Road / Access": "AC", "Boundary Marker": "BM", View: "VW", "Vegetation / Clearing": "VG", Other: "ES" };
+  const FLOWING_WATER_SET_TYPE = "Flowing Water / Creek Corridor";
+  const FLOWING_WATER_REPORT_LIMIT = "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified.";
+  const SET_TYPES = ["Water Area", FLOWING_WATER_SET_TYPE, "Individual Tree", "Tree Group / Canopy", "Potential Homesite", "Drainage Feature", "Road / Access", "Boundary Marker", "View", "Vegetation / Clearing", "Other"];
+  const PHOTO_ROLES = ["Context", "Close-up", "Measurement", "Relationship to surroundings", "Opposite direction", "Whole subject", "Detail", "Before", "After", "Upstream view", "Downstream view", "Across-channel view", "Channel width", "Water depth", "Flow Evidence", "Adjacent Higher-Ground / Tree Context", "Scenic Context", "Building-Avoidance Context", "Creek / homesite or road relationship", "Whole tree", "Bark", "Base / ground", "Lower trunk to first fork", "Crown / canopy", "Visible crown segment", "Connected branch", "Leaf upper surface", "Leaf underside", "Twig / terminal bud", "Fruit / seed / cone / flower", "Scale photograph", "Visible defect", "Root condition", "Targets", "Surrounding canopy", "360-degree panorama", "Transition", "Other"];
+  const PREFIXES = { "Water Area": "WG", [FLOWING_WATER_SET_TYPE]: "FW", "Individual Tree": "TR", "Tree Group / Canopy": "TG", "Potential Homesite": "HS", "Drainage Feature": "DF", "Road / Access": "AC", "Boundary Marker": "BM", View: "VW", "Vegetation / Clearing": "VG", Other: "ES" };
   const REQUIRED_ROLES = {
     "Individual Tree": ["Bark", "Base / ground", "Crown / canopy"],
     "Tree Group / Canopy": ["Context", "Surrounding canopy"],
     "Potential Homesite": ["Context"],
-    "Water Area": ["Context", "Measurement", "Transition"]
+    "Water Area": ["Context", "Measurement", "Transition"],
+    [FLOWING_WATER_SET_TYPE]: ["Upstream view", "Downstream view", "Across-channel view", "Creek / homesite or road relationship"]
   };
   const TREE_VISIBILITY = ["Yes", "No — canopy blocks it", "No — nearby trees block it", "No — brush blocks it", "No — water or unsafe ground blocks it", "No — property boundary or access prevents it", "Unsure"];
   const SPECIES_DETERMINATIONS = ["Inspector confirmed", "Probable", "Possible", "Unknown", "Professional identification requested"];
@@ -99,7 +102,8 @@
       event_type: "record_attached",
       record_type: recordType,
       record_id: id,
-      photo_role: recordType === "photo" ? (settings.photo_role || "Context") : null,
+      photo_role: recordType === "photo" ? (settings.photo_role || (settings.photo_roles || [])[0] || "Context") : null,
+      photo_roles: recordType === "photo" ? Array.from(new Set((settings.photo_roles || [settings.photo_role || "Context"]).filter(Boolean))) : [],
       relationship_basis: settings.relationship_basis || "active_inspector_started_set",
       inspector_confirmed: settings.inspector_confirmed !== false,
       created_by: settings.created_by || data.inspector_identity || "Field Inspector"
@@ -150,8 +154,11 @@
     const events = data.evidence_set_events.filter(item => item.evidence_set_id === evidenceSetId && !voidedEventIds.has(String(item.event_id))).sort((a, b) => String(a.recorded_at || "").localeCompare(String(b.recorded_at || "")));
     events.forEach(event => {
       const key = `${event.record_type || ""}:${event.record_id || ""}`;
-      if (event.event_type === "record_attached") links.set(key, { record_type: event.record_type, record_id: event.record_id, photo_role: event.photo_role || null, attached_by_event_id: event.event_id, inspector_confirmed: event.inspector_confirmed !== false });
-      if (event.event_type === "photo_role_assigned" && links.has(key)) links.get(key).photo_role = event.photo_role;
+      if (event.event_type === "record_attached") links.set(key, { record_type: event.record_type, record_id: event.record_id, photo_role: event.photo_role || null, photo_roles: Array.from(new Set((event.photo_roles || [event.photo_role]).filter(Boolean))), attached_by_event_id: event.event_id, inspector_confirmed: event.inspector_confirmed !== false });
+      if (event.event_type === "photo_role_assigned" && links.has(key)) {
+        links.get(key).photo_role = event.photo_role;
+        links.get(key).photo_roles = Array.from(new Set([...(links.get(key).photo_roles || []), event.photo_role].filter(Boolean)));
+      }
       if (event.event_type === "record_detached") links.delete(key);
       if (event.event_type === "set_finished") {
         result.status = "finished";
@@ -199,7 +206,7 @@
     const photoMap = new Map((data.photos || []).map(item => [String(item.id), item]));
     const photos = (effective.photo_links || []).map(link => ({ link, photo: photoMap.get(String(link.record_id)) })).filter(item => item.photo);
     const times = photos.map(item => item.photo.recorded_at || item.photo.time).filter(Boolean).sort();
-    const roles = photos.map(item => item.link.photo_role).filter(Boolean);
+    const roles = photos.flatMap(item => item.link.photo_roles || [item.link.photo_role]).filter(Boolean);
     const isTreeSet = ["Individual Tree", "Tree Group / Canopy"].includes(effective.set_type);
     const required = isTreeSet ? treeEvidencePlan(effective.subject_details || {}).required_roles : (REQUIRED_ROLES[effective.set_type] || ["Context"]);
     const missing = required.filter(role => !roles.includes(role));
@@ -210,11 +217,12 @@
       label: effective.label,
       set_type: effective.set_type,
       status: effective.status,
+      inspector_confirmed: effective.inspector_confirmed === true,
       tree_id: effective.tree_id || null,
       first_timestamp: times[0] || null,
       last_timestamp: times[times.length - 1] || null,
       photograph_count: photos.length,
-      photographs: photos.map(item => ({ photo_id: item.photo.id, photo_number: item.photo.photo_number || null, role: item.link.photo_role, latitude: item.photo.lat, longitude: item.photo.lon, timestamp: item.photo.recorded_at || item.photo.time })),
+      photographs: photos.map(item => ({ photo_id: item.photo.id, photo_number: item.photo.photo_number || null, role: item.link.photo_role, roles: item.link.photo_roles || [item.link.photo_role].filter(Boolean), latitude: item.photo.lat, longitude: item.photo.lon, timestamp: item.photo.recorded_at || item.photo.time })),
       exact_photo_locations_preserved: true,
       maximum_photo_separation_m: maxSeparation(photos.map(item => item.photo)),
       observation_ids: effective.observation_ids || [],
@@ -245,6 +253,31 @@
         boundary_rule: "All photographed points are observed. Any connecting outline is inferred and must be styled differently from observed points."
       };
     }
+    if (effective.set_type === FLOWING_WATER_SET_TYPE) {
+      const water = photos.map(item => ({ photo: item.photo, roles: item.link.photo_roles || [item.link.photo_role], water: item.photo.water || {} }));
+      const measured = item => String(item.water.measurement_basis || "").toLowerCase() === "measured" || item.roles.includes("Measurement");
+      summary.flowing_water_corridor = {
+        exact_photographed_points: water.map(item => ({ photo_id: item.photo.id, photo_number: item.photo.photo_number || null, latitude: item.photo.lat, longitude: item.photo.lon, timestamp: item.photo.recorded_at || item.photo.time, roles: item.roles })),
+        visible_flow: effective.subject_details && effective.subject_details.visible_flow || "unknown",
+        flow_direction: effective.subject_details && effective.subject_details.flow_direction || "unknown",
+        channel_width_ft: effective.subject_details && effective.subject_details.channel_width_ft || null,
+        channel_width_basis: effective.subject_details && effective.subject_details.channel_width_basis || "Unknown",
+        measured_depth_points: water.filter(item => measured(item) && item.water.water_depth_exact_in != null).map(item => ({ photo_id: item.photo.id, photo_number: item.photo.photo_number || null, depth_in: Number(item.water.water_depth_exact_in), latitude: item.photo.lat, longitude: item.photo.lon })),
+        measured_width_points: water.filter(item => measured(item) && item.water.water_width_ft != null).map(item => ({ photo_id: item.photo.id, photo_number: item.photo.photo_number || null, width_ft: Number(item.water.water_width_ft), latitude: item.photo.lat, longitude: item.photo.lon })),
+        bank_condition: effective.subject_details && effective.subject_details.bank_condition || "not recorded",
+        adjacent_higher_ground: effective.subject_details && effective.subject_details.adjacent_higher_ground || "not recorded",
+        preserve_features: effective.subject_details && effective.subject_details.preserve_features || "not recorded",
+        homesite_or_road_relationship: effective.subject_details && effective.subject_details.homesite_or_road_relationship || "not recorded",
+        amenity_photo_ids: water.filter(item => item.roles.includes("Scenic Context")).map(item => item.photo.id),
+        building_avoidance_photo_ids: water.filter(item => item.roles.includes("Building-Avoidance Context")).map(item => item.photo.id),
+        voice_explanation_ids: effective.voice_note_ids || [],
+        centerline_rule: "A centerline may be inferred only through connected inspector-confirmed flowing-water photo points. It is not a surveyed watercourse boundary.",
+        report_classification: FLOWING_WATER_REPORT_LIMIT,
+        uninspected_extent_rule: "Do not extend the corridor beyond the connected photographed evidence. Uninspected watercourse extent remains unknown.",
+        safety_rule: "Do not cross the channel or stand in moving water to complete this evidence set."
+      };
+      if (!(effective.voice_note_ids || []).length) summary.missing_high_value_views.push("Voice explanation: why this water feature matters");
+    }
     return summary;
   }
 
@@ -274,6 +307,17 @@
       do_not_repeat_whole_tree_prompt: visibility.startsWith("No —"),
       safety_rule: "Never cross water, climb, enter unsafe brush, leave authorized property, or stand in traffic to complete a checklist.",
       report_rule: visibility === "Yes" ? "Report the captured whole-tree context and other identifying views." : `Report that a whole-tree view was not safely obtainable (${visibility}) and explain how that limits confidence without criticizing the inspector.`
+    };
+  }
+
+  function flowingWaterEvidencePlan() {
+    return {
+      required_roles: REQUIRED_ROLES[FLOWING_WATER_SET_TYPE].slice(),
+      useful_when_safely_obtainable: ["Channel width", "Water depth", "Flow Evidence", "Adjacent Higher-Ground / Tree Context", "Scenic Context", "Building-Avoidance Context"],
+      voice_prompt: "Why does this water feature matter to access, homesites, cost, risk, or what makes the property special?",
+      safety_rule: "Do not cross the channel. Do not stand in moving water. Record only evidence obtainable from safe, authorized ground.",
+      centerline_rule: "Only connected inspector-confirmed flowing-water observations may support a conservative inferred centerline. Never convert it into a surveyed boundary.",
+      report_rule: FLOWING_WATER_REPORT_LIMIT
     };
   }
 
@@ -322,6 +366,26 @@
     addRange("pearson-p66-p67-hardwood", "Individual Tree", [66, 67], ["Whole tree", "Bark"], "Mature hardwood P66-P67");
     addRange("pearson-p68-p72-water", "Water Area", [68, 69, 70, 71, 72], ["Context", "Relationship to surroundings", "Close-up", "Detail", "Measurement"], "Localized water area P68-P72");
     if (has(73)) addSuggestion(data, { suggestion_id: "pearson-p73-transition", set_type: "Other", suggested_label: "Transition to ground without visible standing water", photo_ids: [photos.find(photo => photoNumber(photo) === 73).id], suggested_photo_roles: [{ photo_id: photos.find(photo => photoNumber(photo) === 73).id, photo_number: "P73", role: "Transition" }], basis: "Inspector-directed Pearson Road review; consider attaching to the confirmed P68-P72 water set." });
+    const creekNumbers = [...Array.from({ length: 12 }, (_, index) => 107 + index), ...Array.from({ length: 5 }, (_, index) => 121 + index), ...Array.from({ length: 5 }, (_, index) => 132 + index), 143, 144, 145];
+    if (creekNumbers.every(has)) {
+      const roleFor = number => {
+        if (number === 143) return ["Upstream view"];
+        if (number === 144) return ["Downstream view"];
+        if (number === 145) return ["Measurement", "Flow Evidence"];
+        if (number === 135 || number === 136) return ["Scenic Context"];
+        return ["Context"];
+      };
+      addSuggestion(data, {
+        suggestion_id: "pearson-northwest-creek-corridor",
+        set_type: FLOWING_WATER_SET_TYPE,
+        suggested_label: "Northwest Creek / Flowing-Water Corridor",
+        photo_ids: creekNumbers.map(number => photos.find(photo => photoNumber(photo) === number).id),
+        suggested_photo_roles: creekNumbers.map(number => ({ photo_id: photos.find(photo => photoNumber(photo) === number).id, photo_number: `P${number}`, role: roleFor(number)[0], roles: roleFor(number) })),
+        suggested_context_photo_roles: has(139) ? [{ photo_id: photos.find(photo => photoNumber(photo) === 139).id, photo_number: "P139", role: "Adjacent Higher-Ground / Tree Context", roles: ["Adjacent Higher-Ground / Tree Context"] }] : [],
+        basis: "Inspector-directed Pearson Road review. P107-P118, P121-P125, P132-P136 and P143-P145 are candidate creek photographs; P139 is related adjacent higher-ground/tree context.",
+        report_classification: FLOWING_WATER_REPORT_LIMIT
+      });
+    }
     return data.evidence_set_suggestions;
   }
 
@@ -371,7 +435,7 @@
     const previousActive = data.active_evidence_set_id;
     data.active_evidence_set_id = null;
     const set = startEvidenceSet(data, { set_type: suggestion.set_type, label: suggestion.suggested_label, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}`, inspector_confirmed: true });
-    (suggestion.suggested_photo_roles || []).forEach(item => attachRecord(data, set.evidence_set_id, "photo", item.photo_id, { photo_role: item.role, created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}` }));
+    [...(suggestion.suggested_photo_roles || []), ...(suggestion.suggested_context_photo_roles || [])].forEach(item => attachRecord(data, set.evidence_set_id, "photo", item.photo_id, { photo_role: item.role, photo_roles: item.roles || [item.role], created_by: createdBy, relationship_basis: `confirmed_suggestion:${suggestionId}` }));
     finishEvidenceSet(data, set.evidence_set_id, { source_suggestion_id: suggestionId });
     suggestion.status = "confirmed";
     suggestion.confirmed_at = new Date().toISOString();
@@ -382,10 +446,10 @@
   }
 
   return {
-    SET_TYPES, PHOTO_ROLES, REQUIRED_ROLES, TREE_VISIBILITY, SPECIES_DETERMINATIONS, FALLEN_LEAF_CONFIDENCE,
+    SET_TYPES, PHOTO_ROLES, REQUIRED_ROLES, TREE_VISIBILITY, SPECIES_DETERMINATIONS, FALLEN_LEAF_CONFIDENCE, FLOWING_WATER_SET_TYPE, FLOWING_WATER_REPORT_LIMIT,
     ensureEvidenceSetModel, startEvidenceSet, attachRecord, setPhotoRole, detachRecord, finishEvidenceSet,
     effectiveEvidenceSet, buildEffectiveEvidenceSets, summarizeEvidenceSet, createEvidenceSetSummaries,
-    treeEvidencePlan, addAiSpeciesSuggestion, recordSpeciesDetermination, recordLeafProvenance,
+    treeEvidencePlan, flowingWaterEvidencePlan, addAiSpeciesSuggestion, recordSpeciesDetermination, recordLeafProvenance,
     suggestRecentGroup, detectSubjectChange, addPearsonSuggestions, confirmSuggestion, haversineMeters, maxSeparation
   };
 });

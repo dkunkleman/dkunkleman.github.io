@@ -366,7 +366,11 @@
       <details><summary>Map layers</summary><div class="water-layer-controls" aria-label="Small tract water map layers">
         <label><input type="checkbox" data-water-layer="route" checked>Walked route</label>
         <label><input type="checkbox" data-water-layer="standing" checked>Standing water</label>
-        <label><input type="checkbox" data-water-layer="flowing" checked>Flowing water</label>
+        <label><input type="checkbox" data-water-layer="flowing" checked>Flowing water points</label>
+        <label><input type="checkbox" data-water-layer="centerline" checked>Inferred creek centerline</label>
+        <label><input type="checkbox" data-water-layer="directions" checked>Flow-direction arrows</label>
+        <label><input type="checkbox" data-water-layer="measurements" checked>Depth / width points</label>
+        <label><input type="checkbox" data-water-layer="amenity" checked>Scenic / amenity photos</label>
         <label><input type="checkbox" data-water-layer="minor" checked>Minor depressions</label>
         <label><input type="checkbox" data-water-layer="larger" checked>Larger pooled areas</label>
         <label><input type="checkbox" data-water-layer="outlines" checked>Estimated outlines</label>
@@ -378,7 +382,7 @@
         <label><input type="checkbox" data-water-layer="unknown" checked>Uninspected / unknown</label>
       </div></details>
       <div id="smallWaterMapFrame"><svg id="smallWaterMap" viewBox="0 0 1800 1500" role="img" aria-label="Small tract observed water conditions"></svg></div>
-      <p class="small"><strong>Solid blue points are actual photographed water locations.</strong> Shaded or dashed shapes are estimates and are never surveyed wetland boundaries.</p>
+      <p class="small"><strong>Solid blue points are actual photographed water locations.</strong> Dashed creek centerlines, arrows, shaded areas, and avoidance areas are interpretations—not surveyed watercourse boundaries.</p>
     </section>
 
     <section class="card field-warning" aria-labelledby="missing-heading">
@@ -594,21 +598,37 @@
     <div class="dialog-body">
       <h2>Start Photo Group</h2>
       <p class="small">Choose the one subject these photographs will document.</p>
-      <label>Subject type<select id="evidenceSetType"><option>Water Area</option><option>Individual Tree</option><option>Tree Group / Canopy</option><option>Potential Homesite</option><option>Drainage Feature</option><option>Road / Access</option><option>Boundary Marker</option><option>View</option><option>Vegetation / Clearing</option><option>Other</option></select></label>
+      <label>Subject type<select id="evidenceSetType"><option>Water Area</option><option>Flowing Water / Creek Corridor</option><option>Individual Tree</option><option>Tree Group / Canopy</option><option>Potential Homesite</option><option>Drainage Feature</option><option>Road / Access</option><option>Boundary Marker</option><option>View</option><option>Vegetation / Clearing</option><option>Other</option></select></label>
       <label>Optional subject name<input id="evidenceSetName" placeholder="The app will create a permanent group name"></label>
       <div id="treeSetFields" class="structured-fields" hidden>
         <label>Likely species<input id="treeSpecies" placeholder="Unknown is acceptable"></label>
         <label>Species confidence<select id="treeSpeciesConfidence"><option>low</option><option>medium</option><option>high</option></select></label>
         <label>Identification status<select id="treeSpeciesStatus"><option>Unknown</option><option>Inspector confirmed</option><option>Probable</option><option>Possible</option><option>Professional identification requested</option></select></label>
-        <label>Can you clearly photograph most of this tree from where you can safely stand?<select id="treeVisibility"><option>Yes</option><option>No — canopy blocks it</option><option>No — nearby trees block it</option><option>No — brush blocks it</option><option>No — water or unsafe ground blocks it</option><option>No — property boundary or access prevents it</option><option>Unsure</option></select></label>
+        <label>Can most of the tree be photographed safely and clearly?<select id="treeVisibility"><option>Yes</option><option>No — canopy blocks it</option><option>No — nearby trees block it</option><option>No — brush blocks it</option><option>No — water or unsafe ground blocks it</option><option>No — property boundary or access prevents it</option><option>Unsure</option></select></label>
         <label>DBH in inches<input id="treeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
         <label>DBH basis<select id="treeDbhBasis"><option>Not entered</option><option>Measured</option><option>Estimated</option></select></label>
         <label>Total-height estimate (feet)<input id="treeHeight" type="number" min="0" step="1" inputmode="decimal"></label>
         <label>Usable-log estimate (feet)<input id="treeLogHeight" type="number" min="0" step="1" inputmode="decimal"></label>
         <label>Condition<select id="treeCondition"><option>live</option><option>dead</option><option>damaged</option><option>leaning</option><option>forked</option></select></label>
         <label>Purpose<select id="treePurpose"><option>species identification</option><option>timber sample</option><option>landscape</option><option>preserve</option><option>hazard</option><option>forest character</option><option>unknown</option></select></label>
+        <label>Relationship to creek and proposed homesite, if relevant<textarea id="treeCreekRelationship" placeholder="Record only what is safely visible"></textarea></label>
         <label>Inspector explanation<textarea id="treeExplanation"></textarea></label>
         <div id="treeEvidencePlan" class="field-warning small"></div>
+      </div>
+      <div id="flowingWaterSetFields" class="structured-fields" hidden>
+        <p class="field-warning"><strong>Safety first:</strong> Do not cross the channel or stand in moving water. Collect only evidence available from safe, authorized ground.</p>
+        <label>Visible flow<select id="creekVisibleFlow"><option>unknown</option><option>none</option><option>slow</option><option>moderate</option><option>fast</option></select></label>
+        <label>Direction of flow<input id="creekFlowDirection" placeholder="Example: northwest to southeast"></label>
+        <label>Channel width (feet)<input id="creekWidth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Width measured or estimated?<select id="creekWidthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+        <label>Safe-point water depth (inches)<input id="creekDepth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Depth measured or estimated?<select id="creekDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+        <label>Bank condition<textarea id="creekBankCondition" placeholder="Stable, eroded, steep, vegetated, unknown…"></textarea></label>
+        <label>Adjacent higher ground<textarea id="creekHigherGround"></textarea></label>
+        <label>Mature trees or features worth preserving<textarea id="creekPreserve"></textarea></label>
+        <label>Relationship to proposed homesite or road<textarea id="creekRelationship"></textarea></label>
+        <label>Why this water feature matters<textarea id="creekWhyMatters" placeholder="Access, homesite, risk, cost, or amenity"></textarea></label>
+        <div id="flowingWaterEvidencePlan" class="field-warning small"></div>
       </div>
       <div id="forestSetFields" class="structured-fields" hidden>
         <label>Canopy<select id="forestCanopy"><option>open</option><option>moderate</option><option>closed</option></select></label>
@@ -637,7 +657,7 @@
     <div class="dialog-body">
       <h2>Same subject?</h2>
       <p id="groupPhotoPrompt">Choose this photograph's role and what to do next.</p>
-      <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
+      <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Upstream view</option><option>Downstream view</option><option>Across-channel view</option><option>Channel width</option><option>Water depth</option><option>Flow Evidence</option><option>Adjacent Higher-Ground / Tree Context</option><option>Scenic Context</option><option>Building-Avoidance Context</option><option>Creek / homesite or road relationship</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
       <label id="leafProvenanceLabel" hidden>Are you confident this leaf came from this tree?<select id="leafProvenance"><option>Yes — watched it fall or traced it to this tree</option><option>Probably</option><option>Unsure</option></select></label>
     </div>
     <div class="dialog-actions" style="grid-template-columns:1fr 1fr">
@@ -702,12 +722,12 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.9.0"></script>
-  <script src="./water-intelligence.js?v=3.9.0"></script>
-  <script src="./evidence-governance.js?v=3.9.0"></script>
-  <script src="./evidence-sets.js?v=3.9.0"></script>
-  <script src="./inspection-package.js?v=3.9.0"></script>
-  <script src="./idb-recovery.js?v=3.9.0"></script>
-  <script src="./app.js?v=3.9.0"></script>
+  <script src="./inspection-coaching.js?v=3.10.0"></script>
+  <script src="./water-intelligence.js?v=3.10.0"></script>
+  <script src="./evidence-governance.js?v=3.10.0"></script>
+  <script src="./evidence-sets.js?v=3.10.0"></script>
+  <script src="./inspection-package.js?v=3.10.0"></script>
+  <script src="./idb-recovery.js?v=3.10.0"></script>
+  <script src="./app.js?v=3.10.0"></script>
 </body>
 </html>

@@ -172,6 +172,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["professional-handoff-cards.html", `analysis/${contract.export_id}/professional-handoff-cards.html`],
     ["RETURN_VISIT_PLAN.json", `analysis/${contract.export_id}/RETURN_VISIT_PLAN.json`],
     ["SMALL_TRACT_WATER_MAP.json", `maps/${contract.export_id}/SMALL_TRACT_WATER_MAP.json`],
+    ["FLOWING_WATER_CORRIDORS.json", `maps/${contract.export_id}/FLOWING_WATER_CORRIDORS.json`],
     ["small-tract-water-map.html", `maps/${contract.export_id}/small-tract-water-map.html`],
     ["REPORT_TEMPLATE.md", `analysis/${contract.export_id}/REPORT_TEMPLATE.md`],
     ["INSPECTOR_THOUGHTS.md", `analysis/${contract.export_id}/INSPECTOR_THOUGHTS.md`],

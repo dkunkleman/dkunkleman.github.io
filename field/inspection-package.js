@@ -11,7 +11,7 @@
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "1.9";
+  const FORMAT_VERSION = "2.0";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -579,6 +579,7 @@
         professional_handoff_printable: { source: "professional-handoff-cards.html", destination: `analysis/${exportId}/professional-handoff-cards.html` },
         return_visit_plan: { source: "RETURN_VISIT_PLAN.json", destination: `analysis/${exportId}/RETURN_VISIT_PLAN.json` },
         small_tract_water_map: { source: "SMALL_TRACT_WATER_MAP.json", destination: `maps/${exportId}/SMALL_TRACT_WATER_MAP.json` },
+        flowing_water_corridors: { source: "FLOWING_WATER_CORRIDORS.json", destination: `maps/${exportId}/FLOWING_WATER_CORRIDORS.json` },
         small_tract_water_map_interactive: { source: "small-tract-water-map.html", destination: `maps/${exportId}/small-tract-water-map.html` },
         report_template: { source: "REPORT_TEMPLATE.md", destination: `analysis/${exportId}/REPORT_TEMPLATE.md` },
         inspector_thoughts: { source: "INSPECTOR_THOUGHTS.md", destination: `analysis/${exportId}/INSPECTOR_THOUGHTS.md` },
@@ -963,13 +964,14 @@
       waterPage("Small Tract — Preliminary Building Avoidance", "avoidance", "This preliminary decision layer does not establish engineering, wetland, soil, septic, or permitting conclusions.")
     ].join("") : "";
     const waterDetailPages = waterModel.status === "GENERATED" ? (waterModel.water_area_clusters || []).filter(cluster => cluster.evidence_count > 1).map(cluster => `<section class="page landscape"><h1>${htmlEscape(cluster.water_area_id)} — Enlarged Water Detail</h1>${smallWaterMapSvg(manifest, "all", cluster)}<p class="map-note"><strong>${htmlEscape(cluster.classification)}</strong> · Supporting photographs: ${htmlEscape(cluster.supporting_photo_numbers.join(", "))} · Evidence count: ${htmlEscape(cluster.evidence_count)} · Confidence: ${htmlEscape(cluster.confidence)}.</p><div class="disclaimer">${htmlEscape(cluster.outline_basis)} Review the indexed photo pages and attached voice explanations before relying on this interpretation.</div></section>`).join("") : "";
+    const flowingCorridorPages = (waterModel.flowing_water_corridors || []).map(corridor => `<section class="page landscape"><h1>${htmlEscape(corridor.label)}</h1>${smallWaterMapSvg(manifest, "all")}<p><strong>${htmlEscape(corridor.classification)}</strong></p><ul><li><strong>Creek corridor:</strong> ${htmlEscape(corridor.exact_photographed_points.length)} exact confirmed flowing-water photo points.</li><li><strong>Adjacent wooded/high ground:</strong> ${htmlEscape((corridor.adjacent_higher_ground_photographs || []).length + (corridor.adjacent_higher_ground_observations || []).length)} separately identified context records.</li><li><strong>Isolated puddles elsewhere:</strong> remain separate water-area clusters and are not part of this corridor.</li><li><strong>Creek alignment:</strong> dashed centerline inferred only between connected confirmed points; not a surveyed boundary.</li><li><strong>Uninspected watercourse extent:</strong> ${htmlEscape(corridor.uninspected_extent)}</li></ul><div class="disclaimer">Do not infer permanence, ordinary high-water limits, wetlands status, drainage rights, setbacks, or downstream extent from this map.</div></section>`).join("");
     const setPhotoById = new Map((manifest.photographs || []).map(photo => [String(photo.photo_id), photo]));
-    const evidenceSetPages = (manifest.inspection.evidence_set_summaries && manifest.inspection.evidence_set_summaries.sets || []).map(set => {
+    const evidenceSetPages = flowingCorridorPages + (manifest.inspection.evidence_set_summaries && manifest.inspection.evidence_set_summaries.sets || []).map(set => {
       const rows = (set.photographs || []).map(link => {
         const photo = setPhotoById.get(String(link.photo_id));
-        return `<tr><td>${htmlEscape(link.photo_number || link.photo_id)}</td><td>${htmlEscape(link.role || "Unassigned")}</td><td>${htmlEscape(link.timestamp || "Unknown")}</td><td>${htmlEscape(link.latitude)}, ${htmlEscape(link.longitude)}</td><td>${photo && photo.analysis ? `<a href="#photo-${htmlEscape(photo.photo_number)}">Open actual photograph</a>` : "Photo unavailable"}</td></tr>`;
+        return `<tr><td>${htmlEscape(link.photo_number || link.photo_id)}</td><td>${htmlEscape((link.roles || [link.role]).filter(Boolean).join(", ") || "Unassigned")}</td><td>${htmlEscape(link.timestamp || "Unknown")}</td><td>${htmlEscape(link.latitude)}, ${htmlEscape(link.longitude)}</td><td>${photo && photo.analysis ? `<a href="#photo-${htmlEscape(photo.photo_number)}">Open actual photograph</a>` : "Photo unavailable"}</td></tr>`;
       }).join("");
-      return `<section class="page portrait"><h1>${htmlEscape(set.label)}</h1><p><strong>One confirmed subject:</strong> ${htmlEscape(set.set_type)}. The ${htmlEscape(set.photograph_count)} photographs below are different views of this subject, not separate findings.</p>${set.tree_id ? `<p><strong>Permanent tree ID:</strong> ${htmlEscape(set.tree_id)}</p>` : ""}<table><thead><tr><th>Photo</th><th>Role</th><th>Time</th><th>Exact photo location</th><th>Evidence</th></tr></thead><tbody>${rows}</tbody></table><h2>Subject details</h2><pre>${htmlEscape(JSON.stringify(set.subject_details || {}, null, 2))}</pre><p><strong>Maximum photo separation:</strong> ${set.maximum_photo_separation_m == null ? "Unknown" : `${htmlEscape(set.maximum_photo_separation_m)} m`}.</p><div class="disclaimer">Photograph points are observed evidence. Any outline connecting them is inferred and must remain visually distinct. Missing high-value views: ${htmlEscape((set.missing_high_value_views || []).join(", ") || "none identified")}.</div></section>`;
+      return `<section class="page portrait"><h1>${htmlEscape(set.label)}</h1><p><strong>One confirmed subject:</strong> ${htmlEscape(set.set_type)}. The ${htmlEscape(set.photograph_count)} photographs below are different views of this subject, not separate findings.</p>${set.tree_id ? `<p><strong>Permanent tree ID:</strong> ${htmlEscape(set.tree_id)}</p>` : ""}<table><thead><tr><th>Photo</th><th>Role</th><th>Time</th><th>Exact photo location</th><th>Evidence</th></tr></thead><tbody>${rows}</tbody></table><h2>Subject details</h2><pre>${htmlEscape(JSON.stringify(set.subject_details || {}, null, 2))}</pre><p><strong>Maximum photo separation:</strong> ${set.maximum_photo_separation_m == null ? "Unknown" : `${htmlEscape(set.maximum_photo_separation_m)} m`}.</p><div class="disclaimer">${htmlEscape(set.report_rule)} Photograph points are observed evidence. Any outline or centerline connecting them is inferred and must remain visually distinct. Missing high-value views: ${htmlEscape((set.missing_high_value_views || []).join(", ") || "none identified")}.</div></section>`;
     }).join("");
     const reviewAnnotations = manifest.inspection.post_inspection_review && manifest.inspection.post_inspection_review.active_annotations || [];
     const reviewRows = reviewAnnotations.map(annotation => `<tr><td>${htmlEscape(annotation.annotation_id)}</td><td>${htmlEscape(annotation.record_type)}</td><td>${htmlEscape(annotation.statement)}</td><td>${htmlEscape((annotation.supporting_photo_ids || []).join(", ") || "None")}</td><td>${htmlEscape(annotation.approved_by || "Inspector")} · ${htmlEscape(annotation.approved_at || "Time not recorded")}</td></tr>`).join("") || `<tr><td colspan="5">No inspector-approved post-inspection annotations were active at export.</td></tr>`;
@@ -1031,6 +1033,19 @@
       if (!d) return "";
       return `<g class="layer-route">${model.inspected_no_standing_water && model.inspected_no_standing_water.enabled ? `<path class="layer-inspected-dry" d="${d}" fill="none" stroke="rgba(65,155,74,.38)" stroke-width="48" vector-effect="non-scaling-stroke"/>` : ""}<path d="${d}" fill="none" stroke="#111" stroke-width="12" vector-effect="non-scaling-stroke"/><path d="${d}" fill="none" stroke="#ffe600" stroke-width="6" vector-effect="non-scaling-stroke"/></g>`;
     }).join("");
+    const flowingCorridors = (model.flowing_water_corridors || []).map(corridor => {
+      const coordinates = corridor.conservative_centerline && corridor.conservative_centerline.coordinates || [];
+      const path = coordinates.length > 1 ? coordinates.map((point, index) => { const projected = reportProjection(point[0], point[1]); return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`; }).join(" ") : "";
+      const arrows = (corridor.flow_direction_arrows || []).map(arrow => {
+        const from = reportProjection(arrow.from[0], arrow.from[1]), to = reportProjection(arrow.to[0], arrow.to[1]);
+        return `<line class="layer-directions" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#001f5b" stroke-width="9" marker-end="url(#reportFlowArrow)" vector-effect="non-scaling-stroke"><title>${htmlEscape(arrow.direction_reported)}</title></line>`;
+      }).join("");
+      const measurements = [...(corridor.measured_depth_points || []), ...(corridor.measured_width_points || [])].map(item => {
+        const point = reportProjection(item.longitude, item.latitude), label = item.depth_in != null ? `D ${item.depth_in} in` : `W ${item.width_ft} ft`;
+        return `<g class="layer-measurements"><circle cx="${point.x}" cy="${point.y}" r="14" fill="#fff" stroke="#002b6f" stroke-width="5" vector-effect="non-scaling-stroke"/><text x="${point.x}" y="${point.y + 5}" text-anchor="middle" font-size="12" font-weight="900" fill="#002b6f">${htmlEscape(label.slice(0, 1))}</text><title>${htmlEscape(label)} · ${htmlEscape(item.photo_number)}</title></g>`;
+      }).join("");
+      return `<g class="layer-centerline">${path ? `<path d="${path}" fill="none" stroke="#00b7ff" stroke-width="9" stroke-dasharray="18 10" vector-effect="non-scaling-stroke"><title>${htmlEscape(corridor.classification)}</title></path>` : ""}${arrows}${measurements}</g>`;
+    }).join("");
     const outlines = (model.water_area_clusters || []).filter(cluster => cluster.estimated_outline && (!focusCluster || cluster.water_area_id === focusCluster.water_area_id)).map(cluster => `<g class="layer-outlines"><path d="${pathFor(cluster.estimated_outline)}" fill="rgba(21,108,205,.25)" stroke="#1768c4" stroke-width="6" stroke-dasharray="16 10" vector-effect="non-scaling-stroke"/><title>${htmlEscape(cluster.water_area_id)}: ${htmlEscape(cluster.outline_basis)}</title></g>`).join("");
     const avoidance = (model.preliminary_building_avoidance_areas || []).filter(area => area.outline && (!focusCluster || area.water_area_id === focusCluster.water_area_id)).map(area => `<g class="layer-avoidance"><path d="${pathFor(area.outline)}" fill="rgba(190,20,38,.18)" stroke="#c21428" stroke-width="7" stroke-dasharray="22 10" vector-effect="non-scaling-stroke"/><title>${htmlEscape(area.avoidance_id)}: ${htmlEscape(area.reason)}</title></g>`).join("");
     const dry = (model.high_dry_observations || []).map(item => {
@@ -1064,7 +1079,7 @@
     }).join("");
     const showAvoidance = mode === "overview" || mode === "avoidance";
     const showDry = mode === "overview" || mode === "all";
-    return `<svg class="small-water-map report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(model.title)}" xmlns="http://www.w3.org/2000/svg"><use class="layer-terrain" href="#reportTerrainRaster" x="0" y="0" width="1800" height="1500"/><use class="layer-contours" href="#reportContourRaster" x="0" y="0" width="1800" height="1500" opacity=".8"/><path class="layer-unknown" d="${pathFor(boundary)}" fill="rgba(80,80,80,.27)" stroke="#d71920" stroke-width="9" vector-effect="non-scaling-stroke"/>${route}${showAvoidance ? avoidance : ""}${outlines}${showDry ? dry : ""}${wetObservations}${markers}${labels}<g transform="translate(${view.minX + 50} ${view.minY + 50})"><path d="M0 60 L26 0 L52 60 L26 46 Z" fill="#111"/><text x="26" y="-10" text-anchor="middle" font-size="30" font-weight="900">N</text></g></svg>`;
+    return `<svg class="small-water-map report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(model.title)}" xmlns="http://www.w3.org/2000/svg"><defs><marker id="reportFlowArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#001f5b"/></marker></defs><use class="layer-terrain" href="#reportTerrainRaster" x="0" y="0" width="1800" height="1500"/><use class="layer-contours" href="#reportContourRaster" x="0" y="0" width="1800" height="1500" opacity=".8"/><path class="layer-unknown" d="${pathFor(boundary)}" fill="rgba(80,80,80,.27)" stroke="#d71920" stroke-width="9" vector-effect="non-scaling-stroke"/>${route}${flowingCorridors}${showAvoidance ? avoidance : ""}${outlines}${showDry ? dry : ""}${wetObservations}${markers}${labels}<g transform="translate(${view.minX + 50} ${view.minY + 50})"><path d="M0 60 L26 0 L52 60 L26 46 Z" fill="#111"/><text x="26" y="-10" text-anchor="middle" font-size="30" font-weight="900">N</text></g></svg>`;
   }
 
   function createSmallTractWaterMapHtml(manifest) {
@@ -1092,6 +1107,7 @@
       "- PROFESSIONAL_HANDOFF_CARDS.json and professional-handoff-cards.html: exact audience questions, evidence, unknowns, and one-page printable handoffs.",
       "- RETURN_VISIT_PLAN.json: unvisited-zone waypoints and the highest-value remaining measurements and photographs.",
       "- SMALL_TRACT_WATER_MAP.json: exact small-tract ring, small-tract-only route and evidence, conservative water clusters, dry-corridor rule, unknown acreage, and preliminary building-avoidance reasoning.",
+      "- FLOWING_WATER_CORRIDORS.json: inspector-confirmed creek Evidence Sets, exact photographed points, inferred centerlines, reported flow direction, safe measurements, amenity/avoidance context, and explicit uninspected extent.",
       "- small-tract-water-map.html: interactive human-readable map whose water markers open the actual photograph and attached voice explanation.",
       "- REPORT_TEMPLATE.md: required professional Property Intelligence Report structure.",
       "- INSPECTOR_THOUGHTS.md: inspector reasoning kept separate from observed evidence.",
@@ -1580,6 +1596,8 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`FIELD_COACHING.json\` separates well-inspected, lightly-inspected, and not-inspected route-proximity estimates; it also records missing evidence and field-efficiency estimates.
 - \`RETURN_VISIT_PLAN.json\` prioritizes unvisited areas, unanswered questions, measurements, and photographs for the next visit.
 - \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.49-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
+- \`FLOWING_WATER_CORRIDORS.json\` contains only inspector-confirmed creek Evidence Sets. Treat exact photographed points as observations; treat dashed centerlines and flow arrows as inferences. Never convert a centerline into a surveyed boundary or extend it through uninspected ground.
+- Always report a confirmed creek as: "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified."
 - \`small-tract-water-map.html\` provides layer toggles and opens the actual photograph and photo-linked voice explanation from each water marker.
 - Every observation, photograph, and voice note records its inspection area and optional question relationships. Photographs are labeled Critical, Helpful, Reference, or Duplicate.
 - \`INSPECTOR_THOUGHTS.md\` contains experience, theories, concerns, and preferences. These are useful interpretations, but they are not observed facts and must never be silently converted into facts.
@@ -2137,7 +2155,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
-      schema_version: "1.8",
+      schema_version: "1.9",
       purpose: "Portable observations that can be imported across properties, compared without rewriting the field record, and evaluated against stable rural-property decisions.",
       stable_entities: ["property", "inspection", "inspection_export", "inspection_lifecycle_event", "inspection_area", "investigation_question", "gps_point", "observation", "inspector_thought", "inspector_hypothesis", "evidence_correction", "evidence_set", "evidence_set_event", "review_annotation", "weather_context", "attachment", "photo_explanation", "photo_meaning", "professional_handoff_card", "water_evidence", "water_area_cluster", "map_context", "coverage_estimate", "return_visit_plan"],
       observation_contract: {
@@ -2154,15 +2172,21 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       review_annotation_contract: "Post-inspection chat review uses discrete property-intelligence-review-annotation/1.0 records. Entire chats are never facts. Only inspector-approved Active annotations affect derived reports and every material change must cite annotation ID, supporting evidence IDs, and approval time.",
       proximity_rule: "Spatial or temporal proximity is a discovery aid only. Never promote a nearby observation into a confirmed photograph or voice-note relationship.",
       coaching_contract: "Coverage is an explicitly limited route-proximity estimate. Questions and areas are permanent evidence relationships. Every recommendation must cite support, contradictions, remaining uncertainty, and the cheapest reliable next investigation.",
-      water_contract: "User-confirmed water photographs are facts about inspection-time observations. Cluster outlines and building-avoidance areas are conservative interpretations, must retain every supporting evidence ID, and never establish surveyed wetland, drainage, soil, septic, groundwater, or year-round conditions.",
+      water_contract: "User-confirmed water photographs are facts about inspection-time observations. Only an inspector-confirmed Flowing Water / Creek Corridor Evidence Set may create a conservative centerline. Centerlines, cluster outlines, flow arrows, and building-avoidance areas are interpretations, must retain every supporting evidence ID, and never establish a surveyed watercourse boundary, ordinary high-water limit, wetland, drainage right, setback, soil, septic, groundwater, or year-round condition.",
       extension_rule: "Add namespaced observation types and attributes; do not repurpose existing fields.",
       repository_rule: "Use property_id to compare properties, inspection_id to merge artifacts from one visit, and export_id to preserve every immutable package revision."
     };
 
+    const evidenceSetSummaries = evidenceSetTools ? evidenceSetTools.createEvidenceSetSummaries(inspection) : { schema_name: "property-intelligence-evidence-set-index", schema_version: "1.0", sets: [] };
+    const flowingWaterCorridorModel = waterTools ? waterTools.buildPropertyFlowingWaterCorridorModel({
+      inspection: Object.assign({}, inspection, { photos: manifestPhotos, observations, evidence_set_summaries: evidenceSetSummaries }),
+      generatedAt: exportedAt
+    }) : { schema_name: "property-intelligence-flowing-water-corridors", schema_version: "1.0", corridors: [], status: "NOT_AVAILABLE" };
     const smallTractWaterMap = waterTools ? waterTools.buildSmallTractWaterMapModel({
       inspection: Object.assign({}, inspection, {
         photos: manifestPhotos,
         observations,
+        evidence_set_summaries: evidenceSetSummaries,
         water_observation_rule: inspection.water_observation_rule || null
       }),
       subjectFeature,
@@ -2170,7 +2194,6 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       generatedAt: exportedAt
     }) : { status: "NOT_AVAILABLE", reason: "Water intelligence module was unavailable during packaging." };
     const fieldEvidenceReview = governanceTools ? governanceTools.createFieldEvidenceReview(inspection) : null;
-    const evidenceSetSummaries = evidenceSetTools ? evidenceSetTools.createEvidenceSetSummaries(inspection) : { schema_name: "property-intelligence-evidence-set-index", schema_version: "1.0", sets: [] };
     const evidenceSetSuggestions = evidenceSetTools ? (sourceInspection.evidence_set_suggestions || []) : [];
     const allReviewAnnotations = sourceInspection.review_annotations || [];
     const activeReviewAnnotations = allReviewAnnotations.filter(item => item.approved_by_inspector === true && item.status === "Active");
@@ -2296,6 +2319,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       voice_notes: manifestVoices,
       audit_history: auditHistory,
       small_tract_water_map: smallTractWaterMap,
+      flowing_water_corridors: flowingWaterCorridorModel.corridors || [],
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2315,6 +2339,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         return_visit_plan: "RETURN_VISIT_PLAN.json",
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
+        flowing_water_corridors: "FLOWING_WATER_CORRIDORS.json",
         report_template: "REPORT_TEMPLATE.md",
         inspector_thoughts: "INSPECTOR_THOUGHTS.md",
         inspector_hypotheses: "INSPECTOR_HYPOTHESES.md",
@@ -2391,6 +2416,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("professional-handoff-cards.html", professionalHandoffHtml, { modifiedAt });
     zip.add("RETURN_VISIT_PLAN.json", JSON.stringify(returnVisitPlan, null, 2) + "\n", { modifiedAt });
     zip.add("SMALL_TRACT_WATER_MAP.json", JSON.stringify(smallTractWaterMap, null, 2) + "\n", { modifiedAt });
+    zip.add("FLOWING_WATER_CORRIDORS.json", JSON.stringify(flowingWaterCorridorModel, null, 2) + "\n", { modifiedAt });
     zip.add("small-tract-water-map.html", interactiveWaterMap, { modifiedAt });
     zip.add("REPORT_TEMPLATE.md", reportTemplate, { modifiedAt });
     zip.add("INSPECTOR_THOUGHTS.md", inspectorThoughtsMarkdown, { modifiedAt });

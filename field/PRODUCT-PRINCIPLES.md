@@ -28,6 +28,8 @@ The app is a field mentor, not a passive recorder. It should continuously answer
 
 The app must communicate inspection intent, not merely coordinates. A photograph is incomplete field intelligence until its purpose is preserved. Water mapping must keep photographed facts, inspector-confirmed classifications, conservative inferences, inspected corridors, and unvisited unknowns visibly distinct; it must never convert a shallow isolated depression or missing observation into a broad conclusion.
 
+Flowing-water corridors are linear subjects, not puddle clusters. A creek centerline may be inferred only through connected, inspector-confirmed flowing-water evidence and must never be presented as a surveyed boundary. Field coaching must never require crossing a channel or standing in moving water.
+
 Professional evidence must be correctable without becoming erasable. The original record is immutable; every correction is a dated, attributed audit event. Voided evidence remains recoverable but must never influence active findings. Spatial or temporal proximity is not a confirmed evidence relationship.
 
 Several photographs may document one subject. Evidence Sets preserve each image, location, timestamp, and role while preventing one tree or water area from becoming several findings. Automatic grouping is always a proposal requiring inspector confirmation.

@@ -11,6 +11,7 @@
   const WATER_TYPES = ["standing", "flowing", "ditch", "creek_stream", "other", "unknown"];
   const WATER_BEHAVIORS = ["isolated_depression", "connected_pooling", "flowing", "apparent_creek_channel", "ditch", "unknown"];
   const DISCLAIMER = "Estimated from field photographs, route, observations, and terrain context. This is not a surveyed wetland boundary, drainage study, or year-round water determination.";
+  const FLOWING_WATER_LIMITATION = "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified.";
   const DRY_RULE_LIMITATION = "Within the actually walked and visually observed corridor, the absence of water evidence supports only ‘no standing water observed at inspection time.’ It does not establish year-round dryness, soils, wetlands, septic suitability, or groundwater conditions and does not apply to unwalked or visually obstructed acreage.";
 
   function finite(value) {
@@ -259,7 +260,7 @@
       const outline = outlineForCluster(items);
       return {
         water_area_id: `WA-${index + 1}`,
-        classification: flowing ? "Observed flowing-water corridor — permanence and legal classification unknown." : significance,
+        classification: flowing ? FLOWING_WATER_LIMITATION : significance,
         significance,
         center,
         supporting_photo_ids: items.map(item => item.photo_id),
@@ -294,6 +295,84 @@
     return segments;
   }
 
+  function rolesForPhoto(summaryPhoto) {
+    return Array.from(new Set([...(summaryPhoto && summaryPhoto.roles || []), summaryPhoto && summaryPhoto.role].filter(Boolean)));
+  }
+
+  function buildFlowingWaterCorridors(inspection, waterEvidence, highDryObservations) {
+    const summaries = inspection && inspection.evidence_set_summaries && inspection.evidence_set_summaries.sets || [];
+    const photoMap = new Map((inspection && inspection.photos || []).map(photo => [String(photo.photo_id || photo.id), photo]));
+    const waterMap = new Map((waterEvidence || []).map(item => [String(item.photo_id), item]));
+    return summaries.filter(set => set.set_type === "Flowing Water / Creek Corridor" && set.status !== "voided" && set.inspector_confirmed === true).map(set => {
+      const setPhotos = (set.photographs || []).map(item => Object.assign({}, item, { roles: rolesForPhoto(item) }));
+      const confirmedFlowPoints = setPhotos.map(item => ({ summary: item, water: waterMap.get(String(item.photo_id)) })).filter(item => item.water && ["flowing", "creek_stream"].includes(item.water.water_type));
+      const upstream = confirmedFlowPoints.find(item => item.summary.roles.includes("Upstream view"));
+      const downstream = confirmedFlowPoints.find(item => item.summary.roles.includes("Downstream view"));
+      const middle = confirmedFlowPoints.filter(item => item !== upstream && item !== downstream).sort((a, b) => String(a.water.recorded_at || "").localeCompare(String(b.water.recorded_at || "")));
+      const ordered = [upstream, ...middle, downstream].filter(Boolean);
+      const coordinates = ordered.map(item => [item.water.longitude, item.water.latitude]).filter((point, index, rows) => !index || point[0] !== rows[index - 1][0] || point[1] !== rows[index - 1][1]);
+      const details = set.subject_details || {};
+      const directionKnown = details.flow_direction && String(details.flow_direction).toLowerCase() !== "unknown";
+      const arrows = directionKnown ? coordinates.slice(1).map((point, index) => ({ from: coordinates[index], to: point, direction_reported: details.flow_direction, basis: "Inspector-reported direction applied to the confirmed corridor sequence." })) : [];
+      const measuredDepth = confirmedFlowPoints.filter(item => String(item.water.dimensions && item.water.dimensions.basis || "").toLowerCase() === "measured" && item.water.depth && item.water.depth.minimum_in != null).map(item => ({ photo_id: item.water.photo_id, photo_number: item.water.photo_number, latitude: item.water.latitude, longitude: item.water.longitude, depth_in: item.water.depth.minimum_in === item.water.depth.maximum_in ? item.water.depth.minimum_in : null, depth_range_in: [item.water.depth.minimum_in, item.water.depth.maximum_in], basis: "Measured" }));
+      const measuredWidth = confirmedFlowPoints.filter(item => String(item.water.dimensions && item.water.dimensions.basis || "").toLowerCase() === "measured" && item.water.dimensions.width_ft != null).map(item => ({ photo_id: item.water.photo_id, photo_number: item.water.photo_number, latitude: item.water.latitude, longitude: item.water.longitude, width_ft: item.water.dimensions.width_ft, basis: "Measured" }));
+      const rolePoints = role => setPhotos.filter(item => item.roles.includes(role)).map(item => {
+        const photo = photoMap.get(String(item.photo_id)) || {};
+        const location = pointCoordinates(photo);
+        return location ? { photo_id: item.photo_id, photo_number: item.photo_number, latitude: location.lat, longitude: location.lon, roles: item.roles } : null;
+      }).filter(Boolean);
+      const nearbyHighDry = (highDryObservations || []).filter(item => confirmedFlowPoints.some(point => haversine(item.location, { lat: point.water.latitude, lon: point.water.longitude }) <= 60));
+      return {
+        corridor_id: set.evidence_set_id,
+        label: set.label,
+        status: "INSPECTOR_CONFIRMED_EVIDENCE_SET",
+        classification: FLOWING_WATER_LIMITATION,
+        exact_photographed_points: confirmedFlowPoints.map(item => ({ photo_id: item.water.photo_id, photo_number: item.water.photo_number, latitude: item.water.latitude, longitude: item.water.longitude, recorded_at: item.water.recorded_at, roles: item.summary.roles })),
+        conservative_centerline: coordinates.length > 1 ? { type: "LineString", coordinates, evidence_status: "INFERRED_FROM_CONNECTED_CONFIRMED_POINTS", is_surveyed_boundary: false } : null,
+        flow_direction: directionKnown ? details.flow_direction : "unknown",
+        flow_direction_arrows: arrows,
+        measured_depth_points: measuredDepth,
+        measured_width_points: measuredWidth,
+        adjacent_higher_ground_observations: nearbyHighDry,
+        adjacent_higher_ground_photographs: rolePoints("Adjacent Higher-Ground / Tree Context"),
+        amenity_photographs: rolePoints("Scenic Context"),
+        building_avoidance_photographs: rolePoints("Building-Avoidance Context"),
+        across_channel_photographs: rolePoints("Across-channel view"),
+        relationship_photographs: rolePoints("Creek / homesite or road relationship"),
+        visible_flow: details.visible_flow || "unknown",
+        bank_condition: details.bank_condition || "not recorded",
+        preserve_features: details.preserve_features || "not recorded",
+        homesite_or_road_relationship: details.homesite_or_road_relationship || "not recorded",
+        voice_note_ids: set.voice_note_ids || [],
+        centerline_rule: "The dashed centerline connects only confirmed flowing-water evidence points. It is not a surveyed watercourse boundary and must not be buffered into a legal or regulatory boundary.",
+        uninspected_extent: "The watercourse beyond the connected photographed points was not established and remains uninspected / unknown.",
+        separated_from_standing_water: true
+      };
+    }).filter(corridor => corridor.exact_photographed_points.length);
+  }
+
+  function buildPropertyFlowingWaterCorridorModel(options) {
+    const settings = options || {};
+    const inspection = settings.inspection || {};
+    const observations = inspection.observations || inspection.markers || [];
+    const waterEvidence = (inspection.photos || []).map(photo => waterEvidenceFromPhoto(photo, observations)).filter(Boolean);
+    const highDryObservations = observations.filter(item => {
+      const type = normalizeChoice(item.observation_type || item.type);
+      return type.includes("dry") || type.includes("high") || type.includes("homesite");
+    }).map(item => ({ observation_id: item.observation_id || item.id, type: item.observation_type || item.type, recorded_at: item.observed_at || item.time, location: pointCoordinates(item) })).filter(item => item.location);
+    return {
+      schema_name: "property-intelligence-flowing-water-corridors",
+      schema_version: "1.0",
+      generated_at: settings.generatedAt || new Date().toISOString(),
+      property_id: inspection.property_id || null,
+      inspection_id: inspection.inspection_id || null,
+      corridors: buildFlowingWaterCorridors(inspection, waterEvidence, highDryObservations),
+      report_rule: FLOWING_WATER_LIMITATION,
+      activation_rule: "Pending photo-group suggestions never create a corridor. Inspector approval is required.",
+      property_extent_rule: "A corridor is mapped only between its connected confirmed flowing-water photographs. Any upstream, downstream, or lateral extent not photographed remains uninspected / unknown."
+    };
+  }
+
   function buildSmallTractWaterMapModel(options) {
     const settings = options || {};
     const inspection = settings.inspection || {};
@@ -319,6 +398,7 @@
       return (type.includes("dry") || type.includes("high") || type.includes("homesite")) && pointInRing(item, small.ring);
     }).map(item => ({ observation_id: item.observation_id || item.id, type: item.observation_type || item.type, recorded_at: item.observed_at || item.time, location: pointCoordinates(item) }));
     const clusters = clusterWaterEvidence(waterEvidence);
+    const flowingWaterCorridors = buildFlowingWaterCorridors(inspection, waterEvidence, highDryObservations);
     const avoidanceAreas = clusters.filter(cluster => cluster.significance === "Flowing-water corridor" || cluster.significance === "Larger connected wet area" || cluster.significance === "Moderate pooled area").map(cluster => ({
       avoidance_id: `BA-${cluster.water_area_id.slice(3)}`,
       water_area_id: cluster.water_area_id,
@@ -357,6 +437,7 @@
       wet_observations: wetObservations,
       high_dry_observations: highDryObservations,
       water_area_clusters: clusters,
+      flowing_water_corridors: flowingWaterCorridors,
       preliminary_building_avoidance_areas: avoidanceAreas,
       inspected_no_standing_water: {
         enabled: standingWaterRule,
@@ -368,8 +449,8 @@
         statement: "Small-tract acreage beyond the walked and visually observed corridor remains not adequately inspected / unknown.",
         limitation: "No dry, buildability, wetland, soil, septic, or groundwater conclusion may be drawn from unvisited acreage."
       },
-      map_layers: ["small_tract_boundary", "route", "all_water_photographs", "standing_water", "flowing_water", "minor_depressions", "larger_pooled_areas", "estimated_wet_area_outlines", "preliminary_building_avoidance_areas", "high_and_dry_observations", "candidate_homesites", "terrain", "two_foot_contours", "uninspected_unknown"],
-      limitations: [DISCLAIMER, DRY_RULE_LIMITATION, "Observed water conditions apply to the inspection date and recent weather context; they are not a wetland delineation, drainage study, survey, or year-round determination."]
+      map_layers: ["small_tract_boundary", "route", "all_water_photographs", "standing_water", "flowing_water", "confirmed_creek_centerlines", "flow_direction_arrows", "measured_depth_points", "measured_width_points", "amenity_photographs", "building_avoidance_photographs", "minor_depressions", "larger_pooled_areas", "estimated_wet_area_outlines", "preliminary_building_avoidance_areas", "high_and_dry_observations", "candidate_homesites", "terrain", "two_foot_contours", "uninspected_unknown"],
+      limitations: [DISCLAIMER, FLOWING_WATER_LIMITATION, DRY_RULE_LIMITATION, "Observed water conditions apply to the inspection date and recent weather context; they are not a wetland delineation, drainage study, survey, or year-round determination."]
     };
   }
 
@@ -377,6 +458,7 @@
     WATER_TYPES,
     WATER_BEHAVIORS,
     DISCLAIMER,
+    FLOWING_WATER_LIMITATION,
     DRY_RULE_LIMITATION,
     finite,
     pointCoordinates,
@@ -387,6 +469,8 @@
     identifyParcelSections,
     waterEvidenceFromPhoto,
     clusterWaterEvidence,
+    buildFlowingWaterCorridors,
+    buildPropertyFlowingWaterCorridorModel,
     buildSmallTractWaterMapModel
   };
 });

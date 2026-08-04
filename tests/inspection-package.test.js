@@ -232,7 +232,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -251,7 +251,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "1.9");
+  assert.equal(manifest.format_version, "2.0");
   assert.equal(manifest.summary.evidence_set_count, 1);
   assert.equal(manifest.inspection.weather_context.named_event, "Test storm");
   const weatherContext = JSON.parse(files.get("WEATHER_CONTEXT.json").toString("utf8"));
@@ -259,6 +259,8 @@ async function main() {
   assert(weatherContext.interpretation_rules.some(rule => rule.includes("year-round")), "weather package prevents a one-day condition from becoming a year-round claim");
   const evidenceSets = JSON.parse(files.get("EVIDENCE_SETS.json").toString("utf8"));
   assert.equal(evidenceSets.summaries.sets[0].photograph_count, 2, "package explains two views as one subject");
+  const flowingCorridors = JSON.parse(files.get("FLOWING_WATER_CORRIDORS.json").toString("utf8"));
+  assert.equal(flowingCorridors.activation_rule, "Pending photo-group suggestions never create a corridor. Inspector approval is required.");
   assert.match(files.get("printable-report.html").toString("utf8"), /One confirmed subject:[\s\S]*Test multi-view subject|Test multi-view subject[\s\S]*One confirmed subject:/, "printable report presents the multi-photo set as one subject");
   assert.equal(manifest.repository.export_id, "export_full_test");
   assert.equal(manifest.repository.append_only, true);
@@ -406,6 +408,7 @@ async function main() {
   assert.match(reportResult.fileName, /^Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_/);
   const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
   assert(reportFiles.has("SMALL_TRACT_WATER_MAP.json"), "package includes the AI-readable small-tract water model");
+  assert(reportFiles.has("FLOWING_WATER_CORRIDORS.json"), "package includes the AI-readable confirmed creek-corridor model");
   assert(reportFiles.has("small-tract-water-map.html"), "package includes the interactive human-readable small-tract water map");
   const reportImportContract = JSON.parse(reportFiles.get("repository-import.json").toString("utf8"));
   assert.equal(reportImportContract.artifact.repository_filename, "AI_ANALYSIS_REPORT_PACKAGE_export_report_test.zip", "repository retains the AI package identity after ingestion");
@@ -461,6 +464,7 @@ async function main() {
     assert.equal(fs.readdirSync(path.join(storedInspection, "photos", "original")).length, 2, "full-resolution originals are retained separately");
     assert.equal(fs.readdirSync(path.join(storedInspection, "voice")).length, 1, "voice evidence is recovered into the repository");
     assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "WEATHER_CONTEXT.json")), "inspection weather context is preserved in its repository evidence folder per export");
+    assert(fs.existsSync(path.join(storedInspection, "maps", "export_report_test", "FLOWING_WATER_CORRIDORS.json")), "confirmed creek-corridor intelligence is preserved with versioned maps");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
     for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {

@@ -25,6 +25,7 @@ Pearson_Road/
     versions/<export-id>/
     maps/<export-id>/
       SMALL_TRACT_WATER_MAP.json
+      FLOWING_WATER_CORRIDORS.json
       small-tract-water-map.html
     photos/analysis/
     photos/original/
@@ -75,6 +76,8 @@ node repository/chat-review.js CHAT_REVIEW_PACKAGE.zip PROPERTY_INTELLIGENCE_REP
 Approval appends an immutable approved annotation version and regenerates traceable current findings, report updates, and map annotations. Every material report update cites its annotation ID, supporting photograph or observation IDs, and inspector approval date. Draft, Rejected, and Superseded annotations remain in audit history and are excluded from current findings.
 
 Tree evidence remains purpose- and safety-aware after ingestion. Whole-tree obstruction, the alternative-view plan, AI suggestions, inspector determination, missing features, and leaf provenance remain part of the evidence-set history. Weather ingestion likewise preserves the explicit separation between weather context, inspection-time site observations, inferred causes, and year-round conditions not established.
+
+Confirmed creek Evidence Sets are retained in `FLOWING_WATER_CORRIDORS.json`. Exact photographs and measurements remain observed evidence; dashed centerlines and flow arrows remain explicit inferences. Pending group suggestions never enter the current map, and uninspected watercourse extent is never filled in.
 
 `printable_report.pdf.pending.json` tells the future repository service to render `printable-report.html` into a PDF. PDF rendering and ChatGPT analysis are deliberately repository responsibilities rather than field-phone work.
 

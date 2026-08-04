@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.9.0";
+  const APP_VERSION = "3.10.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -520,10 +520,28 @@
   function showEvidenceSetFields() {
     const type = document.getElementById("evidenceSetType").value;
     document.getElementById("treeSetFields").hidden = !["Individual Tree", "Tree Group / Canopy"].includes(type);
+    document.getElementById("flowingWaterSetFields").hidden = type !== "Flowing Water / Creek Corridor";
     document.getElementById("forestSetFields").hidden = type !== "Tree Group / Canopy";
     document.getElementById("homesiteSetFields").hidden = type !== "Potential Homesite";
     if (type === "Tree Group / Canopy" && document.getElementById("treePurpose").value === "species identification") document.getElementById("treePurpose").value = "forest character";
     renderTreeEvidencePlan();
+    renderFlowingWaterEvidencePlan();
+  }
+
+  function renderFlowingWaterEvidencePlan() {
+    const target = document.getElementById("flowingWaterEvidencePlan");
+    if (!target || !evidenceSetTools) return;
+    const plan = evidenceSetTools.flowingWaterEvidencePlan();
+    target.replaceChildren();
+    const heading = document.createElement("strong");
+    heading.textContent = "Safely obtainable creek evidence";
+    const list = document.createElement("ol");
+    plan.required_roles.forEach(role => { const item = document.createElement("li"); item.textContent = role; list.appendChild(item); });
+    const voice = document.createElement("p");
+    voice.textContent = `Voice explanation: ${plan.voice_prompt}`;
+    const safety = document.createElement("p");
+    safety.textContent = plan.safety_rule;
+    target.append(heading, list, voice, safety);
   }
 
   function renderTreeEvidencePlan() {
@@ -561,10 +579,25 @@
       whole_tree_visibility_reason: document.getElementById("treeVisibility").value === "Yes" ? null : document.getElementById("treeVisibility").value,
       dbh_in: Number(document.getElementById("treeDbh").value) || null, dbh_basis: document.getElementById("treeDbhBasis").value,
       total_height_estimate_ft: Number(document.getElementById("treeHeight").value) || null, usable_log_estimate_ft: Number(document.getElementById("treeLogHeight").value) || null,
-      condition: document.getElementById("treeCondition").value, purpose: document.getElementById("treePurpose").value, inspector_explanation: document.getElementById("treeExplanation").value.trim()
+      condition: document.getElementById("treeCondition").value, purpose: document.getElementById("treePurpose").value,
+      creek_or_homesite_relationship: document.getElementById("treeCreekRelationship").value.trim(), inspector_explanation: document.getElementById("treeExplanation").value.trim()
     };
     if (type === "Individual Tree") return treeDetails;
     if (type === "Tree Group / Canopy") return Object.assign(treeDetails, { canopy: document.getElementById("forestCanopy").value, tree_spacing: document.getElementById("forestSpacing").value.trim(), dominant_trunk_size_class: document.getElementById("forestTrunkSize").value.trim(), understory: document.getElementById("forestUnderstory").value, walkability: document.getElementById("forestWalkability").value, mature_trees_to_preserve: document.getElementById("forestPreserve").value.trim(), brush_or_small_stems_to_clear: document.getElementById("forestClearing").value.trim() });
+    if (type === "Flowing Water / Creek Corridor") return {
+      visible_flow: document.getElementById("creekVisibleFlow").value,
+      flow_direction: document.getElementById("creekFlowDirection").value.trim() || "unknown",
+      channel_width_ft: Number(document.getElementById("creekWidth").value) || null,
+      channel_width_basis: document.getElementById("creekWidthBasis").value,
+      safe_point_depth_in: Number(document.getElementById("creekDepth").value) || null,
+      safe_point_depth_basis: document.getElementById("creekDepthBasis").value,
+      bank_condition: document.getElementById("creekBankCondition").value.trim() || "not recorded",
+      adjacent_higher_ground: document.getElementById("creekHigherGround").value.trim() || "not recorded",
+      preserve_features: document.getElementById("creekPreserve").value.trim() || "not recorded",
+      homesite_or_road_relationship: document.getElementById("creekRelationship").value.trim() || "not recorded",
+      inspector_explanation: document.getElementById("creekWhyMatters").value.trim() || "not recorded",
+      safety_confirmation: "Evidence recorded from safe, authorized ground; no channel crossing or standing in moving water was required."
+    };
     if (type === "Potential Homesite") return { candidate_area_center: lastPosition ? { latitude: lastPosition.lat, longitude: lastPosition.lon, accuracy_m: lastPosition.accuracy_m } : null, estimated_footprint_or_outline: document.getElementById("homesiteFootprint").value.trim(), view_direction: document.getElementById("homesiteViewDirection").value.trim(), access_direction: document.getElementById("homesiteAccessDirection").value.trim(), ground_observations: document.getElementById("homesiteGround").value.trim(), mature_trees_to_preserve: document.getElementById("homesitePreserve").value.trim(), brush_or_trees_to_remove: document.getElementById("homesiteRemove").value.trim(), nearby_water_evidence: document.getElementById("homesiteWater").value.trim(), inspector_explanation: document.getElementById("homesiteExplanation").value.trim() };
     return {};
   }
@@ -1302,7 +1335,9 @@
     if (!waterTools || !smallWaterMap) return;
     smallWaterMap.innerHTML = "";
     const subject = subjectParcel();
-    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: effectiveEvidenceData(), subjectFeature: subject, statedSmallTractAcres: 5.49 });
+    const waterInspection = effectiveEvidenceData();
+    waterInspection.evidence_set_summaries = evidenceSetTools ? evidenceSetTools.createEvidenceSetSummaries(data) : { sets: [] };
+    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: waterInspection, subjectFeature: subject, statedSmallTractAcres: 5.49 });
     const summary = document.getElementById("smallWaterSummary");
     if (!smallTractWaterModel || smallTractWaterModel.status !== "GENERATED") {
       summary.textContent = "The verified small-tract parcel ring is unavailable. Evidence capture remains active.";
@@ -1328,6 +1363,30 @@
         addWaterSvg("path", { d, fill: "none", stroke: "#ffe600", "stroke-width": 6, "vector-effect": "non-scaling-stroke" });
       });
     }
+    (smallTractWaterModel.flowing_water_corridors || []).forEach(corridor => {
+      const coordinates = corridor.conservative_centerline && corridor.conservative_centerline.coordinates || [];
+      if (waterLayerEnabled("centerline") && coordinates.length > 1) {
+        const d = coordinates.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ");
+        const line = addWaterSvg("path", { d, fill: "none", stroke: "#00b7ff", "stroke-width": 9, "stroke-dasharray": "18 10", "vector-effect": "non-scaling-stroke" });
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+        title.textContent = corridor.classification;
+        line.appendChild(title);
+      }
+      if (waterLayerEnabled("directions")) (corridor.flow_direction_arrows || []).forEach(arrow => {
+        const x1 = sx(arrow.from[0]), y1 = sy(arrow.from[1]), x2 = sx(arrow.to[0]), y2 = sy(arrow.to[1]);
+        addWaterSvg("line", { x1, y1, x2, y2, stroke: "#001f5b", "stroke-width": 8, "vector-effect": "non-scaling-stroke" });
+        const angle = Math.atan2(y2 - y1, x2 - x1), size = 17;
+        const points = [[x2, y2], [x2 - size * Math.cos(angle - .55), y2 - size * Math.sin(angle - .55)], [x2 - size * Math.cos(angle + .55), y2 - size * Math.sin(angle + .55)]].map(point => point.join(",")).join(" ");
+        addWaterSvg("polygon", { points, fill: "#001f5b" });
+      });
+      if (waterLayerEnabled("measurements")) [...(corridor.measured_depth_points || []), ...(corridor.measured_width_points || [])].forEach(point => {
+        addWaterSvg("circle", { cx: sx(point.longitude), cy: sy(point.latitude), r: 12, fill: "#fff", stroke: "#002b6f", "stroke-width": 5, "vector-effect": "non-scaling-stroke" });
+        addWaterSvg("text", { x: sx(point.longitude), y: sy(point.latitude) + 5, "text-anchor": "middle", "font-size": 13, "font-weight": 900, fill: "#002b6f" }, point.depth_in != null ? "D" : "W");
+      });
+      if (waterLayerEnabled("amenity")) (corridor.amenity_photographs || []).forEach(point => {
+        addWaterSvg("circle", { cx: sx(point.longitude), cy: sy(point.latitude), r: 25, fill: "none", stroke: "#e2bd00", "stroke-width": 7, "vector-effect": "non-scaling-stroke" });
+      });
+    });
     if (waterLayerEnabled("avoidance")) smallTractWaterModel.preliminary_building_avoidance_areas.forEach(area => {
       if (!area.outline) return;
       addWaterSvg("path", { d: projectedRingPath(area.outline), fill: "rgba(194,20,40,.16)", stroke: "#c21428", "stroke-width": 7, "stroke-dasharray": "18 10", "vector-effect": "non-scaling-stroke" });
@@ -1994,7 +2053,9 @@
     const photo = data.photos.find(item => String(item.id) === String(photoId));
     const set = photo && photo.evidence_set_id && evidenceSetTools ? evidenceSetTools.effectiveEvidenceSet(data, photo.evidence_set_id) : null;
     const isFirstSetPhoto = set && set.photo_links && set.photo_links[0] && String(set.photo_links[0].record_id) === String(photoId);
-    const explanationPrompt = isFirstSetPhoto ? "Why are you documenting this subject?" : "Why did you take this picture?";
+    const explanationPrompt = isFirstSetPhoto && set && set.set_type === "Flowing Water / Creek Corridor"
+      ? "Why does this water feature matter to access, homesites, cost, risk, or what makes the property special?"
+      : (isFirstSetPhoto ? "Why are you documenting this subject?" : "Why did you take this picture?");
     document.getElementById("photoExplanationPrompt").textContent = explanationPrompt;
     document.getElementById("photoExplanationState").textContent = "Starting voice recording…";
     document.getElementById("retryPhotoExplanation").hidden = true;
@@ -2735,8 +2796,11 @@
         document.getElementById("groupPhotoPrompt").textContent = `${metadata.photo_number} was saved in ${active ? active.label : "this subject"}. Is it the same subject, a new subject, or the end of this subject?`;
         let suggestedRole = "Context";
         if (active && ["Individual Tree", "Tree Group / Canopy"].includes(active.set_type)) {
-          const usedRoles = new Set((active.photo_links || []).filter(link => String(link.record_id) !== String(id)).map(link => link.photo_role));
+          const usedRoles = new Set((active.photo_links || []).filter(link => String(link.record_id) !== String(id)).flatMap(link => link.photo_roles || [link.photo_role]));
           suggestedRole = evidenceSetTools.treeEvidencePlan(active.subject_details || {}).required_roles.find(role => !usedRoles.has(role)) || "Other";
+        } else if (active && active.set_type === "Flowing Water / Creek Corridor") {
+          const usedRoles = new Set((active.photo_links || []).filter(link => String(link.record_id) !== String(id)).flatMap(link => link.photo_roles || [link.photo_role]));
+          suggestedRole = evidenceSetTools.flowingWaterEvidencePlan().required_roles.find(role => !usedRoles.has(role)) || "Flow Evidence";
         }
         document.getElementById("groupPhotoRole").value = suggestedRole;
         document.getElementById("leafProvenanceLabel").hidden = !["Leaf upper surface", "Leaf underside"].includes(suggestedRole);
