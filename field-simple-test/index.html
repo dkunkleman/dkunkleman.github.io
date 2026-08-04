@@ -26,8 +26,8 @@
       --focus: #ffe34f;
     }
     * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
-    body { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    body { padding-bottom: max(20px, env(safe-area-inset-bottom)); position: static; }
     header { background: var(--dark-green); color: #fff; padding: max(12px, env(safe-area-inset-top)) 14px 12px; }
     header h1 { margin: 0; font-size: 23px; line-height: 1.15; }
     header p { margin: 5px 0 0; font-size: 13px; opacity: .9; }
@@ -219,12 +219,12 @@
       button, .button-link { font-size: 15px; }
     }
     @media (prefers-reduced-motion: reduce) { button.voice.recording { animation: none; } }
-    #simpleShell { min-height: 100vh; background: #f1efe6; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+    #simpleShell { min-height: 100vh; background: #f1efe6; padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow: visible; }
     body:not(.simple-advanced-open) > header,
     body:not(.simple-advanced-open) > #workflow,
     body:not(.simple-advanced-open) > main { display: none; }
     body.simple-advanced-open #simpleShell { display: none; }
-    #simpleTopBar { position: sticky; top: 0; z-index: 100; padding: max(8px, env(safe-area-inset-top)) 8px 8px; background: #173b24; color: #fff; box-shadow: 0 2px 7px rgba(0,0,0,.28); }
+    #simpleTopBar { position: static; padding: max(8px, env(safe-area-inset-top)) 8px 8px; background: #173b24; color: #fff; }
     .simple-banner { padding: 6px; border: 2px solid #9ff0af; border-radius: 7px; background: #0e2c19; text-align: center; font-size: 12px; font-weight: 900; letter-spacing: .02em; }
     .simple-top-controls { display: grid; grid-template-columns: 1.55fr .75fr; gap: 7px; margin-top: 7px; }
     .simple-top-controls button { min-height: 48px; padding: 7px; font-size: 13px; }
@@ -279,7 +279,7 @@
     #simplePackageResult { margin-top: 14px; padding-top: 12px; border-top: 3px solid #173b24; }
     .simple-package-name { display: block; padding: 10px; border: 2px dashed #11652d; overflow-wrap: anywhere; background: #fff; }
     #simpleAdvancedReturn { display: none; }
-    body.simple-advanced-open #simpleAdvancedReturn { display: block; position: fixed; z-index: 150; right: 8px; bottom: max(8px, env(safe-area-inset-bottom)); left: 8px; width: calc(100% - 16px); min-height: 58px; }
+    body.simple-advanced-open #simpleAdvancedReturn { display: block; position: static; width: calc(100% - 16px); margin: 8px; min-height: 58px; }
     .simple-dialog-return { grid-column: 1 / -1; }
     @media (max-width: 390px) {
       .simple-grid .simple-feature { min-height: 74px; font-size: 16px; }
@@ -923,15 +923,15 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.13.0-home-test.1"></script>
-  <script src="./water-intelligence.js?v=3.13.0-home-test.1"></script>
-  <script src="./evidence-governance.js?v=3.13.0-home-test.1"></script>
-  <script src="./evidence-sets.js?v=3.13.0-home-test.1"></script>
-  <script src="./timber-reconnaissance.js?v=3.13.0-home-test.1"></script>
-  <script src="./reviewed-property-synthesis.js?v=3.13.0-home-test.1"></script>
-  <script src="./authoritative-weather.js?v=3.13.0-home-test.1"></script>
-  <script src="./inspection-package.js?v=3.13.0-home-test.1"></script>
-  <script src="./idb-recovery.js?v=3.13.0-home-test.1"></script>
-  <script src="./app.js?v=3.13.0-home-test.1"></script>
+  <script src="./inspection-coaching.js?v=3.13.0-home-test.2"></script>
+  <script src="./water-intelligence.js?v=3.13.0-home-test.2"></script>
+  <script src="./evidence-governance.js?v=3.13.0-home-test.2"></script>
+  <script src="./evidence-sets.js?v=3.13.0-home-test.2"></script>
+  <script src="./timber-reconnaissance.js?v=3.13.0-home-test.2"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.13.0-home-test.2"></script>
+  <script src="./authoritative-weather.js?v=3.13.0-home-test.2"></script>
+  <script src="./inspection-package.js?v=3.13.0-home-test.2"></script>
+  <script src="./idb-recovery.js?v=3.13.0-home-test.2"></script>
+  <script src="./app.js?v=3.13.0-home-test.2"></script>
 </body>
 </html>

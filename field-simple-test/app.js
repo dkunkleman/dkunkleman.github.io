@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.1";
+  const APP_VERSION = "3.13.0-home-test.2";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -3797,6 +3797,14 @@
     pendingGroupPhotoId = null;
   }
 
+  function restoreSimplePageScrolling() {
+    document.body.classList.remove("simple-advanced-open");
+    document.documentElement.style.overflowY = "auto";
+    document.body.style.overflowY = "auto";
+    document.body.style.position = "static";
+    document.body.style.height = "auto";
+  }
+
   function simpleFeaturePrefix(type) {
     const prefixes = { water: "WATER", tree: "TREE", ditch: "DITCH", culvert: "CULVERT", brush: "BRUSH", blocked: "BLOCKED", entrance: "ROAD", open: "OPEN", highlow: "GROUND", other: "OTHER", photo: "PHOTO" };
     return prefixes[type] || "FEATURE";
@@ -3944,6 +3952,7 @@
     const content = document.getElementById("simpleContent");
     if (!content) return;
     simpleCloseDialogs();
+    restoreSimplePageScrolling();
     if (!data.started) {
       content.innerHTML = `<section class="simple-start"><h2>ONE THING TO DO NEXT</h2><p>Tap the green button. Allow precise location when asked.</p><button id="simpleStart" type="button" ${offlineReady ? "" : "disabled"}>${offlineReady ? "START TEST INSPECTION" : "PREPARING OFFLINE USE..."}</button><p class="simple-help">This home test uses separate storage. It cannot clear or change the saved production inspection.</p></section>`;
       const start = document.getElementById("simpleStart");
@@ -3951,7 +3960,11 @@
       renderSimpleHeader();
       return;
     }
-    if (currentSimpleSession()) { renderSimpleCapture(); return; }
+    if (currentSimpleSession()) {
+      const recovered = simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
+      simpleLastSavedMessage = `${recovered.feature_id} SAVED - RETURNED TO FIELD BUTTONS`;
+      simpleSetStatus(simpleLastSavedMessage, "saved");
+    }
     content.innerHTML = `<section class="simple-locator"><div><strong id="simpleLocatorState">LOCATION UNAVAILABLE</strong><span>Approximate field locator - not a survey or legal boundary determination.</span></div><div id="simpleLocatorMap"></div><div class="simple-locator-actions"><button id="simpleCenterMap" type="button">CENTER ON ME</button><button id="simpleExpandMap" type="button">EXPAND MAP</button></div></section><section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section><div class="simple-grid">
       ${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("brush", "BRUSH", "brush")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
       <button id="simpleVoice" type="button" class="simple-feature voice">${mediaRecorder && mediaRecorder.state === "recording" ? "STOP & SAVE VOICE NOTE" : "VOICE NOTE"}</button>
@@ -4041,7 +4054,6 @@
     document.getElementById("simpleFocusNote").addEventListener("click", () => form.elements.namedItem("note").focus());
     document.getElementById("simpleQuickMeasurement").addEventListener("click", () => { const target = form.querySelector('input[type="number"]'); if (target) target.focus(); else simpleSetStatus("This record has no quick number. Use the optional note.", "normal"); });
     document.getElementById("simpleAdvancedFromCapture").addEventListener("click", () => document.body.classList.add("simple-advanced-open"));
-    if (session.feature_type === "tree") setTimeout(() => { const field = form.elements.namedItem("circumference_in"); if (field) field.focus(); }, 0);
     renderSimplePhotoPreview(session).catch(() => { simpleSetStatus("Photo is saved. Its preview could not be displayed right now.", "warning"); });
     renderSimpleHeader();
   }
