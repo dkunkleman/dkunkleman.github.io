@@ -73,6 +73,6 @@ const workerSource = fs.readFileSync(path.resolve(__dirname, "../field/sw.js"), 
 assert(indexSource.includes("What did you measure?") && indexSource.includes("Did the device reach the true bottom/end point?") && indexSource.includes("Does this photograph show a tape, ruler, staff, diameter tape"), "measurement capture is immediate and structured");
 assert(indexSource.includes("Timber Sample Plot") && indexSource.includes("ADD TREE TO PLOT") && indexSource.includes("Measure 54 inches above ground on the uphill side"), "field UI exposes plot and DBH coaching");
 assert(appSource.includes("recordMeasurement") && appSource.includes("createSamplePlot") && appSource.includes("createTimberTree"), "app persists structured measurements, plots, and trees");
-assert(workerSource.includes("timber-reconnaissance.js?v=3.12.0") && workerSource.includes("v17"), "timber tools are cached for offline use in the new release");
+assert(workerSource.includes("timber-reconnaissance.js?v=3.12.1") && workerSource.includes("v18"), "timber tools are cached for offline use in the new release");
 
 process.stdout.write("PASS: authoritative structured measurements, permanent tree/plot IDs, fixed-radius calculations, preliminary timber limitations, builder summary, and forester handoff are verified.\n");

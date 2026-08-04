@@ -39,6 +39,12 @@ assert(route.relocations.some(item => item.reasons.includes("implied_speed_great
 assert(route.relocations.every(item => item.walked_route_claim === false));
 assert(route.relocations.some(item => item.display === "no_connector"), "an intentionally hidden relocation has no map connector");
 assert.match(route.warning, /No straight jump/);
+const sourceFiltered = Synthesis.segmentRoute([
+  point("2026-08-03T15:00:00.000Z", 30.49, -87.09),
+  point("2026-08-03T15:00:10.000Z", 30.49001, -87.09001, { use_for_distance: false, quality_flag: "gap_or_implausible_segment" }),
+  point("2026-08-03T15:00:20.000Z", 30.49002, -87.09002)
+], {});
+assert.equal(sourceFiltered.rejected_points.length, 1, "a source quality-filter rejection breaks the walked route even when its raw accuracy value looks acceptable");
 
 const photos = Array.from({ length: 196 }, (_, index) => ({
   id: `photo-${index + 1}`,
@@ -120,6 +126,8 @@ assert(bundle.homesite_opportunity_map.concepts.every(item => item.possible_driv
 assert.match(bundle.map_html.homesite, /Conceptual potential building-pad area/);
 assert.match(bundle.map_html.homesite, /Possible drive\/access direction/);
 assert(bundle.audience_reports.reports.every(item => item.markdown.includes("Every audience version uses the same immutable evidence")));
+const unavailableHomesite = Synthesis.createHomesiteMap({ inspection, photos, smallTractWaterMap: { status: "NOT_AVAILABLE" } });
+assert.doesNotThrow(() => Synthesis.mapHtml(unavailableHomesite, { photographs: photos, voice_notes: inspection.voice_notes }), "a missing parcel ring never prevents report packaging");
 
 const root = path.resolve(__dirname, "..");
 const indexSource = fs.readFileSync(path.join(root, "field/index.html"), "utf8");
@@ -127,9 +135,9 @@ const appSource = fs.readFileSync(path.join(root, "field/app.js"), "utf8");
 const workerSource = fs.readFileSync(path.join(root, "field/sw.js"), "utf8");
 for (const label of ["Review Corrections", "Approve Evidence Sets", "Review Water Map", "Review Creek Map", "Review Vegetation Map", "Review Homesite Concepts", "Import ChatGPT Review", "Generate Property Report"]) assert(indexSource.includes(label), `${label} is present`);
 assert(indexSource.includes("NEW INSPECTION PHASE / RELOCATION"));
-assert(appSource.includes('const APP_VERSION = "3.12.0"'));
-assert(appSource.includes("isCompletePearsonAugust3Review") && appSource.includes('inspectionDate === "2026-08-03"'), "display-only Pearson cleanup is scoped to the reviewed inspection and cannot alter a later visit");
-assert(workerSource.includes("property-inspector-field-2026-08-03-v17"));
-assert(workerSource.includes("reviewed-property-synthesis.js?v=3.12.0"));
+assert(appSource.includes('const APP_VERSION = "3.12.1"'));
+assert(appSource.includes("pearsonAugust3ReviewCutoff") && appSource.includes('inspectionDate === "2026-08-03"') && appSource.includes("p3Time"), "display-only Pearson cleanup begins at the real P3 field sequence and cannot alter a later visit");
+assert(workerSource.includes("property-inspector-field-2026-08-03-v18"));
+assert(workerSource.includes("reviewed-property-synthesis.js?v=3.12.1"));
 
 process.stdout.write("PASS: segmented routes, confirmation-gated Pearson phases, reviewed maps, conceptual homesites, six audience views, and the 20-section understandable report are verified.\n");

@@ -45,9 +45,17 @@
 
   function isCompletePearsonReview(data) {
     const inspectionDate = String(data && data.conditions && data.conditions.inspection_date || data && data.started || "").slice(0, 10);
+    const p3 = (data.photos || []).find(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 3);
     return String(data && data.property_id || "") === "parcel:221S280000001010000" &&
       inspectionDate === PEARSON_REVIEW_DATE &&
+      Number.isFinite(Date.parse(p3 && (p3.recorded_at || p3.time) || "")) &&
       (data.photos || []).some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+  }
+
+  function pearsonReviewStartTime(data) {
+    if (!isCompletePearsonReview(data)) return null;
+    const p3 = (data.photos || []).find(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 3);
+    return Date.parse(p3.recorded_at || p3.time);
   }
 
   function ensureGovernanceModel(inspection, now) {
@@ -58,7 +66,7 @@
     data.review_annotation_events = Array.isArray(data.review_annotation_events) ? data.review_annotation_events : [];
     data.inspector_identity = data.inspector_identity || "Field Inspector";
     const hasCompletePearsonReview = isCompletePearsonReview(data);
-    const appTestCutoff = Date.parse(`${PEARSON_REVIEW_DATE}T00:00:00.000Z`);
+    const appTestCutoff = pearsonReviewStartTime(data);
     if (hasCompletePearsonReview) {
       const excludePriorDay = (records, recordType) => (records || []).forEach(record => {
         const recordedAt = Date.parse(record.time || record.recorded_at || record.started_at || "");
@@ -269,7 +277,8 @@
   function buildEffectiveInspection(inspection) {
     const raw = ensureGovernanceModel(clone(inspection || {}));
     const completePearsonReview = isCompletePearsonReview(raw);
-    const priorDayGps = completePearsonReview ? (raw.points || []).filter(point => { const time = Date.parse(point.time || ""); return Number.isFinite(time) && time < Date.parse(`${PEARSON_REVIEW_DATE}T00:00:00.000Z`); }) : [];
+    const reviewStartTime = pearsonReviewStartTime(raw);
+    const priorDayGps = completePearsonReview ? (raw.points || []).filter(point => { const time = Date.parse(point.time || ""); return Number.isFinite(time) && time < reviewStartTime; }) : [];
     const allMarkers = (raw.markers || []).map(item => effectiveRecord(raw, "observation", item));
     const allPhotos = (raw.photos || []).map(item => {
       const photo = effectiveRecord(raw, "photo", item);

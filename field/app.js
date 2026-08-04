@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.12.0";
+  const APP_VERSION = "3.12.1";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -439,9 +439,11 @@
     return !governanceTools || governanceTools.recordStatus(data, recordType, recordId) !== "voided";
   }
 
-  function isCompletePearsonAugust3Review() {
+  function pearsonAugust3ReviewCutoff() {
     const inspectionDate = String(data.conditions && data.conditions.inspection_date || data.started || "").slice(0, 10);
-    return String(data.property_id || "") === "parcel:221S280000001010000" && inspectionDate === "2026-08-03" && data.photos.some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+    const p3 = data.photos.find(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 3);
+    const p3Time = Date.parse(p3 && (p3.recorded_at || p3.time) || "");
+    return String(data.property_id || "") === "parcel:221S280000001010000" && inspectionDate === "2026-08-03" && Number.isFinite(p3Time) && data.photos.some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196) ? p3Time : null;
   }
 
   function effectiveEvidenceData() {
@@ -459,8 +461,8 @@
       if (voice) item.area_id = voice.area_id || item.area_id || null;
       return item;
     });
-    const completePearsonReview = isCompletePearsonAugust3Review();
-    const points = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
+    const pearsonCutoff = pearsonAugust3ReviewCutoff();
+    const points = pearsonCutoff != null ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= pearsonCutoff; }) : data.points;
     return Object.assign({}, data, { points, markers, photos, voice_notes: voices });
   }
 
@@ -1490,8 +1492,8 @@
     const lastPhoto = data.photos[data.photos.length - 1];
     const key = [data.points.length, lastPoint && lastPoint.time, data.lifecycle_events.length, lastEvent && lastEvent.time, data.photos.length, lastPhoto && (lastPhoto.recorded_at || lastPhoto.time)].join("|");
     if (routeDisplayCache.key !== key) {
-      const completePearsonReview = isCompletePearsonAugust3Review();
-      const activePoints = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
+      const pearsonCutoff = pearsonAugust3ReviewCutoff();
+      const activePoints = pearsonCutoff != null ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= pearsonCutoff; }) : data.points;
       routeDisplayCache = { key, model: synthesisTools.segmentRoute(activePoints, data) };
     }
     return routeDisplayCache.model;

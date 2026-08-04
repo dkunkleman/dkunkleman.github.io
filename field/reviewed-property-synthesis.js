@@ -9,7 +9,7 @@
 
   const PROPERTY_ID = "parcel:221S280000001010000";
   const PEARSON_REVIEW_DATE = "2026-08-03";
-  const ROUTE_RULES = Object.freeze({ maximum_gap_seconds: 120, maximum_walk_speed_mps: 5, maximum_accepted_accuracy_m: 50, materially_different_photo_location_m: 75 });
+  const ROUTE_RULES = Object.freeze({ maximum_gap_seconds: 120, maximum_walk_speed_mps: 5, maximum_accepted_accuracy_m: 30, materially_different_photo_location_m: 75 });
   const CREEK_WARNING = "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified.";
   const HOMESITE_WARNING = "Inspector concept only. Buildability, lot legality, setbacks, septic suitability, wetlands, access, utilities, drainage and permitting remain unverified.";
   const WATER_SCOPE_RULE = "Within the actually walked and visually observed corridor, absence of water evidence may support 'no standing water observed on the inspection date' only when the inspector confirmed every personally observed standing-water location was photographed. It does not prove year-round dryness and does not apply to visually obstructed or unwalked land.";
@@ -174,9 +174,10 @@
     const close = () => { if (current.length) segments.push({ segment_id: `route-segment-${String(segments.length + 1).padStart(3, "0")}`, status: "confirmed_walked_route", point_count: current.length, started_at: current[0].time || null, ended_at: current[current.length - 1].time || null, points: current }); current = []; };
     for (const point of allPoints) {
       const location = pointOf(point), time = inspectionTime(point), accuracy = Number(point.accuracy_m == null ? point.gps_accuracy_m : point.accuracy_m);
-      if (!location || (Number.isFinite(accuracy) && accuracy > settings.maximum_accepted_accuracy_m) || point.quality_rejected === true) {
+      const sourceRejected = point.quality_rejected === true || point.use_for_distance === false || ["poor_accuracy", "gap_or_implausible_segment", "rejected"].includes(String(point.quality_flag || "").toLowerCase());
+      if (!location || (Number.isFinite(accuracy) && accuracy > settings.maximum_accepted_accuracy_m) || sourceRejected) {
         point.route_status = "rejected_quality";
-        point.rejection_reason = !location ? "invalid_coordinates" : (point.quality_rejection_reason || `accuracy_exceeds_${settings.maximum_accepted_accuracy_m}_m`);
+        point.rejection_reason = !location ? "invalid_coordinates" : (point.quality_rejection_reason || (sourceRejected ? point.quality_flag || "source_quality_filter_rejected" : `accuracy_exceeds_${settings.maximum_accepted_accuracy_m}_m`));
         rejected.push({ source_sequence: point.source_sequence, reason: point.rejection_reason });
         close();
         continue;
@@ -341,9 +342,9 @@
     const zones = zoneSource.map((zone, index) => {
       const layer = `layer-${esc(zone.zone_id || zone.concept_id)}`, ring = zone.geometry && zone.geometry.coordinates && zone.geometry.coordinates[0];
       const base = ring ? `<path class="zone ${layer}" d="${path(ring)}" fill="${index % 2 ? "rgba(255,181,71,.25)" : "rgba(74,160,95,.24)"}" stroke="#7a4a00" stroke-width="3" stroke-dasharray="10 7"><title>${esc(zone.label)} - ${esc(zone.status)}</title></path>` : "";
-      const privacy = (zone.privacy_buffer_options || []).map(item => `<path class="${layer}" d="${path(item.geometry.coordinates[0])}" fill="none" stroke="#2f6f3e" stroke-width="10" stroke-dasharray="5 7"><title>Conceptual privacy/tree-retention buffer - not a legal setback</title></path>`).join("");
-      const pads = (zone.potential_building_pad_areas || []).map(item => `<path class="${layer}" d="${path(item.geometry.coordinates[0])}" fill="rgba(255,238,88,.5)" stroke="#7a5200" stroke-width="4"><title>Conceptual potential building-pad area - untested and unapproved</title></path>`).join("");
-      const drives = (zone.possible_drive_access_directions || []).map(item => `<line class="${layer}" x1="${sx(item.geometry.coordinates[0][0]).toFixed(1)}" y1="${sy(item.geometry.coordinates[0][1]).toFixed(1)}" x2="${sx(item.geometry.coordinates[1][0]).toFixed(1)}" y2="${sy(item.geometry.coordinates[1][1]).toFixed(1)}" stroke="#a63c00" stroke-width="5" stroke-dasharray="12 8" marker-end="url(#arrow)"><title>Possible drive/access direction - not field verified</title></line>`).join("");
+      const privacy = (zone.privacy_buffer_options || []).filter(item => item.geometry && item.geometry.coordinates).map(item => `<path class="${layer}" d="${path(item.geometry.coordinates[0])}" fill="none" stroke="#2f6f3e" stroke-width="10" stroke-dasharray="5 7"><title>Conceptual privacy/tree-retention buffer - not a legal setback</title></path>`).join("");
+      const pads = (zone.potential_building_pad_areas || []).filter(item => item.geometry && item.geometry.coordinates).map(item => `<path class="${layer}" d="${path(item.geometry.coordinates[0])}" fill="rgba(255,238,88,.5)" stroke="#7a5200" stroke-width="4"><title>Conceptual potential building-pad area - untested and unapproved</title></path>`).join("");
+      const drives = (zone.possible_drive_access_directions || []).filter(item => item.geometry && item.geometry.coordinates).map(item => `<line class="${layer}" x1="${sx(item.geometry.coordinates[0][0]).toFixed(1)}" y1="${sy(item.geometry.coordinates[0][1]).toFixed(1)}" x2="${sx(item.geometry.coordinates[1][0]).toFixed(1)}" y2="${sy(item.geometry.coordinates[1][1]).toFixed(1)}" stroke="#a63c00" stroke-width="5" stroke-dasharray="12 8" marker-end="url(#arrow)"><title>Possible drive/access direction - not field verified</title></line>`).join("");
       const pasture = zone.pasture_option && zone.pasture_option.coordinates ? `<path class="${layer}" d="${path(zone.pasture_option.coordinates[0])}" fill="rgba(138,210,93,.24)" stroke="#356f18" stroke-width="4"><title>Conceptual horse-pasture area</title></path>` : "";
       return `${base}${privacy}${pads}${drives}${pasture}`;
     }).join("");

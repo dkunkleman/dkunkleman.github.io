@@ -64,18 +64,22 @@ const completedPearson = {
   property_id: "parcel:221S280000001010000", started: "2026-08-03T13:00:00.000Z", conditions: { inspection_date: "2026-08-03" }, inspector_identity: "Daniel Kunkleman", markers: [], voice_notes: [],
   photos: [
     { id: "prior-day-test-photo", photo_number: "TEST", recorded_at: "2026-08-02T20:00:00.000Z", lat: 30.49, lon: -87.09 },
+    { id: "same-utc-day-local-prior-day-photo", photo_number: "P2", recorded_at: "2026-08-03T04:26:23.713Z", lat: 30.4902, lon: -87.0898 },
+    { id: "photo-3", photo_number: "P3", recorded_at: "2026-08-03T13:00:00.000Z", lat: 30.4905, lon: -87.0895 },
     { id: "photo-196", photo_number: "P196", recorded_at: "2026-08-03T20:00:00.000Z", lat: 30.491, lon: -87.089 }
   ],
   points: [
     { time: "2026-08-02T20:00:00.000Z", lat: 30.49, lon: -87.09 },
+    { time: "2026-08-03T04:26:23.713Z", lat: 30.4902, lon: -87.0898 },
     { time: "2026-08-03T20:00:00.000Z", lat: 30.491, lon: -87.089 }
   ]
 };
 Governance.ensureGovernanceModel(completedPearson, "2026-08-03T21:00:00.000Z");
 const completedView = Governance.buildEffectiveInspection(completedPearson);
 assert(!completedView.active.photos.some(photo => photo.id === "prior-day-test-photo"), "prior-day app-test photo is excluded from active findings");
+assert(!completedView.active.photos.some(photo => photo.id === "same-utc-day-local-prior-day-photo"), "P3, not UTC midnight, separates the real field sequence from local-prior-day app testing");
 assert.equal(completedView.active.points.length, 1, "prior-day app-test GPS is excluded from the active route");
-assert.equal(completedView.audit_history.audit_only_gps_points.length, 1, "excluded GPS remains permanently in audit history");
+assert.equal(completedView.audit_history.audit_only_gps_points.length, 2, "every pre-P3 GPS point remains permanently in audit history");
 assert(completedView.audit_history.corrections.some(item => item.target.record_id === "prior-day-test-photo" && item.original_entry.id === "prior-day-test-photo"), "excluded photo original remains in immutable correction history");
 
 process.stdout.write("PASS: immutable corrections, Pearson evidence correction/hypothesis, photo pattern review, and professional handoffs.\n");

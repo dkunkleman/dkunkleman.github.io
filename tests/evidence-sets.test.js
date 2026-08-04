@@ -128,6 +128,6 @@ assert(indexSource.includes("START PHOTO GROUP") && indexSource.includes("FINISH
 assert(indexSource.includes("Can most of the tree be photographed safely and clearly?") && indexSource.includes("Leaf underside") && indexSource.includes("Professional identification requested"), "adaptive tree-identification controls are present");
 assert(indexSource.includes("Flowing Water / Creek Corridor") && indexSource.includes("Do not cross the channel or stand in moving water") && indexSource.includes("Direction of flow"), "safe flowing-water corridor controls are present");
 assert(appSource.includes("suggestRecentGroup") && appSource.includes("confirmSuggestion") && appSource.includes("Select which photos"), "automatic grouping remains a confirmable suggestion");
-assert(workerSource.includes("evidence-sets.js?v=3.12.0"), "Evidence Sets are available offline");
+assert(workerSource.includes("evidence-sets.js?v=3.12.1"), "Evidence Sets are available offline");
 
 process.stdout.write("PASS: Pearson standing-water, P158-P163 measurement, tree, and P107-P145 creek suggestions remain confirmation-gated; adaptive summaries, safety rules, permanent tree IDs, and append-only undo are verified.\n");
