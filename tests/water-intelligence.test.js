@@ -89,7 +89,7 @@ function main() {
     ] }
   };
 
-  const model = Water.buildSmallTractWaterMapModel({ inspection, subjectFeature: subject, statedSmallTractAcres: 5.49, generatedAt: "2026-08-03T18:00:00Z" });
+  const model = Water.buildSmallTractWaterMapModel({ inspection, subjectFeature: subject, statedSmallTractAcres: 5.48, generatedAt: "2026-08-03T18:00:00Z" });
   const propertyCorridors = Water.buildPropertyFlowingWaterCorridorModel({ inspection, generatedAt: "2026-08-03T18:00:00Z" });
   assert.equal(propertyCorridors.corridors.length, 1, "the property-wide corridor model is not limited to a named parcel subsection and still excludes pending groups");
   assert.match(propertyCorridors.property_extent_rule, /uninspected \/ unknown/);

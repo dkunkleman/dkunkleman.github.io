@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.11.0";
+  const APP_VERSION = "3.12.0";
   const W = 1800;
   const H = 1500;
   const xmin = -87.1;
@@ -22,6 +22,7 @@
   const governanceTools = window.EvidenceGovernance;
   const evidenceSetTools = window.EvidenceSets;
   const timberTools = window.TimberReconnaissance;
+  const synthesisTools = window.ReviewedPropertySynthesis;
   const pendingPhotoCacheName = "property-inspector-pending-photos-v1";
 
   const svg = document.getElementById("overlay");
@@ -121,6 +122,7 @@
   let pendingSubjectChangePrompt = null;
   let pendingMeasurementPhotoId = null;
   let pendingPlotTreeId = null;
+  let routeDisplayCache = { key: "", model: null };
 
   function emptyInspection() {
     return {
@@ -161,6 +163,11 @@
       timber_plots: [],
       timber_trees: [],
       timber_counters: {},
+      review_phase_suggestions: [],
+      review_synthesis_events: [],
+      land_use_concepts: [],
+      reviewed_map_status: {},
+      imported_chat_review_annotations: [],
       inspector_identity: "Field Inspector",
       weather_context: {
         named_event: "", event_dates: "", days_between_event_and_inspection: "", authoritative_rainfall_totals: "",
@@ -245,6 +252,7 @@
       evidenceSetTools.addPearsonSuggestions(data);
     }
     if (timberTools) timberTools.ensureModel(data);
+    if (synthesisTools) synthesisTools.ensureModel(data);
   }
 
   function saveState() {
@@ -423,6 +431,7 @@
     renderQuestionList();
     renderCoverage();
     renderMissingEvidence();
+    renderReviewedSynthesis();
     updateNextStep();
   }
 
@@ -445,7 +454,9 @@
       if (voice) item.area_id = voice.area_id || item.area_id || null;
       return item;
     });
-    return Object.assign({}, data, { markers, photos, voice_notes: voices });
+    const completePearsonReview = data.photos.some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+    const points = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
+    return Object.assign({}, data, { points, markers, photos, voice_notes: voices });
   }
 
   function renderAuditHistory() {
@@ -544,6 +555,111 @@
     });
     if (!container.children.length) container.innerHTML = '<p class="small">No evidence sets yet.</p>';
     updateNextStep();
+  }
+
+  function renderReviewedSynthesis(mode) {
+    if (!synthesisTools) return;
+    synthesisTools.ensureModel(data);
+    const panel = document.getElementById("reviewSynthesisPanel");
+    const summary = document.getElementById("reviewSynthesisSummary");
+    const phases = data.review_phase_suggestions || [];
+    const approved = phases.filter(item => item.status === "approved").length;
+    const pending = phases.filter(item => item.status === "pending_inspector_confirmation").length;
+    summary.textContent = phases.length
+      ? `${approved} Pearson review phase${approved === 1 ? "" : "s"} approved; ${pending} pending. Pending phases and concepts are excluded from active findings.`
+      : "Pearson reviewed phases will appear after the complete P3-P196 inspection is present on this phone.";
+    if (!mode) return;
+    panel.hidden = false;
+    panel.replaceChildren();
+    const heading = document.createElement("h3");
+    heading.textContent = mode === "phases" ? "Reviewed Pearson photo phases" : mode === "homesite" ? "Conceptual homesite and land-use layers" : `${mode[0].toUpperCase()}${mode.slice(1)} map approval`;
+    panel.appendChild(heading);
+
+    const addDecisionRow = (item, id, label, description) => {
+      const row = document.createElement("div");
+      row.className = "review-synthesis-row";
+      row.dataset.status = item.status;
+      const title = document.createElement("strong");
+      title.textContent = `${label} - ${item.status.replaceAll("_", " ")}`;
+      const detail = document.createElement("p");
+      detail.className = "small";
+      detail.textContent = description;
+      const actions = document.createElement("div");
+      actions.className = "review-synthesis-actions";
+      const approve = document.createElement("button");
+      approve.type = "button";
+      approve.textContent = item.status === "approved" ? "APPROVED" : "Approve";
+      approve.disabled = item.status === "approved";
+      approve.addEventListener("click", () => {
+        synthesisTools.reviewItem(data, id, "approved", data.inspector_identity);
+        saveState(); renderReviewedSynthesis(mode); setStatus(`${label} approved and available to the report.`, "success");
+      });
+      const reject = document.createElement("button");
+      reject.type = "button";
+      reject.className = "cancel";
+      reject.textContent = item.status === "rejected" ? "REJECTED" : "Reject / keep out";
+      reject.disabled = item.status === "rejected";
+      reject.addEventListener("click", () => {
+        synthesisTools.reviewItem(data, id, "rejected", data.inspector_identity);
+        saveState(); renderReviewedSynthesis(mode); setStatus(`${label} rejected. Original evidence remains unchanged.`, "active");
+      });
+      actions.append(approve, reject); row.append(title, detail, actions); panel.appendChild(row);
+    };
+
+    if (mode === "phases") {
+      phases.forEach(item => addDecisionRow(item, item.review_item_id, `${item.from === item.to ? `P${item.from}` : `P${item.from}-P${item.to}`} - ${item.title}`, `${item.area}. ${item.meaning} Classification: ${item.classification}. Confidence: ${item.confidence}.`));
+      if (!phases.length) panel.append(Object.assign(document.createElement("p"), { textContent: "The complete Pearson P3-P196 sequence is not present yet. Nothing was inferred." }));
+      return;
+    }
+    if (mode === "homesite") {
+      const mapStatus = data.reviewed_map_status.homesite;
+      const note = document.createElement("p");
+      note.className = "field-warning";
+      note.textContent = synthesisTools.HOMESITE_WARNING;
+      panel.appendChild(note);
+      (data.land_use_concepts || []).forEach(item => addDecisionRow(item, item.concept_id, item.label, `${item.area}. ${item.meaning} ${item.warning}`));
+      const mapButton = document.createElement("button");
+      mapButton.type = "button";
+      mapButton.textContent = mapStatus === "approved" ? "HOMESITE MAP APPROVED" : "Approve homesite map framework";
+      mapButton.disabled = mapStatus === "approved";
+      mapButton.addEventListener("click", () => { synthesisTools.setMapReview(data, "homesite", "approved", data.inspector_identity); saveState(); renderReviewedSynthesis(mode); });
+      panel.appendChild(mapButton);
+      return;
+    }
+    const mapId = mode;
+    const status = data.reviewed_map_status[mapId] || "pending_inspector_confirmation";
+    const row = document.createElement("div");
+    row.className = "review-synthesis-row";
+    row.dataset.status = status;
+    const description = document.createElement("p");
+    description.textContent = mapId === "water" ? synthesisTools.WATER_SCOPE_RULE : mapId === "creek" ? synthesisTools.CREEK_WARNING : "Vegetation zones are inspector interpretations. Actual clearing cost requires contractor pricing.";
+    const approve = document.createElement("button");
+    approve.type = "button";
+    approve.textContent = status === "approved" ? "MAP REVIEW APPROVED" : "Approve this map interpretation";
+    approve.disabled = status === "approved";
+    approve.addEventListener("click", () => { synthesisTools.setMapReview(data, mapId, "approved", data.inspector_identity); saveState(); renderReviewedSynthesis(mode); setStatus(`${mapId} map review approved.`, "success"); });
+    row.append(description, approve); panel.appendChild(row);
+    if (mapId === "water") document.getElementById("smallWaterMapFrame").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function markNewInspectionPhase() {
+    if (!data.started) { setStatus("Start the inspection before marking a new phase or relocation.", "warning"); return; }
+    const label = prompt("Name the new inspection phase or relocation. Example: Drove to Small Tract.", "New inspection phase");
+    if (label === null) return;
+    data.lifecycle_events.push({ type: "new_inspection_phase", time: new Date().toISOString(), label: label.trim() || "New inspection phase", area_id: data.active_area_id || null, source: "button_press", route_break_required: true });
+    saveState(); setStatus("New phase marked. The report route will start a separate walked segment and will not draw a false straight jump.", "success");
+  }
+
+  async function importChatReviewFile(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    if (!file || !synthesisTools) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const count = synthesisTools.importChatReview(data, parsed);
+      saveState(); renderReviewedSynthesis("phases");
+      setStatus(`${count} ChatGPT review annotation${count === 1 ? "" : "s"} imported as pending. Nothing was activated.`, "success");
+    } catch (error) { setStatus(`CHATGPT REVIEW NOT IMPORTED: ${error.message}`, "error"); }
   }
 
   function showEvidenceSetFields() {
@@ -1362,7 +1478,23 @@
     return 2 * radius * Math.asin(Math.sqrt(h));
   }
 
+  function currentSegmentedRoute() {
+    if (!synthesisTools) return null;
+    const lastPoint = data.points[data.points.length - 1];
+    const lastEvent = data.lifecycle_events[data.lifecycle_events.length - 1];
+    const lastPhoto = data.photos[data.photos.length - 1];
+    const key = [data.points.length, lastPoint && lastPoint.time, data.lifecycle_events.length, lastEvent && lastEvent.time, data.photos.length, lastPhoto && (lastPhoto.recorded_at || lastPhoto.time)].join("|");
+    if (routeDisplayCache.key !== key) {
+      const completePearsonReview = data.photos.some(photo => Number(String(photo.photo_number || "").replace(/\D/g, "")) === 196);
+      const activePoints = completePearsonReview ? data.points.filter(point => { const time = Date.parse(point.time || ""); return !Number.isFinite(time) || time >= Date.parse("2026-08-03T00:00:00.000Z"); }) : data.points;
+      routeDisplayCache = { key, model: synthesisTools.segmentRoute(activePoints, data) };
+    }
+    return routeDisplayCache.model;
+  }
+
   function totalDistance() {
+    const segmented = currentSegmentedRoute();
+    if (segmented) return segmented.distance_walked_m;
     let meters = 0;
     for (let i = 1; i < data.points.length; i += 1) meters += haversine(data.points[i - 1], data.points[i]);
     return meters;
@@ -1503,7 +1635,7 @@
     const subject = subjectParcel();
     const waterInspection = effectiveEvidenceData();
     waterInspection.evidence_set_summaries = evidenceSetTools ? evidenceSetTools.createEvidenceSetSummaries(data) : { sets: [] };
-    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: waterInspection, subjectFeature: subject, statedSmallTractAcres: 5.49 });
+    smallTractWaterModel = waterTools.buildSmallTractWaterMapModel({ inspection: waterInspection, subjectFeature: subject, statedSmallTractAcres: 5.48 });
     const summary = document.getElementById("smallWaterSummary");
     if (!smallTractWaterModel || smallTractWaterModel.status !== "GENERATED") {
       summary.textContent = "The verified small-tract parcel ring is unavailable. Evidence capture remains active.";
@@ -1625,14 +1757,28 @@
     svg.innerHTML = "";
     drawPropertyLines();
     drawCoverageOverlay();
-    const visiblePoints = data.points.filter(point => point.lon >= xmin && point.lon <= xmax && point.lat >= ymin && point.lat <= ymax);
-    const pathStride = Math.max(1, Math.ceil(visiblePoints.length / 1500));
-    const displayPoints = visiblePoints.filter((point, index) => index % pathStride === 0 || index === visiblePoints.length - 1);
-    if (displayPoints.length > 1) {
+    const segmentedRoute = currentSegmentedRoute();
+    const routeDisplayPoints = segmentedRoute ? segmentedRoute.segments.flatMap(segment => segment.points) : data.points;
+    const visiblePoints = routeDisplayPoints.filter(point => point.lon >= xmin && point.lon <= xmax && point.lat >= ymin && point.lat <= ymax);
+    const routeSegments = segmentedRoute ? segmentedRoute.segments : [{ points: visiblePoints }];
+    routeSegments.forEach(segment => {
+      const inside = segment.points.filter(point => point.lon >= xmin && point.lon <= xmax && point.lat >= ymin && point.lat <= ymax);
+      const pathStride = Math.max(1, Math.ceil(inside.length / 1500));
+      const displayPoints = inside.filter((point, index) => index % pathStride === 0 || index === inside.length - 1);
+      if (displayPoints.length < 2) return;
       const path = displayPoints.map((point, index) => `${index ? "L" : "M"}${sx(point.lon).toFixed(1)} ${sy(point.lat).toFixed(1)}`).join(" ");
       addSvg("path", { d: path, fill: "none", stroke: "#111", "stroke-width": 10, "vector-effect": "non-scaling-stroke", opacity: 0.82 });
       addSvg("path", { d: path, fill: "none", stroke: "#ffe54a", "stroke-width": 5, "vector-effect": "non-scaling-stroke" });
-    }
+    });
+    if (segmentedRoute) segmentedRoute.relocations.filter(item => item.display !== "no_connector").forEach(item => {
+      const coordinates = item.geometry && item.geometry.coordinates || [];
+      if (coordinates.length !== 2) return;
+      const path = coordinates.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ");
+      const connector = addSvg("path", { d: path, fill: "none", stroke: "#8a8a8a", "stroke-width": 5, "stroke-dasharray": "14 12", "vector-effect": "non-scaling-stroke" });
+      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      title.textContent = "Unverified relocation - not a walked route";
+      connector.appendChild(title);
+    });
     const dotStride = Math.max(5, Math.ceil(visiblePoints.length / 150));
     visiblePoints.forEach((point, index) => {
       if (index % dotStride !== 0 && index !== visiblePoints.length - 1) return;
@@ -1650,7 +1796,7 @@
       addSvg("circle", { cx: x, cy: y, r: 20, fill: style.fill, stroke: "#fff", "stroke-width": 5 });
       addSvg("text", { x, y: y + 5, "text-anchor": "middle", "font-size": 12, "font-family": "Arial", "font-weight": 900, fill: "#fff", "paint-order": "stroke", stroke: "#000", "stroke-width": 2 }, style.label);
     });
-    document.getElementById("pointCount").textContent = data.points.length;
+    document.getElementById("pointCount").textContent = routeDisplayPoints.length;
     document.getElementById("photoCount").textContent = data.photos.length;
     document.getElementById("eventCount").textContent = activeEvidence.markers.length;
     document.getElementById("voiceCount").textContent = activeEvidence.voice_notes.length;
@@ -3556,6 +3702,7 @@
   stopBtn.addEventListener("click", () => stopTracking());
   finishBtn.addEventListener("click", () => finishInspection());
   document.getElementById("addArea").addEventListener("click", addInspectionArea);
+  document.getElementById("newInspectionPhase").addEventListener("click", markNewInspectionPhase);
   document.getElementById("newArea").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addInspectionArea(); } });
   document.getElementById("addQuestion").addEventListener("click", addInvestigationQuestion);
   document.getElementById("newQuestion").addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); addInvestigationQuestion(); } });
@@ -3569,6 +3716,16 @@
   evidenceRelationshipSelect.addEventListener("change", () => { data.next_evidence_relationship = evidenceRelationshipSelect.value; saveState(); renderCoaching(); });
   nextPhotoValueSelect.addEventListener("change", () => { data.next_photo_value = nextPhotoValueSelect.value; saveState(); renderCoaching(); });
   document.getElementById("reviewEvidence").addEventListener("click", showDepartureReview);
+  document.getElementById("reviewCorrections").addEventListener("click", () => document.querySelector(".audit-card").scrollIntoView({ behavior: "smooth", block: "start" }));
+  document.getElementById("reviewPearsonPhases").addEventListener("click", () => renderReviewedSynthesis("phases"));
+  document.getElementById("approveEvidenceSets").addEventListener("click", () => { renderEvidenceSets(); document.getElementById("evidence-sets-heading").scrollIntoView({ behavior: "smooth", block: "start" }); });
+  document.getElementById("reviewWaterMap").addEventListener("click", () => renderReviewedSynthesis("water"));
+  document.getElementById("reviewCreekMap").addEventListener("click", () => renderReviewedSynthesis("creek"));
+  document.getElementById("reviewVegetationMap").addEventListener("click", () => renderReviewedSynthesis("vegetation"));
+  document.getElementById("reviewHomesiteConcepts").addEventListener("click", () => renderReviewedSynthesis("homesite"));
+  document.getElementById("importChatGPTReview").addEventListener("click", () => document.getElementById("chatReviewInput").click());
+  document.getElementById("chatReviewInput").addEventListener("change", importChatReviewFile);
+  document.getElementById("generatePropertyReport").addEventListener("click", () => finishInspection({ reviewed: true }));
   document.getElementById("continueInspecting").addEventListener("click", () => departureDialog.close());
   document.getElementById("finishAfterReview").addEventListener("click", () => { departureDialog.close(); finishInspection({ reviewed: true }); });
   document.getElementById("wet").addEventListener("click", () => openObservationDialog("wet"));

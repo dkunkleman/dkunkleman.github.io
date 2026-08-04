@@ -5,14 +5,15 @@
   const governance = typeof module === "object" && module.exports ? require("./evidence-governance.js") : (root && root.EvidenceGovernance);
   const evidenceSets = typeof module === "object" && module.exports ? require("./evidence-sets.js") : (root && root.EvidenceSets);
   const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
-  const api = factory(coaching, water, governance, evidenceSets, timber);
+  const synthesis = typeof module === "object" && module.exports ? require("./reviewed-property-synthesis.js") : (root && root.ReviewedPropertySynthesis);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools) {
   "use strict";
 
   const FORMAT = "pearson-road-inspection-package";
-  const FORMAT_VERSION = "2.0";
+  const FORMAT_VERSION = "2.1";
   const textEncoder = new TextEncoder();
   const crcTable = new Uint32Array(256);
 
@@ -376,6 +377,10 @@
     const voiceById = new Map((voiceNotes || []).map(note => [String(note.voice_note_id), note]));
     const features = [];
     if ((inspection.points || []).length) {
+      const segmented = inspection.segmented_route && Array.isArray(inspection.segmented_route.segments) ? inspection.segmented_route : null;
+      const lineCoordinates = segmented
+        ? segmented.segments.filter(segment => segment.points.length > 1).map(segment => segment.points.map(point => [point.lon, point.lat]))
+        : [inspection.points.map(point => [point.lon, point.lat])];
       features.push({
         type: "Feature",
         properties: {
@@ -387,10 +392,15 @@
           gps_accuracy_m: inspection.points.map(point => point.accuracy_m),
           altitude_m: inspection.points.map(point => point.altitude_m),
           speed_mps: inspection.points.map(point => point.speed_mps),
-          heading_deg: inspection.points.map(point => point.heading_deg)
+          heading_deg: inspection.points.map(point => point.heading_deg),
+          segmented: Boolean(segmented),
+          segment_count: segmented ? segmented.segments.length : 1,
+          relocation_count: segmented ? segmented.relocations.length : 0,
+          route_warning: segmented ? segmented.warning : null
         },
-        geometry: { type: "LineString", coordinates: inspection.points.map(point => [point.lon, point.lat]) }
+        geometry: lineCoordinates.length === 1 ? { type: "LineString", coordinates: lineCoordinates[0] } : { type: "MultiLineString", coordinates: lineCoordinates }
       });
+      if (segmented) segmented.relocations.filter(item => item.display !== "no_connector").forEach(item => features.push({ type: "Feature", properties: { record_type: "unverified_relocation", walked_route_claim: false, display: item.display, reasons: item.reasons, distance_m: item.distance_m, elapsed_seconds: item.elapsed_seconds }, geometry: item.geometry }));
     }
     (inspection.markers || []).forEach(event => {
       const photo = event.photo_id == null ? null : photoById.get(String(event.photo_id));
@@ -446,15 +456,20 @@
       if (voice) xml += `<inspection:voiceNotePath>${xmlEscape(voice.audio.path)}</inspection:voiceNotePath>`;
       xml += '</extensions></wpt>\n';
     });
-    xml += '  <trk><name>Pearson Road field track</name><trkseg>\n';
-    (inspection.points || []).forEach(point => {
-      xml += `    <trkpt lat="${point.lat}" lon="${point.lon}">`;
-      if (point.altitude_m != null) xml += `<ele>${point.altitude_m}</ele>`;
-      xml += `<time>${xmlEscape(point.time)}</time><extensions><inspection:gpsAccuracyMeters>${xmlEscape(point.accuracy_m)}</inspection:gpsAccuracyMeters>`;
-      if (point.heading_deg != null) xml += `<inspection:compassHeadingDegrees>${xmlEscape(point.heading_deg)}</inspection:compassHeadingDegrees>`;
-      xml += `</extensions></trkpt>\n`;
+    xml += '  <trk><name>Pearson Road field track - segmented walked route</name>\n';
+    const routeSegments = inspection.segmented_route && Array.isArray(inspection.segmented_route.segments) ? inspection.segmented_route.segments : [{ points: inspection.points || [] }];
+    routeSegments.forEach(segment => {
+      xml += '    <trkseg>\n';
+      (segment.points || []).forEach(point => {
+        xml += `      <trkpt lat="${point.lat}" lon="${point.lon}">`;
+        if (point.altitude_m != null) xml += `<ele>${point.altitude_m}</ele>`;
+        xml += `<time>${xmlEscape(point.time)}</time><extensions><inspection:gpsAccuracyMeters>${xmlEscape(point.accuracy_m)}</inspection:gpsAccuracyMeters>`;
+        if (point.heading_deg != null) xml += `<inspection:compassHeadingDegrees>${xmlEscape(point.heading_deg)}</inspection:compassHeadingDegrees>`;
+        xml += `</extensions></trkpt>\n`;
+      });
+      xml += '    </trkseg>\n';
     });
-    xml += '  </trkseg></trk>\n</gpx>\n';
+    xml += '  </trk>\n</gpx>\n';
     return xml;
   }
 
@@ -571,6 +586,7 @@
         field_coaching: { source: "FIELD_COACHING.json", destination: `analysis/${exportId}/FIELD_COACHING.json` },
         field_evidence_review: { source: "FIELD_EVIDENCE_REVIEW.json", destination: `analysis/${exportId}/FIELD_EVIDENCE_REVIEW.json` },
         evidence_audit_history: { source: "EVIDENCE_AUDIT_HISTORY.json", destination: `analysis/${exportId}/EVIDENCE_AUDIT_HISTORY.json` },
+        audit_only_gps_points: { source: "AUDIT_ONLY_GPS_POINTS.json", destination: `analysis/${exportId}/AUDIT_ONLY_GPS_POINTS.json` },
         evidence_sets: { source: "EVIDENCE_SETS.json", destination: `analysis/${exportId}/EVIDENCE_SETS.json` },
         post_inspection_review: { source: "POST_INSPECTION_REVIEW.json", destination: `analysis/${exportId}/POST_INSPECTION_REVIEW.json` },
         chat_review_return_instructions: { source: "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", destination: `analysis/${exportId}/CHAT_REVIEW_RETURN_INSTRUCTIONS.md` },
@@ -581,6 +597,19 @@
         return_visit_plan: { source: "RETURN_VISIT_PLAN.json", destination: `analysis/${exportId}/RETURN_VISIT_PLAN.json` },
         small_tract_water_map: { source: "SMALL_TRACT_WATER_MAP.json", destination: `maps/${exportId}/SMALL_TRACT_WATER_MAP.json` },
         flowing_water_corridors: { source: "FLOWING_WATER_CORRIDORS.json", destination: `maps/${exportId}/FLOWING_WATER_CORRIDORS.json` },
+        segmented_route: { source: "SEGMENTED_ROUTE.json", destination: `maps/${exportId}/SEGMENTED_ROUTE.json` },
+        reviewed_property_synthesis: { source: "REVIEWED_PROPERTY_SYNTHESIS.json", destination: `analysis/${exportId}/REVIEWED_PROPERTY_SYNTHESIS.json` },
+        creek_corridor_map: { source: "CREEK_CORRIDOR_MAP.json", destination: `maps/${exportId}/CREEK_CORRIDOR_MAP.json` },
+        creek_corridor_map_interactive: { source: "creek-corridor-map.html", destination: `maps/${exportId}/creek-corridor-map.html` },
+        vegetation_clearing_map: { source: "VEGETATION_CLEARING_MAP.json", destination: `maps/${exportId}/VEGETATION_CLEARING_MAP.json` },
+        vegetation_clearing_map_interactive: { source: "vegetation-clearing-map.html", destination: `maps/${exportId}/vegetation-clearing-map.html` },
+        homesite_opportunity_map: { source: "HOMESITE_OPPORTUNITY_MAP.json", destination: `maps/${exportId}/HOMESITE_OPPORTUNITY_MAP.json` },
+        homesite_opportunity_map_interactive: { source: "homesite-opportunity-map.html", destination: `maps/${exportId}/homesite-opportunity-map.html` },
+        property_intelligence_report: { source: "PROPERTY_INTELLIGENCE_REPORT.md", destination: `analysis/${exportId}/PROPERTY_INTELLIGENCE_REPORT.md` },
+        property_intelligence_report_html: { source: "property-intelligence-report.html", destination: `analysis/${exportId}/property-intelligence-report.html` },
+        printable_property_report: { source: "printable-property-report.html", destination: `analysis/${exportId}/printable-property-report.html` },
+        audience_reports: { source: "AUDIENCE_REPORTS.json", destination: `analysis/${exportId}/AUDIENCE_REPORTS.json` },
+        audience_report_documents: { source: "audience-reports/*.md", destination: `analysis/${exportId}/audience-reports/` },
         structured_measurements: { source: "STRUCTURED_MEASUREMENTS.json", destination: `measurements/${exportId}/STRUCTURED_MEASUREMENTS.json` },
         preliminary_timber_reconnaissance: { source: "PRELIMINARY_TIMBER_RECONNAISSANCE.json", destination: `timber/${exportId}/PRELIMINARY_TIMBER_RECONNAISSANCE.json` },
         forester_handoff: { source: "FORESTER_HANDOFF.json", destination: `timber/${exportId}/FORESTER_HANDOFF.json` },
@@ -776,16 +805,18 @@
     const finished = new Date((inspection && inspection.stopped) || liveEndTime || NaN);
     const elapsed = Number.isNaN(started.valueOf()) || Number.isNaN(finished.valueOf()) ? 0 : Math.max(0, finished - started);
     let active = 0;
-    let distance = 0;
+    let distance = inspection && inspection.segmented_route && Number.isFinite(Number(inspection.segmented_route.distance_walked_m)) ? Number(inspection.segmented_route.distance_walked_m) : 0;
+    const segmentedDistance = Boolean(inspection && inspection.segmented_route && Number.isFinite(Number(inspection.segmented_route.distance_walked_m)));
     for (let index = 1; index < points.length; index += 1) {
       const previous = points[index - 1];
       const point = points[index];
       const segmentDistance = distanceMeters(previous, point);
-      if (Number.isFinite(segmentDistance)) distance += segmentDistance;
+      if (!segmentedDistance && Number.isFinite(segmentDistance)) distance += segmentDistance;
       const delta = Math.max(0, new Date(point.time) - new Date(previous.time));
       if (!delta || delta > 120000) continue;
       const calculatedSpeed = segmentDistance / (delta / 1000);
       const reportedSpeed = Number(point.speed_mps);
+      if (calculatedSpeed > 5 || (Number.isFinite(reportedSpeed) && reportedSpeed > 5)) continue;
       if ((Number.isFinite(reportedSpeed) && reportedSpeed >= 0.45) || calculatedSpeed >= 0.45) active += delta;
     }
     active = Math.min(active, elapsed || active);
@@ -896,12 +927,14 @@
       return ((feature.geometry || {}).rings || []).map(ring => `<path d="${reportPath(ring)}" fill="${subject ? "rgba(255,255,255,.05)" : "none"}" stroke="${subject ? "#e30000" : "#fff"}" stroke-width="${subject ? 10 : 3}" vector-effect="non-scaling-stroke"/>`);
     }).join("");
     const rawTrack = manifest.inspection.gps_track || [];
-    const displayStride = Math.max(1, Math.ceil(rawTrack.length / 1500));
-    const displayTrack = rawTrack.filter((point, index) => index % displayStride === 0 || index === rawTrack.length - 1);
-    const track = displayTrack.map((point, index) => {
-      const projected = reportProjection(point.lon, point.lat);
-      return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`;
-    }).join(" ");
+    const segmented = manifest.inspection.segmented_route;
+    const displaySegments = segmented && Array.isArray(segmented.segments) ? segmented.segments.map(segment => segment.points) : [rawTrack];
+    const trackSvg = displaySegments.map(points => {
+      const displayStride = Math.max(1, Math.ceil(points.length / 1500));
+      const displayTrack = points.filter((point, index) => index % displayStride === 0 || index === points.length - 1);
+      const path = displayTrack.map((point, index) => { const projected = reportProjection(point.lon, point.lat); return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`; }).join(" ");
+      return path ? `<path d="${path}" fill="none" stroke="#111" stroke-width="13" vector-effect="non-scaling-stroke"/><path d="${path}" fill="none" stroke="#ffe600" stroke-width="7" vector-effect="non-scaling-stroke"/>` : "";
+    }).join("") + (segmented ? (segmented.relocations || []).filter(item => item.display !== "no_connector").map(item => { const path = item.geometry.coordinates.map((point, index) => { const projected = reportProjection(point[0], point[1]); return `${index ? "L" : "M"}${projected.x.toFixed(1)} ${projected.y.toFixed(1)}`; }).join(" "); return `<path d="${path}" fill="none" stroke="#888" stroke-width="5" stroke-dasharray="14 12" vector-effect="non-scaling-stroke"><title>Unverified relocation - not a walked route</title></path>`; }).join("") : "");
     const photoIndex = new Map((manifest.photographs || []).map(photo => [String(photo.photo_id), photo]));
     const evidenceSets = manifest.inspection.evidence_set_summaries && manifest.inspection.evidence_set_summaries.sets || [];
     const setByPhotoId = new Map();
@@ -923,7 +956,7 @@
     const zones = (settings.zones || []).map((zone, index) => `<g><rect x="${zone.minX}" y="${zone.minY}" width="${zone.width}" height="${zone.height}" fill="none" stroke="#ffea00" stroke-width="8" stroke-dasharray="24 12"/><circle cx="${zone.minX + 35}" cy="${zone.minY + 35}" r="30" fill="#111"/><text x="${zone.minX + 35}" y="${zone.minY + 45}" text-anchor="middle" fill="#fff" font-size="30" font-weight="900">${index + 1}</text></g>`).join("");
     const baseImage = settings.terrainDataUrl ? `<use href="#reportTerrainRaster" x="0" y="0" width="1800" height="1500"/>` : `<rect width="1800" height="1500" fill="#d8d1bd"/>`;
     const contours = settings.contourDataUrl ? `<use href="#reportContourRaster" x="0" y="0" width="1800" height="1500" opacity=".8"/>` : "";
-    return `<svg class="report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(settings.title || "Inspection map")}" xmlns="http://www.w3.org/2000/svg">${baseImage}${contours}${parcelPaths}${track ? `<path d="${track}" fill="none" stroke="#111" stroke-width="13" vector-effect="non-scaling-stroke"/><path d="${track}" fill="none" stroke="#ffe600" stroke-width="7" vector-effect="non-scaling-stroke"/>` : ""}${markerSvg}${zones}<g transform="translate(${view.minX + 70} ${view.minY + 70})"><path d="M0 65 L28 0 L56 65 L28 50 Z" fill="#111"/><text x="28" y="-12" text-anchor="middle" font-size="34" font-weight="900">N</text></g><g transform="translate(${view.minX + 90} ${view.minY + view.height - 75})"><path d="M0 0 H336" stroke="#111" stroke-width="12"/><path d="M0 -16 V16 M336 -16 V16" stroke="#111" stroke-width="8"/><text x="168" y="-20" text-anchor="middle" font-size="28" font-weight="900">about 1,000 ft</text></g></svg>`;
+    return `<svg class="report-map" viewBox="${view.minX} ${view.minY} ${view.width} ${view.height}" role="img" aria-label="${htmlEscape(settings.title || "Inspection map")}" xmlns="http://www.w3.org/2000/svg">${baseImage}${contours}${parcelPaths}${trackSvg}${markerSvg}${zones}<g transform="translate(${view.minX + 70} ${view.minY + 70})"><path d="M0 65 L28 0 L56 65 L28 50 Z" fill="#111"/><text x="28" y="-12" text-anchor="middle" font-size="34" font-weight="900">N</text></g><g transform="translate(${view.minX + 90} ${view.minY + view.height - 75})"><path d="M0 0 H336" stroke="#111" stroke-width="12"/><path d="M0 -16 V16 M336 -16 V16" stroke="#111" stroke-width="8"/><text x="168" y="-20" text-anchor="middle" font-size="28" font-weight="900">about 1,000 ft</text></g></svg>`;
   }
 
   async function createPrintableReport(manifest, parcels, mapContext, photoEntries) {
@@ -967,7 +1000,7 @@
     const waterModel = manifest.small_tract_water_map || {};
     const waterPage = (title, mode, note) => `<section class="page landscape"><h1>${htmlEscape(title)}</h1>${smallWaterMapSvg(manifest, mode)}<p class="map-note">${htmlEscape(note)} Solid blue points are actual photographed water. Dashed or shaded boundaries are estimates. Gray acreage outside the inspected corridor remains unknown.</p><div class="disclaimer">${htmlEscape((waterModel.limitations || []).join(" "))}</div></section>`;
     const smallWaterPages = waterModel.status === "GENERATED" ? [
-      waterPage("SMALL TRACT — OBSERVED WATER CONDITIONS", "overview", "Complete 5.49-acre small-tract overview with route, water, dry evidence, estimated extents, and preliminary avoidance areas."),
+      waterPage("SMALL TRACT — OBSERVED WATER CONDITIONS", "overview", "Complete 5.48-acre small-tract overview with route, water, dry evidence, estimated extents, and preliminary avoidance areas."),
       waterPage("Small Tract — Water Evidence Only", "all", "Every confirmed or legacy Wet-linked water photograph within the exact small-tract boundary."),
       waterPage("Small Tract — Larger Pooled and Flowing Water", "significant", "Minor isolated depressions are de-emphasized; flowing and materially pooled evidence remains."),
       waterPage("Small Tract — Preliminary Building Avoidance", "avoidance", "This preliminary decision layer does not establish engineering, wetland, soil, septic, or permitting conclusions.")
@@ -1120,6 +1153,13 @@
       "- PROFESSIONAL_HANDOFF_CARDS.json and professional-handoff-cards.html: exact audience questions, evidence, unknowns, and one-page printable handoffs.",
       "- RETURN_VISIT_PLAN.json: unvisited-zone waypoints and the highest-value remaining measurements and photographs.",
       "- SMALL_TRACT_WATER_MAP.json: exact small-tract ring, small-tract-only route and evidence, conservative water clusters, dry-corridor rule, unknown acreage, and preliminary building-avoidance reasoning.",
+      "- SEGMENTED_ROUTE.json: every exact GPS point plus confirmed walked segments, rejected-point reasons, and unverified relocations that must never be drawn as walked.",
+      "- REVIEWED_PROPERTY_SYNTHESIS.json: inspector approval status for Pearson review phases, maps, concepts, imported ChatGPT proposals, and immutable review events.",
+      "- CREEK_CORRIDOR_MAP.json and creek-corridor-map.html: confirmed or still-pending creek evidence, exact photo points, conservative centerline rules, map-linked photos and voice evidence, and the required professional-verification warning.",
+      "- VEGETATION_CLEARING_MAP.json and vegetation-clearing-map.html: reviewed western/northern woodland and eastern road-frontage zones without unsupported clearing prices.",
+      "- HOMESITE_OPPORTUNITY_MAP.json and homesite-opportunity-map.html: independently toggleable inspector concepts that remain non-active until approval and never represent development approval.",
+      "- PROPERTY_INTELLIGENCE_REPORT.md, property-intelligence-report.html, and printable-property-report.html: the understandable reviewed report with evidence, confidence, and limitations in every section.",
+      "- AUDIENCE_REPORTS.json: buyer, seller, builder, forester, drainage-engineer, and internal views using the same immutable evidence.",
       "- FLOWING_WATER_CORRIDORS.json: inspector-confirmed creek Evidence Sets, exact photographed points, inferred centerlines, reported flow direction, safe measurements, amenity/avoidance context, and explicit uninspected extent.",
       "- STRUCTURED_MEASUREMENTS.json: authoritative inspector-entered numeric measurements, units, methods, endpoint/alignment checks, subjects, supporting photos, and pending confirmation-gated measurement suggestions.",
       "- PRELIMINARY_TIMBER_RECONNAISSANCE.json: permanent tree and plot IDs, raw DBH/height/method/defect records, clearly limited sample summaries, and builder/clearing observations.",
@@ -1171,7 +1211,7 @@
       auto_start: true,
       user_questions_required_before_analysis: false,
       objective: "Reconstruct the field day from this ZIP alone, then reduce uncertainty about access, buildability, economic potential, cost/risk, and distinctive value without asking the field user to match evidence.",
-      start_here: ["AI_README.md", "EVIDENCE_AUDIT_HISTORY.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
+      start_here: ["AI_README.md", "EVIDENCE_AUDIT_HISTORY.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "PROPERTY_INTELLIGENCE_REPORT.md", "SEGMENTED_ROUTE.json", "DECISION_BRIEF.json", "SMALL_TRACT_WATER_MAP.json", "small-tract-water-map.html", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "QUESTION_BRIEF.json", "FIELD_EVIDENCE_REVIEW.json", "FIELD_COACHING.json", "PROFESSIONAL_HANDOFF_CARDS.json", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "AI_ANALYSIS.json", "REPORT_TEMPLATE.md", "EVIDENCE_RELATIONSHIPS.json", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "inspection.json"],
       required_outputs_in_order: [
         "Decision summary",
         "Strengths, weaknesses, and material unknowns",
@@ -1593,7 +1633,7 @@
 
 ## Start here
 
-This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`EVIDENCE_AUDIT_HISTORY.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open \`small-tract-water-map.html\` for the human-readable water map and \`professional-handoff-cards.html\` for one-page audience handoffs. Use \`REPORT_TEMPLATE.md\` to produce the complete report immediately. Do not ask the user to identify files or relationships.
+This package records one rural-property field inspection. Assume no prior knowledge of the property. Read \`EVIDENCE_AUDIT_HISTORY.json\`, \`REVIEWED_PROPERTY_SYNTHESIS.json\`, \`PROPERTY_INTELLIGENCE_REPORT.md\`, \`SEGMENTED_ROUTE.json\`, \`DECISION_BRIEF.json\`, \`SMALL_TRACT_WATER_MAP.json\`, \`QUESTION_BRIEF.json\`, \`FIELD_EVIDENCE_REVIEW.json\`, \`FIELD_COACHING.json\`, and \`AI_ANALYSIS.json\` first, then inspect every active actual photograph and voice note referenced there. Open the four interactive map HTML files for human-readable evidence maps and \`professional-handoff-cards.html\` for one-page audience handoffs. Do not ask the user to identify files or relationships.
 
 The purpose is not to repeat the evidence. The purpose is to reduce uncertainty about five decisions:
 
@@ -1618,7 +1658,10 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`QUESTION_BRIEF.json\` contains the inspector's investigation questions and the evidence explicitly attached to each question.
 - \`FIELD_COACHING.json\` separates well-inspected, lightly-inspected, and not-inspected route-proximity estimates; it also records missing evidence and field-efficiency estimates.
 - \`RETURN_VISIT_PLAN.json\` prioritizes unvisited areas, unanswered questions, measurements, and photographs for the next visit.
-- \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.49-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
+- \`SEGMENTED_ROUTE.json\` preserves every exact GPS point but separates confirmed walked segments from rejected fixes and unverified relocations. Never draw a straight jump as walked.
+- \`REVIEWED_PROPERTY_SYNTHESIS.json\` distinguishes approved Pearson review phases from pending or rejected interpretations. Pending items are not findings.
+- \`PROPERTY_INTELLIGENCE_REPORT.md\` is the inspector-reviewed, plain-English report. Its audience variants change emphasis only; they never change evidence.
+- \`SMALL_TRACT_WATER_MAP.json\` isolates only the approximately 5.48-acre small tract. It excludes large-tract evidence by geometry, distinguishes photographed water from inferred outlines, keeps the flowing-water corridor separate from minor depressions, and never treats unvisited acreage as dry.
 - \`FLOWING_WATER_CORRIDORS.json\` contains only inspector-confirmed creek Evidence Sets. Treat exact photographed points as observations; treat dashed centerlines and flow arrows as inferences. Never convert a centerline into a surveyed boundary or extend it through uninspected ground.
 - Always report a confirmed creek as: "Observed flowing-water corridor. Permanence, ordinary high-water limits, wetlands status, drainage rights and building setbacks remain unverified."
 - \`STRUCTURED_MEASUREMENTS.json\` contains inspector-entered numbers, units, methods, alignment/endpoint checks, subjects, and supporting photographs. The entered number is authoritative; never substitute a value guessed from image pixels.
@@ -1814,7 +1857,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     sourceInspection.timber_plots = Array.isArray(sourceInspection.timber_plots) ? sourceInspection.timber_plots : [];
     sourceInspection.timber_trees = Array.isArray(sourceInspection.timber_trees) ? sourceInspection.timber_trees : [];
     sourceInspection.measurement_suggestions = Array.isArray(sourceInspection.measurement_suggestions) ? sourceInspection.measurement_suggestions : [];
+    sourceInspection.review_phase_suggestions = Array.isArray(sourceInspection.review_phase_suggestions) ? sourceInspection.review_phase_suggestions : [];
+    sourceInspection.review_synthesis_events = Array.isArray(sourceInspection.review_synthesis_events) ? sourceInspection.review_synthesis_events : [];
+    sourceInspection.land_use_concepts = Array.isArray(sourceInspection.land_use_concepts) ? sourceInspection.land_use_concepts : [];
+    sourceInspection.imported_chat_review_annotations = Array.isArray(sourceInspection.imported_chat_review_annotations) ? sourceInspection.imported_chat_review_annotations : [];
     if (timberTools) timberTools.ensureModel(sourceInspection);
+    if (synthesisTools) synthesisTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
     if (governanceTools) governanceTools.ensureGovernanceModel(sourceInspection, settings.exportedAt);
     const governanceView = governanceTools ? governanceTools.buildEffectiveInspection(sourceInspection) : { active: sourceInspection, audit_history: { corrections: [] } };
@@ -2121,7 +2169,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       }).map(match => ({
         photo_id: match.item.photo_id,
         photo_number: match.item.photo_number,
-        relationship: match.direct ? "direct" : "nearest_by_location",
+        relationship: match.direct ? "direct" : "nearest_by_location_unconfirmed",
         distance_m: match.distance_m,
         time_delta_ms: match.time_delta_ms,
         analysis_path: match.item.analysis && match.item.analysis.path
@@ -2130,7 +2178,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         idField: "voice_note_id", targetId: event.id, directIds: [event.voice_note_id]
       }).map(match => ({
         voice_note_id: match.item.voice_note_id,
-        relationship: match.direct ? "direct" : "nearest_by_location",
+        relationship: match.direct ? "direct" : "nearest_by_location_unconfirmed",
         distance_m: match.distance_m,
         time_delta_ms: match.time_delta_ms,
         audio_path: match.item.audio.path
@@ -2189,6 +2237,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       voice.gps_point_reference = gpsReference;
     });
 
+    const segmentedRoute = synthesisTools ? synthesisTools.segmentRoute(inspection.points || [], Object.assign({}, inspection, { photos: manifestPhotos })) : null;
+    if (segmentedRoute) inspection.segmented_route = segmentedRoute;
     const metrics = calculateInspectionMetrics(inspection, exportedAt);
     const schema = {
       schema_name: "property-intelligence-inspection",
@@ -2229,7 +2279,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         water_observation_rule: inspection.water_observation_rule || null
       }),
       subjectFeature,
-      statedSmallTractAcres: 5.49,
+      statedSmallTractAcres: 5.48,
       generatedAt: exportedAt
     }) : { status: "NOT_AVAILABLE", reason: "Water intelligence module was unavailable during packaging." };
     const fieldEvidenceReview = governanceTools ? governanceTools.createFieldEvidenceReview(inspection) : null;
@@ -2317,6 +2367,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         timber_tree_count: (timberReconnaissance.trees || []).length,
         timber_sample_plot_count: timberReconnaissance.sampling_method_summary && timberReconnaissance.sampling_method_summary.plot_count || 0,
         active_review_annotation_count: activeReviewAnnotations.length,
+        walked_route_segment_count: segmentedRoute ? segmentedRoute.segments.length : 1,
+        unverified_relocation_count: segmentedRoute ? segmentedRoute.relocations.length : 0,
+        rejected_gps_point_count: segmentedRoute ? segmentedRoute.rejected_points.length : 0,
         elapsed_time_ms: metrics.elapsed_time_ms,
         active_movement_time_ms: metrics.active_movement_time_ms,
         stopped_time_ms: metrics.stopped_time_ms,
@@ -2363,6 +2416,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         ,measurement_suggestions: sourceInspection.measurement_suggestions || []
         ,preliminary_timber_reconnaissance: timberReconnaissance
         ,forester_handoff: foresterHandoff
+        ,segmented_route: segmentedRoute
+        ,review_phase_suggestions: sourceInspection.review_phase_suggestions || []
+        ,review_synthesis_events: sourceInspection.review_synthesis_events || []
+        ,land_use_concepts: sourceInspection.land_use_concepts || []
+        ,reviewed_map_status: sourceInspection.reviewed_map_status || {}
+        ,imported_chat_review_annotations: sourceInspection.imported_chat_review_annotations || []
       },
       photographs: manifestPhotos,
       voice_notes: manifestVoices,
@@ -2381,6 +2440,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         field_coaching: "FIELD_COACHING.json",
         field_evidence_review: "FIELD_EVIDENCE_REVIEW.json",
         evidence_audit_history: "EVIDENCE_AUDIT_HISTORY.json",
+        audit_only_gps_points: "AUDIT_ONLY_GPS_POINTS.json",
         evidence_sets: "EVIDENCE_SETS.json",
         post_inspection_review: "POST_INSPECTION_REVIEW.json",
         weather_context: "WEATHER_CONTEXT.json",
@@ -2391,6 +2451,19 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         return_visit_plan: "RETURN_VISIT_PLAN.json",
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
+        segmented_route: "SEGMENTED_ROUTE.json",
+        reviewed_property_synthesis: "REVIEWED_PROPERTY_SYNTHESIS.json",
+        creek_corridor_map: "CREEK_CORRIDOR_MAP.json",
+        creek_corridor_map_interactive: "creek-corridor-map.html",
+        vegetation_clearing_map: "VEGETATION_CLEARING_MAP.json",
+        vegetation_clearing_map_interactive: "vegetation-clearing-map.html",
+        homesite_opportunity_map: "HOMESITE_OPPORTUNITY_MAP.json",
+        homesite_opportunity_map_interactive: "homesite-opportunity-map.html",
+        property_intelligence_report: "PROPERTY_INTELLIGENCE_REPORT.md",
+        property_intelligence_report_html: "property-intelligence-report.html",
+        printable_property_report: "printable-property-report.html",
+        audience_reports: "AUDIENCE_REPORTS.json",
+        audience_report_folder: "audience-reports/*.md",
         flowing_water_corridors: "FLOWING_WATER_CORRIDORS.json",
         structured_measurements: "STRUCTURED_MEASUREMENTS.json",
         preliminary_timber_reconnaissance: "PRELIMINARY_TIMBER_RECONNAISSANCE.json",
@@ -2426,6 +2499,29 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         map_context_metadata: "context/map-context.json"
       }
     };
+
+    const reviewedSynthesis = synthesisTools ? synthesisTools.buildSynthesis({
+      inspection: Object.assign({}, sourceInspection, { points: inspection.points, markers: inspection.markers, photos: manifestPhotos, voice_notes: manifestVoices, lifecycle_events: inspection.lifecycle_events, segmented_route: segmentedRoute }),
+      photos: manifestPhotos,
+      voiceNotes: manifestVoices,
+      subjectFeature,
+      smallTractWaterMap,
+      flowingWaterModel: flowingWaterCorridorModel,
+      manifest
+    }) : { route: segmentedRoute, review: { phases: [], events: [], rule: "Reviewed synthesis module unavailable." }, creek_corridor_map: {}, vegetation_clearing_map: {}, homesite_opportunity_map: {}, property_report: { sections: [] }, property_report_markdown: "# Property Intelligence Report\n\nReviewed synthesis module unavailable.\n", property_report_html: "<!doctype html><title>Property Intelligence Report unavailable</title>", audience_reports: { reports: [] }, map_html: { creek: "", vegetation: "", homesite: "" } };
+    inspection.segmented_route = reviewedSynthesis.route;
+    manifest.inspection.segmented_route = reviewedSynthesis.route;
+    manifest.reviewed_property_synthesis = {
+      property_scope: reviewedSynthesis.property_scope,
+      review: reviewedSynthesis.review,
+      creek_corridor_map: "CREEK_CORRIDOR_MAP.json",
+      vegetation_clearing_map: "VEGETATION_CLEARING_MAP.json",
+      homesite_opportunity_map: "HOMESITE_OPPORTUNITY_MAP.json",
+      property_report: "PROPERTY_INTELLIGENCE_REPORT.md",
+      audience_reports: "AUDIENCE_REPORTS.json"
+    };
+    manifest.summary.approved_review_phase_count = (reviewedSynthesis.review.phases || []).filter(item => item.status === "approved").length;
+    manifest.summary.pending_review_phase_count = (reviewedSynthesis.review.phases || []).filter(item => item.status === "pending_inspector_confirmation").length;
 
     const photoIndex = {
       schema_name: "property-inspection-photo-index",
@@ -2463,6 +2559,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("FIELD_COACHING.json", JSON.stringify(fieldCoaching, null, 2) + "\n", { modifiedAt });
     zip.add("FIELD_EVIDENCE_REVIEW.json", JSON.stringify(fieldEvidenceReview, null, 2) + "\n", { modifiedAt });
     zip.add("EVIDENCE_AUDIT_HISTORY.json", JSON.stringify(auditHistory, null, 2) + "\n", { modifiedAt });
+    zip.add("AUDIT_ONLY_GPS_POINTS.json", JSON.stringify({ schema_name: "property-intelligence-audit-only-gps", schema_version: "1.0", inspection_id: manifest.inspection_id, reason: "Excluded prior-day app-test GPS points remain permanently recoverable but do not affect the active route or findings.", points: auditHistory.audit_only_gps_points || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("EVIDENCE_SETS.json", JSON.stringify({ summaries: evidenceSetSummaries, pending_suggestions: evidenceSetSuggestions, append_only_events: sourceInspection.evidence_set_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("POST_INSPECTION_REVIEW.json", JSON.stringify(postInspectionReview, null, 2) + "\n", { modifiedAt });
     zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "1.0", inspection_id: manifest.inspection_id, weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation."] }, null, 2) + "\n", { modifiedAt });
@@ -2474,6 +2571,19 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("RETURN_VISIT_PLAN.json", JSON.stringify(returnVisitPlan, null, 2) + "\n", { modifiedAt });
     zip.add("SMALL_TRACT_WATER_MAP.json", JSON.stringify(smallTractWaterMap, null, 2) + "\n", { modifiedAt });
     zip.add("FLOWING_WATER_CORRIDORS.json", JSON.stringify(flowingWaterCorridorModel, null, 2) + "\n", { modifiedAt });
+    zip.add("SEGMENTED_ROUTE.json", JSON.stringify(reviewedSynthesis.route, null, 2) + "\n", { modifiedAt });
+    zip.add("REVIEWED_PROPERTY_SYNTHESIS.json", JSON.stringify({ schema_name: reviewedSynthesis.schema_name, schema_version: reviewedSynthesis.schema_version, property_scope: reviewedSynthesis.property_scope, review: reviewedSynthesis.review, warnings: reviewedSynthesis.warnings }, null, 2) + "\n", { modifiedAt });
+    zip.add("CREEK_CORRIDOR_MAP.json", JSON.stringify(reviewedSynthesis.creek_corridor_map, null, 2) + "\n", { modifiedAt });
+    zip.add("creek-corridor-map.html", reviewedSynthesis.map_html.creek, { modifiedAt });
+    zip.add("VEGETATION_CLEARING_MAP.json", JSON.stringify(reviewedSynthesis.vegetation_clearing_map, null, 2) + "\n", { modifiedAt });
+    zip.add("vegetation-clearing-map.html", reviewedSynthesis.map_html.vegetation, { modifiedAt });
+    zip.add("HOMESITE_OPPORTUNITY_MAP.json", JSON.stringify(reviewedSynthesis.homesite_opportunity_map, null, 2) + "\n", { modifiedAt });
+    zip.add("homesite-opportunity-map.html", reviewedSynthesis.map_html.homesite, { modifiedAt });
+    zip.add("PROPERTY_INTELLIGENCE_REPORT.md", reviewedSynthesis.property_report_markdown, { modifiedAt });
+    zip.add("property-intelligence-report.html", reviewedSynthesis.property_report_html, { modifiedAt });
+    zip.add("printable-property-report.html", reviewedSynthesis.property_report_html, { modifiedAt });
+    zip.add("AUDIENCE_REPORTS.json", JSON.stringify(reviewedSynthesis.audience_reports, null, 2) + "\n", { modifiedAt });
+    (reviewedSynthesis.audience_reports.reports || []).forEach(report => zip.add(report.filename, report.markdown, { modifiedAt }));
     zip.add("STRUCTURED_MEASUREMENTS.json", JSON.stringify({ schema_name: "property-intelligence-structured-measurement-index", schema_version: "1.0", inspection_id: manifest.inspection_id, authority_rule: "Inspector-entered numeric values are authoritative. Photographs are supporting evidence, not the sole source for reading measurements.", measurements: structuredMeasurements, pending_suggestions: (sourceInspection.evidence_set_suggestions || []).filter(item => item.suggested_measurement && item.status === "pending_inspector_confirmation") }, null, 2) + "\n", { modifiedAt });
     zip.add("PRELIMINARY_TIMBER_RECONNAISSANCE.json", JSON.stringify(timberReconnaissance, null, 2) + "\n", { modifiedAt });
     zip.add("FORESTER_HANDOFF.json", JSON.stringify(foresterHandoff, null, 2) + "\n", { modifiedAt });

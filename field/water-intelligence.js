@@ -278,18 +278,35 @@
     });
   }
 
-  function splitTrack(points, ring) {
+  function splitTrack(points, ring, inspection) {
     const segments = [];
     let current = [];
+    let priorAccepted = null;
+    let lastArea = null;
+    const lifecycle = inspection && inspection.lifecycle_events || [];
+    const timeOf = value => Date.parse(value && (value.time || value.recorded_at) || "");
+    const hasLifecycleBreak = (from, to) => lifecycle.some(event => {
+      const time = timeOf(event);
+      return Number.isFinite(time) && Number.isFinite(from) && Number.isFinite(to) && time > from && time <= to && ["inspection_paused", "inspection_finished", "inspection_area_selected", "explicit_relocation", "relocation", "driving", "new_inspection_phase"].includes(String(event.type || ""));
+    });
     (points || []).forEach((point, index) => {
+      const accuracy = Number(point.accuracy_m == null ? point.gps_accuracy_m : point.accuracy_m);
+      const valid = pointCoordinates(point) && (!Number.isFinite(accuracy) || accuracy <= 50) && point.quality_rejected !== true;
+      if (!valid) { if (current.length) segments.push(current); current = []; priorAccepted = null; return; }
       const inside = pointInRing(point, ring) || distanceToRingMeters(point, ring) <= 25;
-      if (!inside) { if (current.length) segments.push(current); current = []; return; }
-      const previous = current[current.length - 1];
-      if (previous && (haversine(previous, point) > 90 || (Date.parse(point.time || "") - Date.parse(previous.time || "")) > 120000)) {
+      if (!inside) { if (current.length) segments.push(current); current = []; priorAccepted = point; return; }
+      const previous = priorAccepted;
+      const distance = previous ? haversine(previous, point) : null;
+      const elapsedMs = previous ? timeOf(point) - timeOf(previous) : null;
+      const speed = elapsedMs > 0 && distance != null ? distance / (elapsedMs / 1000) : null;
+      const areaChanged = previous && lastArea && point.area_id && lastArea !== point.area_id;
+      if (previous && (distance > 90 || elapsedMs > 120000 || speed > 5 || areaChanged || hasLifecycleBreak(timeOf(previous), timeOf(point)))) {
         if (current.length) segments.push(current);
         current = [];
       }
       current.push(Object.assign({ source_sequence: index + 1 }, point));
+      priorAccepted = point;
+      if (point.area_id) lastArea = point.area_id;
     });
     if (current.length) segments.push(current);
     return segments;
@@ -422,7 +439,7 @@
         section_id: small.section_id,
         ring_index: small.ring_index,
         calculated_acres: small.calculated_acres,
-        stated_acres: finite(settings.statedSmallTractAcres) || 5.49,
+        stated_acres: finite(settings.statedSmallTractAcres) || 5.48,
         boundary: small.ring,
         bounds: small.bounds,
         selection_rule: "Smallest separate exterior ring in the verified subject parcel geometry."
@@ -432,7 +449,7 @@
         excluded_water_photo_ids: excludedWaterEvidence.map(item => item.photo_id),
         rule: "Evidence outside the small-tract ring is excluded from this map, even when close in time."
       },
-      route_segments: splitTrack(inspection.points || inspection.gps_track || [], small.ring),
+      route_segments: splitTrack(inspection.points || inspection.gps_track || [], small.ring, inspection),
       water_photographs: waterEvidence,
       wet_observations: wetObservations,
       high_dry_observations: highDryObservations,
@@ -466,6 +483,7 @@
     ringAreaAcres,
     pointInRing,
     distanceToRingMeters,
+    splitTrack,
     identifyParcelSections,
     waterEvidenceFromPhoto,
     clusterWaterEvidence,

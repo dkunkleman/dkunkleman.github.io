@@ -25,6 +25,7 @@
   const PEARSON_HYPOTHESIS_ID = "hypothesis-pearson-road-drainage-berm-20260803";
   const PEARSON_P44_HOMESITE_CORRECTION_ID = "correction-pearson-homesite-near-p44-20260803";
   const PEARSON_P44_PHOTO_CORRECTION_ID = "correction-pearson-p44-water-measurement-20260803";
+  const PEARSON_REVIEW_DATE = "2026-08-03";
 
   function clone(value) {
     return value == null ? value : JSON.parse(JSON.stringify(value));
@@ -42,12 +43,43 @@
     return record.id || record.observation_id || null;
   }
 
+  function isCompletePearsonReview(data) {
+    const inspectionDate = String(data && data.conditions && data.conditions.inspection_date || data && data.started || "").slice(0, 10);
+    return String(data && data.property_id || "") === "parcel:221S280000001010000" &&
+      inspectionDate === PEARSON_REVIEW_DATE &&
+      (data.photos || []).some(item => Number(String(item.photo_number || "").replace(/\D/g, "")) === 196);
+  }
+
   function ensureGovernanceModel(inspection, now) {
     const data = inspection || {};
     data.corrections = Array.isArray(data.corrections) ? data.corrections : [];
     data.inspector_hypotheses = Array.isArray(data.inspector_hypotheses) ? data.inspector_hypotheses : [];
     data.review_annotations = Array.isArray(data.review_annotations) ? data.review_annotations : [];
+    data.review_annotation_events = Array.isArray(data.review_annotation_events) ? data.review_annotation_events : [];
     data.inspector_identity = data.inspector_identity || "Field Inspector";
+    const hasCompletePearsonReview = isCompletePearsonReview(data);
+    const appTestCutoff = Date.parse(`${PEARSON_REVIEW_DATE}T00:00:00.000Z`);
+    if (hasCompletePearsonReview) {
+      const excludePriorDay = (records, recordType) => (records || []).forEach(record => {
+        const recordedAt = Date.parse(record.time || record.recorded_at || record.started_at || "");
+        const recordId = idOf(record, recordType);
+        if (!recordId || !Number.isFinite(recordedAt) || recordedAt >= appTestCutoff) return;
+        const correctionId = `correction-pearson-app-test-${recordType}-${recordId}`;
+        if (data.corrections.some(item => item.correction_id === correctionId)) return;
+        data.corrections.push({ correction_id: correctionId, target: { record_type: recordType, record_id: recordId }, correction_time: now || new Date().toISOString(), correction_reason: "Excluded prior-day app-test record", corrected_value: null, inspector_identity: data.inspector_identity, resulting_status: "voided", status: "voided", corrected_at: now || new Date().toISOString(), original_entry: clone(record), original_record_preserved: true, source: "Inspector-approved Pearson Road post-inspection correction", immutable: true });
+      });
+      excludePriorDay(data.markers, "observation");
+      excludePriorDay(data.photos, "photo");
+      excludePriorDay(data.voice_notes, "voice_note");
+    }
+    data.review_annotations.filter(item => item.source_conversation_reference === "Inspector-directed Pearson Road post-inspection review" && item.status === "Active" && item.approval_method !== "explicit_in_app_or_repository_approval").forEach(item => {
+      const eventId = `review-reset-pending:${item.annotation_id}`;
+      if (!data.review_annotation_events.some(event => event.event_id === eventId)) data.review_annotation_events.push({ event_id: eventId, event_type: "automated_annotation_reset_to_pending", annotation_id: item.annotation_id, recorded_at: now || new Date().toISOString(), previous_state: clone(item), reason: "The reviewed Pearson phase now requires explicit inspector approval before it can affect findings.", immutable: true });
+      item.status = "Draft";
+      item.approved_by_inspector = false;
+      item.approval_time = null;
+      item.activation_rule = "Explicit inspector approval is required in Review and Build Report or repository review.";
+    });
     const markers = Array.isArray(data.markers) ? data.markers : [];
     const pearsonEntrance = markers.find(item =>
       String(item.time || item.observed_at || "") === PEARSON_ENTRANCE_TIME &&
@@ -126,10 +158,10 @@
       const approvalTime = now || new Date().toISOString();
       const sessionId = "review-pearson-road-real-20260803";
       const areaBy = pattern => ((data.inspection_areas || []).find(item => pattern.test(String(item.name || ""))) || {}).area_id || null;
-      const addReview = row => { if (!data.review_annotations.some(item => item.annotation_id === row.annotation_id)) data.review_annotations.push(Object.assign({ schema_name: "property-intelligence-review-annotation", schema_version: "1.0", property_id: data.property_id, inspection_id: data.inspection_id, review_session_id: sessionId, created_at: approvalTime, created_by: data.inspector_identity, approved_by_inspector: true, approval_time: approvalTime, source_conversation_reference: "Inspector-directed Pearson Road post-inspection review", voice_note_ids: [], gps_point_ids: [], status: "Active", supersedes_annotation_id: null, contradicting_evidence: [], professional_verification_question: null }, row)); };
+      const addReview = row => { if (!data.review_annotations.some(item => item.annotation_id === row.annotation_id)) data.review_annotations.push(Object.assign({ schema_name: "property-intelligence-review-annotation", schema_version: "1.0", property_id: data.property_id, inspection_id: data.inspection_id, review_session_id: sessionId, created_at: approvalTime, created_by: data.inspector_identity, approved_by_inspector: false, approval_time: null, source_conversation_reference: "Inspector-directed Pearson Road post-inspection review", voice_note_ids: [], gps_point_ids: [], status: "Draft", supersedes_annotation_id: null, contradicting_evidence: [], professional_verification_question: null, activation_rule: "Explicit inspector approval is required before this reviewed annotation affects a finding, map, or report." }, row)); };
       addReview({ annotation_id: "review-pearson-p3-p11-large-tract", photograph_ids: photoIds(3, 11), observation_ids: [], inspection_area_id: areaBy(/large tract|north survey|road/i), report_sections_affected: ["Inspection Scope", "Inspection Areas", "Drainage", "Photo captions"], exact_inspector_statement: "P3-P11 are in the large tract north survey-flag/road area. The Entrance button was accidental. The sequence documents survey marker, roadside water, wooded-side water, and the road/berm relationship. I think the road berm traps water.", concise_approved_finding: "P3-P11 document the large-tract north survey-flag and road/berm water sequence; the Entrance press is accidental and excluded.", record_type: "Inspector clarification", evidence_classification: "Observed fact and Inspector interpretation", confidence: "high for sequence and correction; interpretation requires professional verification", supporting_evidence: photoIds(3, 11), unanswered_questions: ["Would lawful drainage toward the north/south Pearson ditch and berm modification improve drainage without creating downstream, right-of-way, permitting, or neighbor impacts?"], professional_verification_question: "What are the existing elevations, lawful outlet, downstream capacity, right-of-way constraints, permitting requirements, and neighboring-property effects of a drainage path toward the north/south Pearson ditch and modification of the road berm?", main_report_or_appendix: "main-report" });
       addReview({ annotation_id: "review-pearson-p12-p43-small-tract", photograph_ids: photoIds(12, 43), observation_ids: [], inspection_area_id: areaBy(/small tract/i), report_sections_affected: ["Inspection Scope", "Inspection Areas", "Drainage", "Timber and vegetation", "Photo captions"], exact_inspector_statement: "P12-P43 are the small tract. The sequence contains shallow water depressions, some larger pooled areas, dry transitions, and generally walkable canopy. Do not describe the entire corridor as dense impassable brush. Separate small puddles, larger pools, and narrow runoff depressions.", concise_approved_finding: "P12-P43 document localized shallow depressions, some larger pools, dry transitions, and generally walkable canopy on the small tract; they do not establish that the entire corridor was wet or impassable.", record_type: "Inspector clarification", evidence_classification: "Observed", confidence: "high for photographed locations; limited outside inspected corridor", supporting_evidence: photoIds(12, 43), unanswered_questions: ["How do these localized water observations behave under other rainfall and seasonal conditions?"], main_report_or_appendix: "main-report" });
-      addReview({ annotation_id: "review-pearson-inspection-scope", photograph_ids: photoIds(3, Math.max(43, (data.photos || []).length)), observation_ids: [], inspection_area_id: null, report_sections_affected: ["Executive Summary", "Inspection Scope", "Inspection Areas", "Inspection critique"], exact_inspector_statement: "The first few photographs concern the large tract. Nearly all remaining inspection activity concerns the 5.49-acre small tract. Do not summarize findings as though the 81-acre large tract was comprehensively inspected.", concise_approved_finding: "The large tract received limited early documentation; nearly all remaining inspection activity concerned the 5.49-acre small tract, so conclusions must not imply comprehensive inspection of the 81-acre large tract.", record_type: "Inspector clarification", evidence_classification: "Observed inspection scope", confidence: "high", supporting_evidence: photoIds(3, Math.max(43, (data.photos || []).length)), unanswered_questions: ["What conditions remain unknown across the unvisited large-tract acreage?"], main_report_or_appendix: "main-report" });
+      addReview({ annotation_id: "review-pearson-inspection-scope", photograph_ids: photoIds(3, Math.max(43, (data.photos || []).length)), observation_ids: [], inspection_area_id: null, report_sections_affected: ["Executive Summary", "Inspection Scope", "Inspection Areas", "Inspection critique"], exact_inspector_statement: "The first few photographs concern the large tract. Nearly all remaining inspection activity concerns the 5.48-acre small tract. Do not summarize findings as though the 81.20-acre large tract was comprehensively inspected.", concise_approved_finding: "The large tract received limited early documentation; nearly all remaining inspection activity concerned the 5.48-acre small tract, so conclusions must not imply comprehensive inspection of the 81.20-acre large tract.", record_type: "Inspector clarification", evidence_classification: "Observed inspection scope", confidence: "high", supporting_evidence: photoIds(3, Math.max(43, (data.photos || []).length)), unanswered_questions: ["What conditions remain unknown across the unvisited large-tract acreage?"], main_report_or_appendix: "main-report" });
       addReview({ annotation_id: "review-pearson-small-tract-narrative", photograph_ids: photoIds(12, Math.max(43, (data.photos || []).length)), observation_ids: [], inspection_area_id: areaBy(/small tract/i), report_sections_affected: ["Executive Summary", "Inspection Areas", "Drainage", "Timber and vegetation", "Access"], exact_inspector_statement: "Small tract: northwest flowing-water corridor; small roadside ditch/swale along curved Pearson Road; eastern third generally high/dry and primarily brush; western portion generally more heavily wooded beneath canopy; no fence observed; most documented shallow puddles were localized rather than proof that the entire tract was wet.", concise_approved_finding: "The small tract includes a northwest flowing-water corridor and roadside swale; its eastern third was generally high/dry and brushy, its western portion more wooded beneath canopy, no fence was observed, and documented shallow puddles were generally localized.", record_type: "Inspector clarification", evidence_classification: "Observed", confidence: "moderate to high within the walked and photographed corridor", supporting_evidence: photoIds(12, Math.max(43, (data.photos || []).length)), unanswered_questions: ["Conditions outside the walked corridor and under different rainfall or seasonal conditions remain unknown."], main_report_or_appendix: "main-report" });
     }
     return data;
@@ -236,6 +268,8 @@
 
   function buildEffectiveInspection(inspection) {
     const raw = ensureGovernanceModel(clone(inspection || {}));
+    const completePearsonReview = isCompletePearsonReview(raw);
+    const priorDayGps = completePearsonReview ? (raw.points || []).filter(point => { const time = Date.parse(point.time || ""); return Number.isFinite(time) && time < Date.parse(`${PEARSON_REVIEW_DATE}T00:00:00.000Z`); }) : [];
     const allMarkers = (raw.markers || []).map(item => effectiveRecord(raw, "observation", item));
     const allPhotos = (raw.photos || []).map(item => {
       const photo = effectiveRecord(raw, "photo", item);
@@ -264,6 +298,7 @@
     });
     const activeReviewAnnotations = (raw.review_annotations || []).filter(item => item.approved_by_inspector === true && item.status === "Active");
     const active = Object.assign({}, raw, {
+      points: completePearsonReview ? (raw.points || []).filter(point => !priorDayGps.includes(point)) : (raw.points || []),
       markers,
       photos: allPhotos.filter(item => !item.excluded_from_findings),
       voice_notes: allVoices.filter(item => !item.excluded_from_findings),
@@ -281,6 +316,8 @@
         immutable_source_rule: "Original entries are never rewritten or deleted. Reports use the effective active view; voided records remain here.",
         corrections: clone(raw.corrections || []),
         review_annotations: clone(raw.review_annotations || []),
+        review_annotation_events: clone(raw.review_annotation_events || []),
+        audit_only_gps_points: clone(priorDayGps),
         source_record_counts: { observations: allMarkers.length, photographs: allPhotos.length, voice_notes: allVoices.length },
         voided_record_ids: [...allMarkers, ...allPhotos, ...allVoices].filter(item => item.excluded_from_findings).map(item => idOf(item, item.photo_number ? "photo" : (item.started_at ? "voice_note" : "observation")))
       }

@@ -27,6 +27,13 @@ Pearson_Road/
       SMALL_TRACT_WATER_MAP.json
       FLOWING_WATER_CORRIDORS.json
       small-tract-water-map.html
+      SEGMENTED_ROUTE.json
+      CREEK_CORRIDOR_MAP.json
+      creek-corridor-map.html
+      VEGETATION_CLEARING_MAP.json
+      vegetation-clearing-map.html
+      HOMESITE_OPPORTUNITY_MAP.json
+      homesite-opportunity-map.html
     photos/analysis/
     photos/original/
     photos/audit/
@@ -41,6 +48,11 @@ Pearson_Road/
     analysis/<export-id>/
       AI_README.md
       AI_ANALYSIS.json
+      REVIEWED_PROPERTY_SYNTHESIS.json
+      PROPERTY_INTELLIGENCE_REPORT.md
+      property-intelligence-report.html
+      printable-property-report.html
+      AUDIENCE_REPORTS.json
       DECISION_BRIEF.json
       REPORT_TEMPLATE.md
       INSPECTOR_THOUGHTS.md
@@ -78,6 +90,8 @@ Approval appends an immutable approved annotation version and regenerates tracea
 Tree evidence remains purpose- and safety-aware after ingestion. Whole-tree obstruction, the alternative-view plan, AI suggestions, inspector determination, missing features, and leaf provenance remain part of the evidence-set history. Weather ingestion likewise preserves the explicit separation between weather context, inspection-time site observations, inferred causes, and year-round conditions not established.
 
 Confirmed creek Evidence Sets are retained in `FLOWING_WATER_CORRIDORS.json`. Exact photographs and measurements remain observed evidence; dashed centerlines and flow arrows remain explicit inferences. Pending group suggestions never enter the current map, and uninspected watercourse extent is never filled in.
+
+Reviewed synthesis is also append-only. `REVIEWED_PROPERTY_SYNTHESIS.json` records pending, approved, and rejected phase/map/concept decisions and their immutable review events. Audience reports may change emphasis but may not change the underlying evidence. `SEGMENTED_ROUTE.json` is the controlling display-route model; raw GPS remains preserved while false jump-lines are excluded from walked geometry.
 
 Authoritative field measurements are retained under `measurements/<export_id>/STRUCTURED_MEASUREMENTS.json`. Preliminary tree, fixed-radius plot, builder/clearing, and forester-handoff records are retained under `timber/<export_id>/`. Every version preserves its methods and limitations; no later interpretation overwrites an earlier inspection.
 

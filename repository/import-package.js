@@ -162,6 +162,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["FIELD_COACHING.json", `analysis/${contract.export_id}/FIELD_COACHING.json`],
     ["FIELD_EVIDENCE_REVIEW.json", `analysis/${contract.export_id}/FIELD_EVIDENCE_REVIEW.json`],
     ["EVIDENCE_AUDIT_HISTORY.json", `analysis/${contract.export_id}/EVIDENCE_AUDIT_HISTORY.json`],
+    ["AUDIT_ONLY_GPS_POINTS.json", `analysis/${contract.export_id}/AUDIT_ONLY_GPS_POINTS.json`],
     ["EVIDENCE_SETS.json", `analysis/${contract.export_id}/EVIDENCE_SETS.json`],
     ["POST_INSPECTION_REVIEW.json", `analysis/${contract.export_id}/POST_INSPECTION_REVIEW.json`],
     ["WEATHER_CONTEXT.json", `weather/${contract.export_id}/WEATHER_CONTEXT.json`],
@@ -173,6 +174,24 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
     ["RETURN_VISIT_PLAN.json", `analysis/${contract.export_id}/RETURN_VISIT_PLAN.json`],
     ["SMALL_TRACT_WATER_MAP.json", `maps/${contract.export_id}/SMALL_TRACT_WATER_MAP.json`],
     ["FLOWING_WATER_CORRIDORS.json", `maps/${contract.export_id}/FLOWING_WATER_CORRIDORS.json`],
+    ["SEGMENTED_ROUTE.json", `maps/${contract.export_id}/SEGMENTED_ROUTE.json`],
+    ["REVIEWED_PROPERTY_SYNTHESIS.json", `analysis/${contract.export_id}/REVIEWED_PROPERTY_SYNTHESIS.json`],
+    ["CREEK_CORRIDOR_MAP.json", `maps/${contract.export_id}/CREEK_CORRIDOR_MAP.json`],
+    ["creek-corridor-map.html", `maps/${contract.export_id}/creek-corridor-map.html`],
+    ["VEGETATION_CLEARING_MAP.json", `maps/${contract.export_id}/VEGETATION_CLEARING_MAP.json`],
+    ["vegetation-clearing-map.html", `maps/${contract.export_id}/vegetation-clearing-map.html`],
+    ["HOMESITE_OPPORTUNITY_MAP.json", `maps/${contract.export_id}/HOMESITE_OPPORTUNITY_MAP.json`],
+    ["homesite-opportunity-map.html", `maps/${contract.export_id}/homesite-opportunity-map.html`],
+    ["PROPERTY_INTELLIGENCE_REPORT.md", `analysis/${contract.export_id}/PROPERTY_INTELLIGENCE_REPORT.md`],
+    ["property-intelligence-report.html", `analysis/${contract.export_id}/property-intelligence-report.html`],
+    ["printable-property-report.html", `analysis/${contract.export_id}/printable-property-report.html`],
+    ["AUDIENCE_REPORTS.json", `analysis/${contract.export_id}/AUDIENCE_REPORTS.json`],
+    ["audience-reports/buyer-report.md", `analysis/${contract.export_id}/audience-reports/buyer-report.md`],
+    ["audience-reports/seller-report.md", `analysis/${contract.export_id}/audience-reports/seller-report.md`],
+    ["audience-reports/builder-report.md", `analysis/${contract.export_id}/audience-reports/builder-report.md`],
+    ["audience-reports/forester-report.md", `analysis/${contract.export_id}/audience-reports/forester-report.md`],
+    ["audience-reports/drainage-engineer-report.md", `analysis/${contract.export_id}/audience-reports/drainage-engineer-report.md`],
+    ["audience-reports/internal-report.md", `analysis/${contract.export_id}/audience-reports/internal-report.md`],
     ["STRUCTURED_MEASUREMENTS.json", `measurements/${contract.export_id}/STRUCTURED_MEASUREMENTS.json`],
     ["PRELIMINARY_TIMBER_RECONNAISSANCE.json", `timber/${contract.export_id}/PRELIMINARY_TIMBER_RECONNAISSANCE.json`],
     ["FORESTER_HANDOFF.json", `timber/${contract.export_id}/FORESTER_HANDOFF.json`],
@@ -253,6 +272,7 @@ function importInspectionPackage(packagePath, repositoryRoot, options) {
   };
   addWrite(writes, inspectionRoot, `${versionPath}/ingestion-receipt.json`, JSON.stringify(receipt, null, 2) + "\n");
   addWrite(writes, inspectionRoot, `analysis/${contract.export_id}/printable_report.pdf.pending.json`, JSON.stringify({ source: "printable-report.html", destination: "printable_report.pdf", status: "pending_repository_generation", source_export_id: contract.export_id }, null, 2) + "\n");
+  addWrite(writes, inspectionRoot, `analysis/${contract.export_id}/property_intelligence_report.pdf.pending.json`, JSON.stringify({ source: "printable-property-report.html", destination: "property_intelligence_report.pdf", status: "pending_repository_generation", source_export_id: contract.export_id }, null, 2) + "\n");
 
   const targetKeys = new Set();
   for (const write of writes) {

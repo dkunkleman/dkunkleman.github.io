@@ -48,12 +48,20 @@ Production, offline-first field evidence collection for the subject rural parcel
 - `FIELD_EVIDENCE_REVIEW.json` identifies strong and repetitive evidence, missing context and measurements, unsupported hypotheses, professional-ready questions, and cautious review candidates for field time that may have produced little additional value.
 - `PROFESSIONAL_HANDOFF_CARDS.json`, Markdown audience cards, and `professional-handoff-cards.html` provide one-page builder, civil/drainage engineer, surveyor, forester, soil/septic, buyer, and seller handoffs without claiming to replace licensed work.
 
+## Reviewed property synthesis
+
+- **REVIEW AND BUILD REPORT** guides the inspector through corrections, Evidence Sets, the water map, creek map, vegetation map, homesite concepts, ChatGPT review import, and final report generation. No inferred phase, zone, grouping, map interpretation, or land-use concept becomes active without inspector approval.
+- The real Pearson P3-P196 review is organized into 12 pending photo phases. P3-P11 remain limited large-tract context; P12-P196 remain the primary 5.48-acre small-tract evidence. The immutable Entrance and P44 Homesite corrections continue to exclude the accidental button presses without deleting them.
+- `SEGMENTED_ROUTE.json` preserves every raw GPS point while splitting displayed walked geometry at rejected fixes, pauses, area/phase changes, relocations, gaps over 120 seconds, and implied speeds over 5 m/s. Unverified relocation is dashed gray or hidden; it is never represented as walked.
+- `CREEK_CORRIDOR_MAP.json`, `VEGETATION_CLEARING_MAP.json`, and `HOMESITE_OPPORTUNITY_MAP.json` each have an interactive HTML view. Photo markers open the actual packaged analysis photograph and associated voice evidence. Confirmed creek centerlines remain dashed, conceptual zones remain non-surveyed, and all required limitations travel with the maps.
+- `PROPERTY_INTELLIGENCE_REPORT.md`, its interactive/printable HTML versions, and `AUDIENCE_REPORTS.json` turn the same immutable evidence into plain-English buyer, seller, builder, forester, drainage-engineer, and internal views. Every report section states meaning, supporting photos, supporting observations, evidence classification, confidence, and limitations.
+
 ## Small-tract water intelligence
 
 - After every saved photograph, the app immediately asks **“Why did you take this picture?”** and starts a voice explanation. The audio inherits the photo's area and questions and is linked back to that photograph in IndexedDB and the exported package.
 - The inspector explicitly confirms Standing Water, Flowing Water, Ditch, Creek or Stream, Other Water, No, or Unsure. The app never silently treats a photograph as water evidence.
 - Confirmed water may record depth, measured/estimated basis, width, length, and behavior. These fields drive a searchable significance classification without treating every small depression as a building constraint.
-- The verified parcel's smaller exterior ring is automatically isolated as the approximately 5.49-acre **Small Tract**. Evidence outside that ring is excluded even when it occurred close in time.
+- The verified parcel's smaller exterior ring is automatically isolated as the approximately 5.48-acre **Small Tract**. Evidence outside that ring is excluded even when it occurred close in time.
 - Nearby compatible photographs may form a conservative `WA-#` cluster. A single photo without dimensions stays a point. Entered dimensions constrain outlines; flowing water never merges indiscriminately with isolated standing puddles.
 - The live map and package distinguish actual blue photo points, estimated dashed blue outlines, preliminary red building-avoidance areas, inspected corridor with no standing water observed, and uninspected/unknown acreage.
 - An inspector-confirmed creek set adds exact flowing-water points, a dashed conservative centerline, reported flow-direction arrows, measured depth/width points, adjacent high-ground evidence, scenic/amenity photographs, and building-avoidance context. Pending groups never create a centerline.
@@ -134,6 +142,7 @@ From the repository root:
 ```powershell
 node --check field\inspection-package.js
 node --check field\inspection-coaching.js
+node --check field\reviewed-property-synthesis.js
 node --check field\water-intelligence.js
 node --check field\evidence-governance.js
 node --check field\app.js

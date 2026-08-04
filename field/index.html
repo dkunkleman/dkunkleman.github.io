@@ -156,6 +156,14 @@
     .coverage-none { background: #dedede; }
     #missingEvidenceList { margin: 8px 0; padding-left: 22px; }
     #reviewEvidence { width: 100%; background: #8a4400; border: 3px solid var(--focus); }
+    .report-review-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .report-review-grid button { min-height:62px; }
+    #reviewSynthesisPanel { margin-top:12px; border:3px solid #173f5f; border-radius:8px; padding:10px; background:#f5f8fa; }
+    .review-synthesis-row { border:2px solid #777; border-radius:7px; padding:10px; margin:9px 0; background:#fff; }
+    .review-synthesis-row[data-status="approved"] { border-color:#1d6f42; background:#e9f7ee; }
+    .review-synthesis-row[data-status="rejected"] { border-color:#971b1b; background:#fff0f0; }
+    .review-synthesis-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+    #newInspectionPhase { background:#4f3a75; }
     .photo-value-select { width: 100%; min-height: 42px; margin-top: 6px; border: 2px solid #777; border-radius: 6px; background: #fff; font-size: 14px; }
     .water-rule { display:block; margin:12px 0; padding:12px; border:3px solid #1768c4; border-radius:8px; background:#edf7ff; font-weight:800; }
     .water-rule input { width:28px; height:28px; vertical-align:middle; margin-right:8px; }
@@ -200,6 +208,7 @@
       .export-modes { grid-template-columns: 1fr; }
       .coach-grid, .evidence-mode { grid-template-columns: 1fr; }
       .coach-grid button { width: 100%; }
+      .report-review-grid { grid-template-columns:1fr; }
       #nextStep { font-size: 15px; }
       button, .button-link { font-size: 15px; }
     }
@@ -239,6 +248,7 @@
         <label>New area name<input id="newArea" type="text" placeholder="Example: Large Tract – Northwest"></label>
         <button id="addArea" type="button">Add Area</button>
       </div>
+      <button id="newInspectionPhase" type="button" style="width:100%;margin-top:10px">NEW INSPECTION PHASE / RELOCATION</button>
       <div class="coach-grid" style="margin-top:10px">
         <label>Investigation question<input id="newQuestion" type="text" placeholder="Example: Does the road berm trap water?"></label>
         <button id="addQuestion" type="button">Add Question</button>
@@ -391,6 +401,25 @@
       <p class="small">The coach identifies the cheapest evidence that would most increase confidence.</p>
       <ul id="missingEvidenceList"><li>Add an investigation question.</li></ul>
       <button id="reviewEvidence" type="button">Review Missing Evidence</button>
+    </section>
+
+    <section class="card" id="reviewAndBuildReport" aria-labelledby="review-build-heading">
+      <h2 id="review-build-heading">REVIEW AND BUILD REPORT</h2>
+      <p class="small"><strong>Nothing inferred becomes active until you approve it.</strong> Review corrections and subject groups first, then approve only the maps and Pearson photo phases that match what you saw.</p>
+      <div class="report-review-grid">
+        <button id="reviewCorrections" type="button">Review Corrections</button>
+        <button id="reviewPearsonPhases" type="button">Review Pearson Photo Phases</button>
+        <button id="approveEvidenceSets" type="button">Approve Evidence Sets</button>
+        <button id="reviewWaterMap" type="button">Review Water Map</button>
+        <button id="reviewCreekMap" type="button">Review Creek Map</button>
+        <button id="reviewVegetationMap" type="button">Review Vegetation Map</button>
+        <button id="reviewHomesiteConcepts" type="button">Review Homesite Concepts</button>
+        <button id="importChatGPTReview" type="button">Import ChatGPT Review</button>
+        <button id="generatePropertyReport" type="button">Generate Property Report</button>
+      </div>
+      <input id="chatReviewInput" type="file" accept="application/json,.json" hidden>
+      <p id="reviewSynthesisSummary" class="small">Pearson reviewed phases will appear after the complete P3-P196 inspection is present on this phone.</p>
+      <div id="reviewSynthesisPanel" hidden></div>
     </section>
 
     <section class="card metrics" aria-label="Inspection status">
@@ -797,13 +826,14 @@
     </div>
   </dialog>
 
-  <script src="./inspection-coaching.js?v=3.11.0"></script>
-  <script src="./water-intelligence.js?v=3.11.0"></script>
-  <script src="./evidence-governance.js?v=3.11.0"></script>
-  <script src="./evidence-sets.js?v=3.11.0"></script>
-  <script src="./timber-reconnaissance.js?v=3.11.0"></script>
-  <script src="./inspection-package.js?v=3.11.0"></script>
-  <script src="./idb-recovery.js?v=3.11.0"></script>
-  <script src="./app.js?v=3.11.0"></script>
+  <script src="./inspection-coaching.js?v=3.12.0"></script>
+  <script src="./water-intelligence.js?v=3.12.0"></script>
+  <script src="./evidence-governance.js?v=3.12.0"></script>
+  <script src="./evidence-sets.js?v=3.12.0"></script>
+  <script src="./timber-reconnaissance.js?v=3.12.0"></script>
+  <script src="./reviewed-property-synthesis.js?v=3.12.0"></script>
+  <script src="./inspection-package.js?v=3.12.0"></script>
+  <script src="./idb-recovery.js?v=3.12.0"></script>
+  <script src="./app.js?v=3.12.0"></script>
 </body>
 </html>

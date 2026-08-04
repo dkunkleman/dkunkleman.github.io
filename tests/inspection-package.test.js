@@ -92,8 +92,8 @@ async function main() {
   const started = "2026-08-02T14:00:00.000Z";
   const points = [
     { time: "2026-08-02T14:00:01.000Z", lat: 30.4891, lon: -87.0941, accuracy_m: 3.2, altitude_m: 18.4, altitude_accuracy_m: 4.1, speed_mps: 1.1, heading_deg: 91, device_orientation: { alpha_deg: 269, beta_deg: 2, gamma_deg: -1 } },
-    { time: "2026-08-02T14:00:16.000Z", lat: 30.4895, lon: -87.0932, accuracy_m: 2.9, altitude_m: 18.8, altitude_accuracy_m: 4.0, speed_mps: 1.2, heading_deg: 88, device_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2 } },
-    { time: "2026-08-02T14:00:31.000Z", lat: 30.4901, lon: -87.0922, accuracy_m: 3.5, altitude_m: 20.1, altitude_accuracy_m: 4.3, speed_mps: 1.0, heading_deg: 44, device_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0 } }
+    { time: "2026-08-02T14:00:31.000Z", lat: 30.4895, lon: -87.0932, accuracy_m: 2.9, altitude_m: 18.8, altitude_accuracy_m: 4.0, speed_mps: 1.2, heading_deg: 88, device_orientation: { alpha_deg: 272, beta_deg: 1, gamma_deg: -2 } },
+    { time: "2026-08-02T14:01:01.000Z", lat: 30.4901, lon: -87.0922, accuracy_m: 3.5, altitude_m: 20.1, altitude_accuracy_m: 4.3, speed_mps: 1.0, heading_deg: 44, device_orientation: { alpha_deg: 316, beta_deg: 3, gamma_deg: 0 } }
   ];
   const types = ["wet", "dry", "blocked", "high", "homesite", "culvert", "tree", "entrance", "thick", "open", "ditch", "timber", "hazard", "other", "wildlife", "note"];
   const markers = types.map((type, index) => ({
@@ -239,7 +239,7 @@ async function main() {
   if (process.env.INSPECTION_TEST_OUTPUT) fs.writeFileSync(process.env.INSPECTION_TEST_OUTPUT, zipBytes);
   const files = extractStoredZip(zipBytes);
   const requiredFiles = [
-    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
+    "AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "FIELD_EVIDENCE_REVIEW.json", "EVIDENCE_AUDIT_HISTORY.json", "AUDIT_ONLY_GPS_POINTS.json", "EVIDENCE_SETS.json", "POST_INSPECTION_REVIEW.json", "WEATHER_CONTEXT.json", "FLOWING_WATER_CORRIDORS.json", "SEGMENTED_ROUTE.json", "REVIEWED_PROPERTY_SYNTHESIS.json", "CREEK_CORRIDOR_MAP.json", "creek-corridor-map.html", "VEGETATION_CLEARING_MAP.json", "vegetation-clearing-map.html", "HOMESITE_OPPORTUNITY_MAP.json", "homesite-opportunity-map.html", "PROPERTY_INTELLIGENCE_REPORT.md", "property-intelligence-report.html", "printable-property-report.html", "AUDIENCE_REPORTS.json", "audience-reports/buyer-report.md", "audience-reports/seller-report.md", "audience-reports/builder-report.md", "audience-reports/forester-report.md", "audience-reports/drainage-engineer-report.md", "audience-reports/internal-report.md", "STRUCTURED_MEASUREMENTS.json", "PRELIMINARY_TIMBER_RECONNAISSANCE.json", "FORESTER_HANDOFF.json", "FORESTER_HANDOFF.md", "CHAT_REVIEW_RETURN_INSTRUCTIONS.md", "schemas/property-intelligence-review-annotation.schema.json", "PROFESSIONAL_HANDOFF_CARDS.json", "PROFESSIONAL_HANDOFF_CARDS.md", "professional-handoff-cards.html", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "INSPECTOR_HYPOTHESES.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md",
     "README.txt", "chatgpt-reconstruction.json", "repository-import.json", "repository-comparison.json", "schema.json", "inspection.json", "events.csv", "observations.csv", "photos.csv", "photo_index.json", "printable-report.html", "voice-notes.csv",
     "track.geojson", "track.gpx", "context/map-context.json", "context/parcels.geojson",
     "context/parcels.arcgis.json", "context/usgs-terrain.png", "context/usgs-contours-2ft.png",
@@ -258,7 +258,7 @@ async function main() {
 
   const manifest = JSON.parse(files.get("inspection.json").toString("utf8"));
   const repositoryImport = JSON.parse(files.get("repository-import.json").toString("utf8"));
-  assert.equal(manifest.format_version, "2.0");
+  assert.equal(manifest.format_version, "2.1");
   assert.equal(manifest.summary.evidence_set_count, 1);
   assert.equal(manifest.summary.structured_measurement_count, 1);
   assert.equal(manifest.summary.timber_tree_count, 1);
@@ -430,6 +430,11 @@ async function main() {
   const reportFiles = extractStoredZip(Buffer.from(await reportResult.blob.arrayBuffer()));
   assert(reportFiles.has("SMALL_TRACT_WATER_MAP.json"), "package includes the AI-readable small-tract water model");
   assert(reportFiles.has("FLOWING_WATER_CORRIDORS.json"), "package includes the AI-readable confirmed creek-corridor model");
+  assert(reportFiles.has("SEGMENTED_ROUTE.json") && reportFiles.has("REVIEWED_PROPERTY_SYNTHESIS.json"), "package includes the exact segmented route and approval-gated reviewed synthesis");
+  assert(reportFiles.has("CREEK_CORRIDOR_MAP.json") && reportFiles.has("creek-corridor-map.html"), "package includes the creek map and its interactive view");
+  assert(reportFiles.has("VEGETATION_CLEARING_MAP.json") && reportFiles.has("vegetation-clearing-map.html"), "package includes vegetation/clearing intelligence");
+  assert(reportFiles.has("HOMESITE_OPPORTUNITY_MAP.json") && reportFiles.has("homesite-opportunity-map.html"), "package includes independently reviewable homesite concepts");
+  assert(reportFiles.has("PROPERTY_INTELLIGENCE_REPORT.md") && reportFiles.has("printable-property-report.html") && reportFiles.has("AUDIENCE_REPORTS.json"), "package includes the understandable report and audience views");
   assert(reportFiles.has("STRUCTURED_MEASUREMENTS.json") && reportFiles.has("PRELIMINARY_TIMBER_RECONNAISSANCE.json") && reportFiles.has("FORESTER_HANDOFF.json"), "report package includes authoritative measurements and timber handoff evidence");
   assert(reportFiles.has("small-tract-water-map.html"), "package includes the interactive human-readable small-tract water map");
   const reportImportContract = JSON.parse(reportFiles.get("repository-import.json").toString("utf8"));
@@ -453,7 +458,7 @@ async function main() {
   assert(interactiveWaterMap.includes("Actual photographed water"));
   assert(interactiveWaterMap.includes("Uninspected / unknown"));
   const packagedAiAnalysis = JSON.parse(reportFiles.get("AI_ANALYSIS.json").toString("utf8"));
-  assert.equal(packagedAiAnalysis.small_tract_water_map.small_tract.stated_acres, 5.49);
+  assert.equal(packagedAiAnalysis.small_tract_water_map.small_tract.stated_acres, 5.48);
   reportManifest.photographs.forEach(photo => {
     assert.equal(photo.original.path, null, `${photo.photo_number} original path is intentionally absent`);
     assert.equal(photo.original.included_in_package, false, `${photo.photo_number} records intentional omission`);
@@ -487,10 +492,14 @@ async function main() {
     assert.equal(fs.readdirSync(path.join(storedInspection, "voice")).length, 1, "voice evidence is recovered into the repository");
     assert(fs.existsSync(path.join(storedInspection, "weather", "export_report_test", "WEATHER_CONTEXT.json")), "inspection weather context is preserved in its repository evidence folder per export");
     assert(fs.existsSync(path.join(storedInspection, "maps", "export_report_test", "FLOWING_WATER_CORRIDORS.json")), "confirmed creek-corridor intelligence is preserved with versioned maps");
+    assert(fs.existsSync(path.join(storedInspection, "maps", "export_report_test", "SEGMENTED_ROUTE.json")), "segmented walked-route evidence is preserved without false connectors");
+    assert(fs.existsSync(path.join(storedInspection, "maps", "export_report_test", "VEGETATION_CLEARING_MAP.json")), "reviewed vegetation zones are preserved with versioned maps");
+    assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "PROPERTY_INTELLIGENCE_REPORT.md")), "the understandable report is extracted for direct analysis");
     assert(fs.existsSync(path.join(storedInspection, "measurements", "export_report_test", "STRUCTURED_MEASUREMENTS.json")), "authoritative measurements are preserved in a versioned repository folder");
     assert(fs.existsSync(path.join(storedInspection, "timber", "export_report_test", "PRELIMINARY_TIMBER_RECONNAISSANCE.json")), "timber reconnaissance is preserved in a versioned repository folder");
     assert(fs.existsSync(path.join(storedInspection, "timber", "export_report_test", "FORESTER_HANDOFF.json")), "forester handoff is preserved beside the reconnaissance");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "printable_report.pdf.pending.json")), "repository receives the printable-PDF derivation instruction");
+    assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "property_intelligence_report.pdf.pending.json")), "repository receives the understandable property-report PDF derivation instruction");
     assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", "repository-comparison.json")), "repository receives a compact cross-inspection comparison record");
     for (const name of ["AI_README.md", "AI_ANALYSIS.json", "DECISION_BRIEF.json", "QUESTION_BRIEF.json", "FIELD_COACHING.json", "RETURN_VISIT_PLAN.json", "REPORT_TEMPLATE.md", "INSPECTOR_THOUGHTS.md", "EVIDENCE_RELATIONSHIPS.json", "SUGGESTED_INSPECTION_QUESTIONS.md"]) {
       assert(fs.existsSync(path.join(storedInspection, "analysis", "export_report_test", name)), `repository extracts ${name} for direct ChatGPT analysis`);
@@ -591,6 +600,7 @@ async function main() {
   assert.equal(pearsonManifest.inspection.pearson_road_evidence_sequence.photo_numbers.join(","), "P3,P4,P5,P6,P7,P8,P9,P10,P11", "P3-P11 remain one inspector-directed large-tract sequence");
   assert.equal(pearsonManifest.photographs.find(photo => photo.photo_number === "P12").observation_id, null, "later unlinked photo is not assigned to a nearby button press");
   assert(pearsonManifest.photographs.find(photo => photo.photo_number === "P12").nearest_observations.every(link => link.relationship === "nearest_by_location_unconfirmed"), "proximity is explicitly unconfirmed");
+  assert(pearsonManifest.inspection.observations.flatMap(item => [...(item.attachments.nearest_photographs || []), ...(item.attachments.nearest_voice_notes || [])]).every(link => link.relationship === "direct" || link.relationship === "nearest_by_location_unconfirmed"), "observation-side proximity links are also explicitly unconfirmed");
   assert.equal(pearsonManifest.inspection.inspector_hypotheses[0].evidence_classification, "Interpretation / Needs Professional Verification");
   assert(pearsonManifest.inspection.inspector_hypotheses[0].prohibition.includes("Do not recommend construction"));
   assert.equal(pearsonManifest.inspection.professional_handoff_cards.cards.length, 7, "all seven professional audience cards are generated");
