@@ -86,7 +86,7 @@
       gps_position_at: position.time || null,
       compass_heading_deg: orientation && orientation.compass_heading_deg != null ? orientation.compass_heading_deg : (position.heading_deg == null ? null : position.heading_deg),
       device_orientation: orientationSnapshot(orientation),
-      information_class: "inspector_observation",
+      information_class: "OBSERVED_ON_SITE",
       completion_status: "BASIC_RECORD_SAVED",
       attributes: Object.assign({}, attributes || {})
     };
@@ -153,7 +153,7 @@
     const model = ensureModel(inspection);
     const validCrossing = crossingId && model.vehicle_crossing_ids.includes(crossingId) ? crossingId : null;
     model.provisional_crossing_interpretation = {
-      information_class: "inspector_interpretation",
+      information_class: "INSPECTOR_INTERPRETATION",
       interpretation_type: "PROVISIONAL VEHICLE-CROSSING INTERPRETATION",
       selection_type: selectionType,
       selected_crossing_id: validCrossing,

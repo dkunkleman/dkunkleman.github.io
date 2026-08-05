@@ -40,7 +40,7 @@ assert.match(comparison.find(item => item.record_id === culvert.record_id).limit
 assert.match(comparison.find(item => item.record_id === major.record_id).limitations, /does not establish permission/);
 
 const selection = frontage.selectProvisionalCrossing(inspection, "SELECTED_RECORDED_CROSSING", noCulvert.record_id, "2026-08-04T14:04:00.000Z");
-assert.equal(selection.information_class, "inspector_interpretation");
+assert.equal(selection.information_class, "INSPECTOR_INTERPRETATION");
 assert.equal(selection.selected_crossing_id, "VEHICLE-CROSSING-002");
 assert.equal(model.screen, "PARKING_REVIEW", "parking appears only after provisional comparison");
 

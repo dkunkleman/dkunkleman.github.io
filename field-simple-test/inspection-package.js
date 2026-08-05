@@ -7,10 +7,12 @@
   const timber = typeof module === "object" && module.exports ? require("./timber-reconnaissance.js") : (root && root.TimberReconnaissance);
   const synthesis = typeof module === "object" && module.exports ? require("./reviewed-property-synthesis.js") : (root && root.ReviewedPropertySynthesis);
   const frontage = typeof module === "object" && module.exports ? require("./frontage-workflow.js") : (root && root.PropertyFrontageWorkflow);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, frontage);
+  const automaticContext = typeof module === "object" && module.exports ? require("./automatic-context.js") : (root && root.AutomaticFieldContext);
+  const sectionMapping = typeof module === "object" && module.exports ? require("./section-mapping.js") : (root && root.SimpleSectionMapping);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, frontage, automaticContext, sectionMapping);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, frontageTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, frontageTools, automaticContextTools, sectionMappingTools) {
   "use strict";
 
   const FORMAT = "property-inspector-home-test-313-package";
@@ -1203,6 +1205,11 @@
       "",
       "Contents:",
       "- AI_README.md: plain-English first instruction for ChatGPT, including relationships, classifications, maps, weather, reporting, and unanswered-question rules.",
+      "- AUTOMATIC_CONTEXT.json: automatic device context, exact official-source records, source URLs, and nonblocking retrieval attempts.",
+      "- FACTS_BY_CLASS.json: evidence separated into the seven required information classes.",
+      "- SITE_SOUND_EXPERIENCE.json: optional location-specific sound/experience records and direct audio links.",
+      "- MAPPED_SECTIONS.json: inspector-confirmed land sections, raw walked edges, corners, photos, voice notes, corrections, approximate area, and separately labeled inferred edges.",
+      "- mapped-sections.geojson: approximate map geometry for mapped sections; phone GPS, not a survey.",
       "- AI_ANALYSIS.json: analysis-first structure containing property, conditions, statistics, full GPS track, observations, photos, voice notes, thoughts, layers, public data, relationships, questions, and metadata.",
       "- DECISION_BRIEF.json: five-decision evidence routing, strengths/weaknesses/unknowns instructions, confidence rubric, and lowest-cost uncertainty-reduction rules.",
       "- QUESTION_BRIEF.json: every inspector-created investigation question with supporting, contradicting, and contextual evidence IDs.",
@@ -1443,6 +1450,7 @@
         analysis_path: photo.analysis && photo.analysis.path,
         photo_value: photo.photo_value,
         evidence_set_id: photo.evidence_set_id || null,
+        section_id: photo.section_id || null,
         structured_measurement_ids: photo.structured_measurement_ids || [],
         timber_tree_id: photo.timber_tree_id || null,
         photo_meaning: photo.photo_meaning,
@@ -1464,11 +1472,13 @@
         purpose: voice.purpose,
         photo_id: voice.photo_id,
         evidence_set_id: voice.evidence_set_id || null,
+        section_id: voice.section_id || null,
         area_id: voice.area_id,
         question_ids: voice.question_ids,
         question_links: voice.question_links
       })),
       evidence_sets: manifest.inspection.evidence_set_summaries || { sets: [] },
+      mapped_sections: manifest.mapped_sections ? (manifest.mapped_sections.sections || []).map(section => ({ section_id: section.section_id, observation_id: section.observation_id || null, photo_ids: section.photo_ids || [], voice_note_ids: section.voice_note_ids || [], walked_edge_point_count: (section.walked_edge || []).length, has_inferred_edge: Boolean(section.inferred_edge), completion_status: section.completion_status })) : [],
       structured_measurements: (manifest.structured_measurements || []).map(item => ({ measurement_id: item.measurement_id, measurement_type: item.measurement_type, authoritative_value: item.authoritative_value, unit: item.unit, basis: item.basis, photo_id: item.photo_id, evidence_set_id: item.evidence_set_id, subject_id: item.subject_id, timber_tree_id: item.timber_tree_id, timber_plot_id: item.timber_plot_id, authority_rule: item.authority_rule })),
       timber_trees: (manifest.preliminary_timber_reconnaissance && manifest.preliminary_timber_reconnaissance.trees || []).map(tree => ({ tree_id: tree.tree_id, plot_id: tree.plot_id, evidence_set_id: tree.evidence_set_id, photo_ids: tree.photo_ids, defect_photo_ids: tree.defect_photo_ids })),
       approved_review_annotations: manifest.inspection.post_inspection_review ? manifest.inspection.post_inspection_review.active_annotations : [],
@@ -1653,6 +1663,7 @@
       voice_notes: manifest.voice_notes,
       structured_measurements: manifest.structured_measurements || [],
       preliminary_timber_reconnaissance: manifest.preliminary_timber_reconnaissance || null,
+      mapped_sections: manifest.mapped_sections || null,
       forester_handoff: manifest.forester_handoff || null,
       inspector_thoughts: manifest.inspection.inspector_thoughts,
       inspector_hypotheses: manifest.inspection.inspector_hypotheses || [],
@@ -1738,6 +1749,10 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`PROFESSIONAL_HANDOFF_CARDS.json\` and \`professional-handoff-cards.html\` identify exact questions, evidence, unknowns, and decisions for builders, engineers, surveyors, foresters, soil/septic professionals, buyers, and sellers. They do not replace licensed work.
 - Inspector hypotheses are separate from observations. Do not state that a drainage or construction idea will work; preserve its exact professional-verification question and contrary evidence.
 - \`CHAT_REVIEW_RETURN_INSTRUCTIONS.md\` and the review-annotation schema define how a later photo-by-photo conversation must return discrete Draft annotations. Never treat an entire chat or assistant wording as fact. Only inspector-approved Active annotations may change a report, and every change must cite the annotation ID, supporting evidence IDs, and approval date.
+- \`AUTOMATIC_CONTEXT.json\` records device context and official external context without asking the inspector to type weather, time, station, or source data. Every external value remains \`REPORTED_BY_EXTERNAL_SOURCE\` with its agency, product, URL, retrieval time, source location/distance when available, units, status, exact response, and limitations. A failed retrieval is evidence of unavailability, not a reason to interrupt field work.
+- \`FACTS_BY_CLASS.json\` is the required separation of \`OBSERVED_ON_SITE\`, \`MEASURED_ON_SITE\`, \`CAPTURED_BY_DEVICE\`, \`REPORTED_BY_EXTERNAL_SOURCE\`, \`CALCULATED\`, \`INSPECTOR_INTERPRETATION\`, and \`UNKNOWN\`. Never relabel one class as another.
+- \`SITE_SOUND_EXPERIENCE.json\` contains optional, location-specific on-site sound/experience observations. Ambient recordings are captured-device evidence. Apparent conflicts such as “Mostly quiet” plus a selected sound must be reported, not silently resolved.
+- \`MAPPED_SECTIONS.json\` preserves each inspector-confirmed section, its exact raw GPS edge, marked corners, optional photos and voice notes, append-only description corrections, approximate acreage, and any separately labeled inferred closing edge. \`mapped-sections.geojson\` is the map interchange view. Never present an inferred edge as physically walked or the phone-GPS result as a survey.
 
 ## Evidence classifications
 
@@ -1925,6 +1940,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     sourceInspection.review_synthesis_events = Array.isArray(sourceInspection.review_synthesis_events) ? sourceInspection.review_synthesis_events : [];
     sourceInspection.land_use_concepts = Array.isArray(sourceInspection.land_use_concepts) ? sourceInspection.land_use_concepts : [];
     sourceInspection.imported_chat_review_annotations = Array.isArray(sourceInspection.imported_chat_review_annotations) ? sourceInspection.imported_chat_review_annotations : [];
+    sourceInspection.site_sound_records = Array.isArray(sourceInspection.site_sound_records) ? sourceInspection.site_sound_records : [];
+    if (automaticContextTools) automaticContextTools.ensureModel(sourceInspection);
+    if (sectionMappingTools) sectionMappingTools.ensureModel(sourceInspection);
     if (timberTools) timberTools.ensureModel(sourceInspection);
     if (synthesisTools) synthesisTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
@@ -1990,9 +2008,12 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
 
       manifestPhotos.push({
         photo_id: metadata.id,
+        information_class: metadata.information_class || "CAPTURED_BY_DEVICE",
+        automatic_context_id: metadata.automatic_context_id || null,
         photo_number: metadata.photo_number || `P${index + 1}`,
         simple_photo_id: metadata.simple_photo_id || null,
         feature_id: metadata.feature_id || null,
+        section_id: metadata.section_id || null,
         simple_session_id: metadata.simple_session_id || null,
         simple_feature_sequence: metadata.simple_feature_sequence || null,
         associated_marker_id: metadata.associated_marker_id || null,
@@ -2090,9 +2111,13 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       if (!audioHash) throw new Error(`Voice note ${index + 1} could not be SHA-256 verified. Package creation stopped.`);
       manifestVoices.push({
         voice_note_id: metadata.id,
+        information_class: metadata.information_class || "CAPTURED_BY_DEVICE",
+        automatic_context_id: metadata.automatic_context_id || null,
+        site_sound_record_id: metadata.site_sound_record_id || null,
         purpose: metadata.purpose || "general_field_note",
         photo_id: metadata.photo_id || null,
         evidence_set_id: metadata.evidence_set_id || null,
+        section_id: metadata.section_id || null,
         simple_session_id: metadata.simple_session_id || null,
         prompt: metadata.prompt || null,
         record_status: metadata.record_status || "active",
@@ -2379,6 +2404,20 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const timberReconnaissance = timberTools ? timberTools.createReconnaissance(sourceInspection) : { schema_name: "property-intelligence-preliminary-timber-reconnaissance", schema_version: "1.0", title: "Preliminary Timber Reconnaissance", trees: [], sampling_method_summary: { plot_count: 0, plots: [] }, builder_and_clearing_summary: {}, disclaimer: "Timber reconnaissance module unavailable." };
     const foresterHandoff = timberTools ? timberTools.createForesterHandoff(sourceInspection, timberReconnaissance) : { schema_name: "property-intelligence-forester-handoff", schema_version: "1.0", raw_tree_records: [], raw_measurements: [], plot_designs: [], unanswered_questions: [], disclaimer: "Timber reconnaissance module unavailable." };
     const frontageAnalysis = frontageTools ? frontageTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-frontage-crossing-workflow", schema_version: "1.0", status: "NOT_AVAILABLE", vehicle_crossing_options: [], frontage_ends: [], parking_and_staging: [] };
+    const automaticContext = sourceInspection.automatic_context || { external_source_records: [], retrieval_attempts: [], device_snapshots: [] };
+    const factsByClass = automaticContextTools ? automaticContextTools.reportByClass(sourceInspection) : { schema_name: "property-intelligence-facts-by-class", schema_version: "1.0", classes: {} };
+    const mappedSections = sectionMappingTools ? sectionMappingTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-simple-section-mapping", schema_version: "1.0", sections: [], approximate_totals_by_description: {} };
+    const mappedSectionsGeoJson = {
+      type: "FeatureCollection",
+      name: "Approximate mapped sections - phone GPS, not a survey",
+      features: (mappedSections.sections || []).flatMap(section => {
+        const features = [];
+        if (section.outlined_section) features.push({ type: "Feature", geometry: section.outlined_section, properties: { section_id: section.section_id, feature_role: "APPROXIMATE_SECTION_OUTLINE", information_class: "CALCULATED", label: section.calculation_label, descriptions: section.effective_description_selections } });
+        if (Array.isArray(section.walked_edge) && section.walked_edge.length > 1) features.push({ type: "Feature", geometry: { type: "LineString", coordinates: section.walked_edge.map(point => [point.longitude, point.latitude]) }, properties: { section_id: section.section_id, feature_role: "PHYSICALLY_WALKED_EDGE", information_class: "CAPTURED_BY_DEVICE" } });
+        if (section.inferred_edge) features.push({ type: "Feature", geometry: { type: "LineString", coordinates: [[section.inferred_edge.from.longitude, section.inferred_edge.from.latitude], [section.inferred_edge.to.longitude, section.inferred_edge.to.latitude]] }, properties: { section_id: section.section_id, feature_role: "APPROXIMATE_INFERRED_EDGE_NOT_PHYSICALLY_WALKED", information_class: "CALCULATED", label: section.inferred_edge.label, reason: section.inferred_edge.reason } });
+        return features;
+      })
+    };
 
     const manifest = {
       format: FORMAT,
@@ -2425,6 +2464,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         water_reviewed_photo_count: manifestPhotos.filter(photo => photo.water_confirmation).length,
         confirmed_water_photo_count: manifestPhotos.filter(photo => photo.water_confirmation === "yes").length,
         voice_note_count: manifestVoices.length,
+        site_sound_experience_count: (sourceInspection.site_sound_records || []).length,
+        automatic_external_source_record_count: (automaticContext.external_source_records || []).length,
+        mapped_section_count: (mappedSections.sections || []).length,
+        mapped_section_closed_count: (mappedSections.sections || []).filter(section => ["SAVED_CLOSED", "SAVED_WITH_INFERRED_EDGE"].includes(section.completion_status)).length,
         source_voice_note_record_count: sourceInspection.voice_notes.length,
         audit_only_voice_note_count: auditOnlyVoices.length,
         correction_count: (sourceInspection.corrections || []).length,
@@ -2490,6 +2533,10 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         water_observation_rule: inspection.water_observation_rule || null,
         build_mode: sourceInspection.build_mode || null,
         simple_capture_sessions: sourceInspection.simple_sessions || []
+        ,site_sound_records: sourceInspection.site_sound_records || []
+        ,automatic_context: automaticContext
+        ,facts_by_class: factsByClass
+        ,mapped_sections: mappedSections
         ,frontage_and_crossing: frontageAnalysis
         ,structured_measurements: structuredMeasurements
         ,measurement_suggestions: sourceInspection.measurement_suggestions || []
@@ -2511,6 +2558,7 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       preliminary_timber_reconnaissance: timberReconnaissance,
       forester_handoff: foresterHandoff,
       frontage_and_crossing: frontageAnalysis,
+      mapped_sections: mappedSections,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2531,6 +2579,11 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         professional_handoff_printable: "professional-handoff-cards.html",
         return_visit_plan: "RETURN_VISIT_PLAN.json",
         frontage_and_crossing: "FRONTAGE_AND_CROSSING.json",
+        automatic_context: "AUTOMATIC_CONTEXT.json",
+        facts_by_class: "FACTS_BY_CLASS.json",
+        site_sound_experience: "SITE_SOUND_EXPERIENCE.json",
+        mapped_sections: "MAPPED_SECTIONS.json",
+        mapped_sections_geojson: "mapped-sections.geojson",
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
         segmented_route: "SEGMENTED_ROUTE.json",
@@ -2650,6 +2703,11 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("EVIDENCE_SETS.json", JSON.stringify({ summaries: evidenceSetSummaries, pending_suggestions: evidenceSetSuggestions, append_only_events: sourceInspection.evidence_set_events || [] }, null, 2) + "\n", { modifiedAt });
     zip.add("POST_INSPECTION_REVIEW.json", JSON.stringify(postInspectionReview, null, 2) + "\n", { modifiedAt });
     zip.add("WEATHER_CONTEXT.json", JSON.stringify({ schema_name: "property-intelligence-weather-context", schema_version: "2.0", inspection_id: manifest.inspection_id, authoritative_weather: manifest.inspection.authoritative_weather || null, manual_weather_context: manifest.inspection.weather_context || {}, observed_site_conditions: manifest.inspection.conditions || {}, interpretation_rules: ["Weather context is not an observed site condition.", "An inferred cause is not an observed fact.", "One inspection does not establish year-round conditions.", "A station total must retain its station-distance limitation.", "Calculated departures and percentages must be labeled as derived from cited official station records.", "Station rainfall may differ from parcel rainfall."] }, null, 2) + "\n", { modifiedAt });
+    zip.add("AUTOMATIC_CONTEXT.json", JSON.stringify(automaticContext, null, 2) + "\n", { modifiedAt });
+    zip.add("FACTS_BY_CLASS.json", JSON.stringify(factsByClass, null, 2) + "\n", { modifiedAt });
+    zip.add("SITE_SOUND_EXPERIENCE.json", JSON.stringify({ schema_name: "property-intelligence-site-sound-experience-index", schema_version: "1.0", inspection_id: manifest.inspection_id, records: sourceInspection.site_sound_records || [], rule: "Site sound and experience choices are on-site observations. Ambient recordings and device metadata are device captures. External weather remains external context." }, null, 2) + "\n", { modifiedAt });
+    zip.add("MAPPED_SECTIONS.json", JSON.stringify(mappedSections, null, 2) + "\n", { modifiedAt });
+    zip.add("mapped-sections.geojson", JSON.stringify(mappedSectionsGeoJson, null, 2) + "\n", { modifiedAt });
     zip.add("CHAT_REVIEW_RETURN_INSTRUCTIONS.md", chatReviewInstructions, { modifiedAt });
     zip.add("schemas/property-intelligence-review-annotation.schema.json", JSON.stringify(reviewAnnotationSchema, null, 2) + "\n", { modifiedAt });
     zip.add("PROFESSIONAL_HANDOFF_CARDS.json", JSON.stringify(professionalHandoffCards, null, 2) + "\n", { modifiedAt });

@@ -473,6 +473,7 @@
       const measurementPhoto = (suggestion.suggested_photo_roles || []).find(item => item.photo_number === measurementRequest.measurement_photo_number) || (suggestion.suggested_photo_roles || []).find(item => item.role === "Measurement");
       const measurement = {
         schema_name: "property-intelligence-structured-measurement", schema_version: "1.0",
+        information_class: "MEASURED_ON_SITE",
         measurement_id: `measurement:${suggestionId}`,
         inspection_id: data.inspection_id || null, property_id: data.property_id || null,
         measurement_type: measurementRequest.measurement_type, authoritative_value: exactValue, unit: measurementRequest.unit,

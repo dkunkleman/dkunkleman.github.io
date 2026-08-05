@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.3";
+  const APP_VERSION = "3.13.0-home-test.4";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -27,6 +27,8 @@
   const synthesisTools = window.ReviewedPropertySynthesis;
   const weatherTools = window.AuthoritativeWeather;
   const frontageTools = window.PropertyFrontageWorkflow;
+  const automaticContextTools = window.AutomaticFieldContext;
+  const sectionMappingTools = window.SimpleSectionMapping;
   const pendingPhotoCacheName = "property-inspector-home-test-313-pending-v1";
 
   const svg = document.getElementById("overlay");
@@ -130,6 +132,46 @@
   let simpleActiveSessionId = null;
   let simpleLastSavedMessage = "";
   let simplePreviewUrl = null;
+  let ambientSoundStopTimer = null;
+  let automaticContextGpsCapturedForRun = false;
+  let automaticContextRefreshPromise = null;
+
+  function captureAutomaticContext(reason, position) {
+    if (!automaticContextTools) return null;
+    const snapshot = automaticContextTools.captureDeviceSnapshot(data, {
+      reason,
+      position: position || null,
+      orientation: latestOrientation,
+      app_version: APP_VERSION,
+      parcel_position: subjectParcel() ? "SUBJECT_PARCEL_CONTEXT_LOADED_POSITION_NOT_SURVEYED" : "UNKNOWN",
+      browser_recovery_context: {
+        indexeddb_name: photoDbName,
+        local_storage_key: stateKey,
+        service_worker_scope: "./",
+        pending_photo_count: pendingPhotoQueue.length
+      }
+    });
+    return snapshot && snapshot.context_id;
+  }
+
+  function refreshAutomaticExternalContext(position) {
+    if (!automaticContextTools || !position) return Promise.resolve(null);
+    if (automaticContextRefreshPromise) return automaticContextRefreshPromise;
+    const existingModel = automaticContextTools.ensureModel(data);
+    const refreshedAt = existingModel.last_external_refresh_at && new Date(existingModel.last_external_refresh_at).getTime();
+    if (Number.isFinite(refreshedAt) && Date.now() - refreshedAt < 15 * 60 * 1000) return Promise.resolve(existingModel);
+    automaticContextRefreshPromise = automaticContextTools.retrieveOfficialContext(data, { position })
+      .then(model => { saveState(); return model; })
+      .catch(error => {
+        const model = automaticContextTools.ensureModel(data);
+        model.external_refresh_status = "OFFLINE_OR_UNAVAILABLE";
+        model.retrieval_attempts.push({ provider: "automatic_context", status: "FAILED_NONBLOCKING", retrieved_at: new Date().toISOString(), error: error.message });
+        saveState();
+        return model;
+      })
+      .finally(() => { automaticContextRefreshPromise = null; });
+    return automaticContextRefreshPromise;
+  }
 
   function emptyInspection() {
     return {
@@ -176,6 +218,9 @@
       simple_sessions: [],
       simple_counters: {},
       active_simple_session_id: null,
+      site_sound_records: [],
+      automatic_context: null,
+      section_mapping: null,
       frontage_workflow: null,
       land_use_concepts: [],
       reviewed_map_status: {},
@@ -261,6 +306,8 @@
     data.active_simple_session_id = data.active_simple_session_id || null;
     simpleActiveSessionId = data.active_simple_session_id;
     if (frontageTools) frontageTools.ensureModel(data);
+    if (automaticContextTools) automaticContextTools.ensureModel(data);
+    if (sectionMappingTools) sectionMappingTools.ensureModel(data);
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
     data.weather_context = Object.assign(emptyInspection().weather_context, data.weather_context || {});
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
@@ -2090,6 +2137,7 @@
     const alpha = orientationNumber(event.alpha);
     const compassHeading = webkitHeading != null ? webkitHeading : (event.absolute && alpha != null ? (360 - alpha + 360) % 360 : null);
     latestOrientation = {
+      information_class: "CAPTURED_BY_DEVICE",
       time: new Date().toISOString(),
       alpha_deg: alpha,
       beta_deg: orientationNumber(event.beta),
@@ -2137,6 +2185,7 @@
   function onPosition(position) {
     const coordinates = position.coords;
     const point = {
+      information_class: "CAPTURED_BY_DEVICE",
       time: new Date(position.timestamp).toISOString(),
       lat: coordinates.latitude,
       lon: coordinates.longitude,
@@ -2154,6 +2203,12 @@
     };
     point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;
     data.points.push(point);
+    if (sectionMappingTools) sectionMappingTools.appendWalkPoint(data, point, point.time);
+    if (!automaticContextGpsCapturedForRun) {
+      captureAutomaticContext("first_precise_gps_after_start_or_resume", point);
+      automaticContextGpsCapturedForRun = true;
+      refreshAutomaticExternalContext(point);
+    }
     coverageDirty = true;
     gpsWriteQueue = gpsWriteQueue
       .then(() => gpsPointPut(data.inspection_id, point))
@@ -2222,6 +2277,8 @@
     }
     data.stopped = null;
     data.lifecycle_events.push({ type: resuming ? "inspection_resumed" : "inspection_started", time: startedAt, source: "button_press" });
+    automaticContextGpsCapturedForRun = false;
+    captureAutomaticContext(resuming ? "inspection_resumed" : "inspection_started", null);
     lastPosition = null;
     saveState();
     updateTimeMetrics();
@@ -2266,6 +2323,8 @@
       button_label: buttonLabels[type] || type,
       note: note || "",
       evidence_classification: settings.evidenceClassification || "Observed",
+      information_class: settings.informationClass || (settings.recordClass === "inspector_thought" ? "INSPECTOR_INTERPRETATION" : "OBSERVED_ON_SITE"),
+      automatic_context_id: automaticContextTools ? automaticContextTools.ensureModel(data).last_device_snapshot_id : null,
       attributes: Object.assign({}, settings.attributes || {}),
       area_id: settings.areaId || context.area_id,
       question_ids: Array.isArray(settings.questionIds) ? settings.questionIds.slice() : context.question_ids,
@@ -2441,6 +2500,10 @@
         simple_session_id: settings.simple_session_id || null,
         prompt: settings.prompt || null,
         recovered_after_interruption: false
+        ,information_class: "CAPTURED_BY_DEVICE"
+        ,automatic_context_id: automaticContextTools ? automaticContextTools.ensureModel(data).last_device_snapshot_id : null
+        ,site_sound_record_id: settings.site_sound_record_id || null
+        ,section_id: settings.section_id || null
       };
       data.pending_voice_note = activeVoiceNote;
       saveState();
@@ -2457,6 +2520,12 @@
         setStatus(`VOICE NOTE ERROR: ${event.error ? event.error.message : "recording failed"}.`, "error");
       });
       mediaRecorder.start(1000);
+      if (Number(settings.auto_stop_ms) > 0) {
+        clearTimeout(ambientSoundStopTimer);
+        ambientSoundStopTimer = setTimeout(() => {
+          if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+        }, Number(settings.auto_stop_ms));
+      }
       voiceBtn.textContent = "Stop Voice Note";
       voiceBtn.classList.add("recording");
       updateControls();
@@ -2528,6 +2597,8 @@
     let voiceSaved = false;
     let explanationHandledWithoutAudio = false;
     try {
+      clearTimeout(ambientSoundStopTimer);
+      ambientSoundStopTimer = null;
       await voiceChunkWrites;
       const isEvidenceExplanation = metadata && ["photo_explanation", "evidence_set_explanation"].includes(metadata.purpose);
       if (isEvidenceExplanation && photoExplanationDisposition) {
@@ -2551,11 +2622,12 @@
         id: makeId("event"),
         source: isEvidenceExplanation ? metadata.purpose : "button_press",
         type: "voice_note",
+        information_class: "CAPTURED_BY_DEVICE",
         observation_type: "field.voice_note",
         taxonomy_version: "property-observation-1.0",
         button_label: "Voice Note",
         note: metadata.prompt || "",
-        attributes: { duration_ms: metadata.duration_ms, purpose: metadata.purpose || "general_field_note", photo_id: metadata.photo_id || null, evidence_set_id: metadata.evidence_set_id || null, simple_session_id: metadata.simple_session_id || null },
+        attributes: { duration_ms: metadata.duration_ms, purpose: metadata.purpose || "general_field_note", photo_id: metadata.photo_id || null, evidence_set_id: metadata.evidence_set_id || null, simple_session_id: metadata.simple_session_id || null, section_id: metadata.section_id || null },
         area_id: metadata.area_id || null,
         question_ids: Array.isArray(metadata.question_ids) ? metadata.question_ids.slice() : [],
         question_links: Array.isArray(metadata.question_links) ? metadata.question_links.map(link => Object.assign({}, link)) : [],
@@ -2574,6 +2646,18 @@
       await voiceStorePut({ id: metadata.id, inspection_id: data.inspection_id, metadata, event: voiceEvent, audioBlob });
       if (metadata.photo_id) await attachExplanationToPhoto(metadata.photo_id, metadata.id);
       data.voice_notes.push(metadata);
+      if (metadata.site_sound_record_id) {
+        const soundRecord = (data.site_sound_records || []).find(item => String(item.sound_id) === String(metadata.site_sound_record_id));
+        if (soundRecord) {
+          if (metadata.purpose === "site_ambient_sound") soundRecord.ambient_audio_voice_note_id = metadata.id;
+          else soundRecord.voice_note_ids = Array.from(new Set([...(soundRecord.voice_note_ids || []), metadata.id]));
+          soundRecord.updated_at = new Date().toISOString();
+        }
+      }
+      if (metadata.section_id && sectionMappingTools) {
+        const section = sectionMappingTools.sectionById(data, metadata.section_id);
+        if (section) section.voice_note_ids = Array.from(new Set([...(section.voice_note_ids || []), metadata.id]));
+      }
       if (metadata.evidence_set_id && evidenceSetTools) evidenceSetTools.attachRecord(data, metadata.evidence_set_id, "voice_note", metadata, { created_by: data.inspector_identity });
       data.pending_voice_note = null;
       data.markers.push(voiceEvent);
@@ -3288,6 +3372,8 @@
       const sourceModified = Number.isFinite(file.lastModified) && file.lastModified > 0 ? new Date(file.lastModified).toISOString() : null;
       const metadata = {
         id,
+        information_class: "CAPTURED_BY_DEVICE",
+        automatic_context_id: automaticContextTools ? automaticContextTools.ensureModel(data).last_device_snapshot_id : null,
         camera_opened_at: pendingPhotoRequestedAt,
         recorded_at: recordedAt,
         time: recordedAt,
@@ -3338,14 +3424,16 @@
         ,simple_photo_id: photoContext.simple_photo_id || null
         ,simple_feature_sequence: photoContext.simple_feature_sequence || null
         ,photo_role: photoContext.photo_role || null
+        ,section_id: photoContext.section_id || (photoContext.feature_id && String(photoContext.feature_id).startsWith("SECTION-") ? photoContext.feature_id : null)
       };
       const photoEvent = markerFromPosition("photo", metadata.note, id, recordedAt, position, {
         evidenceClassification: metadata.evidence_classification,
         attributes: {
-          photo_number: metadata.photo_number,
-          category: metadata.category,
-          associated_observation_id: metadata.associated_observation_id,
-          observation_attributes: metadata.observation_attributes
+           photo_number: metadata.photo_number,
+           category: metadata.category,
+           associated_observation_id: metadata.associated_observation_id,
+           observation_attributes: metadata.observation_attributes,
+           section_id: metadata.section_id
         },
         areaId: metadata.area_id,
         questionIds: metadata.question_ids,
@@ -3367,6 +3455,10 @@
       };
       await commitPhotoRecord(photoRecord, true);
       if (metadata.timber_tree_id && timberTools) timberTools.attachPhotoToTree(data, metadata.timber_tree_id, metadata.id, false);
+      if (metadata.section_id && sectionMappingTools) {
+        const section = sectionMappingTools.sectionById(data, metadata.section_id);
+        if (section) section.photo_ids = Array.from(new Set([...(section.photo_ids || []), metadata.id]));
+      }
       setStatus(`Photo ${data.photos.length} stored with original bytes, analysis copy, GPS, time, and orientation metadata.${storageEstimate.warning ? ` WARNING: only ${formatBytes(storageEstimate.remaining)} of browser storage remains.` : ""}`, storageEstimate.warning ? "warning" : "active");
       if (metadata.simple_capture) {
         const session = simpleSessionById(metadata.simple_session_id);
@@ -3376,6 +3468,7 @@
           session.current_photo_id = metadata.id;
           session.current_simple_photo_id = metadata.simple_photo_id;
           session.pending_photo_id = null;
+          if (culvertNeededSession(session) && culvertStep(session) === "PHOTO") session.details.culvert_sequence_step = "WATER";
         }
         saveState();
         renderActiveSimpleSession();
@@ -3604,6 +3697,7 @@
 
   async function buildPackageWithRecovery(packageMode, packageKind) {
     await refreshAuthoritativeWeather({ silent: true });
+    if (lastPosition) await refreshAutomaticExternalContext(lastPosition);
     let lastError = null;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -3774,7 +3868,7 @@
     frontage_end: "FRONTAGE END", vehicle_crossing: "VEHICLE CROSSING OPTION",
     ditch_change: "DITCH CHANGE", frontage_trees_brush: "TREES / BRUSH",
     frontage_wet_soft: "WET / SOFT", frontage_steep_slope: "STEEP SLOPE",
-    frontage_photo: "FRONTAGE PHOTO", parking_staging: "PARKING / STAGING"
+    frontage_photo: "FRONTAGE PHOTO", parking_staging: "PARKING / STAGING", site_sound: "SITE SOUND / EXPERIENCE", map_section: "MAP THIS SECTION"
   };
 
   function simpleSessionById(id) {
@@ -3814,7 +3908,7 @@
   }
 
   function simpleFeaturePrefix(type) {
-    const prefixes = { water: "WATER", tree: "TREE", ditch: "DITCH", culvert: "CULVERT", brush: "BRUSH", blocked: "BLOCKED", entrance: "ROAD", open: "OPEN", highlow: "GROUND", other: "OTHER", photo: "PHOTO" };
+    const prefixes = { water: "WATER", tree: "TREE", ditch: "DITCH", culvert: "CULVERT", brush: "BRUSH", blocked: "BLOCKED", entrance: "ROAD", open: "OPEN", highlow: "GROUND", other: "OTHER", photo: "PHOTO", site_sound: "SOUND" };
     return prefixes[type] || "FEATURE";
   }
 
@@ -3844,6 +3938,8 @@
       fields.forEach(field => {
         if (field.type === "radio" && !field.checked) return;
         session.details[field.name] = field.value;
+        session.details_information_classes = session.details_information_classes || {};
+        session.details_information_classes[field.name] = field.type === "number" && field.value !== "" ? "MEASURED_ON_SITE" : (field.value && !/^unknown$/i.test(field.value) ? "OBSERVED_ON_SITE" : "UNKNOWN");
       });
     }
     if (session.feature_type === "tree") {
@@ -3851,6 +3947,7 @@
       session.details.measurement_height_in = 54;
       session.details.ground_basis = "Uphill side";
       session.details.calculated_dbh_in = simpleDbh(session.details.circumference_in);
+      session.details_information_classes = Object.assign({}, session.details_information_classes || {}, { calculated_dbh_in: "CALCULATED" });
     }
     session.updated_at = new Date().toISOString();
     const marker = data.markers.find(item => String(item.id) === String(session.observation_id));
@@ -3957,6 +4054,17 @@
     const locatorRoutePoints = data.points.filter((point, index) => index % routeStride === 0 || index === data.points.length - 1);
     const route = locatorRoutePoints.length > 1 ? `<path d="${locatorRoutePoints.map((point, index) => `${index ? "L" : "M"}${sx(point.lon).toFixed(1)} ${sy(point.lat).toFixed(1)}`).join(" ")}" fill="none" stroke="#ffe54a" stroke-width="8" vector-effect="non-scaling-stroke"/>` : "";
     const featureDots = data.markers.filter(item => Number.isFinite(Number(item.lon)) && Number.isFinite(Number(item.lat))).slice(-80).map(item => `<circle cx="${sx(item.lon).toFixed(1)}" cy="${sy(item.lat).toFixed(1)}" r="16" fill="#ff8b21" stroke="#fff" stroke-width="5" vector-effect="non-scaling-stroke"/>`).join("");
+    const mappedSections = sectionMappingTools ? sectionMappingTools.ensureModel(data).sections : [];
+    const sectionLayers = mappedSections.map(section => {
+      const ring = section.outlined_section && section.outlined_section.coordinates && section.outlined_section.coordinates[0];
+      const walked = section.completion_status === "ACTIVE" ? section.raw_walked_edge_points : section.walked_edge;
+      const polygon = Array.isArray(ring) && ring.length > 2 ? `<path d="${ring.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ")} Z" fill="rgba(36,168,91,.20)" stroke="#1f8b4c" stroke-width="7" vector-effect="non-scaling-stroke"/>` : "";
+      const walkedPath = Array.isArray(walked) && walked.length > 1 ? `<path d="${walked.map((point, index) => `${index ? "L" : "M"}${sx(point.longitude).toFixed(1)} ${sy(point.latitude).toFixed(1)}`).join(" ")}" fill="none" stroke="${section.completion_status === "ACTIVE" ? "#00e1ff" : "#39c96b"}" stroke-width="11" vector-effect="non-scaling-stroke"/>` : "";
+      const inferred = section.inferred_edge ? `<line x1="${sx(section.inferred_edge.from.longitude).toFixed(1)}" y1="${sy(section.inferred_edge.from.latitude).toFixed(1)}" x2="${sx(section.inferred_edge.to.longitude).toFixed(1)}" y2="${sy(section.inferred_edge.to.latitude).toFixed(1)}" stroke="#ff6b35" stroke-width="9" stroke-dasharray="28 18" vector-effect="non-scaling-stroke"/>` : "";
+      const labelPoint = section.start;
+      const label = labelPoint ? `<text x="${sx(labelPoint.longitude).toFixed(1)}" y="${(sy(labelPoint.latitude) - 24).toFixed(1)}" fill="#fff" stroke="#173b24" stroke-width="10" paint-order="stroke" font-size="45" font-weight="900">${section.section_id}</text>` : "";
+      return `${polygon}${walkedPath}${inferred}${label}`;
+    }).join("");
     let phone = "";
     if (lastPosition) {
       const x = sx(lastPosition.lon), y = sy(lastPosition.lat);
@@ -3967,11 +4075,254 @@
       const hx = x + Math.sin(angle) * 80, hy = y - Math.cos(angle) * 80;
       phone = `<circle cx="${x}" cy="${y}" r="${accuracyRadius}" fill="rgba(30,132,255,.22)" stroke="#62b4ff" stroke-width="5"/><line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#0a57a6" stroke-width="16"/><circle cx="${x}" cy="${y}" r="24" fill="#1684ff" stroke="#fff" stroke-width="8"/>`;
     }
-    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Approximate subject parcel locator">${ringPaths}${route}${featureDots}${phone}</svg>`;
+    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Approximate subject parcel and mapped-section locator">${ringPaths}${sectionLayers}${route}${featureDots}${phone}</svg>`;
   }
 
   function simpleFieldButton(type, label, cssClass) {
     return `<button type="button" class="simple-feature ${cssClass || ""}" data-simple-feature="${type}">${label}</button>`;
+  }
+
+  function siteSoundRecordForSession(session) {
+    return session ? (data.site_sound_records || []).find(item => String(item.sound_id) === String(session.site_sound_record_id || session.details && session.details.site_sound_record_id)) || null : null;
+  }
+
+  function openSiteSound(locationContext, returnScreen) {
+    if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+    if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
+    const soundId = simpleNextIdentifier("site_sound");
+    const now = new Date().toISOString();
+    const record = {
+      schema_name: "property-intelligence-site-sound-experience",
+      schema_version: "1.0",
+      sound_id: soundId,
+      information_class: "OBSERVED_ON_SITE",
+      location_context: locationContext || "general_site",
+      recorded_at: now,
+      updated_at: now,
+      latitude: lastPosition.lat,
+      longitude: lastPosition.lon,
+      gps_accuracy_m: lastPosition.accuracy_m,
+      gps_position_at: lastPosition.time,
+      selected_experiences: [],
+      ambient_audio_voice_note_id: null,
+      voice_note_ids: [],
+      external_weather_context_id: automaticContextTools ? automaticContextTools.ensureModel(data).last_external_refresh_at : null,
+      completion_status: "ACTIVE"
+    };
+    const marker = markerFromPosition("other", "Site sound / experience", null, now, lastPosition, {
+      informationClass: "OBSERVED_ON_SITE",
+      attributes: { sound_id: soundId, location_context: record.location_context }
+    });
+    const session = {
+      schema_name: "property-inspector-simple-capture-session", schema_version: "1.0",
+      simple_session_id: makeId("simple-session"), feature_id: soundId, feature_type: "site_sound", site_sound_record_id: soundId,
+      started_at: now, updated_at: now, finished_at: null, completion_status: "ACTIVE",
+      return_screen: returnScreen || "FIELD_BUTTONS", details: { site_sound_record_id: soundId }, observation_id: marker.id,
+      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time
+    };
+    data.site_sound_records.push(record);
+    data.markers.push(marker);
+    data.simple_sessions.push(session);
+    data.active_simple_session_id = session.simple_session_id;
+    simpleActiveSessionId = session.simple_session_id;
+    saveState();
+    simpleSetStatus(`${soundId} SAVED - every choice below is optional`, "saved");
+    renderSiteSoundCapture(session);
+  }
+
+  function finishSiteSound(session, status) {
+    const record = siteSoundRecordForSession(session);
+    if (record) {
+      record.completion_status = status || "BASIC_RECORD_SAVED";
+      record.updated_at = new Date().toISOString();
+    }
+    const target = session.return_screen || "FIELD_BUTTONS";
+    simpleFinalizeActive(status || "BASIC_RECORD_SAVED");
+    if (target && target !== "FIELD_BUTTONS") { setFrontageScreen(target); renderFrontageWorkflow(); }
+    else renderSimpleHome();
+  }
+
+  function renderSiteSoundCapture(session) {
+    const record = siteSoundRecordForSession(session);
+    if (!record) { simpleSaveAndReturn(); return; }
+    const choices = ["Traffic", "Aircraft", "Machinery", "People", "Dogs", "Gunfire", "Boats", "Flowing water", "Wildlife", "Wind", "Mostly quiet", "Other", "Unknown"];
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="simple-capture"><h2>${record.sound_id} - SITE SOUND / EXPERIENCE</h2><p class="frontage-instruction">What can you hear or experience here right now?</p><p class="simple-next-line">Optional. Save or skip at any time. The microphone never runs continuously.</p><div class="culvert-factor-list sound-choice-list">${choices.map(choice => `<label><input type="checkbox" value="${choice}" ${(record.selected_experiences || []).includes(choice) ? "checked" : ""}> ${choice}</label>`).join("")}</div><p id="soundConflict" class="frontage-warning" hidden>“Mostly quiet” conflicts with another selected sound. Both will remain saved for review.</p><div class="simple-capture-actions"><button id="soundAmbient" type="button">RECORD 10-SECOND AMBIENT SOUND</button><button id="soundVoice" type="button">OPTIONAL VOICE NOTE</button><button id="soundSave" class="simple-return" type="button">SAVE AND CONTINUE</button><button id="soundSkip" type="button">SKIP AND CONTINUE</button></div></section>`;
+    const updateChoices = () => {
+      record.selected_experiences = Array.from(content.querySelectorAll('.sound-choice-list input:checked')).map(input => input.value);
+      record.updated_at = new Date().toISOString();
+      const conflict = record.selected_experiences.includes("Mostly quiet") && record.selected_experiences.some(value => value !== "Mostly quiet" && value !== "Unknown");
+      document.getElementById("soundConflict").hidden = !conflict;
+      saveState();
+    };
+    content.querySelectorAll('.sound-choice-list input').forEach(input => input.addEventListener("change", updateChoices));
+    document.getElementById("soundAmbient").addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      else await startVoiceRecording({ purpose: "site_ambient_sound", simple_session_id: session.simple_session_id, site_sound_record_id: record.sound_id, auto_stop_ms: 10000, prompt: "Record the surrounding sound for ten seconds." });
+    });
+    document.getElementById("soundVoice").addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      else await startVoiceRecording({ purpose: "site_sound_voice_note", simple_session_id: session.simple_session_id, site_sound_record_id: record.sound_id });
+    });
+    document.getElementById("soundSave").addEventListener("click", () => { updateChoices(); finishSiteSound(session, "BASIC_RECORD_SAVED"); });
+    document.getElementById("soundSkip").addEventListener("click", () => finishSiteSound(session, "SKIPPED_OPTIONAL_DETAILS"));
+    renderSimpleHeader();
+  }
+
+  function sectionRecordForSession(session) {
+    return session && sectionMappingTools ? sectionMappingTools.sectionById(data, session.section_id || session.feature_id) : null;
+  }
+
+  function activateSectionSession(section, returnScreen) {
+    if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
+    const now = new Date().toISOString();
+    let observationId = section.observation_id || null;
+    if (!observationId) {
+      const marker = markerFromPosition("other", "Mapped land section", null, now, lastPosition, {
+        informationClass: "OBSERVED_ON_SITE",
+        attributes: { section_id: section.section_id, section_method: section.method, descriptions: section.description_selections }
+      });
+      observationId = marker.id;
+      section.observation_id = observationId;
+      data.markers.push(marker);
+    }
+    const session = {
+      schema_name: "property-inspector-simple-capture-session", schema_version: "1.0",
+      simple_session_id: makeId("simple-session"), feature_id: section.section_id, feature_type: "map_section", section_id: section.section_id,
+      started_at: now, updated_at: now, finished_at: null, completion_status: "ACTIVE", information_class: "OBSERVED_ON_SITE",
+      return_screen: returnScreen || "FIELD_BUTTONS", details: { section_id: section.section_id }, observation_id: observationId,
+      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time
+    };
+    data.simple_sessions.push(session);
+    data.active_simple_session_id = session.simple_session_id;
+    simpleActiveSessionId = session.simple_session_id;
+    saveState(); redraw();
+    return session;
+  }
+
+  function sectionDescriptionChoices(selected) {
+    const active = new Set(selected || []);
+    return sectionMappingTools.DESCRIPTIONS.map(description => `<label><input type="checkbox" value="${description}" ${active.has(description) ? "checked" : ""}> ${description}</label>`).join("");
+  }
+
+  function renderSectionStart(message) {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const model = sectionMappingTools.ensureModel(data);
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture section-start"><h2>NEXT: MAP AN AREA WHERE THE LAND LOOKS GENERALLY THE SAME</h2><p class="frontage-instruction">Choose what is generally inside this section. Then walk around its outside edge.</p>${message ? `<p class="frontage-warning">${message}</p>` : ""}<div class="culvert-factor-list section-description-list">${sectionDescriptionChoices([])}</div><h3>How do you want to map it?</h3><div class="section-method-list">${Object.entries(sectionMappingTools.METHODS).map(([value, label], index) => `<label><input type="radio" name="sectionMethod" value="${value}" ${index === 0 ? "checked" : ""}> ${label}</label>`).join("")}</div><button id="sectionStartWalking" class="frontage-end" type="button">START WALKING THE EDGE</button><details><summary>PROPERTY STARTING SUGGESTIONS</summary><p>Planning suggestions only. They become observations only after you confirm them in the field.</p>${model.planning_suggestions.map(item => `<button type="button" data-section-suggestion="${item.suggestion_id}">${item.area_label}<br>${item.descriptions.join(" + ")}</button>`).join("")}</details><button id="sectionStartReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
+    let selectedSuggestionId = null;
+    content.querySelectorAll("[data-section-suggestion]").forEach(button => button.addEventListener("click", () => {
+      const suggestion = model.planning_suggestions.find(item => item.suggestion_id === button.dataset.sectionSuggestion);
+      if (!suggestion) return;
+      selectedSuggestionId = suggestion.suggestion_id;
+      content.querySelectorAll('.section-description-list input').forEach(input => { input.checked = suggestion.descriptions.includes(input.value); });
+      simpleSetStatus("STARTING SUGGESTION LOADED - confirm it from what you see before starting", "warning");
+    }));
+    document.getElementById("sectionStartWalking").addEventListener("click", () => {
+      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+      const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
+      const methodInput = content.querySelector('input[name="sectionMethod"]:checked');
+      try {
+        const section = sectionMappingTools.startSection(data, { descriptions, method: methodInput && methodInput.value, position: lastPosition, source_planning_suggestion_id: selectedSuggestionId });
+        activateSectionSession(section, "FIELD_BUTTONS");
+        simpleSetStatus(`${section.section_id} STARTED - descriptions, GPS, time, accuracy, and heading saved`, "saved");
+        renderSectionActive(section);
+      } catch (error) { simpleSetStatus(error.message, "warning"); }
+    });
+    document.getElementById("sectionStartReturn").addEventListener("click", renderSimpleHome);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function sectionDistanceText(section) {
+    const feet = Math.round(Number(section.distance_walked_m || 0) * 3.28084);
+    return `${feet} feet walked`;
+  }
+
+  function renderSectionActive(section) {
+    const session = currentSimpleSession() || activateSectionSession(section, "FIELD_BUTTONS");
+    section.capture_paused = Boolean(section.capture_paused);
+    const content = document.getElementById("simpleContent");
+    const cornerButton = section.method === "MARK_CORNERS" ? `<button id="sectionMarkCorner" class="frontage-end" type="button">MARK NEXT CORNER</button>` : "";
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>ACTIVE SECTION: ${section.section_id}</h2><p class="frontage-instruction">${section.capture_paused ? "SECTION EDGE PAUSED" : section.method_label}</p><p><strong>${sectionMappingTools.effectiveDescriptions(section).join(" + ")}</strong></p><div class="simple-calculation">${sectionDistanceText(section)}<br>${section.raw_walked_edge_points.length} GPS edge points | ${section.marked_corners.length} marked corners</div><div class="simple-capture-actions">${cornerButton}<button id="sectionAddPhoto" type="button">ADD PHOTO</button><button id="sectionVoice" type="button">OPTIONAL VOICE NOTE FOR ${section.section_id}</button><button id="sectionLandChanged" type="button">LAND CHANGED HERE</button><button id="sectionPause" type="button">${section.capture_paused ? "RESUME" : "PAUSE"}</button><button id="sectionFinish" class="frontage-end" type="button">FINISH SECTION</button><button id="sectionCannotWalk" type="button">CANNOT WALK THE REST</button><button id="sectionReturn" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    if (cornerButton) document.getElementById("sectionMarkCorner").addEventListener("click", () => {
+      try { const corner = sectionMappingTools.markCorner(data, lastPosition); saveState(); redraw(); renderSectionActive(section); simpleSetStatus(`CORNER ${corner.corner_number} SAVED FOR ${section.section_id}`, "saved"); } catch (error) { simpleSetStatus(error.message, "warning"); }
+    });
+    document.getElementById("sectionAddPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("sectionAddPhoto").addEventListener("click", () => simpleTakePhoto("Section context"));
+    document.getElementById("sectionVoice").addEventListener("click", async () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      else await startVoiceRecording({ purpose: "section_voice_note", simple_session_id: session.simple_session_id, section_id: section.section_id });
+    });
+    document.getElementById("sectionPause").addEventListener("click", () => { section.capture_paused = !section.capture_paused; section.events.push({ event_type: section.capture_paused ? "SECTION_PAUSED" : "SECTION_RESUMED", recorded_at: new Date().toISOString() }); saveState(); renderSectionActive(section); });
+    document.getElementById("sectionFinish").addEventListener("click", () => attemptFinishSection(section, false));
+    document.getElementById("sectionLandChanged").addEventListener("click", () => attemptFinishSection(section, false, "Land materially changed here."));
+    document.getElementById("sectionCannotWalk").addEventListener("click", () => renderSectionFinishChoice(section, true));
+    document.getElementById("sectionReturn").addEventListener("click", () => { section.capture_paused = true; section.events.push({ event_type: "SECTION_PAUSED_RETURNED_TO_FIELD_BUTTONS", recorded_at: new Date().toISOString() }); simpleReturnToFieldButtons(); });
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function attemptFinishSection(section, cannotWalk, note) {
+    const result = sectionMappingTools.finishSection(data, section.section_id, { completion: null });
+    if (result.needs_finish_choice || cannotWalk) { renderSectionFinishChoice(section, cannotWalk); return; }
+    if (note) section.events.push({ event_type: "LAND_CHANGED_HERE", recorded_at: new Date().toISOString(), note });
+    finishSectionUi(section);
+  }
+
+  function renderSectionFinishChoice(section, cannotWalk) {
+    section.capture_paused = true;
+    saveState();
+    const closure = sectionMappingTools.closureState(section);
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>HOW SHOULD THIS SECTION BE FINISHED?</h2><p class="frontage-instruction">${section.section_id} is saved. ${cannotWalk ? "You said the rest cannot be walked." : `The end is about ${closure.gap_m == null ? "an unknown distance" : `${Math.round(closure.gap_m * 3.28084)} feet`} from the start.`}</p><div class="simple-capture-actions"><button data-section-finish="CONNECT_BACK_TO_START" type="button">CONNECT BACK TO THE START</button><button data-section-finish="COULD_NOT_WALK_MISSING_EDGE" type="button">I COULD NOT WALK THE MISSING EDGE</button><button data-section-finish="SAVE_OPEN_PARTIAL_EDGE" type="button">SAVE AS AN OPEN PARTIAL EDGE</button><button data-section-finish="CONTINUE_WALKING" class="frontage-end" type="button">CONTINUE WALKING</button><button id="sectionFinishReturn" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.querySelectorAll("[data-section-finish]").forEach(button => button.addEventListener("click", () => {
+      const completion = button.dataset.sectionFinish;
+      const result = sectionMappingTools.finishSection(data, section.section_id, { completion });
+      if (result.continued) { section.capture_paused = false; saveState(); renderSectionActive(section); return; }
+      finishSectionUi(section);
+    }));
+    document.getElementById("sectionFinishReturn").addEventListener("click", simpleReturnToFieldButtons);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function finishSectionUi(section) {
+    const session = currentSimpleSession();
+    if (session) simpleFinalizeActive("BASIC_RECORD_SAVED");
+    saveState(); redraw();
+    simpleSetStatus(`${section.section_id} SAVED - ${section.calculation_label}`, "saved");
+    renderSectionReview(section);
+  }
+
+  function reactivateSectionAttachments(section) {
+    const session = activateSectionSession(section, "SECTION_REVIEW");
+    return session;
+  }
+
+  function renderSectionCorrection(section) {
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="simple-capture"><h2>CORRECT ${section.section_id} DESCRIPTION</h2><p>Corrections are append-only. The original description will remain in the record.</p><div class="culvert-factor-list section-correction-list">${sectionDescriptionChoices(sectionMappingTools.effectiveDescriptions(section))}</div><label>Optional reason<textarea id="sectionCorrectionReason"></textarea></label><button id="saveSectionCorrection" class="frontage-end" type="button">SAVE CORRECTION</button><button id="cancelSectionCorrection" class="simple-return" type="button">RETURN TO SECTION</button></section>`;
+    document.getElementById("saveSectionCorrection").addEventListener("click", () => {
+      const descriptions = Array.from(content.querySelectorAll('.section-correction-list input:checked')).map(input => input.value);
+      try { sectionMappingTools.addCorrection(data, section.section_id, descriptions, document.getElementById("sectionCorrectionReason").value); saveState(); renderSectionReview(section); simpleSetStatus(`CORRECTION SAVED FOR ${section.section_id} - original preserved`, "saved"); } catch (error) { simpleSetStatus(error.message, "warning"); }
+    });
+    document.getElementById("cancelSectionCorrection").addEventListener("click", () => renderSectionReview(section));
+  }
+
+  function renderSectionReview(section) {
+    const photos = data.photos.filter(photo => String(photo.feature_id || photo.section_id || "") === String(section.section_id));
+    const voices = data.voice_notes.filter(note => String(note.section_id || "") === String(section.section_id));
+    section.photo_ids = photos.map(photo => photo.id);
+    section.voice_note_ids = voices.map(note => note.id);
+    const area = section.approximate_acres == null ? "Not calculated for an open or photo-only edge" : `${section.approximate_acres} acres (${section.approximate_square_feet} square feet)`;
+    const inferred = section.inferred_edge ? `<p class="frontage-warning">APPROXIMATE INFERRED EDGE — NOT PHYSICALLY WALKED</p>` : `<p>Walked edge preserved separately. No inferred edge is being presented as walked.</p>`;
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>${section.section_id} SAVED</h2><div class="simple-calculation">Approximate area: ${area}<br>Approximate perimeter: ${section.approximate_perimeter_m == null ? "not calculated" : `${Math.round(section.approximate_perimeter_m * 3.28084)} feet`}<br>${section.calculation_label}</div><p><strong>${sectionMappingTools.effectiveDescriptions(section).join(" + ")}</strong></p>${inferred}<p>${photos.length} photo | ${voices.length} optional voice note</p><div class="simple-capture-actions"><button id="sectionNext" class="frontage-end" type="button">MAP THE NEXT SECTION</button><button id="sectionCorrect" type="button">ADD OR CORRECT DESCRIPTION</button><button id="sectionReviewPhoto" type="button">ADD PHOTO</button><button id="sectionReviewVoice" type="button">OPTIONAL VOICE NOTE FOR ${section.section_id}</button><button id="sectionReviewReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></div></section>`;
+    document.getElementById("sectionNext").addEventListener("click", () => renderSectionStart("NEXT: MAP THE ADJOINING AREA WHERE THE BRUSH, TREES, OR GROUND CHANGES. Do not map tiny differences."));
+    document.getElementById("sectionCorrect").addEventListener("click", () => renderSectionCorrection(section));
+    document.getElementById("sectionReviewPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("sectionReviewPhoto").addEventListener("click", () => { const session = reactivateSectionAttachments(section); simpleTakePhoto("Section follow-up"); });
+    document.getElementById("sectionReviewVoice").addEventListener("click", async () => { const session = reactivateSectionAttachments(section); await startVoiceRecording({ purpose: "section_voice_note", simple_session_id: session.simple_session_id, section_id: section.section_id }); });
+    document.getElementById("sectionReviewReturn").addEventListener("click", renderSimpleHome);
+    bindSimpleLocator(); renderSimpleHeader();
   }
 
   function frontageModel() {
@@ -4049,10 +4400,11 @@
   function renderFrontageStepOne() {
     simpleCloseDialogs(); restoreSimplePageScrolling();
     const content = document.getElementById("simpleContent");
-    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 1 - GO TO ONE END OF THE ROAD FRONTAGE</h2><p class="frontage-instruction">Walk to the nearest approximate end of the property's road frontage. Use the parcel outline and blue location dot as a guide.</p><div class="frontage-grid"><button id="markFrontageEnd" class="frontage-end" type="button">MARK FRONTAGE END</button><button id="unknownFrontageEnd" class="frontage-condition" type="button">I CANNOT TELL WHERE THE END IS</button><button id="frontageImportant" type="button">MARK SOMETHING IMPORTANT</button><button id="frontageStepVoice" type="button">OPTIONAL VOICE NOTE</button><button id="frontageStepReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 1 - GO TO ONE END OF THE ROAD FRONTAGE</h2><p class="frontage-instruction">Walk to the nearest approximate end of the property's road frontage. Use the parcel outline and blue location dot as a guide.</p><div class="frontage-grid"><button id="markFrontageEnd" class="frontage-end" type="button">MARK FRONTAGE END</button><button id="unknownFrontageEnd" class="frontage-condition" type="button">I CANNOT TELL WHERE THE END IS</button><button id="frontageImportant" type="button">MARK SOMETHING IMPORTANT</button><button id="frontageStepSound" type="button">OPTIONAL SITE SOUND</button><button id="frontageStepVoice" type="button">OPTIONAL VOICE NOTE</button><button id="frontageStepReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
     document.getElementById("markFrontageEnd").addEventListener("click", () => saveFrontageEnd("APPROXIMATE_END_MARKED"));
     document.getElementById("unknownFrontageEnd").addEventListener("click", () => saveFrontageEnd("END_LOCATION_UNKNOWN"));
     document.getElementById("frontageImportant").addEventListener("click", () => openSimpleCapture("other", "STEP_1"));
+    document.getElementById("frontageStepSound").addEventListener("click", () => openSiteSound("road_frontage_arrival", "STEP_1"));
     document.getElementById("frontageStepVoice").addEventListener("click", async () => {
       if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
       else await startVoiceRecording({ purpose: "frontage_step_1_voice_note", simple_session_id: null });
@@ -4115,13 +4467,14 @@
   function renderFrontageWalk() {
     simpleCloseDialogs(); restoreSimplePageScrolling();
     const content = document.getElementById("simpleContent");
-    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>FRONTAGE WALK ACTIVE</h2><p class="frontage-instruction">Walk toward the other frontage end. Tap the first answer that matches what you see. It saves immediately.</p><div class="frontage-grid"><button data-crossing-class="NO_CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - NO CULVERT NEEDED</button><button data-crossing-class="CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - CULVERT NEEDED</button><button data-crossing-class="EXISTING_CROSSING" class="frontage-crossing" type="button">EXISTING CULVERT / CROSSING</button><button data-crossing-class="MAJOR_VISIBLE_WORK" class="frontage-crossing" type="button">CROSSING - MAJOR WORK</button><button data-frontage-condition="ditch_change" class="frontage-condition" type="button">DITCH CHANGED</button><button data-frontage-condition="frontage_trees_brush" class="frontage-condition" type="button">TREES / BRUSH</button><button data-frontage-condition="frontage_wet_soft" class="frontage-condition" type="button">WET / SOFT</button><button data-frontage-condition="frontage_steep_slope" class="frontage-condition" type="button">STEEP SLOPE</button><button data-frontage-condition="frontage_photo" type="button">PHOTO</button><button id="frontageWalkVoice" type="button">OPTIONAL VOICE NOTE</button><button id="markOtherFrontageEnd" class="frontage-end" type="button">MARK OTHER FRONTAGE END</button><button id="endFrontageWalk" type="button">END FRONTAGE WALK</button><button id="frontageWalkContinue" class="frontage-end wide" type="button">SAVE WHAT I HAVE & CONTINUE FRONTAGE WALK</button><button id="frontageWalkReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>FRONTAGE WALK ACTIVE</h2><p class="frontage-instruction">Walk toward the other frontage end. Tap the first answer that matches what you see. It saves immediately.</p><div class="frontage-grid"><button data-crossing-class="NO_CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - NO CULVERT NEEDED</button><button data-crossing-class="CULVERT_APPARENTLY_NEEDED" class="frontage-crossing" type="button">CROSSING - CULVERT NEEDED</button><button data-crossing-class="EXISTING_CROSSING" class="frontage-crossing" type="button">EXISTING CULVERT / CROSSING</button><button data-crossing-class="MAJOR_VISIBLE_WORK" class="frontage-crossing" type="button">CROSSING - MAJOR WORK</button><button data-frontage-condition="ditch_change" class="frontage-condition" type="button">DITCH CHANGED</button><button data-frontage-condition="frontage_trees_brush" class="frontage-condition" type="button">TREES / BRUSH</button><button data-frontage-condition="frontage_wet_soft" class="frontage-condition" type="button">WET / SOFT</button><button data-frontage-condition="frontage_steep_slope" class="frontage-condition" type="button">STEEP SLOPE</button><button data-frontage-condition="frontage_photo" type="button">PHOTO</button><button id="frontageSoundChanged" type="button">SOUND CHANGED</button><button id="frontageWalkVoice" type="button">OPTIONAL VOICE NOTE</button><button id="markOtherFrontageEnd" class="frontage-end" type="button">MARK OTHER FRONTAGE END</button><button id="endFrontageWalk" type="button">END FRONTAGE WALK</button><button id="frontageWalkContinue" class="frontage-end wide" type="button">SAVE WHAT I HAVE & CONTINUE FRONTAGE WALK</button><button id="frontageWalkReturn" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
     content.querySelectorAll("[data-crossing-class]").forEach(button => button.addEventListener("click", () => saveCrossing(button.dataset.crossingClass)));
     content.querySelectorAll("[data-frontage-condition]").forEach(button => button.addEventListener("click", () => saveRoadsideCondition(button.dataset.frontageCondition)));
     document.getElementById("frontageWalkVoice").addEventListener("click", async () => {
       if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
       else await startVoiceRecording({ purpose: "simple_frontage_walk_voice_note", simple_session_id: null });
     });
+    document.getElementById("frontageSoundChanged").addEventListener("click", () => openSiteSound("road_frontage_sound_changed", "FRONTAGE_WALK"));
     document.getElementById("markOtherFrontageEnd").addEventListener("click", () => {
       const record = saveFrontageRecord("frontage_end", { boundary_confidence: "APPROXIMATE_END_MARKED", surveyed_boundary_claim: false, opposite_end: true });
       if (!record) return;
@@ -4145,10 +4498,119 @@
     return [];
   }
 
+  const culvertQuestionSteps = ["PHOTO", "WATER", "WIDTH", "DEPTH", "PASSABLE", "WORK_FACTORS", "DONE"];
+
+  function culvertNeededSession(session) {
+    return session && session.feature_type === "vehicle_crossing" && session.details.crossing_work_class === "CULVERT_APPARENTLY_NEEDED";
+  }
+
+  function culvertStep(session) {
+    const step = session.details.culvert_sequence_step || "PHOTO";
+    return culvertQuestionSteps.includes(step) ? step : "PHOTO";
+  }
+
+  function saveCulvertAnswer(session, field, value, informationClass, unit, limitation) {
+    session.details.culvert_questions = session.details.culvert_questions || {};
+    const fact = automaticContextTools ? automaticContextTools.classifiedFact({
+      field, value, information_class: informationClass || "UNKNOWN", unit: unit || null,
+      source_record_id: session.feature_id, limitation: limitation || null,
+      gps: { latitude: session.lat, longitude: session.lon, accuracy_m: session.gps_accuracy_m, position_at: session.gps_position_at }
+    }) : { field, value, information_class: informationClass || "UNKNOWN", unit: unit || null, recorded_at: new Date().toISOString() };
+    session.details.culvert_questions[field] = fact;
+    session.updated_at = new Date().toISOString();
+    simpleSaveDraft({ feedback: "ANSWER" });
+    return fact;
+  }
+
+  function advanceCulvertQuestion(session, nextStep) {
+    session.details.culvert_sequence_step = nextStep;
+    session.updated_at = new Date().toISOString();
+    simpleSaveDraft();
+    renderCulvertNeededSequence(session);
+  }
+
+  function culvertVoiceButton(session) {
+    return `<button id="culvertOptionalVoice" type="button">OPTIONAL VOICE NOTE</button><button id="culvertReturnField" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button>`;
+  }
+
+  function bindCulvertCommon(session) {
+    const voice = document.getElementById("culvertOptionalVoice");
+    if (voice) voice.addEventListener("click", () => toggleSimpleSessionVoice(session, null));
+    const back = document.getElementById("culvertReturnField");
+    if (back) back.addEventListener("click", simpleReturnToFieldButtons);
+    renderSimplePhotoPreview(session).catch(() => simpleSetStatus("The feature is saved. Its preview could not be shown right now.", "warning"));
+    renderSimpleHeader();
+  }
+
+  function renderCulvertNeededSequence(session) {
+    const content = document.getElementById("simpleContent");
+    const step = culvertStep(session);
+    const shell = (title, instruction, body) => `<section class="simple-capture culvert-guided"><h2>ACTIVE FEATURE</h2><h2>CROSSING - CULVERT NEEDED</h2><p class="frontage-instruction">FEATURE SAVED</p><h3>${title}</h3><p class="simple-next-line">${instruction}</p><div id="simplePhotoPreview" class="simple-photo-preview"></div><div class="frontage-support-actions">${body}${culvertVoiceButton(session)}</div></section>`;
+    if (step === "PHOTO") {
+      content.innerHTML = shell("TAKE ONE PICTURE STRAIGHT ACROSS THE DITCH", "Stand on the road side. Try to show the ditch and the ground behind it in one picture. The picture is optional.", `<button id="culvertTakeAcrossPhoto" type="button">TAKE PICTURE - ${simpleNextPhotoIdentifier()}</button><button data-photo-disposition="PICTURE_WOULD_NOT_SHOW_IT" type="button">PICTURE WOULD NOT SHOW IT</button><button data-photo-disposition="SKIPPED" type="button">SKIP AND CONTINUE</button><button id="culvertPhotoContinue" class="frontage-end" type="button">SAVE WHAT I HAVE & CONTINUE</button>`);
+      const take = document.getElementById("culvertTakeAcrossPhoto");
+      take.addEventListener("pointerdown", preparePhotoStorage);
+      take.addEventListener("click", () => simpleTakePhoto("Straight across ditch"));
+      content.querySelectorAll("[data-photo-disposition]").forEach(button => button.addEventListener("click", () => {
+        saveCulvertAnswer(session, "straight_across_photo_disposition", button.dataset.photoDisposition, "OBSERVED_ON_SITE");
+        advanceCulvertQuestion(session, "WATER");
+      }));
+      document.getElementById("culvertPhotoContinue").addEventListener("click", () => advanceCulvertQuestion(session, "WATER"));
+    } else if (step === "WATER") {
+      content.innerHTML = shell("IS THERE WATER IN THE DITCH?", "Tap what you can directly see. This is optional.", ["YES", "NO", "UNSURE", "PICTURE SHOWS IT", "SKIP"].map(value => `<button data-water-answer="${value}" type="button">${value}</button>`).join(""));
+      content.querySelectorAll("[data-water-answer]").forEach(button => button.addEventListener("click", () => {
+        const answer = button.dataset.waterAnswer;
+        saveCulvertAnswer(session, "water_visible_in_ditch", answer, answer === "SKIP" || answer === "UNSURE" ? "UNKNOWN" : "OBSERVED_ON_SITE");
+        advanceCulvertQuestion(session, "WIDTH");
+      }));
+    } else if (step === "WIDTH") {
+      content.innerHTML = shell("OPTIONAL DITCH TOP WIDTH", "Enter the top width only if you measured or estimated it safely.", `<label>Width<input id="culvertWidthValue" type="number" min="0" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Unit<select id="culvertWidthUnit"><option value="in">inches</option><option value="ft">feet</option></select></label><button id="culvertSaveWidth" type="button">SAVE MEASUREMENT</button>${["UNABLE", "UNSAFE", "SKIP"].map(value => `<button data-width-answer="${value}" type="button">${value}</button>`).join("")}`);
+      document.getElementById("culvertSaveWidth").addEventListener("click", () => {
+        const value = Number(document.getElementById("culvertWidthValue").value);
+        if (!(value >= 0)) { simpleSetStatus("Enter a width or tap Unable, Unsafe, or Skip.", "warning"); return; }
+        saveCulvertAnswer(session, "ditch_top_width", value, "MEASURED_ON_SITE", document.getElementById("culvertWidthUnit").value);
+        advanceCulvertQuestion(session, "DEPTH");
+      });
+      content.querySelectorAll("[data-width-answer]").forEach(button => button.addEventListener("click", () => { saveCulvertAnswer(session, "ditch_top_width", button.dataset.widthAnswer, "UNKNOWN"); advanceCulvertQuestion(session, "DEPTH"); }));
+    } else if (step === "DEPTH") {
+      content.innerHTML = shell("OPTIONAL DITCH DEPTH", "Measure from the road-side top edge to the bottom only if safe.", `<label>Depth<input id="culvertDepthValue" type="number" min="0" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Unit<select id="culvertDepthUnit"><option value="in">inches</option><option value="ft">feet</option></select></label><button id="culvertSaveDepth" type="button">SAVE MEASUREMENT</button>${["UNABLE", "UNSAFE", "BOTTOM NOT REACHED", "SKIP"].map(value => `<button data-depth-answer="${value}" type="button">${value}</button>`).join("")}`);
+      document.getElementById("culvertSaveDepth").addEventListener("click", () => {
+        const value = Number(document.getElementById("culvertDepthValue").value);
+        if (!(value >= 0)) { simpleSetStatus("Enter a depth or tap Unable, Unsafe, Bottom Not Reached, or Skip.", "warning"); return; }
+        saveCulvertAnswer(session, "ditch_depth_from_road_side_top_edge", value, "MEASURED_ON_SITE", document.getElementById("culvertDepthUnit").value);
+        advanceCulvertQuestion(session, "PASSABLE");
+      });
+      content.querySelectorAll("[data-depth-answer]").forEach(button => button.addEventListener("click", () => { saveCulvertAnswer(session, "ditch_depth_from_road_side_top_edge", button.dataset.depthAnswer, "UNKNOWN", null, button.dataset.depthAnswer === "BOTTOM NOT REACHED" ? "The measuring device did not reach the true bottom." : null); advanceCulvertQuestion(session, "PASSABLE"); }));
+    } else if (step === "PASSABLE") {
+      content.innerHTML = shell("IS THE GROUND BEHIND THE DITCH REASONABLY PASSABLE?", "Record only what you can see from a safe, authorized position.", ["YES", "NO", "UNSURE", "TAKE PICTURE", "SKIP"].map(value => `<button data-passable-answer="${value}" type="button">${value}</button>`).join(""));
+      content.querySelectorAll("[data-passable-answer]").forEach(button => button.addEventListener("click", () => {
+        const answer = button.dataset.passableAnswer;
+        if (answer === "TAKE PICTURE") { simpleTakePhoto("Ground behind ditch"); return; }
+        saveCulvertAnswer(session, "ground_behind_ditch_reasonably_passable", answer, answer === "UNSURE" || answer === "SKIP" ? "UNKNOWN" : "OBSERVED_ON_SITE");
+        advanceCulvertQuestion(session, "WORK_FACTORS");
+      }));
+    } else if (step === "WORK_FACTORS") {
+      const factors = ["TREES", "BRUSH", "WET / SOFT", "STEEP RISE / DROP", "FILL", "EROSION", "LARGE DRAINAGE", "NOTHING OBVIOUS", "UNKNOWN"];
+      content.innerHTML = shell("WHAT VISIBLE WORK FACTORS DO YOU SEE?", "Choose any that apply, or simply continue.", `<div class="culvert-factor-list">${factors.map(value => `<label><input type="checkbox" value="${value}"> ${value}</label>`).join("")}</div><button id="culvertSaveFactors" class="frontage-end" type="button">SAVE AND CONTINUE</button><button id="culvertSkipFactors" type="button">SKIP</button>`);
+      const finish = skipped => {
+        const values = skipped ? [] : Array.from(content.querySelectorAll('.culvert-factor-list input:checked')).map(input => input.value);
+        saveCulvertAnswer(session, "visible_work_factors", values.length ? values : (skipped ? "SKIP" : "NONE SELECTED"), values.length ? "OBSERVED_ON_SITE" : "UNKNOWN");
+        advanceCulvertQuestion(session, "DONE");
+      };
+      document.getElementById("culvertSaveFactors").addEventListener("click", () => finish(false));
+      document.getElementById("culvertSkipFactors").addEventListener("click", () => finish(true));
+    } else {
+      content.innerHTML = shell("OPTIONAL CULVERT CHECK COMPLETE", "The crossing and every answer you chose are saved. Continue the frontage walk.", `<button id="culvertSequenceContinue" class="frontage-end" type="button">SAVE WHAT I HAVE & CONTINUE FRONTAGE WALK</button>`);
+      document.getElementById("culvertSequenceContinue").addEventListener("click", () => { simpleFinalizeActive("BASIC_RECORD_SAVED"); setFrontageScreen(session.return_screen || "FRONTAGE_WALK"); renderFrontageWorkflow(); });
+    }
+    bindCulvertCommon(session);
+  }
+
   function renderFrontageSupportCapture() {
     const session = currentSimpleSession();
     if (!session) { renderFrontageWalk(); return; }
     if (session.feature_type === "frontage_end") { renderFrontageEndSaved(); return; }
+    if (culvertNeededSession(session)) { renderCulvertNeededSequence(session); return; }
     const photos = simpleSessionPhotos(session);
     const currentPhoto = photos.length ? photos[photos.length - 1] : null;
     const workClass = session.details.crossing_work_class;
@@ -4231,6 +4693,14 @@
   }
 
   function simpleReturnToFieldButtons() {
+    const session = currentSimpleSession();
+    if (session && session.feature_type === "map_section") {
+      const section = sectionRecordForSession(session);
+      if (section && section.completion_status === "ACTIVE") {
+        section.capture_paused = true;
+        section.events.push({ event_type: "SECTION_PAUSED_RETURNED_TO_FIELD_BUTTONS", recorded_at: new Date().toISOString() });
+      }
+    }
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     simpleCloseDialogs(); restoreSimplePageScrolling(); setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome();
   }
@@ -4261,8 +4731,11 @@
       simpleSetStatus(simpleLastSavedMessage, "saved");
     }
     const frontageResumeLabel = arrival.status === "ARRIVAL_SEQUENCE_COMPLETE" ? "REVIEW ROAD FRONTAGE" : (arrival.frontage_walk.active ? "CONTINUE FRONTAGE WALK" : "CONTINUE ROAD FRONTAGE");
-    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section><button id="simpleResumeFrontage" class="simple-feature entrance" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:68px" type="button">${frontageResumeLabel}</button><div class="simple-grid">
-      ${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("brush", "BRUSH", "brush")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
+    const activeSection = sectionMappingTools.activeSection(data);
+    const resumeSection = activeSection ? `<button id="simpleResumeSection" class="simple-feature map-section" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:74px" type="button">CONTINUE ${activeSection.section_id}</button>` : "";
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section>${resumeSection}<button id="simpleResumeFrontage" class="simple-feature entrance" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:68px" type="button">${frontageResumeLabel}</button><div class="simple-grid">
+      <button id="simpleMapSection" type="button" class="simple-feature map-section">MAP THIS SECTION</button>${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
+      <button id="simpleSiteSound" type="button" class="simple-feature voice">SITE SOUND / EXPERIENCE</button>
       <button id="simpleVoice" type="button" class="simple-feature voice">${mediaRecorder && mediaRecorder.state === "recording" ? "STOP & SAVE VOICE NOTE" : "VOICE NOTE"}</button>
       <button id="simpleFinish" type="button" class="simple-feature finish">FINISH</button></div>
       <details class="simple-advanced"><summary>ADVANCED TOOLS</summary><p>Only open this if you deliberately need the original 3.13 map and detailed tools.</p><button id="simpleOpenAdvanced" type="button">OPEN ADVANCED TOOLS</button></details>`;
@@ -4272,6 +4745,14 @@
       if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
       else await startVoiceRecording({ purpose: "simple_general_voice_note", simple_session_id: null });
       setTimeout(renderSimpleHome, 100);
+    });
+    document.getElementById("simpleSiteSound").addEventListener("click", () => openSiteSound("interior_or_current_location", "FIELD_BUTTONS"));
+    document.getElementById("simpleMapSection").addEventListener("click", () => renderSectionStart());
+    if (activeSection) document.getElementById("simpleResumeSection").addEventListener("click", () => {
+      activeSection.capture_paused = false;
+      activeSection.events.push({ event_type: "SECTION_RESUMED_FROM_FIELD_BUTTONS", recorded_at: new Date().toISOString() });
+      activateSectionSession(activeSection, "FIELD_BUTTONS");
+      renderSectionActive(activeSection);
     });
     document.getElementById("simpleFinish").addEventListener("click", renderSimpleFinish);
     document.getElementById("simpleResumeFrontage").addEventListener("click", () => {
@@ -4325,6 +4806,14 @@
   function renderSimpleCapture() {
     const session = currentSimpleSession();
     if (!session) { renderSimpleHome(); return; }
+    if (session.feature_type === "site_sound") { renderSiteSoundCapture(session); return; }
+    if (session.feature_type === "map_section") {
+      const section = sectionRecordForSession(session);
+      if (!section) { simpleReturnToFieldButtons(); return; }
+      if (section.completion_status === "ACTIVE") renderSectionActive(section);
+      else renderSectionReview(section);
+      return;
+    }
     if (session.frontage_record_id) { renderFrontageSupportCapture(); return; }
     const content = document.getElementById("simpleContent");
     const photos = simpleSessionPhotos(session);
@@ -4376,7 +4865,7 @@
       schema_name: "property-inspector-simple-capture-session", schema_version: "1.0",
       simple_session_id: makeId("simple-session"), feature_id: featureId, feature_type: type,
       started_at: now, updated_at: now, finished_at: null,
-      completion_status: "ACTIVE", return_screen: returnScreen || "FIELD_BUTTONS", details: type === "water" ? { depth_tool: "Yardstick", surface_unit: "in" } : {},
+      completion_status: "ACTIVE", information_class: "OBSERVED_ON_SITE", return_screen: returnScreen || "FIELD_BUTTONS", details: type === "water" ? { depth_tool: "Yardstick", surface_unit: "in" } : {},
       lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m,
       gps_position_at: lastPosition.time, compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : lastPosition.heading_deg,
       device_orientation: latestOrientation ? { alpha_deg: latestOrientation.alpha_deg, beta_deg: latestOrientation.beta_deg, gamma_deg: latestOrientation.gamma_deg, absolute: latestOrientation.absolute } : null
@@ -4414,6 +4903,7 @@
       simple_capture: true,
       simple_session_id: session.simple_session_id,
       feature_id: session.feature_id,
+      section_id: session.section_id || null,
       simple_photo_id: simplePhotoId,
       simple_feature_sequence: sequence,
       evidence_set_id: null,
@@ -4531,7 +5021,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !frontageTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !frontageTools || !automaticContextTools || !sectionMappingTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;

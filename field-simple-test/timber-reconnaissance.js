@@ -79,6 +79,7 @@
     const row = {
       schema_name: "property-intelligence-structured-measurement",
       schema_version: "1.0",
+      information_class: "MEASURED_ON_SITE",
       measurement_id: input.measurement_id || makeId("measurement"),
       inspection_id: data.inspection_id || null,
       property_id: data.property_id || null,

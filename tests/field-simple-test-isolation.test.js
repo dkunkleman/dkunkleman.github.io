@@ -20,7 +20,9 @@ for (const productionIdentifier of [
 assert(app.includes('"propertyInspectorHomeTest313V1"'));
 assert(app.includes('"property-inspector-home-test-313-evidence"'));
 assert(app.includes('"property-inspector-home-test-313-pending-v1"'));
-assert(worker.includes('"property-inspector-home-test-313-offline-v3"'));
+assert(worker.includes('"property-inspector-home-test-313-offline-v4"'));
+assert(worker.includes('"./automatic-context.js?v=3.13.0-home-test.4"'));
+assert(worker.includes('"./section-mapping.js?v=3.13.0-home-test.4"'));
 assert(!worker.includes('startsWith("property-inspector-field-")'), "test worker cannot delete production caches");
 assert(html.includes("SIMPLE FIELD TEST - PRODUCTION EVIDENCE IS SAFE"));
 assert(html.includes("SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS"));
@@ -36,6 +38,8 @@ assert(!app.includes("Are you safely stopped?"), "start must not ask a prelimina
 assert(!app.includes("POSSIBLE VEHICLE ACCESS"), "generic possible-access terminology is prohibited");
 assert(app.includes('surface_unit: "in"'), "Water must default to inches");
 assert(packageCode.includes('zip.add("FRONTAGE_AND_CROSSING.json"'), "frontage and crossing analysis must be packaged");
+assert(packageCode.includes('zip.add("MAPPED_SECTIONS.json"'), "mapped section analysis must be packaged");
+assert(packageCode.includes('zip.add("mapped-sections.geojson"'), "mapped section geometry must be packaged");
 for (const file of ["subject-parcel.geojson", "photo-points.geojson", "feature-points.geojson", "property-field-map.html", "printable-property-field-map.html"])
   assert(packageCode.includes(`zip.add("${file}"`), `${file} must be independently packaged`);
 
