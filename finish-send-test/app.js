@@ -315,6 +315,7 @@
 
   async function run() {
     if (running) return running;
+    button.disabled = true;
     running = (async () => {
       try {
         if (!inventoryConfirmed) throw new Error("Saved evidence count has not been verified. Nothing was sent.");
@@ -354,6 +355,7 @@
 
   button.addEventListener("click", event => {
     event.preventDefault();
+    if (running) return;
     stage.textContent = "STARTING";
     detail.textContent = "Your tap was received. Starting FINISH & SEND now.";
     button.disabled = true;

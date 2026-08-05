@@ -28,13 +28,14 @@ assert(!app.includes("serviceWorker.register"), "the test page must not register
 assert(!fs.existsSync(path.join(root, "sw.js")), "the isolated test must not ship a service worker");
 assert.equal(referenceCount.binary_evidence_files, 133);
 assert(html.includes('name="dropbox-app-key" content="mg83gg2bw9pv9rs"'));
-assert(html.includes('./finish-send.js?v=2'));
-assert(html.includes('./app.js?v=2'));
+assert(html.includes('./finish-send.js?v=3'));
+assert(html.includes('./app.js?v=3'));
 assert(finishSend.createDropboxPkceAuth);
 assert(fs.readFileSync(path.join(root, "finish-send.js"), "utf8").includes('scope: "files.metadata.read files.content.write"'));
 assert(!fs.readFileSync(path.join(root, "finish-send.js"), "utf8").includes("new Promise(() => {})"));
 assert(app.includes('stage.textContent = "STARTING"'));
 assert(app.includes("Your tap was received"));
+assert(app.includes("if (running) return;"), "a second tap must not overwrite active progress");
 assert(app.includes("RECEIVED"));
 assert.equal(new finishSend.Sha256().update(Buffer.from("abc")).digestHex(), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
 
