@@ -180,8 +180,11 @@
       const state = randomText(48);
       oauthStore.set({ state, codeVerifier, createdAt: new Date().toISOString() });
       const params = new URLSearchParams({ client_id: clientId, response_type: "code", redirect_uri: redirectUri, state, code_challenge_method: "S256", code_challenge: challenge, token_access_type: "offline", scope: "files.metadata.read files.content.write" });
-      location.assign(`${DROPBOX_AUTH}?${params}`);
-      return new Promise(() => {});
+      const authorizationUrl = `${DROPBOX_AUTH}?${params}`;
+      return new Promise((resolve, reject) => {
+        window.setTimeout(() => reject(new Error("Dropbox did not open. Tap FINISH & SEND again. Your inspection remains safe.")), 5000);
+        window.location.href = authorizationUrl;
+      });
     }
 
     async function refresh(token) {

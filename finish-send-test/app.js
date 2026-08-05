@@ -38,14 +38,14 @@
 
   function show(nextStage, message, progress) {
     const state = readState();
-    stage.textContent = nextStage === "RECEIVED" ? "RECEIVED AND VERIFIED" : nextStage.replaceAll("_", " ");
+    stage.textContent = nextStage === "RECEIVED" ? "RECEIVED AND VERIFIED" : nextStage.replace(/_/g, " ");
     if (message) detail.textContent = message;
     else if (nextStage === "CREATING_PACKAGE") detail.textContent = "Saving every original photograph, GPS point, voice note, measurement, observation, incomplete session, and storage record into one archive.";
     else if (nextStage === "UPLOADING") detail.textContent = progress && progress.total ? `${Math.floor((progress.loaded / progress.total) * 100)}% uploaded — ${formatBytes(progress.loaded)} of ${formatBytes(progress.total)}. If Safari closes or service drops, reopen this same link. It will continue automatically.` : "Uploading the complete archive. It will continue automatically after weak service or reopening.";
     else if (nextStage === "VERIFYING") detail.textContent = "Checking the remote byte size and content hash before declaring success.";
     else if (nextStage === "RECEIVED" && state && state.receipt) detail.textContent = `${state.receipt.filename}\n${state.receipt.dropbox_path}\n${formatBytes(state.receipt.byte_size)}\nSHA-256: ${state.receipt.sha256}\nCompleted: ${state.receipt.completion_time}`;
     button.disabled = !inventoryConfirmed || Boolean(running) || nextStage === "RECEIVED";
-    button.textContent = nextStage === "RECEIVED" ? "RECEIVED AND VERIFIED" : (state ? "RESUME FINISH & SEND" : "FINISH & SEND");
+    button.textContent = nextStage === "RECEIVED" ? "RECEIVED AND VERIFIED" : "FINISH & SEND";
   }
 
   function updateState(nextStage, additions) {
@@ -321,8 +321,10 @@
         const sendState = createState();
         if (sendState.stage === "RECEIVED" && sendState.receipt) { show("RECEIVED"); return sendState.receipt; }
         button.disabled = true;
-        updateState("CREATING_PACKAGE", { last_error: null });
+        updateState("CONNECTING_TO_DROPBOX", { last_error: null });
+        show("CONNECTING_TO_DROPBOX", "Opening the secure Dropbox connection. Your inspection remains saved on this phone.");
         await auth.getAccessToken();
+        updateState("CREATING_PACKAGE", { last_error: null });
         const result = await createArchive(sendState);
         show("CREATING_PACKAGE", "Hashing the archive before upload…");
         const hashes = await FinishSend.hashArchive(result.blob, (loaded, total) => show("CREATING_PACKAGE", `Hashing the complete archive: ${Math.floor((loaded / total) * 100)}%…`));
@@ -350,7 +352,13 @@
     return running;
   }
 
-  button.addEventListener("click", () => { run().catch(() => {}); });
+  button.addEventListener("click", event => {
+    event.preventDefault();
+    stage.textContent = "STARTING";
+    detail.textContent = "Your tap was received. Starting FINISH & SEND now.";
+    button.disabled = true;
+    window.setTimeout(() => { run().catch(() => {}); }, 0);
+  });
   window.addEventListener("online", () => { const state = readState(); if (state && state.stage !== "RECEIVED") run().catch(() => {}); });
   window.addEventListener("beforeunload", event => { if (running) { event.preventDefault(); event.returnValue = ""; } });
 
