@@ -20,9 +20,12 @@ for (const productionIdentifier of [
 assert(app.includes('"propertyInspectorHomeTest313V1"'));
 assert(app.includes('"property-inspector-home-test-313-evidence"'));
 assert(app.includes('"property-inspector-home-test-313-pending-v1"'));
-assert(worker.includes('"property-inspector-home-test-313-offline-v4"'));
-assert(worker.includes('"./automatic-context.js?v=3.13.0-home-test.4"'));
-assert(worker.includes('"./section-mapping.js?v=3.13.0-home-test.4"'));
+assert(worker.includes('"property-inspector-home-test-313-offline-v5"'));
+assert(worker.includes('"./automatic-context.js?v=3.13.0-home-test.5"'));
+assert(worker.includes('"./section-mapping.js?v=3.13.0-home-test.5"'));
+assert(worker.includes('"./wet-edge-mapping.js?v=3.13.0-home-test.5"'));
+assert(worker.includes('"./property-review.js?v=3.13.0-home-test.5"'));
+assert(worker.includes('"./assets/august-4-route-context.json"'));
 assert(!worker.includes('startsWith("property-inspector-field-")'), "test worker cannot delete production caches");
 assert(html.includes("SIMPLE FIELD TEST - PRODUCTION EVIDENCE IS SAFE"));
 assert(html.includes("SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS"));
@@ -37,6 +40,12 @@ for (const label of ["STEP 1 - GO TO ONE END OF THE ROAD FRONTAGE", "MARK FRONTA
 assert(!app.includes("Are you safely stopped?"), "start must not ask a preliminary safety question");
 assert(!app.includes("POSSIBLE VEHICLE ACCESS"), "generic possible-access terminology is prohibited");
 assert(app.includes('surface_unit: "in"'), "Water must default to inches");
+for (const label of ["LARGE TREES", "UNDERBRUSH", "WALKING", "GROUND", "DENSE 2–3 INCH TANGLED", "OPEN AND REVEAL"])
+  assert(app.includes(label), `simple section workflow must include ${label}`);
+for (const label of ["MARSHY CLEARING — APPROX. REACHED AREA", "PROBABLE MAIN CREEK", "PROBABLE CREEK BRANCH", "THINNER TREE CANOPY", "WHAT IS THE LIGHTER EASTERN AREA ACTUALLY LIKE?"])
+  assert(app.includes(label) || fs.readFileSync(path.join(root, "property-review.js"), "utf8").includes(label), `corrected aerial workflow must include ${label}`);
+assert(app.includes("The location reached during the August 4 walk was largely a marshy clearing, not a trail."));
+assert(app.includes("Cutting brush does not drain or make soft or flooded ground usable."), "Open and Reveal must preserve the wet-ground limitation");
 assert(packageCode.includes('zip.add("FRONTAGE_AND_CROSSING.json"'), "frontage and crossing analysis must be packaged");
 assert(packageCode.includes('zip.add("MAPPED_SECTIONS.json"'), "mapped section analysis must be packaged");
 assert(packageCode.includes('zip.add("mapped-sections.geojson"'), "mapped section geometry must be packaged");

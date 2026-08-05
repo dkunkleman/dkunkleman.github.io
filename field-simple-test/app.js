@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.4";
+  const APP_VERSION = "3.13.0-home-test.5";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -29,6 +29,8 @@
   const frontageTools = window.PropertyFrontageWorkflow;
   const automaticContextTools = window.AutomaticFieldContext;
   const sectionMappingTools = window.SimpleSectionMapping;
+  const wetEdgeTools = window.WetEdgeMapping;
+  const previsitTools = window.PropertyPrevisitReview;
   const pendingPhotoCacheName = "property-inspector-home-test-313-pending-v1";
 
   const svg = document.getElementById("overlay");
@@ -135,6 +137,8 @@
   let ambientSoundStopTimer = null;
   let automaticContextGpsCapturedForRun = false;
   let automaticContextRefreshPromise = null;
+  let august4RouteContext = null;
+  let aerialTraceDraft = null;
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -221,6 +225,8 @@
       site_sound_records: [],
       automatic_context: null,
       section_mapping: null,
+      wet_edge_mapping: null,
+      property_previsit_review: null,
       frontage_workflow: null,
       land_use_concepts: [],
       reviewed_map_status: {},
@@ -308,6 +314,8 @@
     if (frontageTools) frontageTools.ensureModel(data);
     if (automaticContextTools) automaticContextTools.ensureModel(data);
     if (sectionMappingTools) sectionMappingTools.ensureModel(data);
+    if (wetEdgeTools) wetEdgeTools.ensureModel(data);
+    if (previsitTools) previsitTools.ensureModel(data);
     data.conditions = Object.assign(emptyInspection().conditions, data.conditions || {});
     data.weather_context = Object.assign(emptyInspection().weather_context, data.weather_context || {});
     data.water_observation_rule = Object.assign(emptyInspection().water_observation_rule, data.water_observation_rule || {});
@@ -2204,6 +2212,7 @@
     point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;
     data.points.push(point);
     if (sectionMappingTools) sectionMappingTools.appendWalkPoint(data, point, point.time);
+    if (wetEdgeTools) wetEdgeTools.appendWalkPoint(data, point, point.time);
     if (!automaticContextGpsCapturedForRun) {
       captureAutomaticContext("first_precise_gps_after_start_or_resume", point);
       automaticContextGpsCapturedForRun = true;
@@ -3719,6 +3728,7 @@
           mapContext,
           packageMode,
           packageKind,
+          august4Context: august4RouteContext,
           appVersion: APP_VERSION,
           sourceUrl: location.href.split(/[?#]/)[0]
         });
@@ -3868,7 +3878,7 @@
     frontage_end: "FRONTAGE END", vehicle_crossing: "VEHICLE CROSSING OPTION",
     ditch_change: "DITCH CHANGE", frontage_trees_brush: "TREES / BRUSH",
     frontage_wet_soft: "WET / SOFT", frontage_steep_slope: "STEEP SLOPE",
-    frontage_photo: "FRONTAGE PHOTO", parking_staging: "PARKING / STAGING", site_sound: "SITE SOUND / EXPERIENCE", map_section: "MAP THIS SECTION"
+    frontage_photo: "FRONTAGE PHOTO", parking_staging: "PARKING / STAGING", site_sound: "SITE SOUND / EXPERIENCE", map_section: "MAP THIS SECTION", aerial_prediction_check: "AERIAL PREDICTION CHECK"
   };
 
   function simpleSessionById(id) {
@@ -4049,7 +4059,19 @@
     if (!container || !state) return;
     const rings = subjectRings();
     state.textContent = simpleLocatorState(rings);
-    const ringPaths = rings.map(ring => `<path d="${ring.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ")} Z" fill="rgba(255,255,255,.08)" stroke="#ff3030" stroke-width="14" vector-effect="non-scaling-stroke"/>`).join("");
+    const ringPaths = rings.map((ring, ringIndex) => {
+      const label = ringIndex === 0 ? "LARGE TRACT — APPROX. 81.2 AC" : "SMALL TRACT — APPROX. 5.5 AC";
+      const center = ring.reduce((sum, point) => ({ x: sum.x + sx(point[0]), y: sum.y + sy(point[1]) }), { x: 0, y: 0 });
+      center.x /= Math.max(1, ring.length); center.y /= Math.max(1, ring.length);
+      return `<path d="${ring.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ")} Z" fill="rgba(255,255,255,.08)" stroke="${ringIndex === 0 ? "#ff3030" : "#ff9e2f"}" stroke-width="14" vector-effect="non-scaling-stroke"/><text x="${center.x.toFixed(1)}" y="${center.y.toFixed(1)}" fill="#fff" stroke="#222" stroke-width="12" paint-order="stroke" text-anchor="middle" font-size="38" font-weight="900">${label}</text>`;
+    }).join("");
+    const priorPoints = august4RouteContext && Array.isArray(august4RouteContext.raw_gps_points) ? august4RouteContext.raw_gps_points : [];
+    const priorStride = Math.max(1, Math.ceil(priorPoints.length / 900));
+    const priorDisplay = priorPoints.filter((point, index) => index % priorStride === 0 || index === priorPoints.length - 1);
+    const priorRoute = priorDisplay.length > 1 ? `<path d="${priorDisplay.map((point, index) => `${index ? "L" : "M"}${sx(point.longitude).toFixed(1)} ${sy(point.latitude).toFixed(1)}`).join(" ")}" fill="none" stroke="#9bd3ff" stroke-width="12" stroke-dasharray="24 14" vector-effect="non-scaling-stroke"/><text x="${sx(priorDisplay[0].longitude).toFixed(1)}" y="${(sy(priorDisplay[0].latitude) - 28).toFixed(1)}" fill="#fff" stroke="#17446d" stroke-width="12" paint-order="stroke" font-size="42" font-weight="900">AUGUST 4 WALKED ROUTE</text>` : "";
+    const priorReachedPoint = priorPoints.reduce((best, point) => !best || Number(point.longitude) > Number(best.longitude) ? point : best, null);
+    const marshyClearing = priorReachedPoint ? `<g><circle cx="${sx(priorReachedPoint.longitude).toFixed(1)}" cy="${sy(priorReachedPoint.latitude).toFixed(1)}" r="34" fill="#6b8f3d" stroke="#fff" stroke-width="8"/><text x="${sx(priorReachedPoint.longitude).toFixed(1)}" y="${(sy(priorReachedPoint.latitude) - 48).toFixed(1)}" fill="#fff" stroke="#33451c" stroke-width="12" paint-order="stroke" text-anchor="middle" font-size="38" font-weight="900">MARSHY CLEARING — APPROX. REACHED AREA</text></g>` : "";
+    const priorPhotoDots = august4RouteContext && Array.isArray(august4RouteContext.photograph_points) ? august4RouteContext.photograph_points.map(point => `<circle cx="${sx(point.longitude).toFixed(1)}" cy="${sy(point.latitude).toFixed(1)}" r="18" fill="#fff" stroke="#7d3cff" stroke-width="8" vector-effect="non-scaling-stroke"><title>${point.photo_number || "August 4 photograph"}</title></circle>`).join("") : "";
     const routeStride = Math.max(1, Math.ceil(data.points.length / 600));
     const locatorRoutePoints = data.points.filter((point, index) => index % routeStride === 0 || index === data.points.length - 1);
     const route = locatorRoutePoints.length > 1 ? `<path d="${locatorRoutePoints.map((point, index) => `${index ? "L" : "M"}${sx(point.lon).toFixed(1)} ${sy(point.lat).toFixed(1)}`).join(" ")}" fill="none" stroke="#ffe54a" stroke-width="8" vector-effect="non-scaling-stroke"/>` : "";
@@ -4065,6 +4087,18 @@
       const label = labelPoint ? `<text x="${sx(labelPoint.longitude).toFixed(1)}" y="${(sy(labelPoint.latitude) - 24).toFixed(1)}" fill="#fff" stroke="#173b24" stroke-width="10" paint-order="stroke" font-size="45" font-weight="900">${section.section_id}</text>` : "";
       return `${polygon}${walkedPath}${inferred}${label}`;
     }).join("");
+    const reviewModel = previsitTools ? previsitTools.ensureModel(data) : { aerial_traces: [], stopping_points: [] };
+    const aerialLayers = (reviewModel.aerial_traces || []).map(trace => {
+      const coordinates = trace.geometry && trace.geometry.type === "Polygon" ? trace.geometry.coordinates[0] : trace.geometry && trace.geometry.coordinates;
+      if (!Array.isArray(coordinates) || coordinates.length < 2) return "";
+      const path = coordinates.map((point, index) => `${index ? "L" : "M"}${sx(point[0]).toFixed(1)} ${sy(point[1]).toFixed(1)}`).join(" ");
+      const main = ["PROBABLE MAIN CREEK", "PROBABLE MAIN CHANNEL"].includes(trace.trace_type);
+      const area = trace.geometry.type === "Polygon";
+      const vegetationColor = trace.trace_type === "LIKELY DENSE 2–3 INCH BRUSH" ? "#ffe75a" : (["DENSER TREE CANOPY", "LIKELY LARGER TREES"].includes(trace.trace_type) ? "#136f3a" : (trace.trace_type === "THINNER TREE CANOPY" ? "#9fd66e" : (trace.trace_type === "POSSIBLE MARSHY CLEARING" ? "#87a84e" : (trace.trace_type === "LIKELY MIXED BRUSH AND LARGER TREES" ? "#ff9e32" : null))));
+      const color = vegetationColor || (main ? "#4dd6ff" : "#b78cff");
+      return `<path d="${path}${area ? " Z" : ""}" fill="${area ? `${color}2e` : "none"}" stroke="${color}" stroke-width="${main ? 12 : 8}" stroke-dasharray="${trace.trace_type === "UNKNOWN" ? "10 20" : "20 10"}" vector-effect="non-scaling-stroke"><title>${trace.trace_type} — PREDICTED FROM AERIAL IMAGE — CHECK ON THE GROUND</title></path>`;
+    }).join("");
+    const stoppingDots = (reviewModel.stopping_points || []).map(point => `<g><circle cx="${sx(point.longitude).toFixed(1)}" cy="${sy(point.latitude).toFixed(1)}" r="26" fill="#ff4b3a" stroke="#fff" stroke-width="8"/><text x="${sx(point.longitude).toFixed(1)}" y="${(sy(point.latitude) - 38).toFixed(1)}" fill="#fff" stroke="#64130b" stroke-width="10" paint-order="stroke" text-anchor="middle" font-size="38" font-weight="900">STOP</text></g>`).join("");
     let phone = "";
     if (lastPosition) {
       const x = sx(lastPosition.lon), y = sy(lastPosition.lat);
@@ -4075,7 +4109,7 @@
       const hx = x + Math.sin(angle) * 80, hy = y - Math.cos(angle) * 80;
       phone = `<circle cx="${x}" cy="${y}" r="${accuracyRadius}" fill="rgba(30,132,255,.22)" stroke="#62b4ff" stroke-width="5"/><line x1="${x}" y1="${y}" x2="${hx}" y2="${hy}" stroke="#0a57a6" stroke-width="16"/><circle cx="${x}" cy="${y}" r="24" fill="#1684ff" stroke="#fff" stroke-width="8"/>`;
     }
-    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Approximate subject parcel and mapped-section locator">${ringPaths}${sectionLayers}${route}${featureDots}${phone}</svg>`;
+    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Approximate large and small parcel boundaries, August 4 reference route, and current field locator">${ringPaths}${aerialLayers}${priorRoute}${priorPhotoDots}${marshyClearing}${sectionLayers}${route}${featureDots}${stoppingDots}${phone}</svg><p class="simple-map-warning">APPROXIMATE — PHONE GPS AND COUNTY PARCEL MAP, NOT A SURVEY. Blue dashed line: August 4 walked route. MARSHY CLEARING marks the approximate reached area; its boundary is not established. Aerial traces are predictions until field confirmed. Unvisited acreage: UNKNOWN.</p>`;
   }
 
   function simpleFieldButton(type, label, cssClass) {
@@ -4202,28 +4236,50 @@
 
   function sectionDescriptionChoices(selected) {
     const active = new Set(selected || []);
-    return sectionMappingTools.DESCRIPTIONS.map(description => `<label><input type="checkbox" value="${description}" ${active.has(description) ? "checked" : ""}> ${description}</label>`).join("");
+    const choices = sectionMappingTools.PRIMARY_DESCRIPTIONS || sectionMappingTools.DESCRIPTIONS;
+    const primary = choices.map(description => `<label><input type="checkbox" value="${description}" ${active.has(description) ? "checked" : ""}> ${description}</label>`).join("");
+    const other = (sectionMappingTools.OTHER_DESCRIPTIONS || []).map(description => `<label><input type="checkbox" value="${description}" ${active.has(description) ? "checked" : ""}> ${description}</label>`).join("");
+    return `${primary}${other ? `<details><summary>OTHER — ONLY IF YOU ACTUALLY SEE IT</summary>${other}</details>` : ""}`;
   }
 
-  function renderSectionStart(message) {
+  function sectionConditionGroups(selectedConditions) {
+    const selected = selectedConditions || {};
+    const labels = { large_trees: "LARGE TREES", underbrush: "UNDERBRUSH", travel_difficulty: "WALKING", ground_and_water: "GROUND" };
+    const short = {
+      "NO LARGE TREES OBSERVED": "NONE", "SCATTERED LARGE TREES": "SCATTERED", "MANY LARGE TREES": "MANY", "NEARLY CONTINUOUS LARGE-TREE CANOPY": "CONTINUOUS",
+      "OPEN UNDERNEATH": "OPEN UNDERNEATH", "LIGHT SMALL BRUSH": "LIGHT", "DENSE 1–2-INCH BRUSH": "DENSE 1–2 INCH", "DENSE 2–3-INCH TANGLED BRUSH": "DENSE 2–3 INCH TANGLED", "BRUSH DIAMETER UNKNOWN": "DIAMETER UNKNOWN",
+      "EASY TO WALK THROUGH": "EASY", "MODERATELY DIFFICULT": "MODERATE", "VERY DIFFICULT": "VERY DIFFICULT", "CANNOT TRAVEL WITHOUT CUTTING": "NEEDS CUTTING",
+      "DRY AND FIRM": "DRY / FIRM", "SOFT WITHOUT VISIBLE WATER": "SOFT", "STANDING WATER MOSTLY 2–4 INCHES": "WATER MOSTLY 2–4 INCHES", "LOCAL WATER APPROXIMATELY 8 INCHES": "WATER LOCALLY ABOUT 8 INCHES", "WATER DEPTH UNKNOWN": "WATER DEPTH UNKNOWN", "GROUND UNKNOWN": "UNKNOWN"
+    };
+    return Object.entries(sectionMappingTools.CONDITION_GROUPS || {}).map(([group, choices]) => `<fieldset class="section-condition-group"><legend>${labels[group] || group}</legend><p>Optional — choose one only if you know.</p>${choices.map(choice => `<label><input type="radio" name="section-${group}" value="${choice}" ${selected[group] === choice ? "checked" : ""}> ${short[choice] || choice}</label>`).join("")}<button type="button" data-clear-section-group="${group}">CLEAR THIS GROUP</button></fieldset>`).join("");
+  }
+
+  function renderSectionStart(message, options) {
     simpleCloseDialogs(); restoreSimplePageScrolling();
     const model = sectionMappingTools.ensureModel(data);
+    const settings = options || {};
     const content = document.getElementById("simpleContent");
-    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture section-start"><h2>NEXT: MAP AN AREA WHERE THE LAND LOOKS GENERALLY THE SAME</h2><p class="frontage-instruction">Choose what is generally inside this section. Then walk around its outside edge.</p>${message ? `<p class="frontage-warning">${message}</p>` : ""}<div class="culvert-factor-list section-description-list">${sectionDescriptionChoices([])}</div><h3>How do you want to map it?</h3><div class="section-method-list">${Object.entries(sectionMappingTools.METHODS).map(([value, label], index) => `<label><input type="radio" name="sectionMethod" value="${value}" ${index === 0 ? "checked" : ""}> ${label}</label>`).join("")}</div><button id="sectionStartWalking" class="frontage-end" type="button">START WALKING THE EDGE</button><details><summary>PROPERTY STARTING SUGGESTIONS</summary><p>Planning suggestions only. They become observations only after you confirm them in the field.</p>${model.planning_suggestions.map(item => `<button type="button" data-section-suggestion="${item.suggestion_id}">${item.area_label}<br>${item.descriptions.join(" + ")}</button>`).join("")}</details><button id="sectionStartReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture section-start"><h2>${settings.title || "NEXT: MAP AN AREA WHERE THE LAND LOOKS GENERALLY THE SAME"}</h2><p class="frontage-instruction">Record trees overhead, brush underneath, walking, and ground separately. Every group is optional. Then walk the outside edge, or save only the partial edge you can support.</p>${message ? `<p class="frontage-warning">${message}</p>` : ""}<div class="section-condition-groups">${sectionConditionGroups(settings.conditions || {})}</div><details><summary>OTHER DESCRIPTION — OPTIONAL</summary><div class="culvert-factor-list section-description-list">${(sectionMappingTools.OTHER_DESCRIPTIONS || []).map(description => `<label><input type="checkbox" value="${description}"> ${description}</label>`).join("")}</div></details><h3>How do you want to map it?</h3><div class="section-method-list">${Object.entries(sectionMappingTools.METHODS).map(([value, label], index) => `<label><input type="radio" name="sectionMethod" value="${value}" ${(settings.method ? settings.method === value : index === 0) ? "checked" : ""}> ${label}</label>`).join("")}</div><button id="sectionStartWalking" class="frontage-end" type="button">START / SAVE THIS SECTION</button><details><summary>PROPERTY STARTING SUGGESTIONS</summary><p>Planning suggestions only. They become observations only after you confirm them in the field.</p>${model.planning_suggestions.map(item => `<button type="button" data-section-suggestion="${item.suggestion_id}">${item.area_label}<br>${Object.values(item.conditions || {}).join(" + ") || "No condition preselected"}</button>`).join("")}</details><button id="sectionStartReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
     let selectedSuggestionId = null;
+    content.querySelectorAll("[data-clear-section-group]").forEach(button => button.addEventListener("click", () => { const checked = content.querySelector(`input[name="section-${button.dataset.clearSectionGroup}"]:checked`); if (checked) checked.checked = false; }));
     content.querySelectorAll("[data-section-suggestion]").forEach(button => button.addEventListener("click", () => {
       const suggestion = model.planning_suggestions.find(item => item.suggestion_id === button.dataset.sectionSuggestion);
       if (!suggestion) return;
       selectedSuggestionId = suggestion.suggestion_id;
-      content.querySelectorAll('.section-description-list input').forEach(input => { input.checked = suggestion.descriptions.includes(input.value); });
+      Object.entries(sectionMappingTools.CONDITION_GROUPS || {}).forEach(([group]) => {
+        const value = suggestion.conditions && suggestion.conditions[group];
+        content.querySelectorAll(`input[name="section-${group}"]`).forEach(input => { input.checked = input.value === value; });
+      });
       simpleSetStatus("STARTING SUGGESTION LOADED - confirm it from what you see before starting", "warning");
     }));
     document.getElementById("sectionStartWalking").addEventListener("click", () => {
       if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
       const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
+      const conditions = {};
+      Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
       const methodInput = content.querySelector('input[name="sectionMethod"]:checked');
       try {
-        const section = sectionMappingTools.startSection(data, { descriptions, method: methodInput && methodInput.value, position: lastPosition, source_planning_suggestion_id: selectedSuggestionId });
+        const section = sectionMappingTools.startSection(data, { descriptions, conditions, method: methodInput && methodInput.value, position: lastPosition, source_planning_suggestion_id: selectedSuggestionId || settings.source || null });
         activateSectionSession(section, "FIELD_BUTTONS");
         simpleSetStatus(`${section.section_id} STARTED - descriptions, GPS, time, accuracy, and heading saved`, "saved");
         renderSectionActive(section);
@@ -4322,6 +4378,45 @@
     document.getElementById("sectionReviewPhoto").addEventListener("click", () => { const session = reactivateSectionAttachments(section); simpleTakePhoto("Section follow-up"); });
     document.getElementById("sectionReviewVoice").addEventListener("click", async () => { const session = reactivateSectionAttachments(section); await startVoiceRecording({ purpose: "section_voice_note", simple_session_id: session.simple_session_id, section_id: section.section_id }); });
     document.getElementById("sectionReviewReturn").addEventListener("click", renderSimpleHome);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderOpenRevealStart() {
+    simpleCloseDialogs(); restoreSimplePageScrolling();
+    const content = document.getElementById("simpleContent");
+    const laneTypes = ["ROAD-TO-INTERIOR WALKING LANE", "WET-AREA VIEWING LANE", "CREEK-INSPECTION LANE", "SECTION-EDGE LANE", "CROSS-LANE", "CANDIDATE-AREA VIEWING LANE", "OTHER"];
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>OPEN AND REVEAL — OPTIONAL PLAN</h2><p class="frontage-instruction">Plan selective cutting of smaller brush so you can see and walk the property before deciding on broader clearing.</p><p class="frontage-warning">Cutting brush does not drain or make soft or flooded ground usable.</p><form id="openRevealForm"><label>Lane type<select name="lane_type">${laneTypes.map(item => `<option>${item}</option>`).join("")}</select></label><div class="simple-fields two"><label>Planned width, feet<input name="planned_width_ft" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Approximate length, feet<input name="approximate_length_ft" type="number" step="1" inputmode="numeric" placeholder="optional"></label></div><label>Dominant brush diameter<input name="dominant_brush_diameter" placeholder="optional, for example 2–3 inches"></label><label>Large trees to preserve<input name="large_trees_to_preserve" placeholder="optional"></label><label>Standing water<input name="standing_water" placeholder="optional"></label><label>Soft ground<input name="soft_ground" placeholder="optional"></label><label>Equipment limitations<input name="equipment_limitations" placeholder="optional"></label></form><button id="openRevealStart" class="frontage-end" type="button">RECORD LANE START HERE</button><button id="openRevealReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
+    document.getElementById("openRevealStart").addEventListener("click", () => {
+      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+      const values = Object.fromEntries(new FormData(document.getElementById("openRevealForm")).entries());
+      try {
+        const lane = sectionMappingTools.startOpenAndRevealLane(data, Object.assign({}, values, { position: lastPosition }));
+        const now = new Date().toISOString();
+        const marker = markerFromPosition("other", lane.lane_id, null, now, lastPosition, { informationClass: "INSPECTOR_PLANNING_INTERPRETATION", attributes: { open_and_reveal_lane_id: lane.lane_id, lane_type: lane.lane_type } });
+        const session = { schema_name: "property-inspector-simple-capture-session", schema_version: "1.0", simple_session_id: makeId("simple-session"), feature_id: lane.lane_id, feature_type: "open_and_reveal", started_at: now, updated_at: now, completion_status: "ACTIVE", information_class: "INSPECTOR_PLANNING_INTERPRETATION", return_screen: "OPEN_AND_REVEAL", details: { lane_id: lane.lane_id }, observation_id: marker.id, lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time };
+        data.markers.push(marker); data.simple_sessions.push(session); data.active_simple_session_id = session.simple_session_id; simpleActiveSessionId = session.simple_session_id; saveState(); redraw();
+        renderOpenRevealActive(lane); simpleSetStatus(`${lane.lane_id} START SAVED`, "saved");
+      } catch (error) { simpleSetStatus(error.message, "warning"); }
+    });
+    document.getElementById("openRevealReturn").addEventListener("click", renderSimpleHome);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderOpenRevealActive(lane) {
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>${lane.lane_id}</h2><p><strong>${lane.lane_type}</strong></p><p class="frontage-warning">This is a planning lane. Cutting brush may improve visibility and walking access; it will not resolve wetness.</p><div class="simple-capture-actions"><button id="openRevealPhoto" type="button">ADD PHOTO</button><button id="openRevealVoice" type="button">OPTIONAL VOICE NOTE</button><button id="openRevealFinish" class="frontage-end" type="button">RECORD LANE END HERE</button><button id="openRevealStartOnly" class="simple-return" type="button">SAVE START ONLY & RETURN</button></div></section>`;
+    document.getElementById("openRevealPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("openRevealPhoto").addEventListener("click", () => simpleTakePhoto("Open-and-Reveal lane context"));
+    document.getElementById("openRevealVoice").addEventListener("click", async () => { const session = currentSimpleSession(); await startVoiceRecording({ purpose: "open_and_reveal_lane", simple_session_id: session && session.simple_session_id }); });
+    const finish = position => {
+      sectionMappingTools.finishOpenAndRevealLane(data, lane.lane_id, position);
+      lane.photo_ids = data.photos.filter(photo => String(photo.feature_id || "") === lane.lane_id).map(photo => photo.id);
+      lane.voice_note_ids = data.voice_notes.filter(note => String(note.feature_id || note.simple_session_id || "") === lane.lane_id || String(note.simple_session_id || "") === String(simpleActiveSessionId || "")).map(note => note.id);
+      if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED");
+      saveState(); redraw(); renderSimpleHome(); simpleSetStatus(`${lane.lane_id} SAVED`, "saved");
+    };
+    document.getElementById("openRevealFinish").addEventListener("click", () => finish(lastPosition));
+    document.getElementById("openRevealStartOnly").addEventListener("click", () => finish(null));
     bindSimpleLocator(); renderSimpleHeader();
   }
 
@@ -4705,6 +4800,119 @@
     simpleCloseDialogs(); restoreSimplePageScrolling(); setFrontageScreen("FIELD_BUTTONS"); renderSimpleHome();
   }
 
+  function renderAugust4Summary() {
+    const content = document.getElementById("simpleContent");
+    const routeCount = august4RouteContext && Array.isArray(august4RouteContext.raw_gps_points) ? august4RouteContext.raw_gps_points.length : 0;
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture august4-summary"><h2>AUGUST 4 WET-WEATHER WALK COMPLETE</h2><div class="simple-calculation"><strong>MOST WATER: 2–4 INCHES</strong><br>DEEPEST OBSERVED: ABOUT 8 INCHES<br>GROUND: SOFT THROUGHOUT THE INSPECTED ROUTE<br>DRY GROUND FOUND: NO<br>CONDITION BEYOND STOPPING POINT: UNKNOWN</div><p class="frontage-warning">Do not repeat the failed dry-ground search during the same wet-weather inspection. Do not walk into deeper water merely to complete the map.</p><p>${routeCount.toLocaleString()} prior GPS points are loaded as a reference route. Unvisited acreage remains UNKNOWN.</p><div class="simple-capture-actions"><button id="augViewRoute" type="button">VIEW TODAY'S ROUTE</button><button id="augViewPhotos" type="button">VIEW PHOTOS</button><button id="augListenVoice" type="button">LISTEN TO VOICE NOTES</button><button id="augMapObserved" type="button">MAP OBSERVED WET SECTION</button><button id="augMarkStop" type="button">MARK WHERE I STOPPED</button><button id="augAerialReview" type="button">REVIEW CREEKS / AERIAL IMAGE</button><button id="augDryReturn" type="button">PLAN DRY-WEATHER RETURN</button><button id="augFinish" class="frontage-end" type="button">FINISH AND EXPORT</button><button id="augReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></div></section>`;
+    document.getElementById("augViewRoute").addEventListener("click", () => { document.getElementById("simpleLocatorMap").scrollIntoView({ block: "center" }); simpleSetStatus("AUGUST 4 WALKED ROUTE SHOWN — unvisited acreage remains unknown", "saved"); });
+    document.getElementById("augViewPhotos").addEventListener("click", renderAugust4PhotoIndex);
+    document.getElementById("augListenVoice").addEventListener("click", renderAugust4VoiceIndex);
+    document.getElementById("augMapObserved").addEventListener("click", () => { const section = wetEdgeTools.createAugust4ObservedSection(data, august4RouteContext); saveState(); renderAugust4Summary(); simpleSetStatus(`${section.wet_area_id} SAVED AS AN OPEN OBSERVED-ROUTE SECTION — unvisited acreage remains UNKNOWN`, "saved"); });
+    document.getElementById("augMarkStop").addEventListener("click", renderMarkStoppingPoint);
+    document.getElementById("augAerialReview").addEventListener("click", renderAerialReview);
+    document.getElementById("augDryReturn").addEventListener("click", renderDryWeatherPlan);
+    document.getElementById("augFinish").addEventListener("click", renderSimpleFinish);
+    document.getElementById("augReturn").addEventListener("click", renderSimpleHome);
+    bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderAugust4PhotoIndex() {
+    const content = document.getElementById("simpleContent");
+    const points = august4RouteContext && Array.isArray(august4RouteContext.photograph_points) ? august4RouteContext.photograph_points : [];
+    const rows = points.map(point => `<li><strong>${point.photo_number}</strong> — ${point.recorded_at || "time unavailable"}<br>${Number(point.latitude).toFixed(6)}, ${Number(point.longitude).toFixed(6)} · ±${Math.round(point.gps_accuracy_m || 0)} m</li>`).join("");
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>AUGUST 4 PHOTOGRAPH LOCATIONS</h2><p>${points.length} photograph locations from the read-only failure-analysis package are shown on the map.</p><p class="frontage-warning">The actual photograph files remain in the inspection archive and are not copied into this public test website.</p><ol class="plain-record-list">${rows || "<li>No prior photograph points loaded.</li>"}</ol><button id="augPhotoBack" class="simple-return" type="button">RETURN TO AUGUST 4 SUMMARY</button></section>`;
+    document.getElementById("augPhotoBack").addEventListener("click", renderAugust4Summary); bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderAugust4VoiceIndex() {
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="simple-capture"><h2>AUGUST 4 VOICE NOTES</h2><p>The read-only August 4 failure-analysis package contains 8 intact voice notes.</p><p class="frontage-warning">They remain in the private inspection archive. They were not copied into this public test website, so this screen cannot play them.</p><button id="augVoiceBack" class="simple-return" type="button">RETURN TO AUGUST 4 SUMMARY</button></section>`;
+    document.getElementById("augVoiceBack").addEventListener("click", renderAugust4Summary); renderSimpleHeader();
+  }
+
+  function renderMarkStoppingPoint() {
+    const content = document.getElementById("simpleContent");
+    const prior = august4RouteContext && Array.isArray(august4RouteContext.raw_gps_points) ? august4RouteContext.raw_gps_points : [];
+    const eastmost = prior.reduce((best, point) => !best || Number(point.longitude) > Number(best.longitude) ? point : best, null);
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>MARK WHERE I STOPPED</h2><p>Choose only what you personally know. This creates a new append-only confirmation and does not change the August 4 GPS evidence.</p><div class="simple-capture-actions"><button id="stopCurrent" type="button">I AM STANDING AT THE STOPPING POINT</button><button id="stopFurthest" type="button">THE FURTHEST AUGUST 4 POINT IS WHERE I STOPPED</button><button id="stopUnknown" type="button">I CANNOT CONFIRM THE EXACT POINT</button><button id="stopBack" class="simple-return" type="button">RETURN WITHOUT MARKING</button></div></section>`;
+    document.getElementById("stopCurrent").addEventListener("click", () => { try { previsitTools.markStoppingPoint(data, lastPosition, null); saveState(); renderAugust4Summary(); simpleSetStatus("STOPPING POINT SAVED — condition beyond it remains UNKNOWN", "saved"); } catch (error) { simpleSetStatus(error.message, "warning"); } });
+    document.getElementById("stopFurthest").addEventListener("click", () => { if (!eastmost) { simpleSetStatus("The August 4 route is unavailable. Nothing was marked.", "warning"); return; } const point = { lat: eastmost.latitude, lon: eastmost.longitude, accuracy_m: eastmost.accuracy_m, time: eastmost.time }; const saved = previsitTools.markStoppingPoint(data, point, "Inspector confirmed the furthest reliable August 4 sampled point as the stopping point.", new Date().toISOString()); saved.basis = "INSPECTOR_CONFIRMED_FROM_AUGUST_4_REFERENCE_ROUTE"; saveState(); renderAugust4Summary(); simpleSetStatus("STOPPING POINT CONFIRMED AND SAVED — original route unchanged", "saved"); });
+    document.getElementById("stopUnknown").addEventListener("click", () => { const model = previsitTools.ensureModel(data); model.stopping_point_status = { status: "EXACT_POINT_NOT_CONFIRMED", recorded_at: new Date().toISOString(), append_only: true }; saveState(); renderAugust4Summary(); simpleSetStatus("EXACT STOPPING POINT LEFT UNKNOWN", "saved"); });
+    document.getElementById("stopBack").addEventListener("click", renderAugust4Summary); bindSimpleLocator(); renderSimpleHeader();
+  }
+
+  function renderDryWeatherPlan() {
+    const content = document.getElementById("simpleContent");
+    const model = previsitTools.ensureModel(data);
+    content.innerHTML = `<section class="simple-capture"><h2>PLAN DRY-WEATHER RETURN</h2><div class="simple-calculation">${model.dry_weather_return_plan.readiness_statement}</div><p>${model.dry_weather_return_plan.readiness_basis}</p><h3>When there has been a useful dry period, recheck only these useful locations:</h3><ul>${model.dry_weather_return_plan.recommended_repeat_locations.map(item => `<li>${item}</li>`).join("")}</ul><p class="frontage-warning">Do not answer at every GPS point. Do not assume higher mapped ground is dry. Do not enter unsafe water.</p><button id="dryExpect" type="button">WHAT TO EXPECT TODAY</button><button id="dryBack" class="simple-return" type="button">RETURN TO AUGUST 4 SUMMARY</button></section>`;
+    document.getElementById("dryExpect").addEventListener("click", renderWhatToExpect);
+    document.getElementById("dryBack").addEventListener("click", renderAugust4Summary); renderSimpleHeader();
+  }
+
+  function renderWhatToExpect() {
+    const content = document.getElementById("simpleContent");
+    const model = previsitTools.ensureModel(data);
+    content.innerHTML = `<section class="simple-capture"><h2>WHAT TO EXPECT TODAY</h2><ul>${model.what_to_expect_today.map(item => `<li>${item}</li>`).join("")}</ul><p class="frontage-warning">These are planning warnings from prior observations, aerial interpretation, and external context. They are not proof of current conditions.</p><button id="expectBack" class="simple-return" type="button">RETURN TO DRY-WEATHER PLAN</button></section>`;
+    document.getElementById("expectBack").addEventListener("click", renderDryWeatherPlan); renderSimpleHeader();
+  }
+
+  function renderAerialReview() {
+    const content = document.getElementById("simpleContent");
+    const model = previsitTools.ensureModel(data);
+    const interpretation = model.aerial_interpretations[0];
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>WHAT DOES THE AERIAL IMAGE APPEAR TO SHOW?</h2><p><strong>Apple Maps appears to show a prominent winding creek and several probable branches across the large tract.</strong></p><p>The western and central area appears to have denser large-tree canopy. The mature woods thin substantially toward the eastern side, especially after the main creek. The lighter eastern area appears to contain fewer large trees, but it may consist of marsh, wet flats, and dense lower brush rather than dry open land.</p><p><strong>The location reached during the August 4 walk was largely a marshy clearing, not a trail.</strong></p><p class="frontage-warning">Source: ${interpretation.source}. Planning prediction only except for the inspector-confirmed marshy clearing. Not a survey. Not a regulatory wetland determination. Never assume dry, easy, open, or buildable ground from color.</p><label>Trace type<select id="aerialTraceType">${previsitTools.TRACE_TYPES.map(type => `<option>${type}</option>`).join("")}</select></label><label>Confidence<select id="aerialTraceConfidence"><option>uncertain</option><option>possible</option><option>probable</option></select></label><p>Tap points on the parcel map to trace one creek, creek branch, canopy area, or possible marshy clearing. Trace each branch separately.</p><div class="simple-calculation" id="aerialTraceCount">0 trace points</div><div class="simple-capture-actions"><button id="aerialUndo" type="button">UNDO LAST POINT</button><button id="aerialSave" type="button">SAVE THIS TRACE</button><button id="aerialClear" type="button">CANCEL THIS TRACE</button><button id="aerialFieldCheck" class="frontage-end" type="button">CHECK THE LIGHTER EASTERN AREA</button><button id="aerialBack" class="simple-return" type="button">RETURN TO AUGUST 4 SUMMARY</button></div></section>`;
+    aerialTraceDraft = [];
+    bindSimpleLocator();
+    const map = document.querySelector("#simpleLocatorMap svg");
+    const update = () => { const count = document.getElementById("aerialTraceCount"); if (count) count.textContent = `${aerialTraceDraft.length} trace point${aerialTraceDraft.length === 1 ? "" : "s"}`; };
+    if (map) map.addEventListener("click", event => { const rect = map.getBoundingClientRect(); const x = (event.clientX - rect.left) / rect.width * W; const y = (event.clientY - rect.top) / rect.height * H; const lon = xmin + x / W * (xmax - xmin); const lat = ymax - y / H * (ymax - ymin); aerialTraceDraft.push([lon, lat]); update(); });
+    document.getElementById("aerialUndo").addEventListener("click", () => { aerialTraceDraft.pop(); update(); });
+    document.getElementById("aerialClear").addEventListener("click", () => { aerialTraceDraft = []; update(); });
+    document.getElementById("aerialSave").addEventListener("click", () => { try { const trace = previsitTools.addAerialTrace(data, { trace_type: document.getElementById("aerialTraceType").value, confidence: document.getElementById("aerialTraceConfidence").value, coordinates: aerialTraceDraft }); saveState(); renderAerialReview(); simpleSetStatus(`${trace.trace_id} SAVED AS AERIAL INTERPRETATION — not field confirmed`, "saved"); } catch (error) { simpleSetStatus(error.message, "warning"); } });
+    document.getElementById("aerialFieldCheck").addEventListener("click", renderPredictionCheck);
+    document.getElementById("aerialBack").addEventListener("click", renderAugust4Summary); renderSimpleHeader();
+  }
+
+  function renderPredictionCheck() {
+    const content = document.getElementById("simpleContent");
+    const model = previsitTools.ensureModel(data);
+    const traces = model.aerial_traces || [];
+    const choices = ["MARSH / WET FLAT", "STANDING WATER", "SOFT WITHOUT VISIBLE WATER", "DENSE 2–3-INCH TANGLED BRUSH", "SCATTERED LARGE TREES", "MOSTLY OPEN UNDERBRUSH", "FIRM AND DRY", "CREEK OR CHANNEL", "CANNOT REACH", "AERIAL PREDICTION WRONG", "SKIP"];
+    content.innerHTML = `<section class="simple-capture"><h2>WHAT IS THE LIGHTER EASTERN AREA ACTUALLY LIKE?</h2><label>Prediction being checked<select id="predictionTrace"><option value="">THINNER TREE CANOPY / LIKELY LOW BRUSH OR MARSH — NO TRACE SELECTED</option>${traces.map(trace => `<option value="${trace.trace_id}">${trace.trace_id} — ${trace.trace_type}</option>`).join("")}</select></label><p class="simple-next-line">Tap every answer that is true. Each tap saves immediately. Nothing is required.</p><div id="predictionSavedCount" class="simple-calculation">0 choices saved</div><div class="simple-capture-actions">${choices.map(choice => `<button type="button" data-prediction-choice="${choice}">${choice}</button>`).join("")}<button id="predictionPhoto" type="button">PHOTO</button><button id="predictionVoice" type="button">OPTIONAL VOICE NOTE</button><button id="predictionDone" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button><button id="predictionBack" class="simple-return" type="button">RETURN TO AERIAL REVIEW</button></div></section>`;
+    let activeCheck = null;
+    const updateCount = () => { const count = document.getElementById("predictionSavedCount"); if (count) count.textContent = `${activeCheck ? activeCheck.selection_events.length : 0} choice${activeCheck && activeCheck.selection_events.length === 1 ? "" : "s"} saved`; };
+    content.querySelectorAll("[data-prediction-choice]").forEach(button => button.addEventListener("click", () => {
+      const traceId = document.getElementById("predictionTrace").value;
+      const trace = traces.find(item => item.trace_id === traceId);
+      try {
+        activeCheck = previsitTools.addPredictionFieldChoice(data, { field_prediction_check_id: activeCheck && activeCheck.field_prediction_check_id, aerial_trace_id: traceId || null, aerial_prediction: trace ? trace.trace_type : "THINNER TREE CANOPY / LIKELY LOW BRUSH OR MARSH", choice: button.dataset.predictionChoice, position: lastPosition });
+        saveState(); updateCount(); button.dataset.saved = "true"; simpleSetStatus(`${button.dataset.predictionChoice} SAVED — ${activeCheck.field_prediction_check_id}`, "saved");
+      } catch (error) { simpleSetStatus(error.message, "warning"); }
+    }));
+    document.getElementById("predictionPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("predictionPhoto").addEventListener("click", () => { if (!activeCheck) { simpleSetStatus("Tap what is actually here first, or return without recording.", "warning"); return; } renderPredictionSaved(activeCheck); setTimeout(() => document.getElementById("predictionPhoto") && document.getElementById("predictionPhoto").click(), 0); });
+    document.getElementById("predictionVoice").addEventListener("click", async () => { if (!activeCheck) { simpleSetStatus("Tap what is actually here first, or return without recording.", "warning"); return; } renderPredictionSaved(activeCheck); setTimeout(() => document.getElementById("predictionVoice") && document.getElementById("predictionVoice").click(), 0); });
+    document.getElementById("predictionDone").addEventListener("click", () => { if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED"); renderSimpleHome(); });
+    document.getElementById("predictionBack").addEventListener("click", renderAerialReview); renderSimpleHeader();
+  }
+
+  function renderPredictionSaved(check) {
+    const content = document.getElementById("simpleContent");
+    content.innerHTML = `<section class="simple-capture"><h2>${check.field_prediction_check_id} SAVED</h2><p>${check.field_observation}</p><p>GPS, time, accuracy, prediction, field answer, and agreement status are saved separately.</p><div class="simple-capture-actions"><button id="predictionPhoto" type="button">TAKE PICTURE</button><button id="predictionVoice" type="button">OPTIONAL VOICE NOTE</button><button id="predictionDone" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></div></section>`;
+    const makeSession = () => {
+      let session = simpleSessionById(check.simple_session_id);
+      if (session) return session;
+      const now = new Date().toISOString();
+      const marker = markerFromPosition("other", check.field_observation, null, now, lastPosition, { attributes: { field_prediction_check_id: check.field_prediction_check_id, aerial_prediction: check.aerial_prediction } });
+      session = { schema_name: "property-inspector-simple-capture-session", schema_version: "1.0", simple_session_id: makeId("simple-session"), feature_id: check.field_prediction_check_id, feature_type: "aerial_prediction_check", started_at: now, updated_at: now, completion_status: "ACTIVE", information_class: "OBSERVED_ON_SITE", return_screen: "FIELD_BUTTONS", details: { field_prediction_check_id: check.field_prediction_check_id, aerial_prediction: check.aerial_prediction, field_observation: check.field_observation }, observation_id: marker.id, lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time };
+      data.markers.push(marker); data.simple_sessions.push(session); data.active_simple_session_id = session.simple_session_id; simpleActiveSessionId = session.simple_session_id; check.simple_session_id = session.simple_session_id; saveState(); return session;
+    };
+    document.getElementById("predictionPhoto").addEventListener("pointerdown", preparePhotoStorage);
+    document.getElementById("predictionPhoto").addEventListener("click", () => { makeSession(); simpleTakePhoto("Field confirmation of aerial prediction"); });
+    document.getElementById("predictionVoice").addEventListener("click", async () => { const session = makeSession(); await startVoiceRecording({ purpose: "aerial_prediction_field_confirmation", simple_session_id: session.simple_session_id }); });
+    document.getElementById("predictionDone").addEventListener("click", simpleSaveAndReturn); renderSimpleHeader();
+  }
+
   function renderSimpleHome() {
     const content = document.getElementById("simpleContent");
     if (!content) return;
@@ -4733,12 +4941,12 @@
     const frontageResumeLabel = arrival.status === "ARRIVAL_SEQUENCE_COMPLETE" ? "REVIEW ROAD FRONTAGE" : (arrival.frontage_walk.active ? "CONTINUE FRONTAGE WALK" : "CONTINUE ROAD FRONTAGE");
     const activeSection = sectionMappingTools.activeSection(data);
     const resumeSection = activeSection ? `<button id="simpleResumeSection" class="simple-feature map-section" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:74px" type="button">CONTINUE ${activeSection.section_id}</button>` : "";
-    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section>${resumeSection}<button id="simpleResumeFrontage" class="simple-feature entrance" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:68px" type="button">${frontageResumeLabel}</button><div class="simple-grid">
+    content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-next"><strong>WHAT DO I DO NOW?</strong><span>Tap what you see. Take a photo or add a note if useful. Nothing else is required.</span></section><button id="simpleAugust4Review" class="simple-feature water" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:82px" type="button">AUGUST 4 WET-WEATHER WALK COMPLETE</button>${resumeSection}<button id="simpleResumeFrontage" class="simple-feature entrance" style="display:block;width:100%;max-width:620px;margin:0 auto 8px;min-height:68px" type="button">${frontageResumeLabel}</button><div class="simple-grid">
       <button id="simpleMapSection" type="button" class="simple-feature map-section">MAP THIS SECTION</button>${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
       <button id="simpleSiteSound" type="button" class="simple-feature voice">SITE SOUND / EXPERIENCE</button>
       <button id="simpleVoice" type="button" class="simple-feature voice">${mediaRecorder && mediaRecorder.state === "recording" ? "STOP & SAVE VOICE NOTE" : "VOICE NOTE"}</button>
       <button id="simpleFinish" type="button" class="simple-feature finish">FINISH</button></div>
-      <details class="simple-advanced"><summary>ADVANCED TOOLS</summary><p>Only open this if you deliberately need the original 3.13 map and detailed tools.</p><button id="simpleOpenAdvanced" type="button">OPEN ADVANCED TOOLS</button></details>`;
+      <details class="simple-advanced"><summary>ADVANCED TOOLS</summary><p>Only open this if you deliberately need an optional planning tool or the original 3.13 detailed tools.</p><button id="simpleOpenReveal" type="button">OPEN AND REVEAL</button><button id="simpleOpenAdvanced" type="button">OPEN ORIGINAL DETAILED TOOLS</button></details>`;
     content.querySelectorAll("[data-simple-feature]").forEach(button => button.addEventListener("pointerdown", preparePhotoStorage));
     content.querySelectorAll("[data-simple-feature]").forEach(button => button.addEventListener("click", () => openSimpleCapture(button.dataset.simpleFeature)));
     document.getElementById("simpleVoice").addEventListener("click", async () => {
@@ -4747,6 +4955,7 @@
       setTimeout(renderSimpleHome, 100);
     });
     document.getElementById("simpleSiteSound").addEventListener("click", () => openSiteSound("interior_or_current_location", "FIELD_BUTTONS"));
+    document.getElementById("simpleAugust4Review").addEventListener("click", renderAugust4Summary);
     document.getElementById("simpleMapSection").addEventListener("click", () => renderSectionStart());
     if (activeSection) document.getElementById("simpleResumeSection").addEventListener("click", () => {
       activeSection.capture_paused = false;
@@ -4763,6 +4972,7 @@
       saveState(); renderFrontageWorkflow();
     });
     document.getElementById("simpleOpenAdvanced").addEventListener("click", () => document.body.classList.add("simple-advanced-open"));
+    document.getElementById("simpleOpenReveal").addEventListener("click", renderOpenRevealStart);
     bindSimpleLocator();
     renderSimpleHeader();
   }
@@ -5021,7 +5231,7 @@
   }
 
   async function initialize() {
-    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !frontageTools || !automaticContextTools || !sectionMappingTools) {
+    if (!packageTools || !dbRecoveryTools || !coachingTools || !waterTools || !governanceTools || !evidenceSetTools || !weatherTools || !frontageTools || !automaticContextTools || !sectionMappingTools || !wetEdgeTools || !previsitTools) {
       setStatus("Inspection package code failed to load. Do not begin an inspection.", "error");
       startBtn.disabled = true;
       return;
@@ -5032,6 +5242,14 @@
       return;
     }
     loadState();
+    try {
+      const response = await fetch("./assets/august-4-route-context.json");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      august4RouteContext = await response.json();
+    } catch (error) {
+      august4RouteContext = null;
+      setStatus(`The August 4 reference route is unavailable: ${error.message}`, "warning");
+    }
     if (SIMPLE_AUTOMATION_MODE && data.started) {
       lastPosition = { lat: 30.489, lon: -87.091, accuracy_m: 3, altitude_m: 20, altitude_accuracy_m: 2, heading_deg: 90, speed_mps: 0, time: new Date().toISOString(), sequence: 1 };
       if (!data.points.length) data.points.push(Object.assign({}, lastPosition));

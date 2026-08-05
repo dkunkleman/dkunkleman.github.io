@@ -9,10 +9,12 @@
   const frontage = typeof module === "object" && module.exports ? require("./frontage-workflow.js") : (root && root.PropertyFrontageWorkflow);
   const automaticContext = typeof module === "object" && module.exports ? require("./automatic-context.js") : (root && root.AutomaticFieldContext);
   const sectionMapping = typeof module === "object" && module.exports ? require("./section-mapping.js") : (root && root.SimpleSectionMapping);
-  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, frontage, automaticContext, sectionMapping);
+  const wetEdgeMapping = typeof module === "object" && module.exports ? require("./wet-edge-mapping.js") : (root && root.WetEdgeMapping);
+  const propertyReview = typeof module === "object" && module.exports ? require("./property-review.js") : (root && root.PropertyPrevisitReview);
+  const api = factory(coaching, water, governance, evidenceSets, timber, synthesis, frontage, automaticContext, sectionMapping, wetEdgeMapping, propertyReview);
   if (typeof module === "object" && module.exports) module.exports = api;
   if (root) root.InspectionPackage = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, frontageTools, automaticContextTools, sectionMappingTools) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (coachingTools, waterTools, governanceTools, evidenceSetTools, timberTools, synthesisTools, frontageTools, automaticContextTools, sectionMappingTools, wetEdgeMappingTools, propertyReviewTools) {
   "use strict";
 
   const FORMAT = "property-inspector-home-test-313-package";
@@ -1210,6 +1212,9 @@
       "- SITE_SOUND_EXPERIENCE.json: optional location-specific sound/experience records and direct audio links.",
       "- MAPPED_SECTIONS.json: inspector-confirmed land sections, raw walked edges, corners, photos, voice notes, corrections, approximate area, and separately labeled inferred edges.",
       "- mapped-sections.geojson: approximate map geometry for mapped sections; phone GPS, not a survey.",
+      "- WET_EDGE_MAPPING.json: corrected August 4 wet-route findings and the rule that unvisited acreage remains unknown.",
+      "- AUGUST_4_REFERENCE_ROUTE.json: the prior raw phone-GPS route and prior photograph locations when that read-only context was available.",
+      "- PROPERTY_PREVISIT_REVIEW.json: aerial planning interpretations, source-image identity, probable creek traces, separate vegetation/underbrush/travel/ground layers, field checks, and dry-weather return planning.",
       "- AI_ANALYSIS.json: analysis-first structure containing property, conditions, statistics, full GPS track, observations, photos, voice notes, thoughts, layers, public data, relationships, questions, and metadata.",
       "- DECISION_BRIEF.json: five-decision evidence routing, strengths/weaknesses/unknowns instructions, confidence rubric, and lowest-cost uncertainty-reduction rules.",
       "- QUESTION_BRIEF.json: every inspector-created investigation question with supporting, contradicting, and contextual evidence IDs.",
@@ -1754,6 +1759,13 @@ Every observation includes \`decision_relevance\`. Treat its candidate effect as
 - \`SITE_SOUND_EXPERIENCE.json\` contains optional, location-specific on-site sound/experience observations. Ambient recordings are captured-device evidence. Apparent conflicts such as “Mostly quiet” plus a selected sound must be reported, not silently resolved.
 - \`MAPPED_SECTIONS.json\` preserves each inspector-confirmed section, its exact raw GPS edge, marked corners, optional photos and voice notes, append-only description corrections, approximate acreage, and any separately labeled inferred closing edge. \`mapped-sections.geojson\` is the map interchange view. Never present an inferred edge as physically walked or the phone-GPS result as a survey.
 
+- In \`MAPPED_SECTIONS.json\`, large trees overhead, underbrush, travel difficulty, and ground/water are independent optional conditions. Never infer travel difficulty from mature-tree canopy, and never infer dry ground from vegetation appearance.
+- \`PROPERTY_PREVISIT_REVIEW.json\` records the Apple Maps screenshot by filename, hash, dimensions, and visible map parameters without republishing it. Aerial classes are planning predictions only. Light mottled areas are not open ground; they are interpreted as likely dense 2–3-inch tangled brush about 10–12 feet tall, subject to field confirmation. Dark crowns may show large trees but do not establish the understory or walking difficulty.
+- \`WET_EDGE_MAPPING.json\` and \`AUGUST_4_REFERENCE_ROUTE.json\` preserve the corrected prior wet-weather route context. The walked route was soft, with standing water mostly 2–4 inches and local water near 8 inches; no dry ground was reached. Never extend this conclusion to unvisited acreage.
+- Open-and-Reveal lanes under \`MAPPED_SECTIONS.json\` are inspector planning interpretations for selective brush cutting. Cutting may improve visibility and access but does not drain or make flooded or soft ground usable.
+- The prior \`TRAIL\` interpretation is superseded and appears only in the append-only audit correction inside \`PROPERTY_PREVISIT_REVIEW.json\`. Current analysis must use \`MARSHY CLEARING / WET LOW-VEGETATION AREA\` and must not treat it as a constructed trail, firm path, vehicle route, or dry open ground.
+- Western/central denser canopy, the field-confirmed marshy reached area, thinner eastern canopy, and the probable main creek/branches are separate interpretations. The eastern canopy reduction may reduce large-tree clearing but does not establish dry or usable land.
+
 ## Evidence classifications
 
 ${Object.entries(evidenceClassificationDefinitions).map(([name, meaning]) => `- **${name}:** ${meaning}`).join("\n")}
@@ -1943,6 +1955,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     sourceInspection.site_sound_records = Array.isArray(sourceInspection.site_sound_records) ? sourceInspection.site_sound_records : [];
     if (automaticContextTools) automaticContextTools.ensureModel(sourceInspection);
     if (sectionMappingTools) sectionMappingTools.ensureModel(sourceInspection);
+    if (wetEdgeMappingTools) wetEdgeMappingTools.ensureModel(sourceInspection);
+    if (propertyReviewTools) propertyReviewTools.ensureModel(sourceInspection);
     if (timberTools) timberTools.ensureModel(sourceInspection);
     if (synthesisTools) synthesisTools.ensureModel(sourceInspection);
     if (coachingTools) coachingTools.ensureInspectionModel(sourceInspection, sourceInspection.started || settings.exportedAt);
@@ -2407,6 +2421,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     const automaticContext = sourceInspection.automatic_context || { external_source_records: [], retrieval_attempts: [], device_snapshots: [] };
     const factsByClass = automaticContextTools ? automaticContextTools.reportByClass(sourceInspection) : { schema_name: "property-intelligence-facts-by-class", schema_version: "1.0", classes: {} };
     const mappedSections = sectionMappingTools ? sectionMappingTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-simple-section-mapping", schema_version: "1.0", sections: [], approximate_totals_by_description: {} };
+    const wetEdgeMapping = wetEdgeMappingTools ? wetEdgeMappingTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-wet-edge-mapping", schema_version: "1.0", wet_areas: [] };
+    const propertyPrevisitReview = propertyReviewTools ? propertyReviewTools.analysisModel(sourceInspection) : { schema_name: "property-intelligence-previsit-water-terrain-review", schema_version: "1.0" };
+    const august4ReferenceRoute = settings.august4Context && typeof settings.august4Context === "object" ? settings.august4Context : null;
     const mappedSectionsGeoJson = {
       type: "FeatureCollection",
       name: "Approximate mapped sections - phone GPS, not a survey",
@@ -2559,6 +2576,8 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
       forester_handoff: foresterHandoff,
       frontage_and_crossing: frontageAnalysis,
       mapped_sections: mappedSections,
+      wet_edge_mapping: wetEdgeMapping,
+      property_previsit_review: propertyPrevisitReview,
       map_context: mapMetadata,
       files: {
         ai_readme: "AI_README.md",
@@ -2584,6 +2603,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
         site_sound_experience: "SITE_SOUND_EXPERIENCE.json",
         mapped_sections: "MAPPED_SECTIONS.json",
         mapped_sections_geojson: "mapped-sections.geojson",
+        wet_edge_mapping: "WET_EDGE_MAPPING.json",
+        august_4_reference_route: august4ReferenceRoute ? "AUGUST_4_REFERENCE_ROUTE.json" : null,
+        property_previsit_review: "PROPERTY_PREVISIT_REVIEW.json",
         small_tract_water_map: "SMALL_TRACT_WATER_MAP.json",
         small_tract_water_map_interactive: "small-tract-water-map.html",
         segmented_route: "SEGMENTED_ROUTE.json",
@@ -2708,6 +2730,9 @@ ${questions.map(question => `## ${question.category}\n\n${question.question}\n\n
     zip.add("SITE_SOUND_EXPERIENCE.json", JSON.stringify({ schema_name: "property-intelligence-site-sound-experience-index", schema_version: "1.0", inspection_id: manifest.inspection_id, records: sourceInspection.site_sound_records || [], rule: "Site sound and experience choices are on-site observations. Ambient recordings and device metadata are device captures. External weather remains external context." }, null, 2) + "\n", { modifiedAt });
     zip.add("MAPPED_SECTIONS.json", JSON.stringify(mappedSections, null, 2) + "\n", { modifiedAt });
     zip.add("mapped-sections.geojson", JSON.stringify(mappedSectionsGeoJson, null, 2) + "\n", { modifiedAt });
+    zip.add("WET_EDGE_MAPPING.json", JSON.stringify(wetEdgeMapping, null, 2) + "\n", { modifiedAt });
+    if (august4ReferenceRoute) zip.add("AUGUST_4_REFERENCE_ROUTE.json", JSON.stringify(august4ReferenceRoute) + "\n", { modifiedAt });
+    zip.add("PROPERTY_PREVISIT_REVIEW.json", JSON.stringify(propertyPrevisitReview, null, 2) + "\n", { modifiedAt });
     zip.add("CHAT_REVIEW_RETURN_INSTRUCTIONS.md", chatReviewInstructions, { modifiedAt });
     zip.add("schemas/property-intelligence-review-annotation.schema.json", JSON.stringify(reviewAnnotationSchema, null, 2) + "\n", { modifiedAt });
     zip.add("PROFESSIONAL_HANDOFF_CARDS.json", JSON.stringify(professionalHandoffCards, null, 2) + "\n", { modifiedAt });

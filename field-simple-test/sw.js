@@ -1,24 +1,27 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-offline-v4";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.4";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v5";
+const INDEX_URL = "./index.html?v=3.13.0-home-test.5";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.13.0-home-test.4",
-  "./water-intelligence.js?v=3.13.0-home-test.4",
-  "./evidence-governance.js?v=3.13.0-home-test.4",
-  "./evidence-sets.js?v=3.13.0-home-test.4",
-  "./timber-reconnaissance.js?v=3.13.0-home-test.4",
-  "./reviewed-property-synthesis.js?v=3.13.0-home-test.4",
-  "./authoritative-weather.js?v=3.13.0-home-test.4",
-  "./frontage-workflow.js?v=3.13.0-home-test.4",
-  "./automatic-context.js?v=3.13.0-home-test.4",
-  "./section-mapping.js?v=3.13.0-home-test.4",
-  "./app.js?v=3.13.0-home-test.4",
-  "./idb-recovery.js?v=3.13.0-home-test.4",
-  "./inspection-package.js?v=3.13.0-home-test.4",
+  "./inspection-coaching.js?v=3.13.0-home-test.5",
+  "./water-intelligence.js?v=3.13.0-home-test.5",
+  "./evidence-governance.js?v=3.13.0-home-test.5",
+  "./evidence-sets.js?v=3.13.0-home-test.5",
+  "./timber-reconnaissance.js?v=3.13.0-home-test.5",
+  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5",
+  "./authoritative-weather.js?v=3.13.0-home-test.5",
+  "./frontage-workflow.js?v=3.13.0-home-test.5",
+  "./automatic-context.js?v=3.13.0-home-test.5",
+  "./section-mapping.js?v=3.13.0-home-test.5",
+  "./wet-edge-mapping.js?v=3.13.0-home-test.5",
+  "./property-review.js?v=3.13.0-home-test.5",
+  "./app.js?v=3.13.0-home-test.5",
+  "./idb-recovery.js?v=3.13.0-home-test.5",
+  "./inspection-package.js?v=3.13.0-home-test.5",
   "./manifest.webmanifest",
-  "./assets/parcels.json"
+  "./assets/parcels.json",
+  "./assets/august-4-route-context.json"
 ];
 const OPTIONAL_MAP_FILES = [
   "./assets/usgs-terrain.png",
