@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5";
+  const APP_VERSION = "3.13.0-home-test.5.1";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -139,6 +139,7 @@
   let automaticContextRefreshPromise = null;
   let august4RouteContext = null;
   let aerialTraceDraft = null;
+  let fieldGpsFixPromise = null;
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -2305,6 +2306,30 @@
     });
   }
 
+  async function ensureFieldGpsReady() {
+    const recordedAt = lastPosition && Date.parse(lastPosition.time || "");
+    if (lastPosition && Number.isFinite(recordedAt) && Date.now() - recordedAt <= 120000) return lastPosition;
+    if (fieldGpsFixPromise) return fieldGpsFixPromise;
+    fieldGpsFixPromise = (async () => {
+      if (!("geolocation" in navigator)) {
+        simpleSetStatus("LOCATION IS NOT AVAILABLE ON THIS PHONE. Nothing was recorded.", "warning");
+        return null;
+      }
+      simpleSetStatus("GETTING YOUR LOCATION - WAIT HERE. Your tap will continue automatically.", "warning");
+      if (watchId === null) await startTracking();
+      return new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(position => {
+          onPosition(position);
+          resolve(lastPosition);
+        }, error => {
+          simpleSetStatus(`GPS IS NOT READY: ${error.message}. Allow Precise Location, then tap again. Nothing was lost.`, "warning");
+          resolve(null);
+        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+      });
+    })().finally(() => { fieldGpsFixPromise = null; });
+    return fieldGpsFixPromise;
+  }
+
   function stopTracking(options) {
     const settings = options || {};
     if (watchId !== null) navigator.geolocation.clearWatch(watchId);
@@ -4452,11 +4477,8 @@
     return ({ frontage_end: "frontage_end", vehicle_crossing: "vehicle_crossing", ditch_change: "ditch", frontage_trees_brush: "thick", frontage_wet_soft: "wet", frontage_steep_slope: "blocked", frontage_photo: "photo", parking_staging: "parking_staging" })[recordType] || "other";
   }
 
-  function saveFrontageRecord(recordType, attributes) {
-    if (!lastPosition) {
-      simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning");
-      return null;
-    }
+  async function saveFrontageRecord(recordType, attributes) {
+    if (!await ensureFieldGpsReady()) return null;
     const now = new Date().toISOString();
     const record = frontageTools.createRecord(data, recordType, lastPosition, latestOrientation, attributes || {}, now);
     const marker = markerFromPosition(frontageMarkerType(recordType), "", null, now, lastPosition, {
@@ -4508,8 +4530,8 @@
     bindSimpleLocator(); renderSimpleHeader();
   }
 
-  function saveFrontageEnd(confidence) {
-    const record = saveFrontageRecord("frontage_end", { boundary_confidence: confidence, surveyed_boundary_claim: false });
+  async function saveFrontageEnd(confidence) {
+    const record = await saveFrontageRecord("frontage_end", { boundary_confidence: confidence, surveyed_boundary_claim: false });
     if (!record) return;
     activateFrontageSession(record, "STEP_2");
     setFrontageScreen("FRONTAGE_END_SAVED");
@@ -4543,16 +4565,16 @@
     bindSimpleLocator(); renderSimpleHeader();
   }
 
-  function saveCrossing(workClass) {
-    const record = saveFrontageRecord("vehicle_crossing", { crossing_work_class: workClass, permission_established: false, engineered: false, legally_approved: false, construction_ready: false });
+  async function saveCrossing(workClass) {
+    const record = await saveFrontageRecord("vehicle_crossing", { crossing_work_class: workClass, permission_established: false, engineered: false, legally_approved: false, construction_ready: false });
     if (!record) return;
     activateFrontageSession(record, "FRONTAGE_WALK");
     setFrontageScreen("FRONTAGE_SUPPORT");
     renderFrontageSupportCapture();
   }
 
-  function saveRoadsideCondition(recordType) {
-    const record = saveFrontageRecord(recordType, {});
+  async function saveRoadsideCondition(recordType) {
+    const record = await saveFrontageRecord(recordType, {});
     if (!record) return;
     activateFrontageSession(record, "FRONTAGE_WALK");
     setFrontageScreen("FRONTAGE_SUPPORT");
@@ -4570,8 +4592,8 @@
       else await startVoiceRecording({ purpose: "simple_frontage_walk_voice_note", simple_session_id: null });
     });
     document.getElementById("frontageSoundChanged").addEventListener("click", () => openSiteSound("road_frontage_sound_changed", "FRONTAGE_WALK"));
-    document.getElementById("markOtherFrontageEnd").addEventListener("click", () => {
-      const record = saveFrontageRecord("frontage_end", { boundary_confidence: "APPROXIMATE_END_MARKED", surveyed_boundary_claim: false, opposite_end: true });
+    document.getElementById("markOtherFrontageEnd").addEventListener("click", async () => {
+      const record = await saveFrontageRecord("frontage_end", { boundary_confidence: "APPROXIMATE_END_MARKED", surveyed_boundary_claim: false, opposite_end: true });
       if (!record) return;
       frontageTools.endFrontageWalk(data, lastGpsSequence(), "MARKED", new Date().toISOString()); saveState(); renderFrontageReview();
     });
@@ -4763,9 +4785,9 @@
     const origin = selected || "the crossing area under review";
     const content = document.getElementById("simpleContent");
     content.innerHTML = `${simpleLocatorMarkup()}<section class="frontage-step"><h2>STEP 3 - CHECK PARKING, UNLOADING, TURNING, OR STAGING</h2><p class="frontage-instruction">Starting from ${origin}, inspect nearby ground for enough usable space for a vehicle to stop, park, unload, turn, or stage equipment.</p><p class="frontage-warning">Do not assume one area serves every purpose. Record only ground actually inspected.</p><div class="frontage-grid">${["PASSENGER-VEHICLE PARKING","PICKUP PARKING","TRAILER UNLOADING","EQUIPMENT STAGING","TURNAROUND","NONE OBSERVED","UNKNOWN"].map(label => `<button data-parking-class="${label.replace(/ /g, "_")}" type="button">${label}</button>`).join("")}<button id="finishParkingReview" class="frontage-end wide" type="button">FINISH PARKING CHECK</button><button id="parkingReturnField" class="simple-return wide" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button></div></section>`;
-    content.querySelectorAll("[data-parking-class]").forEach(button => button.addEventListener("click", () => {
+    content.querySelectorAll("[data-parking-class]").forEach(button => button.addEventListener("click", async () => {
       const classification = button.dataset.parkingClass;
-      const record = saveFrontageRecord("parking_staging", { classification, related_vehicle_crossing_id: selected || null, capture_method: "POINT_PLUS_OPTIONAL_DIMENSIONS" });
+      const record = await saveFrontageRecord("parking_staging", { classification, related_vehicle_crossing_id: selected || null, capture_method: "POINT_PLUS_OPTIONAL_DIMENSIONS" });
       if (!record) return;
       if (["NONE_OBSERVED", "UNKNOWN"].includes(classification)) { simpleSetStatus(`${record.record_id} SAVED - ${classification.replace(/_/g, " ")}`, "saved"); renderParkingReview(); return; }
       activateFrontageSession(record, "PARKING_REVIEW"); setFrontageScreen("FRONTAGE_SUPPORT"); renderFrontageSupportCapture();
@@ -5065,8 +5087,8 @@
     renderSimpleHeader();
   }
 
-  function openSimpleCapture(type, returnScreen) {
-    if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready yet. The feature was not recorded.", "warning"); return; }
+  async function openSimpleCapture(type, returnScreen) {
+    if (!await ensureFieldGpsReady()) return;
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     simpleCloseDialogs();
     const featureId = simpleNextIdentifier(type);
@@ -5277,6 +5299,9 @@
     renderAuthoritativeWeather();
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
+    if (data.started && !data.stopped && watchId === null && !SIMPLE_AUTOMATION_MODE) {
+      await startTracking();
+    }
     coverageSnapshot = null;
     coachingStateSnapshot = null;
     coverageDirty = true;
@@ -5465,6 +5490,7 @@
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       if (watchId !== null && !wakeLock) keepAwake();
+      if (data.started && !data.stopped && watchId === null) startTracking();
       preparePhotoStorage();
     }
   });
