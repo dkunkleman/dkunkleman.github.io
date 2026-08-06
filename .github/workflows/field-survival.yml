@@ -7,17 +7,26 @@ on:
       - 'field-simple-test/**'
       - 'restore-working-field-app/**'
       - 'tests/safari-field-survival.test.js'
+      - 'tests/field-simple-idb-recovery.test.js'
+      - 'tests/section-mapping.test.js'
+      - 'tests/field-simple-test-package.test.js'
       - '.github/workflows/field-survival.yml'
   workflow_dispatch:
 
 jobs:
   safari-field-survival:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Compile and verify Safari recovery release
+      - name: Verify Safari recovery release
         run: node tests/safari-field-survival.test.js
+      - name: Verify retry-safe photograph database
+        run: node tests/field-simple-idb-recovery.test.js
+      - name: Verify section mapping
+        run: node tests/section-mapping.test.js
+      - name: Verify complete inspection package
+        run: node tests/field-simple-test-package.test.js
