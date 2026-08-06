@@ -25,14 +25,20 @@ assert.match(recovery, /pageshow/);
 assert.match(recovery, /focus/);
 assert.match(recovery, /Date\.now\(\)[\s\S]*120000/);
 
-assert.match(worker, /3\.13\.0-home-test\.5\.3-safari-recovery-1/);
+assert.match(worker, /3\.13\.0-home-test\.5\.3-safari-recovery-2/);
 assert.match(worker, /safari-geolocation-recovery\.js/);
 assert.match(worker, /recoveredAppResponse/);
+assert.match(worker, /patchFieldAppSource/);
+assert.match(worker, /SECTION SAVED — Safari GPS is reconnecting/);
+assert.match(worker, /!observationId && lastPosition/);
+assert.match(worker, /lastPosition \? lastPosition\.lat : null/);
+assert.match(worker, /WAITING FOR FIRST GPS POINT/);
 assert.match(worker, /field-simple-test\/app\.js/);
 assert.match(worker, /ignoreSearch:\s*true/);
 assert.match(worker, /skipWaiting/);
 assert.match(worker, /clients\.claim/);
 
+assert.match(restore, /3\.13\.0-home-test\.5\.3-safari-recovery-2/);
 assert.match(restore, /serviceWorker\.register\("\/field-simple-test\/sw\.js/);
 assert.match(restore, /await waitForActivation\(registration\)/);
 assert.ok(restore.indexOf("await waitForActivation(registration)") < restore.indexOf("location.replace(target)"), "restore must activate recovery before opening field app");
