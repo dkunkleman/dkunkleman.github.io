@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.2";
+  const APP_VERSION = "3.13.0-home-test.5.2-candidate-1";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -140,6 +140,16 @@
   let august4RouteContext = null;
   let aerialTraceDraft = null;
   let fieldGpsFixPromise = null;
+
+  const simpleShell = document.getElementById("simpleShell");
+  if (simpleShell) {
+    simpleShell.addEventListener("click", event => {
+      const button = event.target && event.target.closest ? event.target.closest("button") : null;
+      if (!button || button.disabled || !simpleShell.contains(button)) return;
+      const label = String(button.textContent || "FIELD ACTION").trim().replace(/\s+/g, " ");
+      simpleSetStatus(`TAP RECEIVED — ${label}`, "warning");
+    }, true);
+  }
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -2308,7 +2318,7 @@
 
   async function ensureFieldGpsReady() {
     const recordedAt = lastPosition && Date.parse(lastPosition.time || "");
-    if (lastPosition && Number.isFinite(recordedAt) && Date.now() - recordedAt <= 120000) return lastPosition;
+    if (watchId !== null && lastPosition && Number.isFinite(recordedAt) && Date.now() - recordedAt <= 120000) return lastPosition;
     if (fieldGpsFixPromise) return fieldGpsFixPromise;
     fieldGpsFixPromise = (async () => {
       if (!("geolocation" in navigator)) {
@@ -3797,12 +3807,8 @@
     if (!(await confirmLargePackage("report"))) return;
     packageBusy = true;
     updateControls();
-    if (watchId !== null) stopTracking({ silent: true, reason: "finish" });
-    else if (!data.stopped) {
-      data.stopped = new Date().toISOString();
-      data.lifecycle_events.push({ type: "inspection_finished", time: data.stopped, source: "button_press" });
-      saveState();
-    }
+    data.lifecycle_events.push({ type: "inspection_copy_created", time: new Date().toISOString(), source: "button_press" });
+    saveState();
     try {
       const result = await buildPackageWithRecovery("report", null);
       await presentPackage(result.fileName, result.blob, result.manifest);
@@ -3856,7 +3862,7 @@
 
   async function clearInspection() {
     if (!confirm("Erase the saved track, every marker, every note, and every stored photograph from this phone?")) return;
-    if (watchId !== null) stopTracking({ silent: true, reason: "clear" });
+    if (watchId !== null) { setStatus("END INSPECTION before clearing. Active field evidence was not changed.", "warning"); return; }
     try {
       await gpsWriteQueue;
       await photoStoreClear();
@@ -4145,8 +4151,8 @@
     return session ? (data.site_sound_records || []).find(item => String(item.sound_id) === String(session.site_sound_record_id || session.details && session.details.site_sound_record_id)) || null : null;
   }
 
-  function openSiteSound(locationContext, returnScreen) {
-    if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+  async function openSiteSound(locationContext, returnScreen) {
+    if (!await ensureFieldGpsReady()) return;
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     const soundId = simpleNextIdentifier("site_sound");
     const now = new Date().toISOString();
@@ -4302,18 +4308,15 @@
       if (startButton.disabled) return;
       startButton.disabled = true;
       startButton.textContent = "TAP RECEIVED — GETTING GPS";
-      startButton.setAttribute("aria-busy", "true");
-      simpleSetStatus("TAP RECEIVED — GETTING GPS. The section will start automatically.", "warning");
+      simpleSetStatus("TAP RECEIVED — GETTING GPS", "warning");
       try {
         const startPosition = await ensureFieldGpsReady();
         if (!startPosition) {
           startButton.disabled = false;
           startButton.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
-          startButton.removeAttribute("aria-busy");
-          simpleSetStatus("SECTION NOT STARTED — allow Precise Location, then tap the large button again. Nothing was lost.", "warning");
+          simpleSetStatus("SECTION NOT STARTED — move into open sky and tap the large button again. Nothing was lost.", "warning");
           return;
         }
-        startButton.textContent = "GPS READY — SAVING SECTION";
         const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
         const conditions = {};
         Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
@@ -4325,7 +4328,6 @@
       } catch (error) {
         startButton.disabled = false;
         startButton.textContent = "SECTION NOT STARTED — TAP TO TRY AGAIN";
-        startButton.removeAttribute("aria-busy");
         simpleSetStatus(`SECTION NOT STARTED — ${error.message}. Nothing was lost.`, "warning");
       }
     });
@@ -4430,8 +4432,8 @@
     const content = document.getElementById("simpleContent");
     const laneTypes = ["ROAD-TO-INTERIOR WALKING LANE", "WET-AREA VIEWING LANE", "CREEK-INSPECTION LANE", "SECTION-EDGE LANE", "CROSS-LANE", "CANDIDATE-AREA VIEWING LANE", "OTHER"];
     content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>OPEN AND REVEAL — OPTIONAL PLAN</h2><p class="frontage-instruction">Plan selective cutting of smaller brush so you can see and walk the property before deciding on broader clearing.</p><p class="frontage-warning">Cutting brush does not drain or make soft or flooded ground usable.</p><form id="openRevealForm"><label>Lane type<select name="lane_type">${laneTypes.map(item => `<option>${item}</option>`).join("")}</select></label><div class="simple-fields two"><label>Planned width, feet<input name="planned_width_ft" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Approximate length, feet<input name="approximate_length_ft" type="number" step="1" inputmode="numeric" placeholder="optional"></label></div><label>Dominant brush diameter<input name="dominant_brush_diameter" placeholder="optional, for example 2–3 inches"></label><label>Large trees to preserve<input name="large_trees_to_preserve" placeholder="optional"></label><label>Standing water<input name="standing_water" placeholder="optional"></label><label>Soft ground<input name="soft_ground" placeholder="optional"></label><label>Equipment limitations<input name="equipment_limitations" placeholder="optional"></label></form><button id="openRevealStart" class="frontage-end" type="button">RECORD LANE START HERE</button><button id="openRevealReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
-    document.getElementById("openRevealStart").addEventListener("click", () => {
-      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+    document.getElementById("openRevealStart").addEventListener("click", async () => {
+      if (!await ensureFieldGpsReady()) return;
       const values = Object.fromEntries(new FormData(document.getElementById("openRevealForm")).entries());
       try {
         const lane = sectionMappingTools.startOpenAndRevealLane(data, Object.assign({}, values, { position: lastPosition }));
@@ -4459,7 +4461,7 @@
       if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED");
       saveState(); redraw(); renderSimpleHome(); simpleSetStatus(`${lane.lane_id} SAVED`, "saved");
     };
-    document.getElementById("openRevealFinish").addEventListener("click", () => finish(lastPosition));
+    document.getElementById("openRevealFinish").addEventListener("click", async () => { const position = await ensureFieldGpsReady(); if (position) finish(position); });
     document.getElementById("openRevealStartOnly").addEventListener("click", () => finish(null));
     bindSimpleLocator(); renderSimpleHeader();
   }
@@ -4959,6 +4961,35 @@
     if (!content) return;
     simpleCloseDialogs();
     restoreSimplePageScrolling();
+    if (data.started && data.stopped && watchId === null) {
+      content.innerHTML = `<section class="simple-start"><h2>YOUR SAVED INSPECTION IS SAFE</h2><p>Tap the green button to turn GPS and the field buttons back on.</p><button id="simpleResumeSaved" type="button" ${offlineReady ? "" : "disabled"}>${offlineReady ? "RESUME EXISTING INSPECTION" : "PREPARING OFFLINE USE..."}</button><p class="simple-help">This keeps every photograph, GPS point, note, measurement, and section.</p></section>`;
+      const resume = document.getElementById("simpleResumeSaved");
+      if (resume && offlineReady) resume.addEventListener("click", async () => {
+        resume.disabled = true;
+        resume.textContent = "TAP RECEIVED — STARTING GPS";
+        simpleSetStatus("TAP RECEIVED — STARTING GPS", "warning");
+        const savedStoppedAt = data.stopped;
+        await startTracking();
+        const position = await ensureFieldGpsReady();
+        if (!position) {
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+          stopOrientationCapture();
+          releaseWakeLock();
+          data.stopped = savedStoppedAt || new Date().toISOString();
+          saveState();
+          updateControls();
+          resume.disabled = false;
+          resume.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
+          simpleSetStatus("GPS NOT READY — move into open sky and tap the green button again. Nothing was lost.", "warning");
+          return;
+        }
+        simpleSetStatus("INSPECTION RESUMED — FIELD BUTTONS ARE WORKING", "saved");
+        renderSimpleHome();
+      });
+      renderSimpleHeader();
+      return;
+    }
     if (!data.started) {
       content.innerHTML = `<section class="simple-start"><h2>ONE THING TO DO NEXT</h2><p>Tap the green button. Allow precise location when asked.</p><button id="simpleStart" type="button" ${offlineReady ? "" : "disabled"}>${offlineReady ? "START TEST INSPECTION" : "PREPARING OFFLINE USE..."}</button><p class="simple-help">This home test uses separate storage. It cannot clear or change the saved production inspection.</p></section>`;
       const start = document.getElementById("simpleStart");
@@ -4986,7 +5017,7 @@
       <button id="simpleMapSection" type="button" class="simple-feature map-section">MAP THIS SECTION</button>${simpleFieldButton("water", "WATER", "water")}${simpleFieldButton("tree", "TREE", "tree")}${simpleFieldButton("ditch", "DITCH / SWALE", "ditch")}${simpleFieldButton("culvert", "CULVERT", "culvert")}${simpleFieldButton("blocked", "BLOCKED", "blocked")}${simpleFieldButton("entrance", "ROAD / ENTRANCE", "entrance")}${simpleFieldButton("open", "OPEN AREA", "open")}${simpleFieldButton("highlow", "HIGH / LOW", "highlow")}${simpleFieldButton("other", "OTHER", "other")}${simpleFieldButton("photo", "PHOTO", "photo")}
       <button id="simpleSiteSound" type="button" class="simple-feature voice">SITE SOUND / EXPERIENCE</button>
       <button id="simpleVoice" type="button" class="simple-feature voice">${mediaRecorder && mediaRecorder.state === "recording" ? "STOP & SAVE VOICE NOTE" : "VOICE NOTE"}</button>
-      <button id="simpleFinish" type="button" class="simple-feature finish">FINISH</button></div>
+      <button id="simpleFinish" type="button" class="simple-feature finish">SAVE / SEND A COPY</button></div>
       <details class="simple-advanced"><summary>ADVANCED TOOLS</summary><p>Only open this if you deliberately need an optional planning tool or the original 3.13 detailed tools.</p><button id="simpleOpenReveal" type="button">OPEN AND REVEAL</button><button id="simpleOpenAdvanced" type="button">OPEN ORIGINAL DETAILED TOOLS</button></details>`;
     content.querySelectorAll("[data-simple-feature]").forEach(button => button.addEventListener("pointerdown", preparePhotoStorage));
     content.querySelectorAll("[data-simple-feature]").forEach(button => button.addEventListener("click", () => openSimpleCapture(button.dataset.simpleFeature)));
@@ -5200,14 +5231,28 @@
     simpleSaveAndReturn();
   }
 
+  async function endInspection() {
+    simpleSetStatus("TAP RECEIVED — END INSPECTION", "warning");
+    if (!confirm("END INSPECTION and stop GPS? Your saved photographs, GPS, notes, measurements, and sections will remain on this phone.")) {
+      simpleSetStatus("INSPECTION REMAINS ACTIVE", "saved");
+      return false;
+    }
+    if (currentSimpleSession()) simpleSaveDraft({ feedback: "CURRENT FIELD ITEM" });
+    stopTracking({ silent: true, reason: "finish" });
+    simpleSetStatus("INSPECTION ENDED — ALL SAVED EVIDENCE REMAINS ON THIS PHONE", "saved");
+    renderSimpleHome();
+    return true;
+  }
+
   async function renderSimpleFinish() {
-    if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED");
+    if (currentSimpleSession()) simpleSaveDraft({ feedback: "CURRENT FIELD ITEM" });
     simpleCloseDialogs();
     const content = document.getElementById("simpleContent");
-    content.innerHTML = `<section class="simple-finish"><h2>FINISH TEST INSPECTION</h2><p>First make the ChatGPT package. Then make the full archive.</p><button id="simpleReportPackage" type="button">SEND THIS TEST INSPECTION TO CHATGPT</button><p>Contains every photo at analysis quality, GPS, notes, measurements, and voice records.</p><button id="simpleFullArchive" type="button">DOWNLOAD FULL PRESERVATION ARCHIVE</button><p>Contains every original photo byte-for-byte.</p><button id="simpleFinishReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button><div id="simplePackageResult"></div></section>`;
+    content.innerHTML = `<section class="simple-finish"><h2>SAVE OR SEND A COPY</h2><p>These buttons make a copy. They do not stop GPS or end your inspection.</p><button id="simpleReportPackage" type="button">SEND THIS INSPECTION TO CHATGPT</button><p>Contains every photo at analysis quality, GPS, notes, measurements, and voice records.</p><button id="simpleFullArchive" type="button">DOWNLOAD FULL PRESERVATION ARCHIVE</button><p>Contains every original photo byte-for-byte.</p><button id="simpleFinishReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button><details><summary>ONLY WHEN THE FIELD WORK IS REALLY OVER</summary><button id="simpleEndInspection" class="frontage-end" type="button">END INSPECTION — STOP GPS</button></details><div id="simplePackageResult"></div></section>`;
     document.getElementById("simpleReportPackage").addEventListener("click", async () => { await finishInspection({ reviewed: true, simple_test: true }); renderSimplePackageResult(); });
     document.getElementById("simpleFullArchive").addEventListener("click", async () => { await exportBackupNow(); renderSimplePackageResult(); });
     document.getElementById("simpleFinishReturn").addEventListener("click", renderSimpleHome);
+    document.getElementById("simpleEndInspection").addEventListener("click", endInspection);
     renderSimpleHeader();
   }
 
@@ -5340,7 +5385,7 @@
   }
 
   startBtn.addEventListener("click", startTracking);
-  stopBtn.addEventListener("click", () => stopTracking());
+  stopBtn.addEventListener("click", endInspection);
   finishBtn.addEventListener("click", () => finishInspection());
   document.getElementById("addArea").addEventListener("click", addInspectionArea);
   document.getElementById("newInspectionPhase").addEventListener("click", markNewInspectionPhase);
