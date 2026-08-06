@@ -42,7 +42,7 @@
         await Promise.all(names.filter(name=>name.startsWith("property-inspector-home-test-313-offline-")).map(name=>caches.delete(name)));
       }
       status.textContent="WORKING APP RESTORED. Opening it now...";
-      const target="/field-simple-test/?v=3.13.0-home-test.5.1&deploy=ed42ca2&restored="+Date.now();
+      const target="/field-simple-test/?v=3.13.0-home-test.5.2&deploy=section-start-fix&restored="+Date.now();
       setTimeout(()=>location.replace(target),500);
     }catch(error){
       running=false;
