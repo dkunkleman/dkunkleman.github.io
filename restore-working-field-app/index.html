@@ -23,7 +23,7 @@
 </main>
 <script>
 (function(){
-  const RELEASE="3.13.0-home-test.5.3-safari-recovery-1";
+  const RELEASE="3.13.0-home-test.5.3-safari-recovery-2";
   const button=document.getElementById("restore");
   const status=document.getElementById("status");
   let running=false;
@@ -60,7 +60,7 @@
       const registration=await navigator.serviceWorker.register("/field-simple-test/sw.js?release="+encodeURIComponent(RELEASE)+"&t="+Date.now(),{scope:"/field-simple-test/"});
       await waitForActivation(registration);
       status.textContent="SAFARI RECOVERY READY. Opening the field app now...";
-      const target="/field-simple-test/?v="+encodeURIComponent(RELEASE)+"&deploy=safari-recovery&restored="+Date.now();
+      const target="/field-simple-test/?v="+encodeURIComponent(RELEASE)+"&deploy=safari-recovery-2&restored="+Date.now();
       location.replace(target);
     }catch(error){
       running=false;
