@@ -30,7 +30,7 @@ for (const purpose of ["POTENTIAL HOUSE OPENING", "POSSIBLE ADDITIONAL HOMESITE"
   assert(app.includes(purpose), `section purposes must include ${purpose}`);
 assert(!app.includes("OPTIONAL VOICE NOTE"), "active fixed workflow cannot offer voice-note capture");
 assert(app.includes("VOICE RECORDING IS OFF"), "stale or legacy voice triggers must be non-recording");
-assert(html.includes("Legacy Voice Evidence â€” Read Only"), "historical voice evidence remains explicitly read only");
+assert(html.includes("Legacy Voice Evidence — Read Only"), "historical voice evidence remains explicitly read only");
 
 for (const eventName of ["UI_ACTION_ATTEMPT", "UI_ACTION_SUCCEEDED", "UI_ACTION_FAILED"])
   assert(app.includes(eventName), `button diagnostic must log ${eventName}`);
@@ -51,4 +51,3 @@ for (const button of inventory.buttons) {
 }
 
 process.stdout.write(`PASS: fixed candidate has isolated storage, ordinary notes, section-purpose notes, atomic shell protection, and ${inventory.buttons.length} inventoried field controls.\n`);
-
