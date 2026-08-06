@@ -1,0 +1,4 @@
+Safari GPS recovery deployment marker.
+App code source: candidate branch a418ab3cc067958dd9a47dea63239a857e032420
+Live integration commit parent: bc423a15b2a2294e2e35c782e2f201859807abc9
+Purpose: force GitHub Pages to publish the current main tree containing stale Safari GPS watcher recovery and safe active-inspection controls.
