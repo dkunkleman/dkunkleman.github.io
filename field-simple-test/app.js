@@ -309,7 +309,7 @@
     data.orientation_samples = Array.isArray(data.orientation_samples) ? data.orientation_samples : [];
     data.build_mode = SIMPLE_TEST_BUILD;
     data.simple_sessions = Array.isArray(data.simple_sessions) ? data.simple_sessions : [];
-    data.simple_counters ×_=ã»h‘éì¶»§q«^tWÚYHXİ]™P\™XTÙ[Xİ˜[YNÃBˆÛÛœİ\™XHH]Kš[œÜXİ[Û—Ø\™X\Ë™š[™
+    data.simple_counters×_=ïÛh‘éì¶»§q«^uXWÚYHXİ]™P\™XTÙ[Xİ˜[YNÃBˆÛÛœİ\™XHH]Kš[œÜXİ[Û—Ø\™X\Ë™š[™
 ][HOˆ][K˜\™XWÚYOOH]K˜Xİ]™WØ\™XWÚY
 NÃBˆ]K›Y™XŞXÛWÙ]™[Ëœ\Ú
 È\Nˆš[œÜXİ[Û—Ø\™XWÜÙ[XİY‹[YNˆ™]È]J
