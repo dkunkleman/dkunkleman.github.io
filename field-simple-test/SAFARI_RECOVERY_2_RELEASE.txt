@@ -1,0 +1,10 @@
+Safari field recovery release 2
+Release: 3.13.0-home-test.5.3-safari-recovery-2
+Includes:
+- Safari geolocation watcher self-recovery
+- precise-to-normal location fallback
+- background/pageshow/focus watcher revival
+- section start survives temporary GPS loss
+- query-safe offline app shell
+- safe restore activates recovery before field app navigation
+- copy/export does not end the inspection
