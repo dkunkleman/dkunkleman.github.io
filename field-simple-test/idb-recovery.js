@@ -1,3 +1,38 @@
+(function () {
+  "use strict";
+  const geo = navigator && navigator.geolocation;
+  if (!geo || geo.__propertyInspectorGpsFallbackInstalled) return;
+  const nativeGetCurrentPosition = geo.getCurrentPosition.bind(geo);
+  const original = geo.getCurrentPosition;
+  geo.getCurrentPosition = function (success, error, options) {
+    const requested = Object.assign({}, options || {});
+    if (!requested.enableHighAccuracy) return nativeGetCurrentPosition(success, error, requested);
+    let settled = false;
+    const succeed = position => {
+      if (settled) return;
+      settled = true;
+      success(position);
+    };
+    const fail = firstError => {
+      if (settled) return;
+      const fallback = {
+        enableHighAccuracy: false,
+        maximumAge: Math.max(Number(requested.maximumAge) || 0, 15000),
+        timeout: 8000
+      };
+      nativeGetCurrentPosition(succeed, secondError => {
+        if (settled) return;
+        settled = true;
+        if (typeof error === "function") error(secondError || firstError);
+      }, fallback);
+    };
+    requested.timeout = Math.min(Number(requested.timeout) || 8000, 8000);
+    nativeGetCurrentPosition(succeed, fail, requested);
+  };
+  try { Object.defineProperty(geo, "__propertyInspectorGpsFallbackInstalled", { value: true }); }
+  catch (error) { geo.__propertyInspectorGpsFallbackInstalled = true; }
+})();
+
 (function (root, factory) {
   "use strict";
   const api = factory();
