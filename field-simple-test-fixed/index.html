@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#173b24">
+  <meta name="property-inspector-build" content="3.13.0-home-test.5.4">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Property Inspector">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+      <title>Property Inspector 3.13 Safe Home Test</title>
+  <style>
+    :root {
+      --bg: #ece9df;
+      --card: #fff;
+      --ink: #111b14;
+      --muted: #536058;
+      --green: #1d5b32;
+      --dark-green: #173b24;
+      --red: #c72424;
+      --blue: #155fbd;
+      --purple: #63389a;
+      --amber: #9a5b00;
+      --focus: #ffe34f;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    body { padding-bottom: max(20px, env(safe-area-inset-bottom)); position: static; }
+    header { background: var(--dark-green); color: #fff; padding: max(12px, env(safe-area-inset-top)) 14px 12px; }
+    header h1 { margin: 0; font-size: 23px; line-height: 1.15; }
+    header p { margin: 5px 0 0; font-size: 13px; opacity: .9; }
+    #offlineState { display: inline-block; margin-top: 8px; border: 2px solid #fff; border-radius: 999px; padding: 5px 10px; font-size: 13px; font-weight: 800; }
+    #offlineState[data-ready="true"] { color: #0c3218; background: #8bf0a5; border-color: #8bf0a5; }
+    #offlineState[data-ready="false"] { color: #3b0b0b; background: #ffaaa3; border-color: #ffaaa3; }
+    #workflow { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.98); border-bottom: 2px solid #a7a79d; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    #nextStep { background: #111; color: #fff; border-left: 7px solid var(--focus); padding: 10px 11px; min-height: 48px; font-weight: 850; font-size: 16px; line-height: 1.3; }
+    #primaryControls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    button, .button-link { min-height: 54px; border: 0; border-radius: 8px; padding: 10px 8px; color: #fff; background: var(--green); font: 800 16px/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    button:active, .button-link:active { transform: scale(.985); }
+    button:focus-visible, .button-link:focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; }
+    button:disabled { opacity: .38; transform: none; }
+    #start { background: #18783a; }
+    #finish { background: #111; border: 3px solid var(--focus); }
+    #stop { grid-column: 1 / -1; background: #4c5650; }
+    #status { margin-top: 8px; border-radius: 6px; background: #1d2420; color: #fff; padding: 9px 10px; min-height: 42px; font: 700 13px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #status[data-kind="error"] { background: #8e1111; }
+    #status[data-kind="warning"] { background: #704400; }
+    #status[data-kind="success"] { background: #096028; }
+    #status[data-kind="active"] { background: #173f60; }
+    main { max-width: 1200px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid #c7c5bb; border-radius: 9px; padding: 12px; margin: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .card h2 { margin: 0 0 4px; font-size: 19px; }
+    .card > p:first-of-type { margin-top: 4px; }
+    #fieldButtons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    #fieldButtons button { min-height: 62px; font-size: 15px; }
+    button.wet { background: var(--blue); }
+    button.dry { background: #80620d; }
+    button.blocked { background: var(--red); }
+    button.high { background: #a34300; }
+    button.homesite { background: #177252; }
+    button.culvert { background: #275975; }
+    button.tree { background: #327019; }
+    button.entrance { background: #75551c; }
+    button.wildlife { background: #5b4d1b; }
+    button.photo { background: var(--purple); }
+    button.voice { background: #9b1e58; }
+    button.voice.recording { animation: recordPulse 1.25s infinite; background: #d0063b; }
+    button.note { background: #4d5960; }
+    button.thought { background: #69468f; }
+    button.more { background: #273238; }
+    @keyframes recordPulse { 50% { box-shadow: 0 0 0 6px rgba(208,6,59,.25); } }
+    #mapFrame { position: relative; width: calc(100% - 20px); margin: 10px auto 0; background: #d8d1bd; overflow: hidden; aspect-ratio: 1800/1500; border: 2px solid #777; border-radius: 8px; touch-action: pan-x pan-y; }
+    #mapFrame img, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    #hillshade { z-index: 1; }
+    #contours { z-index: 2; opacity: .9; }
+    #overlay { z-index: 3; pointer-events: none; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .metric { min-width: 0; background: #f5f5f0; border-radius: 6px; padding: 8px; }
+    .metric span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; }
+    .metric strong { display: block; margin-top: 3px; overflow-wrap: anywhere; font-size: 17px; }
+    .condition-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+    .weather-verification { margin: 10px 0 14px; padding: 12px; border: 3px solid #8b6a12; border-radius: 9px; background: #fff9dd; }
+    .weather-verification[data-state="verified"] { border-color: #176d38; background: #e8f8ed; }
+    .weather-verification[data-state="warning"] { border-color: #a3261d; background: #fff0ee; }
+    .weather-verification h3 { margin: 0 0 6px; font-size: 17px; }
+    .weather-verification p { margin: 5px 0; }
+    .weather-verification button { width: 100%; margin-top: 8px; }
+    .condition-grid label { margin-top: 4px; }
+    .condition-grid input, .condition-grid select, .condition-grid textarea,
+    dialog input, dialog select, dialog textarea { width: 100%; min-height: 48px; margin-top: 5px; border: 2px solid #777; border-radius: 7px; padding: 9px; background: #fff; color: #111; font: 16px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    .condition-grid textarea, dialog textarea { min-height: 78px; resize: vertical; }
+    .choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 6px; }
+    .choice-grid label { min-height: 50px; margin: 0; border: 2px solid #8a8a82; border-radius: 7px; padding: 8px; background: #f6f6f1; display: flex; align-items: center; gap: 7px; }
+    .choice-grid input { width: 24px; min-height: 24px; margin: 0; flex: 0 0 auto; }
+    dialog { width: min(560px, calc(100vw - 18px)); max-height: calc(100vh - 24px); border: 3px solid #111; border-radius: 10px; padding: 0; overflow: auto; }
+    dialog::backdrop { background: rgba(0,0,0,.72); }
+    .dialog-body { padding: 14px; }
+    .dialog-body h2 { margin: 0 0 6px; }
+    .dialog-actions { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 14px max(10px, env(safe-area-inset-bottom)); background: #fff; border-top: 2px solid #bbb; }
+    .dialog-actions .cancel { background: #59615c; }
+    #moreCategories[hidden], .structured-fields[hidden] { display: none; }
+    #moreCategories { margin-top: 10px; border-top: 2px solid #aaa; padding-top: 10px; }
+    #moreCategories h3 { margin: 0 0 8px; font-size: 16px; }
+    #moreButtons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    #moreButtons button { min-height: 60px; background: #425148; }
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 8px; margin-top: 10px; }
+    .thumb { border: 2px solid #bcbcb4; border-radius: 7px; padding: 6px; font-size: 11px; line-height: 1.4; }
+    .thumb img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
+    .photo-error { color: #890d0d; border-color: #b00000; background: #fff0ef; }
+    .lineKey { display: inline-block; width: 32px; height: 0; vertical-align: middle; margin-right: 7px; }
+    .subjectKey { border-top: 6px solid #ff2020; }
+    .neighborKey { border-top: 3px solid #fff; box-shadow: 0 1px 0 #111; }
+    .small { color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .field-warning { border-left: 7px solid var(--amber); }
+    label { display: block; margin-top: 10px; font-weight: 700; font-size: 14px; }
+    input[type="range"] { width: min(250px, 70vw); vertical-align: middle; }
+    #packageReady { border: 3px solid #0b762f; background: #ecfff2; }
+    #packageReady[hidden], #packageLink[hidden], #sharePackage[hidden] { display: none; }
+    #packageReady p { font-weight: 700; }
+    #packageFilename { display: block; padding: 9px; border: 2px dashed #0b762f; background: #fff; overflow-wrap: anywhere; font: 800 15px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #packageLink, #sharePackage { display: block; width: 100%; margin-top: 8px; text-decoration: none; background: #0b762f; }
+    #sharePackage { background: #111; border: 3px solid var(--focus); }
+    .export-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .export-mode { border: 2px solid #777; border-radius: 8px; padding: 10px; background: #f7f7f2; }
+    .export-mode.recommended { border: 3px solid #11652d; background: #edfff1; }
+    .export-mode h3 { margin: 0 0 5px; font-size: 16px; }
+    .export-mode p { margin: 4px 0; }
+    .package-estimate { display: block; margin-top: 8px; font: 900 18px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #fullArchive { width: 100%; margin-top: 9px; background: #492568; }
+    #estimateWarning { color: #8b1010; font-weight: 900; }
+    #retryPendingPhoto { width: 100%; margin: 8px 0; background: #8a4400; border: 3px solid var(--focus); }
+    #retryPendingPhoto[hidden], #galleryPager[hidden] { display: none; }
+    #galleryPager { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 10px; }
+    #galleryPager button { min-height: 48px; background: #4c5650; }
+    #galleryPageInfo { font-weight: 900; text-align: center; white-space: nowrap; }
+    details summary { min-height: 44px; padding: 10px 0; font-weight: 800; cursor: pointer; }
+    .utilityButtons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .utilityButtons button { background: #56625b; font-size: 14px; }
+    .coach-card { border: 3px solid #173b24; }
+    .coach-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; }
+    .coach-grid label { margin: 0; }
+    .coach-grid button { min-width: 116px; }
+    .coach-grid input, .coach-grid select { display: block; width: 100%; min-height: 50px; margin-top: 5px; border: 2px solid #777; border-radius: 7px; padding: 8px; background: #fff; color: #111; font-size: 16px; }
+    #questionList { display: grid; gap: 8px; margin-top: 10px; }
+    .question-row { border: 2px solid #777; border-radius: 8px; padding: 9px; background: #f7f7f2; }
+    .question-row.active { border-color: #155fbd; background: #edf6ff; }
+    .question-row label { display: flex; gap: 8px; align-items: flex-start; margin: 0; font-size: 15px; }
+    .question-row input[type="checkbox"] { width: 26px; height: 26px; margin: 0; flex: 0 0 auto; }
+    .question-controls { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-top: 8px; }
+    .question-controls select { width: 100%; min-height: 44px; border: 2px solid #777; border-radius: 7px; background: #fff; font-size: 15px; }
+    .question-controls button { min-height: 44px; background: #4d5960; font-size: 14px; }
+    #coachNextAction { margin: 10px 0 0; padding: 10px; border-left: 7px solid var(--focus); background: #111; color: #fff; font-weight: 850; }
+    .evidence-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .evidence-mode select { width: 100%; min-height: 50px; border: 2px solid #777; border-radius: 7px; background: #fff; font-size: 16px; }
+    .coverage-key { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 8px; }
+    .coverage-key div { border: 2px solid #777; border-radius: 7px; padding: 8px; text-align: center; }
+    .coverage-key strong { display: block; font-size: 20px; }
+    .coverage-well { background: #b9efc6; }
+    .coverage-light { background: #fff1a6; }
+    .coverage-none { background: #dedede; }
+    #missingEvidenceList { margin: 8px 0; padding-left: 22px; }
+    #reviewEvidence { width: 100%; background: #8a4400; border: 3px solid var(--focus); }
+    .report-review-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .report-review-grid button { min-height:62px; }
+    #reviewSynthesisPanel { margin-top:12px; border:3px solid #173f5f; border-radius:8px; padding:10px; background:#f5f8fa; }
+    .review-synthesis-row { border:2px solid #777; border-radius:7px; padding:10px; margin:9px 0; background:#fff; }
+    .review-synthesis-row[data-status="approved"] { border-color:#1d6f42; background:#e9f7ee; }
+    .review-synthesis-row[data-status="rejected"] { border-color:#971b1b; background:#fff0f0; }
+    .review-synthesis-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+    #newInspectionPhase { background:#4f3a75; }
+    .photo-value-select { width: 100%; min-height: 42px; margin-top: 6px; border: 2px solid #777; border-radius: 6px; background: #fff; font-size: 14px; }
+    .water-rule { display:block; margin:12px 0; padding:12px; border:3px solid #1768c4; border-radius:8px; background:#edf7ff; font-weight:800; }
+    .water-rule input { width:28px; height:28px; vertical-align:middle; margin-right:8px; }
+    #smallWaterMapFrame { position:relative; width:100%; min-height:420px; border:3px solid #164b75; background:#d9d9d9; overflow:hidden; }
+    #smallWaterMap { display:block; width:100%; min-height:420px; touch-action:manipulation; }
+    .water-layer-controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:6px; margin:10px 0; }
+    .water-layer-controls label { display:flex; align-items:center; min-height:52px; padding:8px; border:2px solid #777; border-radius:7px; background:#fff; font-weight:800; }
+    .water-layer-controls input { width:25px; height:25px; margin-right:8px; }
+    .water-summary { border-left:7px solid #1768c4; padding:9px 12px; background:#edf7ff; }
+    .water-choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .water-choice-grid button { min-height:68px; }
+    #waterPhotoDialog img { display:block; width:100%; max-height:55vh; object-fit:contain; background:#111; }
+    #waterPhotoDialog audio { width:100%; margin-top:10px; }
+    #photoExplanationDialog[open] { border-color:#9b1e58; }
+    #photoExplanationPrompt { padding:12px; background:#fff2f7; border:3px solid #9b1e58; font-size:22px; font-weight:900; }
+    #correctionControls { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+    #undoLast, #correctRecord { width:100%; min-height:64px; border:3px solid var(--focus); }
+    #undoLast { background:#9a1f16; }
+    #correctRecord { background:#7a3900; }
+    #evidenceSetBanner { margin-top:10px; padding:12px; border:4px solid #ffe34f; border-radius:8px; background:#162f48; color:#fff; }
+    #evidenceSetBanner[hidden] { display:none; }
+    #evidenceSetBanner strong, #evidenceSetBanner span { display:block; }
+    #finishEvidenceSet { width:100%; margin-top:8px; background:#111; border:3px solid var(--focus); }
+    #startPhotoGroup { background:#153f67; }
+    #evidenceSetList { display:grid; gap:8px; margin-top:8px; }
+    .evidence-set-row { border:2px solid #65727c; border-radius:8px; padding:9px; background:#f1f6fa; }
+    .suggestion-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:7px; }
+    .suggestion-actions button { min-height:46px; font-size:13px; }
+    .audit-card { border-left:8px solid #7a3900; }
+    .training-prompts { padding-left:24px; }
+    .training-prompts li { margin:8px 0; font-weight:700; }
+    .evidence-role-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .evidence-role-grid label { display:flex; align-items:center; min-height:58px; border:2px solid #777; border-radius:7px; padding:8px; font-weight:800; }
+    .evidence-role-grid input { width:26px; height:26px; margin-right:8px; }
+    #departureDialog .dialog-actions { grid-template-columns: 1fr 1fr; }
+    #clear { background: #a31616; }
+    @media (max-width: 430px) {
+      #fieldButtons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #fieldButtons button { min-height: 64px; font-size: 16px; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .condition-grid { grid-template-columns: 1fr; }
+      .export-modes { grid-template-columns: 1fr; }
+      .coach-grid, .evidence-mode { grid-template-columns: 1fr; }
+      .coach-grid button { width: 100%; }
+      .report-review-grid { grid-template-columns:1fr; }
+      #nextStep { font-size: 15px; }
+      button, .button-link { font-size: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) { button.voice.recording { animation: none; } }
+    #simpleShell { min-height: 100vh; background: #f1efe6; padding-bottom: max(22px, env(safe-area-inset-bottom)); overflow: visible; }
+    body:not(.simple-advanced-open) > header,
+    body:not(.simple-advanced-open) > #workflow,
+    body:not(.simple-advanced-open) > main { display: none; }
+    body.simple-advanced-open #simpleShell { display: none; }
+    #simpleTopBar { position: static; padding: max(8px, env(safe-area-inset-top)) 8px 8px; background: #173b24; color: #fff; }
+    .simple-banner { padding: 6px; border: 2px solid #9ff0af; border-radius: 7px; background: #0e2c19; text-align: center; font-size: 12px; font-weight: 900; letter-spacing: .02em; }
+    .simple-top-controls { display: grid; grid-template-columns: 1.55fr .75fr; gap: 7px; margin-top: 7px; }
+    .simple-top-controls button { min-height: 48px; padding: 7px; font-size: 13px; }
+    #simpleTopReturn { background: #f2cf28; color: #161200; }
+    #simpleTopFinish { background: #8c1717; }
+    .simple-build-line { margin-top: 5px; text-align: center; font-size: 11px; font-weight: 900; }
+    .simple-top-state { display: flex; justify-content: space-between; gap: 6px; padding-top: 6px; font-size: 12px; font-weight: 850; }
+    #simpleContent { padding: 9px; }
+    #simpleSaveStatus { margin: 8px 9px 0; min-height: 42px; padding: 10px; border-radius: 8px; background: #27332b; color: #fff; font-weight: 900; text-align: center; }
+    #simpleSaveStatus[data-kind="saved"] { background: #096028; }
+    #simpleSaveStatus[data-kind="warning"] { background: #824100; }
+    .simple-start, .simple-capture, .simple-finish { max-width: 620px; margin: 0 auto; padding: 14px; border: 3px solid #173b24; border-radius: 12px; background: #fff; }
+    .simple-start h2, .simple-capture h2, .simple-finish h2 { margin: 0 0 8px; }
+    .simple-start > button { width: 100%; min-height: 92px; background: #12672c; font-size: 24px; }
+    .simple-next { display: grid; gap: 4px; margin-bottom: 8px; padding: 10px; b…12904 tokens truncated…
+      <div id="timberPlotFields" class="structured-fields" hidden>
+        <p class="field-warning"><strong>Preliminary Timber Reconnaissance:</strong> This is not a certified timber cruise, appraisal, sale volume, or market valuation.</p>
+        <label>Fixed plot size<select id="timberPlotSize"><option value="0.05">1/20 acre</option><option value="0.1" selected>1/10 acre</option><option value="0.2">1/5 acre</option><option value="0.25">1/4 acre</option><option value="0.5">1/2 acre</option><option value="1">1 acre</option><option value="custom">Custom</option></select></label>
+        <label id="timberPlotCustomLabel" hidden>Custom plot acres<input id="timberPlotCustomAcres" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+        <p id="timberPlotRadius" class="field-warning"><strong>Radius:</strong> 37.2 feet from the GPS center.</p>
+        <label>Sampling method<select id="timberSamplingMethod"><option>Fixed-radius field sample</option><option>Targeted example plot</option><option>Convenience plot</option></select></label>
+        <label>Canopy<select id="timberPlotCanopy"><option>unknown</option><option>open</option><option>moderate</option><option>closed</option></select></label>
+        <label>Understory<select id="timberPlotUnderstory"><option>unknown</option><option>light</option><option>moderate</option><option>dense</option></select></label>
+        <label>Equipment access conditions<textarea id="timberPlotAccess"></textarea></label>
+        <label>Wet-ground conditions<textarea id="timberPlotWetGround"></textarea></label>
+        <label>Qualifying-tree rule<textarea id="timberPlotInclusionRule">Every qualifying tree rooted within the stated fixed radius</textarea></label>
+        <label>Published volume equation/table, if selected<input id="timberVolumeEquation" placeholder="Leave blank unless a qualified method is selected"></label>
+      </div>
+      <div id="flowingWaterSetFields" class="structured-fields" hidden>
+        <p class="field-warning"><strong>Safety first:</strong> Do not cross the channel or stand in moving water. Collect only evidence available from safe, authorized ground.</p>
+        <label>Visible flow<select id="creekVisibleFlow"><option>unknown</option><option>none</option><option>slow</option><option>moderate</option><option>fast</option></select></label>
+        <label>Direction of flow<input id="creekFlowDirection" placeholder="Example: northwest to southeast"></label>
+        <label>Channel width (feet)<input id="creekWidth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Width measured or estimated?<select id="creekWidthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+        <label>Safe-point water depth (inches)<input id="creekDepth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Depth measured or estimated?<select id="creekDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+        <label>Bank condition<textarea id="creekBankCondition" placeholder="Stable, eroded, steep, vegetated, unknownâ€¦"></textarea></label>
+        <label>Adjacent higher ground<textarea id="creekHigherGround"></textarea></label>
+        <label>Mature trees or features worth preserving<textarea id="creekPreserve"></textarea></label>
+        <label>Relationship to proposed homesite or road<textarea id="creekRelationship"></textarea></label>
+        <label>Why this water feature matters<textarea id="creekWhyMatters" placeholder="Access, homesite, risk, cost, or amenity"></textarea></label>
+        <div id="flowingWaterEvidencePlan" class="field-warning small"></div>
+      </div>
+      <div id="forestSetFields" class="structured-fields" hidden>
+        <label>Canopy<select id="forestCanopy"><option>open</option><option>moderate</option><option>closed</option></select></label>
+        <label>Tree spacing<input id="forestSpacing" placeholder="Approximate spacing"></label>
+        <label>Dominant trunk-size class<input id="forestTrunkSize"></label>
+        <label>Understory<select id="forestUnderstory"><option>light</option><option>moderate</option><option>dense</option></select></label>
+        <label>Walkability<select id="forestWalkability"><option>easy</option><option>moderate</option><option>difficult</option></select></label>
+        <label>Mature trees that could remain<textarea id="forestPreserve"></textarea></label>
+        <label>Brush/small stems likely to require clearing<textarea id="forestClearing"></textarea></label>
+      </div>
+      <div id="homesiteSetFields" class="structured-fields" hidden>
+        <label>Estimated footprint or outline<textarea id="homesiteFootprint"></textarea></label>
+        <label>View direction<input id="homesiteViewDirection"></label>
+        <label>Access direction<input id="homesiteAccessDirection"></label>
+        <label>Ground observations<textarea id="homesiteGround"></textarea></label>
+        <label>Mature trees to preserve<textarea id="homesitePreserve"></textarea></label>
+        <label>Brush or trees to remove<textarea id="homesiteRemove"></textarea></label>
+        <label>Nearby water evidence<textarea id="homesiteWater"></textarea></label>
+        <label>Why this location was selected<textarea id="homesiteExplanation"></textarea></label>
+      </div>
+    </div>
+    <div class="dialog-actions"><button id="cancelEvidenceSet" class="cancel" type="button">Cancel</button><button id="createEvidenceSet" type="button">Start This Subject</button></div>
+  </dialog>
+
+  <dialog id="groupPhotoDialog">
+    <div class="dialog-body">
+      <h2>Same subject?</h2>
+      <p id="groupPhotoPrompt">Choose this photograph's role and what to do next.</p>
+      <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Upstream view</option><option>Downstream view</option><option>Across-channel view</option><option>Channel width</option><option>Water depth</option><option>Flow Evidence</option><option>Adjacent Higher-Ground / Tree Context</option><option>Scenic Context</option><option>Building-Avoidance Context</option><option>Creek / homesite or road relationship</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>DBH tape position</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>Plot center / radius</option><option>Access / wet ground</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
+      <label id="leafProvenanceLabel" hidden>Are you confident this leaf came from this tree?<select id="leafProvenance"><option>Yes â€” watched it fall or traced it to this tree</option><option>Probably</option><option>Unsure</option></select></label>
+    </div>
+    <div class="dialog-actions" style="grid-template-columns:1fr 1fr">
+      <button id="continueEvidenceSet" type="button">Same subject</button>
+      <button id="finishAfterGroupPhoto" type="button">End subject</button>
+      <button id="newAfterGroupPhoto" type="button">New subject</button>
+      <button id="removeFromEvidenceSet" class="cancel" type="button">Remove from group</button>
+    </div>
+  </dialog>
+
+  <dialog id="structuredMeasurementDialog">
+    <div class="dialog-body">
+      <h2>What did you measure?</h2>
+      <p class="field-warning"><strong>Enter the number now.</strong> This valueâ€”not a later attempt to read the photographâ€”is the authoritative field measurement.</p>
+      <label>Measurement type<select id="measurementType"><option>Water depth</option><option>Width</option><option>Length</option><option>Tree diameter</option><option>Distance</option><option>Other</option></select></label>
+      <label>Exact recorded value<input id="measurementValue" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label>Unit<select id="measurementUnit"><option value="in">inches</option><option value="ft">feet</option><option value="yd">yards</option><option value="m">meters</option><option value="cm">centimeters</option><option value="mm">millimeters</option><option value="other">other</option></select></label>
+      <label id="measurementOtherUnitLabel" hidden>Other unit<input id="measurementOtherUnit"></label>
+      <label>Measured or estimated?<select id="measurementBasis"><option>Measured</option><option>Estimated</option></select></label>
+      <label>Instrument<input id="measurementInstrument" placeholder="Tape, ruler, staff, diameter tapeâ€¦"></label>
+      <label>Did the device reach the true bottom/end point?<select id="measurementReachedEnd"><option>Unknown</option><option>Yes</option><option>No</option></select></label>
+      <label>Was the device approximately vertical or level?<select id="measurementAligned"><option>Unknown</option><option>Yes</option><option>No</option><option>Not applicable</option></select></label>
+      <label>Subject or photo group<select id="measurementSubject"></select></label>
+      <div id="measurementWaterFields" class="structured-fields">
+        <label>Bottom condition<select id="measurementWaterBottom"><option>Unknown</option><option>Soft bottom</option><option>Firm bottom</option></select></label>
+        <label>Water setting<select id="measurementWaterContext"><option value="">Choose one</option><option>Isolated puddle</option><option>Pooled area</option><option>Ditch</option><option>Creek</option></select></label>
+        <label>Approximate surface length (feet)<input id="measurementSurfaceLength" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Approximate surface width (feet)<input id="measurementSurfaceWidth" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      </div>
+      <p class="small">Optional voice explanation: the voice explanation already recorded for this photograph remains directly linked to this measurement.</p>
+    </div>
+    <div class="dialog-actions"><button id="cancelStructuredMeasurement" class="cancel" type="button">Cancel</button><button id="saveStructuredMeasurement" type="button">Save Measurement</button></div>
+  </dialog>
+
+  <dialog id="plotTreeDialog">
+    <div class="dialog-body">
+      <h2>Add qualifying plot tree</h2>
+      <p id="plotTreePlotName" class="field-warning">Record every qualifying tree rooted inside the stated radius.</p>
+      <label>Probable species<input id="plotTreeSpecies" placeholder="Unknown is acceptable"></label>
+      <label>Alternative species<input id="plotTreeAlternatives" placeholder="Comma separated"></label>
+      <label>Identification status<select id="plotTreeStatus"><option>Unknown</option><option>Inspector confirmed</option><option>Probable</option><option>Possible</option><option>Professional identification requested</option></select></label>
+      <label>Identification confidence<select id="plotTreeConfidence"><option>low</option><option>medium</option><option>high</option></select></label>
+      <label>DBH method<select id="plotTreeDbhMethod"><option>Not measured</option><option>Diameter tape reading</option><option>Circumference converted to diameter</option><option>Biltmore-stick estimate</option><option>Visual estimate</option></select></label>
+      <label>Diameter reading (inches)<input id="plotTreeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <label>Circumference reading (inches)<input id="plotTreeCircumference" type="number" min="0" step="0.1" inputmode="decimal"></label>
+      <label>DBH instrument<input id="plotTreeInstrument"></label>
+      <label>DBH confidence<select id="plotTreeDbhConfidence"><option>unknown</option><option>low</option><option>medium</option><option>high</option></select></label>
+      <label>Merchantable height (feet)<input id="plotTreeMerchantableHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+      <label>Usable 16-foot logs, nearest half-log<input id="plotTreeLogs" type="number" min="0" step="0.5" inputmode="decimal"></label>
+      <label>Height method<select id="plotTreeHeightMethod"><option>Unknown</option><option>Laser rangefinder/clinometer</option><option>Tree scale stick</option><option>Phone estimate</option><option>Visual estimate</option></select></label>
+      <label>Product category<select id="plotTreeProduct"><option>Unknown</option><option>Pulpwood</option><option>Chip-n-saw</option><option>Sawtimber</option><option>Veneer candidate</option><option>Nonmerchantable</option></select></label>
+      <label>Visible defects<input id="plotTreeDefects" placeholder="Comma separated; photograph every significant defect"></label>
+      <label>Purposes<input id="plotTreePurposes" placeholder="Timber, preserve, clearing obstacleâ€¦"></label>
+      <label>Inspector explanation<textarea id="plotTreeExplanation"></textarea></label>
+      <label class="water-rule"><input id="plotTreePhoto" type="checkbox" checked>Take supporting photograph after saving</label>
+    </div>
+    <div class="dialog-actions"><button id="cancelPlotTree" class="cancel" type="button">Cancel</button><button id="savePlotTree" type="button">Save Plot Tree</button></div>
+  </dialog>
+
+  <dialog id="hypothesisDialog">
+    <div class="dialog-body">
+      <h2>Inspector Hypothesis</h2>
+      <p class="small">A hypothesis is your interpretation, not an observed fact and not a construction recommendation.</p>
+      <label>Hypothesis statement<textarea id="hypothesisStatement" placeholder="What do you think may be happening?"></textarea></label>
+      <label>Triggering observations<select id="hypothesisObservations" multiple size="5"></select></label>
+      <label>Supporting photographs<select id="hypothesisPhotos" multiple size="5"></select></label>
+      <label>Contradicting evidence records<select id="hypothesisContradictions" multiple size="4"></select></label>
+      <label>Exact question needing verification<textarea id="hypothesisQuestion" placeholder="What exact question should a professional answer?"></textarea></label>
+      <label>Professional type<select id="hypothesisProfessional"><option>civil/drainage engineer</option><option>surveyor</option><option>builder</option><option>forester</option><option>soil/septic professional</option><option>other professional</option></select></label>
+      <label>Cheapest next evidence-gathering step<textarea id="hypothesisNextStep" placeholder="Measurement, record check, targeted return visit, or narrow professional question"></textarea></label>
+      <label>Contradicting evidence note, if any<textarea id="hypothesisContradiction" placeholder="Record what could disprove this idea"></textarea></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="cancelHypothesis" class="cancel" type="button">Cancel</button>
+      <button id="saveHypothesis" type="button">Save as Hypothesis</button>
+    </div>
+  </dialog>
+
+  <dialog id="waterClassificationDialog">
+    <div class="dialog-body">
+      <h2>Does this photograph show water?</h2>
+      <p class="small">Confirm what you personally observed. The app will never silently classify water.</p>
+      <div id="waterTypeChoices" class="water-choice-grid">
+        <button type="button" data-water-choice="standing">Yes â€” Standing Water</button>
+        <button type="button" data-water-choice="flowing">Yes â€” Flowing Water</button>
+        <button type="button" data-water-choice="ditch">Yes â€” Ditch</button>
+        <button type="button" data-water-choice="creek_stream">Yes â€” Creek or Stream</button>
+        <button type="button" data-water-choice="other">Yes â€” Other Water</button>
+        <button type="button" data-water-choice="no" class="cancel">No</button>
+        <button type="button" data-water-choice="unsure" class="cancel">Unsure</button>
+      </div>
+      <div id="waterMeasurementFields" class="structured-fields" hidden>
+        <label>Depth<select id="photoWaterDepth"><option value="unknown">Unknown</option><option value="less_than_1_inch">Less than 1 inch</option><option value="1-3_inches">1â€“3 inches</option><option value="3-7_inches">3â€“7 inches</option><option value="8-12_inches">8â€“12 inches</option><option value="more_than_12_inches">More than 12 inches</option><option value="exact">Exact entry</option></select></label>
+        <label id="photoWaterExactLabel" hidden>Exact depth in inches<input id="photoWaterExact" type="number" min="0" step="0.25" inputmode="decimal"></label>
+        <label>Measurement basis<select id="photoWaterBasis"><option>Unknown</option><option>Estimated</option><option>Measured</option></select></label>
+        <label>Approximate width in feet<input id="photoWaterWidth" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
+        <label>Approximate length in feet<input id="photoWaterLength" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
+        <label>Water behavior<select id="photoWaterBehavior"><option value="unknown">Unknown</option><option value="isolated_depression">Isolated depression</option><option value="connected_pooling">Connected pooling</option><option value="flowing">Flowing</option><option value="apparent_creek_channel">Apparent creek channel</option><option value="ditch">Ditch</option></select></label>
+        <button id="saveWaterClassification" type="button">Save Water Evidence</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="waterPhotoDialog">
+    <div class="dialog-body">
+      <button id="closeWaterPhoto" class="cancel" type="button">Close</button>
+      <h2 id="waterPhotoTitle">Water photograph</h2>
+      <img id="waterPhotoImage" alt="Water evidence photograph">
+      <p id="waterPhotoDetails" class="small"></p>
+      <audio id="waterPhotoAudio" controls hidden></audio>
+    </div>
+  </dialog>
+
+  <script src="../field-simple-test/inspection-coaching.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/water-intelligence.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/evidence-governance.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/evidence-sets.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/timber-reconnaissance.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/reviewed-property-synthesis.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/authoritative-weather.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/frontage-workflow.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/automatic-context.js?v=3.13.0-home-test.5.4"></script>
+  <script src="./section-mapping.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/wet-edge-mapping.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/property-review.js?v=3.13.0-home-test.5.4"></script>
+  <script src="./inspection-package.js?v=3.13.0-home-test.5.4"></script>
+  <script src="../field-simple-test/idb-recovery.js?v=3.13.0-home-test.5.4"></script>
+  <script src="./app.js?v=3.13.0-home-test.5.4"></script>
+</body>
+</html>
+
