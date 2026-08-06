@@ -124,6 +124,11 @@ async function main() {
   assert.match(app, /TAP RECEIVED — STARTING GPS/);
   assert.match(app, /const savedStoppedAt = data\.stopped/);
   assert.match(app, /data\.stopped = savedStoppedAt \|\| new Date\(\)\.toISOString\(\)/);
+  const resumeStart = app.indexOf("const savedStoppedAt = data.stopped");
+  const resumeEnd = app.indexOf('simpleSetStatus("INSPECTION RESUMED', resumeStart);
+  const resumeBlock = app.slice(resumeStart, resumeEnd);
+  assert.match(resumeBlock, /const position = await ensureFieldGpsReady\(\)/);
+  assert.doesNotMatch(resumeBlock, /await startTracking\(\)/, "Resume must not start GPS twice");
 
   assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
   assert.match(app, /const photoDbName = "property-inspector-home-test-313-evidence"/);
