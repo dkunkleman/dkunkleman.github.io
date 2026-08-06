@@ -1,24 +1,28 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-offline-v5-1-resume-1";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1-resume-1";
+const RELEASE = "3.13.0-home-test.5.3-safari-recovery-1";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v5-3-safari-recovery-1";
+const INDEX_URL = `./index.html?v=${RELEASE}`;
+const APP_URL = `./app.js?v=${RELEASE}`;
+const RECOVERY_URL = `./safari-geolocation-recovery.js?v=${RELEASE}`;
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.13.0-home-test.5.1-resume-1",
-  "./water-intelligence.js?v=3.13.0-home-test.5.1-resume-1",
-  "./evidence-governance.js?v=3.13.0-home-test.5.1-resume-1",
-  "./evidence-sets.js?v=3.13.0-home-test.5.1-resume-1",
-  "./timber-reconnaissance.js?v=3.13.0-home-test.5.1-resume-1",
-  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5.1-resume-1",
-  "./authoritative-weather.js?v=3.13.0-home-test.5.1-resume-1",
-  "./frontage-workflow.js?v=3.13.0-home-test.5.1-resume-1",
-  "./automatic-context.js?v=3.13.0-home-test.5.1-resume-1",
-  "./section-mapping.js?v=3.13.0-home-test.5.1-resume-1",
-  "./wet-edge-mapping.js?v=3.13.0-home-test.5.1-resume-1",
-  "./property-review.js?v=3.13.0-home-test.5.1-resume-1",
-  "./app.js?v=3.13.0-home-test.5.1-resume-1",
-  "./idb-recovery.js?v=3.13.0-home-test.5.1-resume-1",
-  "./inspection-package.js?v=3.13.0-home-test.5.1-resume-1",
+  `./inspection-coaching.js?v=${RELEASE}`,
+  `./water-intelligence.js?v=${RELEASE}`,
+  `./evidence-governance.js?v=${RELEASE}`,
+  `./evidence-sets.js?v=${RELEASE}`,
+  `./timber-reconnaissance.js?v=${RELEASE}`,
+  `./reviewed-property-synthesis.js?v=${RELEASE}`,
+  `./authoritative-weather.js?v=${RELEASE}`,
+  `./frontage-workflow.js?v=${RELEASE}`,
+  `./automatic-context.js?v=${RELEASE}`,
+  `./section-mapping.js?v=${RELEASE}`,
+  `./wet-edge-mapping.js?v=${RELEASE}`,
+  `./property-review.js?v=${RELEASE}`,
+  APP_URL,
+  RECOVERY_URL,
+  `./idb-recovery.js?v=${RELEASE}`,
+  `./inspection-package.js?v=${RELEASE}`,
   "./manifest.webmanifest",
   "./assets/parcels.json",
   "./assets/august-4-route-context.json"
@@ -29,6 +33,41 @@ const OPTIONAL_MAP_FILES = [
   "../icon-192.png",
   "../icon-512.png"
 ];
+
+function cachePut(cacheName, request, response) {
+  if (!response || !response.ok) return Promise.resolve();
+  return caches.open(cacheName).then(cache => cache.put(request, response.clone())).catch(() => {});
+}
+
+async function bestResponse(request, fallbackRequest) {
+  try {
+    const network = await fetch(request);
+    if (network && network.ok) {
+      cachePut(CACHE_NAME, request, network);
+      return network;
+    }
+  } catch (error) {
+    // Offline or transient network failure. Use the immutable app shell below.
+  }
+  return (await caches.match(request)) || (fallbackRequest ? await caches.match(fallbackRequest) : null);
+}
+
+async function recoveryText() {
+  const absolute = new URL(RECOVERY_URL, self.location.href).href;
+  const request = new Request(absolute, { cache: "no-cache" });
+  const response = await bestResponse(request, RECOVERY_URL);
+  return response ? await response.text() : "";
+}
+
+async function recoveredAppResponse(request) {
+  const app = await bestResponse(request, APP_URL);
+  if (!app) return new Response("Field app unavailable offline.", { status: 503, headers: { "content-type": "text/plain" } });
+  const [recovery, appText] = await Promise.all([recoveryText(), app.text()]);
+  const headers = new Headers(app.headers);
+  headers.set("content-type", "application/javascript; charset=utf-8");
+  headers.set("cache-control", "no-store");
+  return new Response(`${recovery}\n\n${appText}`, { status: 200, statusText: "OK", headers });
+}
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -55,12 +94,16 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  if (url.pathname.endsWith("/field-simple-test/app.js")) {
+    event.respondWith(recoveredAppResponse(request));
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(INDEX_URL)
         .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(INDEX_URL, copy));
+          cachePut(CACHE_NAME, INDEX_URL, response);
           return response;
         })
         .catch(() => caches.match(INDEX_URL))
@@ -73,23 +116,17 @@ self.addEventListener("fetch", event => {
     event.respondWith(
       fetch(request)
         .then(response => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          }
+          cachePut(CACHE_NAME, request, response);
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(async () => (await caches.match(request)) || (url.pathname.endsWith("/safari-geolocation-recovery.js") ? caches.match(RECOVERY_URL) : null))
     );
     return;
   }
 
   event.respondWith(
     caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-      }
+      cachePut(CACHE_NAME, request, response);
       return response;
     }))
   );
