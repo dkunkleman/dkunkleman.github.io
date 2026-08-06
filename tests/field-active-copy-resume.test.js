@@ -124,7 +124,7 @@ async function main() {
 
   assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
   assert.match(app, /const photoDbName = "property-inspector-home-test-313-evidence"/);
-  const workerHash = crypto.createHash("sha256").update(worker.replace(/\\r\\n/g, "\\n")).digest("hex");
+  const workerHash = crypto.createHash("sha256").update(worker.replace(/\r\n/g, "\n")).digest("hex");
   assert.equal(workerHash, "32a3b3e425a76152eca5436c764e3e09d0a5f859abef34f089bec18fe4e6650f", "service worker must remain byte-for-byte unchanged");
 
   const populated = {
