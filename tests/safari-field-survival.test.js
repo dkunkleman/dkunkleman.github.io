@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
 const recovery = fs.readFileSync(path.join(root, "field-simple-test", "safari-geolocation-recovery.js"), "utf8");
@@ -31,7 +32,7 @@ function extractFunctionSource(text, name) {
       else if (char === quote) quote = null;
       continue;
     }
-    if (char === "\"" || char === "'" || char === "`") { quote = char; continue; }
+    if (char === "\"" || char === "'") { quote = char; continue; }
     if (char === "{") depth += 1;
     if (char === "}") {
       depth -= 1;
@@ -53,13 +54,31 @@ assert.match(recovery, /pageshow/);
 assert.match(recovery, /focus/);
 assert.match(recovery, /Date\.now\(\)[\s\S]*120000/);
 
-const releaseMatch = worker.match(/const RELEASE = "([^"]+)"/);
-assert.ok(releaseMatch, "worker release must be declared");
-const release = releaseMatch[1];
-assert.equal(release, "3.13.0-home-test.5.3-safari-recovery-3");
-const patchSource = extractFunctionSource(worker, "patchFieldAppSource");
-const patchFieldAppSource = new Function("RELEASE", `return (${patchSource});`)(release);
-const patchedApp = patchFieldAppSource(app);
+const workerContext = {
+  console,
+  URL,
+  Request,
+  Response,
+  Headers,
+  setTimeout,
+  clearTimeout,
+  fetch: async () => { throw new Error("network disabled in regression test"); },
+  caches: {
+    open: async () => ({ put: async () => {}, addAll: async () => {}, add: async () => {} }),
+    match: async () => null,
+    keys: async () => []
+  },
+  self: {
+    location: { href: "https://www.livelikecharliechallenge.org/field-simple-test/sw.js", origin: "https://www.livelikecharliechallenge.org" },
+    addEventListener: () => {},
+    skipWaiting: async () => {},
+    clients: { claim: async () => {} }
+  }
+};
+vm.createContext(workerContext);
+vm.runInContext(worker, workerContext);
+assert.equal(typeof workerContext.patchFieldAppSource, "function", "worker patch function must be executable");
+const patchedApp = workerContext.patchFieldAppSource(app);
 new Function(patchedApp);
 
 assert.match(patchedApp, /const APP_VERSION = "3\.13\.0-home-test\.5\.3-safari-recovery-3"/);
@@ -77,6 +96,7 @@ assert.match(patchedApp, /WAITING FOR FIRST GPS POINT/);
 assert.doesNotMatch(patchedApp, /SECTION NOT STARTED — move into open sky/);
 assert.match(patchedApp, /Offline ready · \$\{APP_VERSION\}/);
 
+assert.match(worker, /3\.13\.0-home-test\.5\.3-safari-recovery-3/);
 assert.match(worker, /safari-geolocation-recovery\.js/);
 assert.match(worker, /recoveredAppResponse/);
 assert.match(worker, /window\.__FIELD_CACHE_NAME/);
