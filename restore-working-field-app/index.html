@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#173b24">
+  <title>Restore Working Field App</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;background:#eef3ee;color:#102117;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;padding:calc(env(safe-area-inset-top) + 24px) 18px calc(env(safe-area-inset-bottom) + 24px);display:flex;align-items:center;justify-content:center}
+    main{width:min(100%,620px);background:white;border:4px solid #173b24;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+    h1{font-size:34px;line-height:1.05;margin:0 0 18px;text-align:center} p{font-size:21px;line-height:1.35}
+    button{width:100%;min-height:140px;border:0;border-radius:22px;background:#127331;color:white;font-weight:900;font-size:31px;line-height:1.1;padding:20px;touch-action:manipulation}
+    button:disabled{background:#6f7d73}.safe{font-weight:800;color:#7d160e}.status{min-height:70px;margin-top:18px;padding:14px;border-radius:14px;background:#eef3ee;font-size:21px;font-weight:800}
+  </style>
+</head>
+<body>
+<main>
+  <h1>RESTORE THE WORKING FIELD APP</h1>
+  <p>This removes only the broken saved copy of the app. It does not clear photographs, GPS, notes, sections, or inspection records.</p>
+  <button id="restore" type="button">RESTORE &amp; OPEN WORKING APP</button>
+  <div id="status" class="status">Tap the green button once.</div>
+  <p class="safe">Do not press Clear inside the field app.</p>
+</main>
+<script>
+(function(){
+  const button=document.getElementById("restore");
+  const status=document.getElementById("status");
+  let running=false;
+  button.addEventListener("click",async function(){
+    if(running)return;
+    running=true;
+    button.disabled=true;
+    button.textContent="RESTORING...";
+    status.textContent="Removing the broken saved app copy. Your inspection evidence is staying on this phone.";
+    try{
+      if("serviceWorker" in navigator){
+        const registrations=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.filter(registration=>new URL(registration.scope).pathname.startsWith("/field-simple-test/")).map(registration=>registration.unregister()));
+      }
+      if("caches" in window){
+        const names=await caches.keys();
+        await Promise.all(names.filter(name=>name.startsWith("property-inspector-home-test-313-")).map(name=>caches.delete(name)));
+      }
+      status.textContent="WORKING APP RESTORED. Opening it now...";
+      const target="/field-simple-test/?v=3.13.0-home-test.5.1&deploy=ed42ca2&restored="+Date.now();
+      setTimeout(()=>location.replace(target),500);
+    }catch(error){
+      running=false;
+      button.disabled=false;
+      button.textContent="TRY RESTORE AGAIN";
+      status.textContent="The app copy was not changed. Tap TRY RESTORE AGAIN. Error: "+(error&&error.message?error.message:"unknown error");
+    }
+  });
+})();
+</script>
+</body>
+</html>
