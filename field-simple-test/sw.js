@@ -39,6 +39,10 @@ function cachePut(cacheName, request, response) {
   return caches.open(cacheName).then(cache => cache.put(request, response.clone())).catch(() => {});
 }
 
+async function matchIgnoringVersion(request) {
+  return caches.match(request, { ignoreSearch: true });
+}
+
 async function bestResponse(request, fallbackRequest) {
   try {
     const network = await fetch(request);
@@ -49,7 +53,7 @@ async function bestResponse(request, fallbackRequest) {
   } catch (error) {
     // Offline or transient network failure. Use the immutable app shell below.
   }
-  return (await caches.match(request)) || (fallbackRequest ? await caches.match(fallbackRequest) : null);
+  return (await matchIgnoringVersion(request)) || (fallbackRequest ? await matchIgnoringVersion(fallbackRequest) : null);
 }
 
 async function recoveryText() {
@@ -106,7 +110,7 @@ self.addEventListener("fetch", event => {
           cachePut(CACHE_NAME, INDEX_URL, response);
           return response;
         })
-        .catch(() => caches.match(INDEX_URL))
+        .catch(() => matchIgnoringVersion(INDEX_URL))
     );
     return;
   }
@@ -119,13 +123,13 @@ self.addEventListener("fetch", event => {
           cachePut(CACHE_NAME, request, response);
           return response;
         })
-        .catch(async () => (await caches.match(request)) || (url.pathname.endsWith("/safari-geolocation-recovery.js") ? caches.match(RECOVERY_URL) : null))
+        .catch(async () => (await matchIgnoringVersion(request)) || (url.pathname.endsWith("/safari-geolocation-recovery.js") ? matchIgnoringVersion(RECOVERY_URL) : null))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
+    caches.match(request, { ignoreSearch: true }).then(cached => cached || fetch(request).then(response => {
       cachePut(CACHE_NAME, request, response);
       return response;
     }))
