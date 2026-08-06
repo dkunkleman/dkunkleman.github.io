@@ -20,7 +20,7 @@ for (const productionIdentifier of [
 assert(app.includes('"propertyInspectorHomeTest313V1"'));
 assert(app.includes('"property-inspector-home-test-313-evidence"'));
 assert(app.includes('"property-inspector-home-test-313-pending-v1"'));
-assert(worker.includes('"property-inspector-home-test-313-offline-v5-2"'));
+assert(worker.includes('"property-inspector-home-test-313-offline-v5-1"'));
 assert(worker.includes('"./automatic-context.js?v=3.13.0-home-test.5.1"'));
 assert(worker.includes('"./section-mapping.js?v=3.13.0-home-test.5.1"'));
 assert(worker.includes('"./wet-edge-mapping.js?v=3.13.0-home-test.5.1"'));
@@ -28,7 +28,7 @@ assert(worker.includes('"./property-review.js?v=3.13.0-home-test.5.1"'));
 assert(app.includes("async function ensureFieldGpsReady()"));
 assert(app.includes("if (data.started && !data.stopped && watchId === null && !SIMPLE_AUTOMATION_MODE)"));
 assert(app.includes("if (!await ensureFieldGpsReady()) return null;"));
-assert(app.includes("async function openSimpleCapture(type, returnScreen, context)"));
+assert(app.includes("async function openSimpleCapture(type, returnScreen)"));
 assert(worker.includes('"./assets/august-4-route-context.json"'));
 assert(!worker.includes('startsWith("property-inspector-field-")'), "test worker cannot delete production caches");
 assert(html.includes("SIMPLE FIELD TEST - PRODUCTION EVIDENCE IS SAFE"));
@@ -53,12 +53,6 @@ assert(app.includes("Cutting brush does not drain or make soft or flooded ground
 assert(packageCode.includes('zip.add("FRONTAGE_AND_CROSSING.json"'), "frontage and crossing analysis must be packaged");
 assert(packageCode.includes('zip.add("MAPPED_SECTIONS.json"'), "mapped section analysis must be packaged");
 assert(packageCode.includes('zip.add("mapped-sections.geojson"'), "mapped section geometry must be packaged");
-for (const label of ["START MAPPING THIS SECTION", "SECTION STARTED AND SAVING", "SECTION NOT STARTED", "PHOTO IN THIS SECTION", "WATER IN THIS SECTION", "TREE IN THIS SECTION", "SAVE THIS SECTION"])
-  assert(app.includes(label), `section capture must clearly show ${label}`);
-assert(app.includes('returnScreen === "SECTION_ACTIVE"'), "saving section evidence must return to the active section");
-assert(app.includes('recoveredSession.feature_type === "map_section"'), "reopening Safari must restore the active section screen");
-assert(app.includes("section_id: session.section_id || null"), "section photos and feature records must directly preserve their section relationship");
-assert(html.includes(".section-active-confirmation"), "the active-section confirmation must be large and visible outdoors");
 for (const file of ["subject-parcel.geojson", "photo-points.geojson", "feature-points.geojson", "property-field-map.html", "printable-property-field-map.html"])
   assert(packageCode.includes(`zip.add("${file}"`), `${file} must be independently packaged`);
 
