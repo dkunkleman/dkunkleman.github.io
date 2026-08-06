@@ -67,10 +67,6 @@
       try { nativeClearWatch(record.nativeWatchId); } catch (error) { /* already gone */ }
       record.nativeWatchId = null;
     }
-    if (record.restartTimer) {
-      clearTimeout(record.restartTimer);
-      record.restartTimer = null;
-    }
   }
 
   function cancelRecord(record) {
@@ -86,16 +82,6 @@
     });
   }
 
-  function scheduleRestart(record, delay) {
-    if (!record || record.cancelled || record.permissionDenied || record.restartTimer) return;
-    const scheduledGeneration = record.generation;
-    record.restartTimer = setTimeout(() => {
-      record.restartTimer = null;
-      if (record.cancelled || record.permissionDenied || record.generation !== scheduledGeneration) return;
-      startNativeWatch(record);
-    }, delay == null ? 1200 : delay);
-  }
-
   function startNativeWatch(record) {
     if (!record || record.cancelled || record.permissionDenied) return;
     cancelOtherWatches(record.virtualId);
@@ -103,33 +89,14 @@
     const generation = record.generation;
     const success = position => {
       if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
-      record.failureCount = 0;
-      record.permissionErrorReported = false;
       remember(position);
       if (typeof record.success === "function") record.success(position);
     };
     const failure = error => {
       if (record.cancelled || record.generation !== generation) return;
-      record.failureCount += 1;
-      if (error && Number(error.code) === 1) {
-        record.permissionDenied = true;
-        stopNative(record);
-        if (!record.permissionErrorReported && typeof record.failure === "function") {
-          record.permissionErrorReported = true;
-          record.failure(error);
-        }
-        return;
-      }
-      recoveredGetCurrentPosition(position => {
-        if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
-        record.failureCount = 0;
-        remember(position);
-        if (typeof record.success === "function") record.success(position);
-      }, fallbackError => {
-        if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
-        if (record.failureCount === 1 && typeof record.failure === "function") record.failure(fallbackError || error);
-        scheduleRestart(record, Math.min(5000, 800 + record.failureCount * 700));
-      }, record.options);
+      if (error && Number(error.code) === 1) record.permissionDenied = true;
+      stopNative(record);
+      if (typeof record.failure === "function") record.failure(error);
     };
     try {
       record.nativeWatchId = nativeWatchPosition(success, failure, preciseAttemptOptions(record.options));
@@ -147,9 +114,6 @@
       failure,
       options: options || {},
       nativeWatchId: null,
-      restartTimer: null,
-      failureCount: 0,
-      permissionErrorReported: false,
       permissionDenied: false,
       cancelled: false,
       generation: 0
@@ -171,7 +135,7 @@
   function reviveAll() {
     virtualWatches.forEach(record => {
       if (record.cancelled || record.permissionDenied) return;
-      scheduleRestart(record, 0);
+      startNativeWatch(record);
     });
   }
 
