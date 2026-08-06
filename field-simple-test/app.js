@@ -4973,7 +4973,6 @@
         resume.textContent = "TAP RECEIVED — STARTING GPS";
         simpleSetStatus("TAP RECEIVED — STARTING GPS", "warning");
         const savedStoppedAt = data.stopped;
-        await startTracking();
         const position = await ensureFieldGpsReady();
         if (!position) {
           if (watchId !== null) navigator.geolocation.clearWatch(watchId);
