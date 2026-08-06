@@ -1,0 +1,18 @@
+Safari field recovery release 3
+Release: 3.13.0-home-test.5.3-safari-recovery-3
+Status: release candidate pending physical iPhone Safari acceptance test
+
+Safeguards:
+- frozen field-rescue backup remains separate and untouched
+- Safari watcher self-recovery with precise-to-normal fallback
+- permission denial does not loop retries
+- stale/failed GPS watcher is cleared and reacquired with bounded backoff
+- visibility/pageshow/focus recovery
+- section saves immediately even if GPS is temporarily unavailable
+- first recovered section GPS fix records actual fix time, delay, accuracy, and sequence
+- mid-inspection package/archive creation does not stop GPS or end inspection
+- GPS canonical storage remains IndexedDB; local recovery snapshots are bounded/throttled
+- later retry-safe IndexedDB lifecycle remains intact for photo reliability
+- service-worker matching is query-string safe offline
+- actual executing release/cache are displayed in Offline ready status
+- automated Safari field-survival regression check enabled
