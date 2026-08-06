@@ -48,7 +48,13 @@ assert.match(recovery, /nativeClearWatch/);
 assert.match(recovery, /enableHighAccuracy:\s*false/);
 assert.match(recovery, /maximumAge:[\s\S]*30000/);
 assert.match(recovery, /virtualWatches/);
-assert.match(recovery, /scheduleRestart/);
+assert.match(recovery, /cancelOtherWatches\(null\)/, "starting a watcher must cancel every older watcher");
+assert.match(recovery, /generation:\s*0/);
+assert.match(recovery, /record\.generation \+= 1/);
+assert.match(recovery, /record\.generation !== generation/);
+assert.match(recovery, /permissionDenied:\s*false/);
+assert.match(recovery, /record\.permissionDenied = true/);
+assert.match(recovery, /if \(!record \|\| record\.cancelled \|\| record\.permissionDenied \|\| record\.restartTimer\) return/);
 assert.match(recovery, /visibilitychange/);
 assert.match(recovery, /pageshow/);
 assert.match(recovery, /focus/);
@@ -81,11 +87,13 @@ assert.equal(typeof workerContext.patchFieldAppSource, "function", "worker patch
 const patchedApp = workerContext.patchFieldAppSource(app);
 new Function(patchedApp);
 
-assert.match(patchedApp, /const APP_VERSION = "3\.13\.0-home-test\.5\.3-safari-recovery-3"/);
+assert.match(patchedApp, /const APP_VERSION = "3\.13\.0-home-test\.5\.3-safari-recovery-4"/);
 assert.match(patchedApp, /SECTION SAVED — Safari GPS is reconnecting/);
 assert.match(patchedApp, /SECTION_FIRST_GPS_RECOVERED/);
 assert.match(patchedApp, /original_section_tap_at/);
 assert.match(patchedApp, /gps_start_delay_ms/);
+assert.match(patchedApp, /point\.section_id = sectionAtFix\.section_id/);
+assert.match(patchedApp, /section_capture_status = "ACTIVE_EDGE_CAPTURE"/);
 assert.match(patchedApp, /GPS INTERRUPTED — RECONNECTING AUTOMATICALLY/);
 assert.match(patchedApp, /Settings > Privacy & Security > Location Services > Safari Websites/);
 assert.match(patchedApp, /GPS_RECOVERY_SNAPSHOT_INTERVAL_MS = 10000/);
@@ -94,9 +102,16 @@ assert.match(patchedApp, /if \(!trackingOptions\.skipReconcile\) await reconcile
 assert.match(patchedApp, /lastPosition \? lastPosition\.lat : null/);
 assert.match(patchedApp, /WAITING FOR FIRST GPS POINT/);
 assert.doesNotMatch(patchedApp, /SECTION NOT STARTED — move into open sky/);
+assert.match(patchedApp, /function exactFieldEvidenceCounts\(\)/);
+assert.match(patchedApp, /function verifyExportCounts\(/);
+assert.match(patchedApp, /EXPORT STARTING —/);
+assert.match(patchedApp, /EXPORT VERIFIED —/);
+assert.match(patchedApp, /INSPECTION STILL ACTIVE:/);
+assert.match(patchedApp, /if \(inspectionWasActive && data\.stopped\) throw new Error\("Export ended the active inspection\."\)/);
+assert.match(patchedApp, /await gpsWriteQueue;/, "GPS write queue must be flushed before packaging");
 assert.match(patchedApp, /Offline ready · \$\{APP_VERSION\}/);
 
-assert.match(worker, /3\.13\.0-home-test\.5\.3-safari-recovery-3/);
+assert.match(worker, /3\.13\.0-home-test\.5\.3-safari-recovery-4/);
 assert.match(worker, /safari-geolocation-recovery\.js/);
 assert.match(worker, /recoveredAppResponse/);
 assert.match(worker, /window\.__FIELD_CACHE_NAME/);
@@ -105,12 +120,13 @@ assert.match(worker, /ignoreSearch:\s*true/);
 assert.match(worker, /skipWaiting/);
 assert.match(worker, /clients\.claim/);
 
-assert.match(restore, /3\.13\.0-home-test\.5\.3-safari-recovery-3/);
+assert.match(restore, /3\.13\.0-home-test\.5\.3-safari-recovery-4/);
 assert.match(restore, /serviceWorker\.register\("\/field-simple-test\/sw\.js/);
 assert.match(restore, /await waitForActivation\(registration\)/);
 assert.ok(restore.indexOf("await waitForActivation(registration)") < restore.indexOf("location.replace(target)"), "restore must activate recovery before opening field app");
 assert.doesNotMatch(restore, /localStorage\.clear|indexedDB\.deleteDatabase/);
 
+assert.doesNotMatch(idbRecovery, /geolocation|GpsFallback|GPS fallback/, "IndexedDB recovery must not also wrap GPS");
 assert.match(idbRecovery, /database\.onversionchange = \(\) =>/);
 assert.match(idbRecovery, /disconnect\(database, generation, false\)/);
 assert.match(idbRecovery, /databasePromise = null/);
