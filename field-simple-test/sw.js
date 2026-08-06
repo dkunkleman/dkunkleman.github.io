@@ -1,7 +1,7 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-offline-v5-2";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.5.2";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v5-1";
+const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
   "./inspection-coaching.js?v=3.13.0-home-test.5.1",
@@ -16,7 +16,7 @@ const CORE_OFFLINE_FILES = [
   "./section-mapping.js?v=3.13.0-home-test.5.1",
   "./wet-edge-mapping.js?v=3.13.0-home-test.5.1",
   "./property-review.js?v=3.13.0-home-test.5.1",
-  "./app.js?v=3.13.0-home-test.5.2",
+  "./app.js?v=3.13.0-home-test.5.1",
   "./idb-recovery.js?v=3.13.0-home-test.5.1",
   "./inspection-package.js?v=3.13.0-home-test.5.1",
   "./manifest.webmanifest",
