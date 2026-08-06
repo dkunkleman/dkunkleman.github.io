@@ -1,7 +1,7 @@
 "use strict";
 
-const RELEASE = "3.13.0-home-test.5.3-safari-recovery-1";
-const CACHE_NAME = "property-inspector-home-test-313-offline-v5-3-safari-recovery-1";
+const RELEASE = "3.13.0-home-test.5.3-safari-recovery-2";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v5-3-safari-recovery-2";
 const INDEX_URL = `./index.html?v=${RELEASE}`;
 const APP_URL = `./app.js?v=${RELEASE}`;
 const RECOVERY_URL = `./safari-geolocation-recovery.js?v=${RELEASE}`;
@@ -63,11 +63,50 @@ async function recoveryText() {
   return response ? await response.text() : "";
 }
 
+function patchFieldAppSource(source) {
+  let patched = source;
+
+  const abortSection = [
+    "        if (!startPosition) {",
+    "          startButton.disabled = false;",
+    "          startButton.textContent = \"GPS NOT READY — TAP HERE TO TRY AGAIN\";",
+    "          simpleSetStatus(\"SECTION NOT STARTED — move into open sky and tap the large button again. Nothing was lost.\", \"warning\");",
+    "          return;",
+    "        }"
+  ].join("\n");
+  const savePendingSection = [
+    "        if (!startPosition) {",
+    "          simpleSetStatus(\"SECTION SAVED — Safari GPS is reconnecting. Wait for the first GPS point before walking the edge.\", \"warning\");",
+    "        }"
+  ].join("\n");
+  patched = patched.replace(abortSection, savePendingSection);
+
+  patched = patched.replace(
+    "    if (!observationId) {\n      const marker = markerFromPosition(\"other\", \"Mapped land section\"",
+    "    if (!observationId && lastPosition) {\n      const marker = markerFromPosition(\"other\", \"Mapped land section\""
+  );
+
+  patched = patched.replace(
+    "      return_screen: returnScreen || \"FIELD_BUTTONS\", details: { section_id: section.section_id }, observation_id: observationId,\n      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time\n    };",
+    "      return_screen: returnScreen || \"FIELD_BUTTONS\", details: { section_id: section.section_id }, observation_id: observationId,\n      lat: lastPosition ? lastPosition.lat : null, lon: lastPosition ? lastPosition.lon : null, gps_accuracy_m: lastPosition ? lastPosition.accuracy_m : null, gps_position_at: lastPosition ? lastPosition.time : null\n    };"
+  );
+
+  patched = patched.replace(
+    '        simpleSetStatus(`${section.section_id} STARTED — GPS, time, accuracy, and heading saved`, "saved");',
+    '        simpleSetStatus(startPosition ? `${section.section_id} STARTED — GPS, time, accuracy, and heading saved` : `${section.section_id} STARTED — WAITING FOR FIRST GPS POINT; section is safely started`, startPosition ? "saved" : "warning");'
+  );
+
+  return patched;
+}
+
 async function recoveredAppResponse(request) {
   const app = await bestResponse(request, APP_URL);
   if (!app) return new Response("Field app unavailable offline.", { status: 503, headers: { "content-type": "text/plain" } });
-  const [recovery, appText] = await Promise.all([recoveryText(), app.text()]);
+  const [recovery, originalAppText] = await Promise.all([recoveryText(), app.text()]);
+  const appText = patchFieldAppSource(originalAppText);
   const headers = new Headers(app.headers);
+  headers.delete("content-length");
+  headers.delete("content-encoding");
   headers.set("content-type", "application/javascript; charset=utf-8");
   headers.set("cache-control", "no-store");
   return new Response(`${recovery}\n\n${appText}`, { status: 200, statusText: "OK", headers });
