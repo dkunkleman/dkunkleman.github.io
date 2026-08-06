@@ -1,0 +1,23 @@
+name: Field survival checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'field-simple-test/**'
+      - 'restore-working-field-app/**'
+      - 'tests/safari-field-survival.test.js'
+      - '.github/workflows/field-survival.yml'
+  workflow_dispatch:
+
+jobs:
+  safari-field-survival:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile and verify Safari recovery release
+        run: node tests/safari-field-survival.test.js
