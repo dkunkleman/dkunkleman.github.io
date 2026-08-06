@@ -110,6 +110,9 @@ async function main() {
   const gps = functionBody("ensureFieldGpsReady");
   assert.match(gps, /watchId !== null && lastPosition/);
   assert.match(gps, /GETTING YOUR LOCATION - WAIT HERE/);
+  assert.match(gps, /navigator\.geolocation\.clearWatch\(watchId\)/);
+  assert.match(gps, /watchId = null/);
+  assert.match(gps, /await startTracking\(\)/);
   assert.match(gps, /GPS IS NOT READY/);
 
   const start = functionBody("startTracking");
