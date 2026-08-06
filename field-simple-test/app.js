@@ -2326,7 +2326,11 @@
         return null;
       }
       simpleSetStatus("GETTING YOUR LOCATION - WAIT HERE. Your tap will continue automatically.", "warning");
-      if (watchId === null) await startTracking();
+      if (watchId !== null) {
+        try { navigator.geolocation.clearWatch(watchId); } catch (error) { /* A stale Safari watcher may already be gone. */ }
+        watchId = null;
+      }
+      await startTracking();
       return new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(position => {
           onPosition(position);
