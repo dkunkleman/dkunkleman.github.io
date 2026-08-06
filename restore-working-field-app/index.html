@@ -39,7 +39,7 @@
       }
       if("caches" in window){
         const names=await caches.keys();
-        await Promise.all(names.filter(name=>name.startsWith("property-inspector-home-test-313-")).map(name=>caches.delete(name)));
+        await Promise.all(names.filter(name=>name.startsWith("property-inspector-home-test-313-offline-")).map(name=>caches.delete(name)));
       }
       status.textContent="WORKING APP RESTORED. Opening it now...";
       const target="/field-simple-test/?v=3.13.0-home-test.5.1&deploy=ed42ca2&restored="+Date.now();
@@ -48,7 +48,7 @@
       running=false;
       button.disabled=false;
       button.textContent="TRY RESTORE AGAIN";
-      status.textContent="The app copy was not changed. Tap TRY RESTORE AGAIN. Error: "+(error&&error.message?error.message:"unknown error");
+      status.textContent="The safe restore did not finish. Your inspection evidence was not cleared. Tap TRY RESTORE AGAIN. Error: "+(error&&error.message?error.message:"unknown error");
     }
   });
 })();
