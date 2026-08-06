@@ -240,7 +240,574 @@
     .simple-start, .simple-capture, .simple-finish { max-width: 620px; margin: 0 auto; padding: 14px; border: 3px solid #173b24; border-radius: 12px; background: #fff; }
     .simple-start h2, .simple-capture h2, .simple-finish h2 { margin: 0 0 8px; }
     .simple-start > button { width: 100%; min-height: 92px; background: #12672c; font-size: 24px; }
-    .simple-next { display: grid; gap: 4px; margin-bottom: 8px; padding: 10px; b…12904 tokens truncated…
+    .simple-next { display: grid; gap: 4px; margin-bottom: 8px; padding: 10px; border-left: 8px solid #f2cf28; background: #111; color: #fff; }
+    .simple-next strong { font-size: 18px; }
+    .simple-next span, .simple-next-line { font-size: 15px; line-height: 1.3; }
+    .simple-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+    .simple-locator { position: relative; height: 120px; max-width: 620px; margin: 0 auto 8px; overflow: hidden; border: 3px solid #173b24; border-radius: 10px; background: #d6ddd2; }
+    .simple-locator > div:first-child { position: absolute; z-index: 2; top: 5px; left: 5px; max-width: 64%; padding: 4px 6px; border-radius: 5px; background: rgba(0,0,0,.78); color: #fff; }
+    .simple-locator strong, .simple-locator span { display: block; font-size: 10px; line-height: 1.2; }
+    #simpleLocatorMap, #simpleLocatorMap svg { display: block; width: 100%; height: 100%; }
+    .simple-locator-actions { position: absolute; z-index: 2; right: 4px; bottom: 4px; display: flex; gap: 4px; }
+    .simple-locator-actions button { min-height: 34px; padding: 5px 7px; border: 2px solid #fff; border-radius: 5px; background: #173b24; font-size: 10px; }
+    #simpleShell button { touch-action: manipulation; -webkit-tap-highlight-color: rgba(242,207,40,.45); }
+    #simpleShell button[data-tap-state="received"] { outline: 5px solid #f2cf28; transform: scale(.98); }
+    .simple-grid .simple-feature { min-height: 78px; padding: 8px; font-size: 18px; line-height: 1.1; }
+    .simple-feature.water { background: #156ac4; } .simple-feature.tree { background: #287225; }
+    .simple-feature.ditch { background: #35667d; } .simple-feature.culvert { background: #394e62; }
+    .simple-feature.brush { background: #5b6724; } .simple-feature.blocked { background: #b51f1f; }
+    .simple-feature.entrance { background: #76571c; } .simple-feature.open { background: #357d63; }
+    .simple-feature.highlow { background: #99500d; } .simple-feature.other { background: #4e5853; }
+    .simple-feature.photo { background: #653a91; } .simple-feature.voice { background: #982157; }
+    .simple-feature.finish { grid-column: 1 / -1; min-height: 66px; background: #111; border: 4px solid #f2cf28; }
+    .simple-advanced { max-width: 620px; margin: 11px auto; padding: 0 10px 10px; border: 2px solid #777; border-radius: 9px; background: #fff; }
+    .simple-advanced button { width: 100%; background: #4b5550; }
+    .simple-capture label { margin-top: 10px; }
+    .simple-capture input, .simple-capture select, .simple-capture textarea { width: 100%; min-height: 54px; margin-top: 5px; border: 3px solid #666; border-radius: 8px; padding: 10px; font-size: 19px; }
+    .simple-capture textarea { min-height: 82px; }
+    .simple-primary-input input { min-height: 66px; font-size: 25px; font-weight: 900; }
+    .simple-fields { display: grid; gap: 8px; }
+    .simple-fields.two { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .simple-fields.three { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .simple-help { color: #4c5850; font-size: 13px; line-height: 1.4; }
+    .simple-calculation, .simple-item-count { margin-top: 10px; padding: 10px; border-radius: 7px; background: #e8eee9; font-size: 17px; font-weight: 900; }
+    .simple-photo-preview { display: grid; grid-template-columns: minmax(0,140px) 1fr; gap: 9px; align-items: center; min-height: 82px; margin: 10px 0; padding: 8px; border: 3px solid #155fbd; border-radius: 9px; background: #edf6ff; }
+    .simple-photo-preview img { display: block; width: 100%; max-height: 138px; object-fit: contain; border-radius: 6px; background: #111; }
+    .simple-photo-preview strong, .simple-photo-preview span { display: block; margin: 2px 0; }
+    .simple-capture-actions { display: grid; gap: 8px; margin-top: 12px; }
+    .simple-capture-actions button { min-height: 60px; font-size: 17px; }
+    .simple-return { background: #f2cf28 !important; color: #161200 !important; border: 3px solid #111 !important; font-weight: 950 !important; }
+    .simple-capture-actions details { padding: 0 9px 9px; border: 2px solid #777; border-radius: 8px; }
+    .frontage-step { max-width: 620px; margin: 0 auto; padding: 14px; border: 3px solid #173b24; border-radius: 12px; background: #fff; }
+    .frontage-step h2 { margin: 0 0 8px; font-size: 22px; }
+    .frontage-instruction { margin: 8px 0 12px; padding: 11px; border-left: 8px solid #f2cf28; background: #111; color: #fff; font-size: 17px; font-weight: 850; line-height: 1.35; }
+    .frontage-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+    .frontage-grid button { min-height: 76px; padding: 9px; font-size: 16px; }
+    .frontage-grid .wide { grid-column: 1 / -1; }
+    .frontage-crossing { background: #205f84; }
+    .frontage-condition { background: #6d5520; }
+    .frontage-end { background: #176b36; }
+    .frontage-review-row { margin: 9px 0; padding: 10px; border: 3px solid #5e6862; border-radius: 8px; background: #f7f7f2; }
+    .frontage-review-row[data-lowest="true"] { border-color: #15703a; background: #eaffef; }
+    .frontage-review-row strong, .frontage-review-row span { display: block; margin: 3px 0; }
+    .frontage-warning { padding: 9px; border: 2px solid #8a5c00; border-radius: 7px; background: #fff5d7; font-weight: 750; }
+    .frontage-support-actions { display: grid; gap: 8px; margin-top: 12px; }
+    .frontage-support-actions button { min-height: 62px; font-size: 16px; }
+    .culvert-factor-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+    .culvert-factor-list label { display: flex; align-items: center; gap: 8px; min-height: 54px; margin: 0; padding: 8px; border: 2px solid #59645e; border-radius: 8px; background: #f3f5f2; font-weight: 800; }
+    .culvert-factor-list input { width: 28px; min-height: 28px; margin: 0; }
+    .section-method-list { display: grid; gap: 8px; margin: 10px 0 14px; }
+    .section-method-list label { display: flex; align-items: center; gap: 10px; min-height: 58px; margin: 0; padding: 10px; border: 3px solid #3f5847; border-radius: 9px; background: #f7fbf5; font-size: 17px; font-weight: 850; }
+    .section-method-list input { width: 30px; min-height: 30px; margin: 0; }
+    .section-start-feedback, .section-active-confirmation { display: grid; gap: 5px; margin: 12px 0; padding: 14px; border: 4px solid #174f2a; border-radius: 10px; background: #e8f7e8; color: #10291a; text-align: center; }
+    .section-start-feedback strong, .section-active-confirmation strong { font-size: 23px; line-height: 1.1; }
+    .section-start-feedback span, .section-active-confirmation span { font-size: 17px; font-weight: 750; }
+    .section-start-feedback[data-kind="starting"] { border-color: #815f00; background: #fff3b8; }
+    .section-start-feedback[data-kind="error"], .section-start-feedback[data-kind="warning"] { border-color: #8f1919; background: #fff0ed; color: #711313; }
+    .section-active-confirmation[data-paused="true"] { border-color: #815f00; background: #fff3b8; }
+    .section-purpose-note { min-height: 78px !important; background: #6a3d91 !important; border: 4px solid #f2cf28 !important; }
+    .section-purpose-choices { display: grid; gap: 7px; margin-top: 12px; padding: 10px; border: 3px solid #35533e; border-radius: 9px; }
+    .section-purpose-choices label { display: flex; align-items: center; gap: 8px; min-height: 50px; margin: 0; padding: 7px; border: 2px solid #777; border-radius: 7px; }
+    .section-purpose-choices input { width: 28px; min-height: 28px; margin: 0; }
+    .note-not-saved { padding: 11px; border: 3px solid #8e1111; background: #fff0ed; color: #711313; font-size: 18px; font-weight: 950; text-align: center; }
+    .note-saved-confirmation { display: grid; gap: 5px; padding: 15px; border: 4px solid #096028; background: #e8f7e8; text-align: center; }
+    .note-saved-confirmation strong { font-size: 28px; }
+    .section-condition-groups { display: grid; gap: 10px; }
+    .section-condition-group { margin: 0; padding: 9px; border: 3px solid #35533e; border-radius: 9px; background: #f7fbf6; }
+    .section-condition-group legend { padding: 0 6px; font-size: 18px; font-weight: 900; }
+    .section-condition-group p { margin: 0 0 5px; color: #4b554e; font-size: 13px; font-weight: 700; }
+    .section-condition-group label { display: flex; align-items: center; gap: 9px; min-height: 48px; margin: 5px 0; padding: 7px; border: 2px solid #888; border-radius: 7px; background: #fff; }
+    .section-condition-group input { width: 27px; min-height: 27px; margin: 0; flex: 0 0 auto; }
+    .section-condition-group button { width: 100%; min-height: 44px; margin-top: 6px; background: #59615c; font-size: 14px; }
+    .simple-feature.map-section { background: #166b52; }
+    .simple-map-warning { margin: 6px 0 0; padding: 7px; background: #fff2bf; color: #2b2100; font-size: 12px; font-weight: 850; line-height: 1.25; }
+    .plain-record-list { display: grid; gap: 10px; padding-left: 25px; }
+    .simple-finish > button, #simplePackageResult button, #simplePackageResult a { display: block; width: 100%; min-height: 68px; margin-top: 10px; font-size: 17px; }
+    .simple-finish > button:first-of-type { background: #11652d; }
+    #simplePackageResult { margin-top: 14px; padding-top: 12px; border-top: 3px solid #173b24; }
+    .simple-package-name { display: block; padding: 10px; border: 2px dashed #11652d; overflow-wrap: anywhere; background: #fff; }
+    #simpleAdvancedReturn { display: none; }
+    body.simple-advanced-open #simpleAdvancedReturn { display: block; position: static; width: calc(100% - 16px); margin: 8px; min-height: 58px; }
+    .simple-dialog-return { grid-column: 1 / -1; }
+    @media (max-width: 390px) {
+      .simple-grid .simple-feature { min-height: 74px; font-size: 16px; }
+      .simple-fields.three { grid-template-columns: repeat(3,minmax(0,1fr)); }
+      .simple-capture input, .simple-capture select { font-size: 17px; }
+      .frontage-grid { grid-template-columns: 1fr; }
+      .frontage-grid .wide { grid-column: auto; }
+      .culvert-factor-list { grid-template-columns: 1fr; }
+    }
+    @media (orientation: landscape) and (max-height: 500px) {
+      .simple-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+      .simple-grid .simple-feature { min-height: 62px; }
+      .simple-feature.finish { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <section id="simpleShell" aria-label="Simple field test">
+    <div id="simpleTopBar">
+      <div class="simple-banner">FIXED FIELD TEST - PRODUCTION EVIDENCE IS SAFE</div>
+      <div id="simpleBuildLine" class="simple-build-line">APP VERSION: 3.13.0-home-test.5.4 | BUILD: FIELD-FIX-5.4-CANDIDATE</div>
+      <button id="reloadLatestApp" type="button">RELOAD LATEST APP</button>
+      <div class="simple-top-controls">
+        <button id="simpleTopReturn" type="button">SAVE & RETURN TO BUTTONS</button>
+        <button id="simpleTopFinish" type="button">FINISH</button>
+      </div>
+      <button id="reportButtonFailure" type="button" hidden>REPORT BUTTON FAILURE</button>
+      <div class="simple-top-state"><span id="simpleGpsStatus">NOT STARTED</span><span id="simpleCounts">0 photos | 0 records</span></div>
+    </div>
+    <div id="simpleSaveStatus" role="status" aria-live="polite">HOME TEST - SEPARATE FROM SAVED PROPERTY DATA</div>
+    <div id="simpleContent"><section class="simple-start"><h2>LOADING SAFE HOME TEST...</h2></section></div>
+  </section>
+  <button id="simpleAdvancedReturn" class="simple-return" type="button">SAVE WHAT I HAVE & RETURN TO FIELD BUTTONS</button>
+  <header>
+    <h1>Property Inspector</h1>
+    <p>Offline field evidence for real rural property inspections.</p>
+    <span id="offlineState" data-ready="false">Preparing offline use…</span>
+  </header>
+
+  <section id="workflow" aria-label="Inspection controls">
+    <div id="nextStep">NEXT: Wait for “Offline ready,” then tap Start Inspection.</div>
+    <div id="primaryControls">
+      <button id="start" disabled>Start Inspection</button>
+      <button id="finish" disabled>Finish Inspection</button>
+      <button id="stop" disabled>Pause GPS</button>
+    </div>
+    <div id="correctionControls">
+      <button id="undoLast" type="button">UNDO LAST</button>
+      <button id="correctRecord" type="button">REVIEW / CORRECT RECORDS</button>
+    </div>
+    <div id="status" role="status" aria-live="polite">Loading the offline field tool…</div>
+  </section>
+
+  <main>
+    <section class="card coach-card" aria-labelledby="coach-heading">
+      <h2 id="coach-heading">Inspection Coaching</h2>
+      <p class="small"><strong>Choose the area and questions before recording evidence.</strong> New photos, observations, notes, and voice recordings attach automatically.</p>
+      <div class="coach-grid">
+        <label>Current inspection area<select id="activeArea"></select></label>
+        <span></span>
+      </div>
+      <div class="coach-grid" style="margin-top:10px">
+        <label>New area name<input id="newArea" type="text" placeholder="Example: Large Tract – Northwest"></label>
+        <button id="addArea" type="button">Add Area</button>
+      </div>
+      <button id="newInspectionPhase" type="button" style="width:100%;margin-top:10px">NEW INSPECTION PHASE / RELOCATION</button>
+      <div class="coach-grid" style="margin-top:10px">
+        <label>Investigation question<input id="newQuestion" type="text" placeholder="Example: Does the road berm trap water?"></label>
+        <button id="addQuestion" type="button">Add Question</button>
+      </div>
+      <div id="questionList"><p class="small">No investigation questions yet. Add the most important uncertainty before walking.</p></div>
+      <div class="evidence-mode">
+        <label>Next evidence relationship<select id="evidenceRelationship"><option value="supports">Supports the question</option><option value="contradicts">Contradicts the question</option><option value="context">Context only</option></select></label>
+        <label>Next photo value<select id="nextPhotoValue"><option>Critical</option><option selected>Helpful</option><option>Reference</option><option>Duplicate</option></select></label>
+      </div>
+      <p id="coachNextAction">NEXT BEST EVIDENCE: Add an investigation question, then collect evidence that could answer it.</p>
+      <details>
+        <summary>Professional evidence checklist</summary>
+        <ul class="training-prompts">
+          <li>What decision will this evidence help someone make?</li>
+          <li>What fact would a professional otherwise have to visit the site to collect?</li>
+          <li>Can I measure it rather than merely describe it?</li>
+          <li>Have I shown context as well as the close-up?</li>
+          <li>Am I recording a fact, estimate, or hypothesis?</li>
+          <li>Is another photograph adding information or merely repeating the last one?</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card" aria-labelledby="record-heading">
+      <h2 id="record-heading">Record what you see</h2>
+      <p class="small">One tap records the current GPS, time, accuracy, heading, and orientation. Use Notes for typing or iPhone keyboard dictation.</p>
+      <div id="fieldButtons">
+        <button id="wet" class="wet" disabled>Wet</button>
+        <button id="dry" class="dry" disabled>Dry</button>
+        <button id="blocked" class="blocked" disabled>Blocked Access</button>
+        <button id="high" class="high" disabled>High Ground</button>
+        <button id="homesite" class="homesite" disabled>Potential Homesite</button>
+        <button id="culvert" class="culvert" disabled>Culvert</button>
+        <button id="tree" class="tree" disabled>Specimen Tree</button>
+        <button id="entrance" class="entrance" disabled>Road / Entrance</button>
+        <button id="photo" class="photo" disabled>Take Photo</button>
+        <button id="startPhotoGroup" class="photo" disabled>START PHOTO GROUP</button>
+        <button id="voice" class="voice" type="button" hidden disabled>Legacy Voice Evidence — Read Only</button>
+        <button id="note" class="note" type="button" disabled>Notes</button>
+        <button id="more" class="more" disabled>More Categories</button>
+      </div>
+      <div id="moreCategories" hidden>
+        <h3>More field observations</h3>
+        <div id="moreButtons">
+          <button id="thick" disabled>Thick Brush</button>
+          <button id="open" disabled>Open Area</button>
+          <button id="ditch" disabled>Ditch</button>
+          <button id="timber" disabled>Timber Sample</button>
+          <button id="hazard" disabled>Hazard</button>
+          <button id="wildlife" disabled>Wildlife</button>
+          <button id="other" disabled>Other</button>
+          <button id="thought" class="thought" disabled>Inspector Thought</button>
+          <button id="hypothesis" class="thought" disabled>Inspector Hypothesis</button>
+        </div>
+        <p class="small"><strong>Inspector Thought</strong> records your judgment or theory separately from observed evidence.</p>
+      </div>
+      <div id="evidenceSetBanner" hidden>
+        <strong>ACTIVE PHOTO GROUP</strong>
+        <span id="evidenceSetBannerName">Subject</span>
+        <span id="evidenceSetBannerCount">0 photographs saved</span>
+        <button id="addPlotTree" type="button" hidden>ADD TREE TO PLOT</button>
+        <button id="finishEvidenceSet" type="button">FINISH THIS SUBJECT</button>
+      </div>
+      <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+    </section>
+
+    <section class="card" aria-labelledby="evidence-sets-heading">
+      <h2 id="evidence-sets-heading">Evidence Sets</h2>
+      <p class="small">One subject can have several photographs, notes, measurements, and locations. Suggested groups never become findings until you confirm them.</p>
+      <div id="evidenceSetList"><p class="small">No evidence sets yet.</p></div>
+    </section>
+
+    <section class="card audit-card" aria-labelledby="audit-heading">
+      <h2 id="audit-heading">Corrections &amp; audit history</h2>
+      <p class="small">Corrections never erase the original. Voided records are excluded from findings but remain permanently recoverable in the package audit history.</p>
+      <p id="auditSummary">No corrections recorded.</p>
+      <div id="auditHistory"></div>
+    </section>
+
+    <section class="card" aria-labelledby="conditions-heading">
+      <h2 id="conditions-heading">Inspection conditions</h2>
+      <p class="small">Optional. Enter what you know; entries save automatically on this phone and are included in the package.</p>
+      <div id="authoritativeWeatherPanel" class="weather-verification" data-state="pending" aria-live="polite">
+        <h3>Automatic authoritative weather</h3>
+        <p id="authoritativeWeatherStatus"><strong>Waiting for inspection date</strong></p>
+        <p id="authoritativeWeatherDetails" class="small">The app retrieves official NOAA historical weather automatically and preserves a verified offline copy.</p>
+        <button id="refreshAuthoritativeWeather" type="button">Refresh Official NOAA Weather</button>
+      </div>
+      <div class="condition-grid">
+        <label>Inspection date<input id="conditionDate" type="date"></label>
+        <label>Weather summary<input id="conditionWeather" type="text" placeholder="Clear, cloudy, light rain…"></label>
+        <label>Rainfall — previous 24 hours<input id="conditionRain24" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Rainfall — previous 7 days<input id="conditionRain7" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Rainfall — previous 30 days<input id="conditionRain30" type="text" inputmode="decimal" placeholder="Inches or unknown"></label>
+        <label>Temperature<input id="conditionTemperature" type="text" inputmode="decimal" placeholder="°F or unknown"></label>
+        <label>Ground condition<select id="conditionGround"><option value="">Not entered</option><option>Dry</option><option>Firm</option><option>Soft</option><option>Spongy</option><option>Muddy</option><option>Standing water</option><option>Mixed</option><option>Unknown</option></select></label>
+        <label>Rain during inspection<select id="conditionRainDuring"><option value="">Not entered</option><option value="no">No</option><option value="yes">Yes</option><option value="unknown">Unknown</option></select></label>
+        <label>Conditions evidence<select id="conditionEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
+        <label>Named storm or major weather event<input id="weatherEventName" type="text" placeholder="Name or none known"></label>
+        <label>Weather-event dates<input id="weatherEventDates" type="text" placeholder="Start/end dates"></label>
+        <label>Days between event and inspection<input id="weatherDaysSince" type="number" min="0" step="1" inputmode="numeric"></label>
+        <label>Authoritative rainfall totals<input id="weatherAuthoritativeRain" type="text" placeholder="Amount, source, station"></label>
+        <label>Weather-station distance from parcel<input id="weatherStationDistance" type="text" placeholder="Miles or unknown"></label>
+        <label>Recent local rain reported by inspector<input id="weatherLocalRain" type="text"></label>
+        <label>Potentially relevant mechanism<select id="weatherMechanism"><option value="unknown">Unknown</option><option value="rainfall">Rainfall</option><option value="surge">Surge</option><option value="both">Surge and rainfall</option><option value="neither_established">Neither established</option></select></label>
+      </div>
+      <p class="small">Conditions documented in this report reflect the inspection date and should not be interpreted as year-round conditions without additional observation or professional evaluation.</p>
+      <label class="water-rule"><input id="allWaterPhotographed" type="checkbox">I photographed every standing-water location I personally observed.</label>
+      <p class="small">This applies only to the walked and visually observed corridor at inspection time. It does not mean unvisited ground or year-round conditions were dry.</p>
+    </section>
+
+    <div id="mapFrame" aria-label="Offline terrain, contours, parcels, GPS track, and markers">
+      <img id="hillshade" src="../field-simple-test/assets/usgs-terrain.png" alt="Offline USGS terrain hillshade">
+      <img id="contours" src="../field-simple-test/assets/usgs-contours-2ft.png" alt="Offline USGS 2-foot contours">
+      <svg id="overlay" viewBox="0 0 1800 1500" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </div>
+
+    <section class="card" aria-labelledby="coverage-heading">
+      <h2 id="coverage-heading">Coverage estimate</h2>
+      <p class="small">Route proximity estimates where you have been. It never proves conditions in unvisited acreage.</p>
+      <div class="coverage-key">
+        <div class="coverage-well"><span>Well inspected</span><strong id="coverageWell">0%</strong></div>
+        <div class="coverage-light"><span>Lightly inspected</span><strong id="coverageLight">0%</strong></div>
+        <div class="coverage-none"><span>Not inspected</span><strong id="coverageNone">100%</strong></div>
+      </div>
+      <p id="coverageMethod" class="small">Start GPS to calculate parcel coverage.</p>
+    </section>
+
+    <section class="card" aria-labelledby="small-water-heading">
+      <h2 id="small-water-heading">SMALL TRACT — OBSERVED WATER CONDITIONS</h2>
+      <p id="smallWaterSummary" class="water-summary">Water evidence will appear here after parcel geometry loads.</p>
+      <details><summary>Map layers</summary><div class="water-layer-controls" aria-label="Small tract water map layers">
+        <label><input type="checkbox" data-water-layer="route" checked>Walked route</label>
+        <label><input type="checkbox" data-water-layer="standing" checked>Standing water</label>
+        <label><input type="checkbox" data-water-layer="flowing" checked>Flowing water points</label>
+        <label><input type="checkbox" data-water-layer="centerline" checked>Inferred creek centerline</label>
+        <label><input type="checkbox" data-water-layer="directions" checked>Flow-direction arrows</label>
+        <label><input type="checkbox" data-water-layer="measurements" checked>Depth / width points</label>
+        <label><input type="checkbox" data-water-layer="amenity" checked>Scenic / amenity photos</label>
+        <label><input type="checkbox" data-water-layer="minor" checked>Minor depressions</label>
+        <label><input type="checkbox" data-water-layer="larger" checked>Larger pooled areas</label>
+        <label><input type="checkbox" data-water-layer="outlines" checked>Estimated outlines</label>
+        <label><input type="checkbox" data-water-layer="avoidance" checked>Building avoidance</label>
+        <label><input type="checkbox" data-water-layer="dry" checked>High / dry evidence</label>
+        <label><input type="checkbox" data-water-layer="homesites" checked>Candidate homesites</label>
+        <label><input type="checkbox" data-water-layer="terrain" checked>Terrain</label>
+        <label><input type="checkbox" data-water-layer="contours" checked>2-foot contours</label>
+        <label><input type="checkbox" data-water-layer="unknown" checked>Uninspected / unknown</label>
+      </div></details>
+      <div id="smallWaterMapFrame"><svg id="smallWaterMap" viewBox="0 0 1800 1500" role="img" aria-label="Small tract observed water conditions"></svg></div>
+      <p class="small"><strong>Solid blue points are actual photographed water locations.</strong> Dashed creek centerlines, arrows, shaded areas, and avoidance areas are interpretations—not surveyed watercourse boundaries.</p>
+    </section>
+
+    <section class="card field-warning" aria-labelledby="missing-heading">
+      <h2 id="missing-heading">Before you leave</h2>
+      <p class="small">The coach identifies the cheapest evidence that would most increase confidence.</p>
+      <ul id="missingEvidenceList"><li>Add an investigation question.</li></ul>
+      <button id="reviewEvidence" type="button">Review Missing Evidence</button>
+    </section>
+
+    <section class="card" id="reviewAndBuildReport" aria-labelledby="review-build-heading">
+      <h2 id="review-build-heading">REVIEW AND BUILD REPORT</h2>
+      <p class="small"><strong>Nothing inferred becomes active until you approve it.</strong> Review corrections and subject groups first, then approve only the maps and Pearson photo phases that match what you saw.</p>
+      <div class="report-review-grid">
+        <button id="reviewCorrections" type="button">Review Corrections</button>
+        <button id="reviewPearsonPhases" type="button">Review Pearson Photo Phases</button>
+        <button id="approveEvidenceSets" type="button">Approve Evidence Sets</button>
+        <button id="reviewWaterMap" type="button">Review Water Map</button>
+        <button id="reviewCreekMap" type="button">Review Creek Map</button>
+        <button id="reviewVegetationMap" type="button">Review Vegetation Map</button>
+        <button id="reviewHomesiteConcepts" type="button">Review Homesite Concepts</button>
+        <button id="importChatGPTReview" type="button">Import ChatGPT Review</button>
+        <button id="generatePropertyReport" type="button">Generate Property Report</button>
+      </div>
+      <input id="chatReviewInput" type="file" accept="application/json,.json" hidden>
+      <p id="reviewSynthesisSummary" class="small">Pearson reviewed phases will appear after the complete P3-P196 inspection is present on this phone.</p>
+      <div id="reviewSynthesisPanel" hidden></div>
+    </section>
+
+    <section class="card metrics" aria-label="Inspection status">
+      <div class="metric"><span>GPS points</span><strong id="pointCount">0</strong></div>
+      <div class="metric"><span>Distance walked</span><strong id="distance">0 ft</strong></div>
+      <div class="metric"><span>GPS accuracy</span><strong id="accuracy">—</strong></div>
+      <div class="metric"><span>Current location</span><strong id="location">—</strong></div>
+      <div class="metric"><span>Compass</span><strong id="heading">—</strong></div>
+      <div class="metric"><span>Photos</span><strong id="photoCount">0</strong></div>
+      <div class="metric"><span>Observations</span><strong id="eventCount">0</strong></div>
+      <div class="metric"><span>Voice notes</span><strong id="voiceCount">0</strong></div>
+      <div class="metric"><span>Elapsed time</span><strong id="elapsedTime">0 min</strong></div>
+      <div class="metric"><span>Active movement</span><strong id="activeTime">0 min</strong></div>
+      <div class="metric"><span>Stopped time</span><strong id="stoppedTime">0 min</strong></div>
+      <div class="metric"><span>Documenting</span><strong id="documentingTime">0 min</strong></div>
+      <div class="metric"><span>Avg. observation spacing</span><strong id="observationSpacing">—</strong></div>
+      <div class="metric"><span>Photos / acre</span><strong id="photosPerAcre">—</strong></div>
+      <div class="metric"><span>Observations / acre</span><strong id="observationsPerAcre">—</strong></div>
+      <div class="metric"><span>Questions answered</span><strong id="questionsAnswered">0</strong></div>
+      <div class="metric"><span>Questions remaining</span><strong id="questionsRemaining">0</strong></div>
+    </section>
+
+    <section class="card" aria-labelledby="export-heading">
+      <h2 id="export-heading">Inspection packages</h2>
+      <p class="small">Nothing is removed after either export. <strong>Finish Inspection</strong> creates the smaller ChatGPT package. The full archive remains available afterward from the saved originals.</p>
+      <div class="export-modes">
+        <div class="export-mode recommended">
+          <h3>CHATGPT ANALYSIS PACKAGE</h3>
+          <p class="small">Decision-ready evidence organized around access, buildability, economic potential, cost and risk, and what makes the property special. Includes strengths, weaknesses, unknowns, confidence rules, cheapest next investigations, and every photo at analysis quality.</p>
+          <span id="reportEstimate" class="package-estimate">Estimating…</span>
+          <p class="small">Created when you tap <strong>Finish Inspection</strong>.</p>
+        </div>
+        <div class="export-mode">
+          <h3>FULL EVIDENCE ARCHIVE</h3>
+          <p class="small">Every original photo byte-for-byte, analysis copies, voice notes, raw GPS, orientations, observations, hashes, and map context. Intended for permanent and professional evidence storage.</p>
+          <span id="fullEstimate" class="package-estimate">Estimating…</span>
+          <button id="fullArchive" disabled>Create FULL EVIDENCE ARCHIVE</button>
+        </div>
+      </div>
+      <p id="estimateWarning" class="small" hidden></p>
+    </section>
+
+    <section class="card" aria-labelledby="photo-heading">
+      <h2 id="photo-heading">Photographs</h2>
+      <p class="small">Every shown photo has original image bytes stored on this iPhone. Finish Inspection is blocked if any photo cannot be recovered.</p>
+      <button id="retryPendingPhoto" hidden>Retry Pending Photo</button>
+      <div id="gallery"></div>
+      <div id="galleryPager" hidden><button id="galleryPrevious">Previous Photos</button><span id="galleryPageInfo"></span><button id="galleryNext">Next Photos</button></div>
+    </section>
+
+    <section id="packageReady" class="card" hidden>
+      <h2>Inspection package ready</h2>
+      <p id="packageSummary">Everything is in one file.</p>
+      <strong id="packageFilename"></strong>
+      <button id="sharePackage" hidden>Save to Property Intelligence Repository</button>
+      <a id="packageLink" class="button-link" hidden>Save Inspection Package</a>
+      <p id="packageInstruction" class="small"></p>
+      <p class="small">The repository stores the permanent record. ChatGPT analyzes it there. Do not clear the inspection until the repository confirms receipt.</p>
+    </section>
+
+    <section class="card">
+      <h2>Map key</h2>
+      <p><span class="lineKey subjectKey"></span><strong>Red:</strong> subject parcel</p>
+      <p><span class="lineKey neighborKey"></span><strong>White/black:</strong> neighboring parcels</p>
+      <label>2-foot contours <input id="contourOpacity" type="range" min="0" max="1" step=".05" value=".90"></label>
+      <label>USGS terrain <input id="terrainOpacity" type="range" min="0" max="1" step=".05" value="1"></label>
+    </section>
+
+    <section class="card field-warning">
+      <h2>Before entering the property</h2>
+      <p class="small"><strong>Confirm “Offline ready.”</strong> Keep Safari open and keep the iPhone charged. Low Power Mode and a locked screen can pause browser GPS. Carry a battery pack for large parcels.</p>
+    </section>
+
+    <details class="card">
+      <summary>Troubleshooting and recovery</summary>
+      <p class="small">The Finish Inspection button is the normal workflow. These individual data exports are only for technical recovery; they do not include photographs and are not a complete inspection package.</p>
+      <div class="utilityButtons">
+        <button id="backup">Full Archive Backup Now</button>
+        <button id="csv">Recovery CSV</button>
+        <button id="geojson">Recovery GeoJSON</button>
+        <button id="gpx">Recovery GPX</button>
+        <button id="clear" hidden>Clear Test Inspection</button>
+      </div>
+    </details>
+  </main>
+
+  <dialog id="observationDialog">
+    <form method="dialog">
+      <div class="dialog-body">
+        <h2 id="observationTitle">Record observation</h2>
+        <p class="small">Choose any useful details, then tap Save Observation.</p>
+        <div id="wetFields" class="structured-fields" hidden>
+          <label>Water depth</label>
+          <div class="choice-grid" id="wetDepthChoices">
+            <label><input type="radio" name="wetDepth" value="less than 1 inch">Less than 1 inch</label>
+            <label><input type="radio" name="wetDepth" value="1–3 inches">1–3 inches</label>
+            <label><input type="radio" name="wetDepth" value="4–6 inches">4–6 inches</label>
+            <label><input type="radio" name="wetDepth" value="7–12 inches">7–12 inches</label>
+            <label><input type="radio" name="wetDepth" value="more than 12 inches">More than 12 inches</label>
+            <label><input type="radio" name="wetDepth" value="exact">Exact number</label>
+            <label><input type="radio" name="wetDepth" value="unknown" checked>Unknown</label>
+          </div>
+          <label id="wetExactLabel" hidden>Exact depth in inches<input id="wetExactDepth" type="number" min="0" step="0.25" inputmode="decimal"></label>
+          <label>Depth basis<select id="wetDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
+          <label>Water condition<select id="wetWaterType"><option value="">Not entered</option><option>Still</option><option>Flowing</option><option>Ditch water</option><option>Across roadway</option><option>Behind berm</option></select></label>
+          <label>Extent note<input id="wetExtent" type="text" placeholder="Approximate area or limits"></label>
+        </div>
+        <div id="dryFields" class="structured-fields" hidden>
+          <label>Dry-ground detail<select id="dryCondition"><option value="">Not entered</option><option>Dry surface</option><option>Firm</option><option>Soft or spongy</option><option>Pine-needle floor</option><option>Possible homesite</option></select></label>
+        </div>
+        <div id="blockedFields" class="structured-fields" hidden>
+          <label>Blocked by<select id="blockedReason"><option value="">Not entered</option><option>Water</option><option>Brush</option><option>Ditch</option><option>Fence</option><option>Unsafe</option><option>Boundary</option><option>Other</option></select></label>
+        </div>
+        <label>Evidence classification<select id="observationEvidence"><option>Observed</option><option>Measured</option><option>Estimated</option><option>Public Data</option><option>Interpretation</option><option>Needs Professional Verification</option></select></label>
+        <label>Optional note<textarea id="observationNote" placeholder="Short field note"></textarea></label>
+        <div class="choice-grid"><label><input id="observationPhoto" type="checkbox">Take a photograph after saving</label></div>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancelObservation" class="cancel" value="cancel">Cancel</button>
+        <button id="saveObservation" type="button">Save Observation</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="departureDialog">
+    <form method="dialog">
+      <div class="dialog-body">
+        <h2>Before you leave the property</h2>
+        <p id="departureSummary" class="small"></p>
+        <ol id="departureActions"></ol>
+        <p class="small"><strong>Finish anyway only when returning is safer or the remaining uncertainty is acceptable.</strong> Unknown acreage will remain labeled unknown in the report.</p>
+      </div>
+      <div class="dialog-actions">
+        <button id="continueInspecting" class="cancel" value="cancel">Return to Inspection</button>
+        <button id="finishAfterReview" type="button">Finish &amp; Create Package</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="photoExplanationDialog">
+    <div class="dialog-body">
+      <h2>Explain this photograph</h2>
+      <p id="photoExplanationPrompt">Why did you take this picture?</p>
+      <p id="photoExplanationState" class="small">Starting voice recording…</p>
+    </div>
+    <div class="dialog-actions">
+      <button id="stopPhotoExplanation" type="button">Stop &amp; Save Explanation</button>
+      <button id="retryPhotoExplanation" class="cancel" type="button" hidden>Retry Voice Explanation</button>
+      <button id="skipPhotoExplanation" class="cancel" type="button">Skip</button>
+      <button id="laterPhotoExplanation" class="cancel" type="button">Explain Later</button>
+    </div>
+  </dialog>
+
+  <dialog id="photoMeaningDialog">
+    <div class="dialog-body">
+      <h2>What does this photograph mean?</h2>
+      <p class="small">Use short answers. These prevent a nearby button press from being mistaken for the photograph's meaning.</p>
+      <label>What does it show?<select id="photoMeaningSubject"><option value="">Choose one</option><option>Access or road</option><option>Drainage or water</option><option>Homesite or buildability</option><option>Timber or tree</option><option>Hazard or cost concern</option><option>Boundary or relationship</option><option>General context</option><option>Other</option></select></label>
+      <label>Measurement status<select id="photoMeaningMeasurement"><option>Not measured</option><option>Measured</option><option>Estimated</option><option>Scale visible in photograph</option><option>Unknown</option></select></label>
+      <label>Does this photograph show a tape, ruler, staff, diameter tape, or other measuring device?<select id="photoShowsMeasuringDevice"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Unsure</option></select></label>
+      <label>Area represented<select id="photoMeaningExtent"><option>Single point or object</option><option>Small localized area</option><option>Part of the tract</option><option>Broad site condition</option><option>Unknown</option></select></label>
+      <label>Why might it matter?<select id="photoMeaningImportance"><option>Access decision</option><option>Buildability decision</option><option>Economic or timber decision</option><option>Cost or risk decision</option><option>Distinctive property feature</option><option>Professional verification</option><option>General reference</option></select></label>
+      <fieldset><legend>Four-photo evidence role</legend><div class="evidence-role-grid">
+        <label><input type="checkbox" name="photoEvidenceRole" value="context">Context</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="evidence">Evidence</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="measurement">Measurement</label>
+        <label><input type="checkbox" name="photoEvidenceRole" value="relationship">Relationship</label>
+      </div></fieldset>
+      <label>Optional short clarification<textarea id="photoMeaningNote" placeholder="What should another person understand immediately?"></textarea></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="savePhotoMeaning" type="button">Save Photo Meaning</button>
+      <button id="photoMeaningLater" class="cancel" type="button">Complete Later</button>
+    </div>
+  </dialog>
+
+  <dialog id="correctionDialog">
+    <div class="dialog-body">
+      <h2>Undo or correct a record</h2>
+      <p class="small"><strong>The original will remain unchanged.</strong> This creates a dated audit entry and changes only how reports interpret the record.</p>
+      <label>Record<select id="correctionTarget"></select></label>
+      <label>Status or reason<select id="correctionReason"><option>Correct</option><option>Corrected value</option><option>Accidental button press</option><option>Wrong category</option><option>Wrong inspection area</option><option>Wrong question</option><option>Duplicate</option><option>Needs clarification</option><option>Withdrawn</option></select></label>
+      <label>Correct category<select id="correctionCategory"><option value="">No category change</option><option value="wet">Wet</option><option value="dry">Dry</option><option value="blocked">Blocked Access</option><option value="high">High Ground</option><option value="homesite">Potential Homesite</option><option value="culvert">Culvert</option><option value="tree">Specimen Tree</option><option value="entrance">Road / Entrance</option><option value="ditch">Ditch</option><option value="timber">Timber</option><option value="hazard">Hazard</option><option value="other">Other</option></select></label>
+      <label>Correct inspection area<select id="correctionArea"></select></label>
+      <label>Correct investigation question<select id="correctionQuestion"><option value="">No question change</option></select></label>
+      <label>Clarification<textarea id="correctionClarification" placeholder="What should the corrected record mean?"></textarea></label>
+      <label>Inspector identity<input id="correctionInspector" type="text" autocomplete="name" value="Field Inspector"></label>
+    </div>
+    <div class="dialog-actions">
+      <button id="cancelCorrection" class="cancel" type="button">Cancel</button>
+      <button id="saveCorrection" type="button">Save Permanent Correction</button>
+    </div>
+  </dialog>
+
+  <dialog id="undoDialog">
+    <div class="dialog-body">
+      <h2>Undo last action?</h2>
+      <p id="undoDescription">Nothing will be deleted. The original remains in audit history.</p>
+    </div>
+    <div class="dialog-actions">
+      <button id="keepLastAction" class="cancel" type="button">No, keep it</button>
+      <button id="confirmUndoLast" type="button">Yes, undo it</button>
+    </div>
+  </dialog>
+
+  <dialog id="evidenceSetDialog">
+    <div class="dialog-body">
+      <h2>Start Photo Group</h2>
+      <p class="small">Choose the one subject these photographs will document.</p>
+      <label>Subject type<select id="evidenceSetType"><option>Water Area</option><option>Flowing Water / Creek Corridor</option><option>Individual Tree</option><option>Tree Group / Canopy</option><option>Timber Sample Plot</option><option>Potential Homesite</option><option>Drainage Feature</option><option>Road / Access</option><option>Boundary Marker</option><option>View</option><option>Vegetation / Clearing</option><option>Other</option></select></label>
+      <label>Optional subject name<input id="evidenceSetName" placeholder="The app will create a permanent group name"></label>
+      <div id="treeSetFields" class="structured-fields" hidden>
+        <label>Likely species<input id="treeSpecies" placeholder="Unknown is acceptable"></label>
+        <label>Alternative species<input id="treeAlternativeSpecies" placeholder="Separate possibilities with commas"></label>
+        <label>Species confidence<select id="treeSpeciesConfidence"><option>low</option><option>medium</option><option>high</option></select></label>
+        <label>Identification status<select id="treeSpeciesStatus"><option>Unknown</option><option>Inspector confirmed</option><option>Probable</option><option>Possible</option><option>Professional identification requested</option></select></label>
+        <label>Can most of the tree be photographed safely and clearly?<select id="treeVisibility"><option>Yes</option><option>No — canopy blocks it</option><option>No — nearby trees block it</option><option>No — brush blocks it</option><option>No — water or unsafe ground blocks it</option><option>No — property boundary or access prevents it</option><option>Unsure</option></select></label>
+        <p class="field-warning"><strong>DBH:</strong> Measure 54 inches above ground on the uphill side. Never silently treat an estimate as measured.</p>
+        <label>DBH method<select id="treeDbhMethod"><option>Not measured</option><option>Diameter tape reading</option><option>Circumference converted to diameter</option><option>Biltmore-stick estimate</option><option>Visual estimate</option></select></label>
+        <label>Diameter reading (inches)<input id="treeDbh" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Circumference reading (inches)<input id="treeCircumference" type="number" min="0" step="0.1" inputmode="decimal"></label>
+        <label>Instrument<input id="treeDbhInstrument" placeholder="Diameter tape, Biltmore stick, tape measure…"></label>
+        <label>Measurement confidence<select id="treeDbhConfidence"><option>unknown</option><option>low</option><option>medium</option><option>high</option></select></label>
+        <fieldset><legend>DBH complications</legend><div class="choice-grid" id="treeDbhComplications"><label><input type="checkbox" value="Leaning tree">Leaning tree</label><label><input type="checkbox" value="Fork below breast height">Fork below breast height</label><label><input type="checkbox" value="Butt swell">Butt swell</label><label><input type="checkbox" value="Irregular trunk">Irregular trunk</label><label><input type="checkbox" value="Slope / uphill side">Slope / uphill side</label><label><input type="checkbox" value="Multiple stems">Multiple stems</label></div></fieldset>
+        <label>Total-height estimate (feet)<input id="treeHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Merchantable-height estimate (feet)<input id="treeLogHeight" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Usable 16-foot logs, nearest half-log<input id="treeUsableLogs" type="number" min="0" step="0.5" inputmode="decimal"></label>
+        <label>Height method<select id="treeHeightMethod"><option>Unknown</option><option>Laser rangefinder/clinometer</option><option>Tree scale stick</option><option>Phone estimate</option><option>Visual estimate</option></select></label>
+        <fieldset><legend>Where usable timber ends</legend><div class="choice-grid" id="treeUsableEnd"><label><input type="checkbox" value="Major fork">Major fork</label><label><input type="checkbox" value="Serious sweep">Serious sweep</label><label><input type="checkbox" value="Broken top">Broken top</label><label><input type="checkbox" value="Decay">Decay</label><label><input type="checkbox" value="Minimum usable diameter">Minimum usable diameter</label><label><input type="checkbox" value="Excessive limbs">Excessive limbs</label><label><input type="checkbox" value="Other defect">Other defect</label></div></fieldset>
+        <label>Condition<select id="treeCondition"><option>live</option><option>dead</option><option>damaged</option><option>leaning</option><option>forked</option></select></label>
+        <label>Purpose<select id="treePurpose"><option>species identification</option><option>timber sample</option><option>landscape</option><option>preserve</option><option>hazard</option><option>forest character</option><option>unknown</option></select></label>
+        <label>Relationship to creek and proposed homesite, if relevant<textarea id="treeCreekRelationship" placeholder="Record only what is safely visible"></textarea></label>
+        <fieldset><legend>Bole quality and visible defects</legend><div class="choice-grid" id="treeDefects"><label><input type="checkbox" value="Straight">Straight</label><label><input type="checkbox" value="Slight sweep">Slight sweep</label><label><input type="checkbox" value="Severe sweep">Severe sweep</label><label><input type="checkbox" value="Leaning">Leaning</label><label><input type="checkbox" value="Forked">Forked</label><label><input type="checkbox" value="Multiple stems">Multiple stems</label><label><input type="checkbox" value="Visible rot">Visible rot</label><label><input type="checkbox" value="Hollow">Hollow</label><label><input type="checkbox" value="Lightning scar">Lightning scar</label><label><input type="checkbox" value="Fire scar">Fire scar</label><label><input type="checkbox" value="Insect damage">Insect damage</label><label><input type="checkbox" value="Broken top">Broken top</label><label><input type="checkbox" value="Dead top">Dead top</label><label><input type="checkbox" value="Excessive knots">Excessive knots</label><label><input type="checkbox" value="Large limbs">Large limbs</label><label><input type="checkbox" value="Mechanical damage">Mechanical damage</label><label><input type="checkbox" value="Unknown">Unknown</label></div></fieldset>
+        <fieldset><legend>Tree purpose — choose all that apply</legend><div class="choice-grid" id="treePurposes"><label><input type="checkbox" value="Likely timber sample">Likely timber sample</label><label><input type="checkbox" value="Preserve for shade">Preserve for shade</label><label><input type="checkbox" value="Landscape/specimen tree">Landscape/specimen tree</label><label><input type="checkbox" value="Wildlife tree">Wildlife tree</label><label><input type="checkbox" value="Hazard concern">Hazard concern</label><label><input type="checkbox" value="Clearing obstacle">Clearing obstacle</label><label><input type="checkbox" value="Property buffer">Property buffer</label><label><input type="checkbox" value="Unknown">Unknown</label></div></fieldset>
+        <label>Inspector explanation<textarea id="treeExplanation"></textarea></label>
+        <div id="treeEvidencePlan" class="field-warning small"></div>
+      </div>
       <div id="timberPlotFields" class="structured-fields" hidden>
         <p class="field-warning"><strong>Preliminary Timber Reconnaissance:</strong> This is not a certified timber cruise, appraisal, sale volume, or market valuation.</p>
         <label>Fixed plot size<select id="timberPlotSize"><option value="0.05">1/20 acre</option><option value="0.1" selected>1/10 acre</option><option value="0.2">1/5 acre</option><option value="0.25">1/4 acre</option><option value="0.5">1/2 acre</option><option value="1">1 acre</option><option value="custom">Custom</option></select></label>
@@ -262,7 +829,7 @@
         <label>Width measured or estimated?<select id="creekWidthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
         <label>Safe-point water depth (inches)<input id="creekDepth" type="number" min="0" step="0.1" inputmode="decimal"></label>
         <label>Depth measured or estimated?<select id="creekDepthBasis"><option>Unknown</option><option>Measured</option><option>Estimated</option></select></label>
-        <label>Bank condition<textarea id="creekBankCondition" placeholder="Stable, eroded, steep, vegetated, unknownâ€¦"></textarea></label>
+        <label>Bank condition<textarea id="creekBankCondition" placeholder="Stable, eroded, steep, vegetated, unknown…"></textarea></label>
         <label>Adjacent higher ground<textarea id="creekHigherGround"></textarea></label>
         <label>Mature trees or features worth preserving<textarea id="creekPreserve"></textarea></label>
         <label>Relationship to proposed homesite or road<textarea id="creekRelationship"></textarea></label>
@@ -297,7 +864,7 @@
       <h2>Same subject?</h2>
       <p id="groupPhotoPrompt">Choose this photograph's role and what to do next.</p>
       <label>Photograph role<select id="groupPhotoRole"><option>Context</option><option>Close-up</option><option>Measurement</option><option>Relationship to surroundings</option><option>Opposite direction</option><option>Whole subject</option><option>Detail</option><option>Before</option><option>After</option><option>Upstream view</option><option>Downstream view</option><option>Across-channel view</option><option>Channel width</option><option>Water depth</option><option>Flow Evidence</option><option>Adjacent Higher-Ground / Tree Context</option><option>Scenic Context</option><option>Building-Avoidance Context</option><option>Creek / homesite or road relationship</option><option>Whole tree</option><option>Bark</option><option>Base / ground</option><option>Lower trunk to first fork</option><option>Crown / canopy</option><option>Visible crown segment</option><option>Connected branch</option><option>Leaf upper surface</option><option>Leaf underside</option><option>Twig / terminal bud</option><option>Fruit / seed / cone / flower</option><option>Scale photograph</option><option>DBH tape position</option><option>Visible defect</option><option>Root condition</option><option>Targets</option><option>Surrounding canopy</option><option>Plot center / radius</option><option>Access / wet ground</option><option>360-degree panorama</option><option>Transition</option><option>Other</option></select></label>
-      <label id="leafProvenanceLabel" hidden>Are you confident this leaf came from this tree?<select id="leafProvenance"><option>Yes â€” watched it fall or traced it to this tree</option><option>Probably</option><option>Unsure</option></select></label>
+      <label id="leafProvenanceLabel" hidden>Are you confident this leaf came from this tree?<select id="leafProvenance"><option>Yes — watched it fall or traced it to this tree</option><option>Probably</option><option>Unsure</option></select></label>
     </div>
     <div class="dialog-actions" style="grid-template-columns:1fr 1fr">
       <button id="continueEvidenceSet" type="button">Same subject</button>
@@ -310,13 +877,13 @@
   <dialog id="structuredMeasurementDialog">
     <div class="dialog-body">
       <h2>What did you measure?</h2>
-      <p class="field-warning"><strong>Enter the number now.</strong> This valueâ€”not a later attempt to read the photographâ€”is the authoritative field measurement.</p>
+      <p class="field-warning"><strong>Enter the number now.</strong> This value—not a later attempt to read the photograph—is the authoritative field measurement.</p>
       <label>Measurement type<select id="measurementType"><option>Water depth</option><option>Width</option><option>Length</option><option>Tree diameter</option><option>Distance</option><option>Other</option></select></label>
       <label>Exact recorded value<input id="measurementValue" type="number" min="0" step="0.01" inputmode="decimal"></label>
       <label>Unit<select id="measurementUnit"><option value="in">inches</option><option value="ft">feet</option><option value="yd">yards</option><option value="m">meters</option><option value="cm">centimeters</option><option value="mm">millimeters</option><option value="other">other</option></select></label>
       <label id="measurementOtherUnitLabel" hidden>Other unit<input id="measurementOtherUnit"></label>
       <label>Measured or estimated?<select id="measurementBasis"><option>Measured</option><option>Estimated</option></select></label>
-      <label>Instrument<input id="measurementInstrument" placeholder="Tape, ruler, staff, diameter tapeâ€¦"></label>
+      <label>Instrument<input id="measurementInstrument" placeholder="Tape, ruler, staff, diameter tape…"></label>
       <label>Did the device reach the true bottom/end point?<select id="measurementReachedEnd"><option>Unknown</option><option>Yes</option><option>No</option></select></label>
       <label>Was the device approximately vertical or level?<select id="measurementAligned"><option>Unknown</option><option>Yes</option><option>No</option><option>Not applicable</option></select></label>
       <label>Subject or photo group<select id="measurementSubject"></select></label>
@@ -349,7 +916,7 @@
       <label>Height method<select id="plotTreeHeightMethod"><option>Unknown</option><option>Laser rangefinder/clinometer</option><option>Tree scale stick</option><option>Phone estimate</option><option>Visual estimate</option></select></label>
       <label>Product category<select id="plotTreeProduct"><option>Unknown</option><option>Pulpwood</option><option>Chip-n-saw</option><option>Sawtimber</option><option>Veneer candidate</option><option>Nonmerchantable</option></select></label>
       <label>Visible defects<input id="plotTreeDefects" placeholder="Comma separated; photograph every significant defect"></label>
-      <label>Purposes<input id="plotTreePurposes" placeholder="Timber, preserve, clearing obstacleâ€¦"></label>
+      <label>Purposes<input id="plotTreePurposes" placeholder="Timber, preserve, clearing obstacle…"></label>
       <label>Inspector explanation<textarea id="plotTreeExplanation"></textarea></label>
       <label class="water-rule"><input id="plotTreePhoto" type="checkbox" checked>Take supporting photograph after saving</label>
     </div>
@@ -380,16 +947,16 @@
       <h2>Does this photograph show water?</h2>
       <p class="small">Confirm what you personally observed. The app will never silently classify water.</p>
       <div id="waterTypeChoices" class="water-choice-grid">
-        <button type="button" data-water-choice="standing">Yes â€” Standing Water</button>
-        <button type="button" data-water-choice="flowing">Yes â€” Flowing Water</button>
-        <button type="button" data-water-choice="ditch">Yes â€” Ditch</button>
-        <button type="button" data-water-choice="creek_stream">Yes â€” Creek or Stream</button>
-        <button type="button" data-water-choice="other">Yes â€” Other Water</button>
+        <button type="button" data-water-choice="standing">Yes — Standing Water</button>
+        <button type="button" data-water-choice="flowing">Yes — Flowing Water</button>
+        <button type="button" data-water-choice="ditch">Yes — Ditch</button>
+        <button type="button" data-water-choice="creek_stream">Yes — Creek or Stream</button>
+        <button type="button" data-water-choice="other">Yes — Other Water</button>
         <button type="button" data-water-choice="no" class="cancel">No</button>
         <button type="button" data-water-choice="unsure" class="cancel">Unsure</button>
       </div>
       <div id="waterMeasurementFields" class="structured-fields" hidden>
-        <label>Depth<select id="photoWaterDepth"><option value="unknown">Unknown</option><option value="less_than_1_inch">Less than 1 inch</option><option value="1-3_inches">1â€“3 inches</option><option value="3-7_inches">3â€“7 inches</option><option value="8-12_inches">8â€“12 inches</option><option value="more_than_12_inches">More than 12 inches</option><option value="exact">Exact entry</option></select></label>
+        <label>Depth<select id="photoWaterDepth"><option value="unknown">Unknown</option><option value="less_than_1_inch">Less than 1 inch</option><option value="1-3_inches">1–3 inches</option><option value="3-7_inches">3–7 inches</option><option value="8-12_inches">8–12 inches</option><option value="more_than_12_inches">More than 12 inches</option><option value="exact">Exact entry</option></select></label>
         <label id="photoWaterExactLabel" hidden>Exact depth in inches<input id="photoWaterExact" type="number" min="0" step="0.25" inputmode="decimal"></label>
         <label>Measurement basis<select id="photoWaterBasis"><option>Unknown</option><option>Estimated</option><option>Measured</option></select></label>
         <label>Approximate width in feet<input id="photoWaterWidth" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Unknown if blank"></label>
@@ -427,4 +994,3 @@
   <script src="./app.js?v=3.13.0-home-test.5.4"></script>
 </body>
 </html>
-
