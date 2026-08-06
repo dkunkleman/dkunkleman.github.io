@@ -33,28 +33,36 @@
   }
 
   function recoveredGetCurrentPosition(success, failure, options) {
-    const onSuccess = position => {
+    let settled = false;
+    const finishSuccess = position => {
+      if (settled) return;
+      settled = true;
       remember(position);
       if (typeof success === "function") success(position);
     };
-    const onFailure = error => {
-      if (error && error.code === 1) {
-        if (typeof failure === "function") failure(error);
+    const finishFailure = error => {
+      if (settled) return;
+      settled = true;
+      if (typeof failure === "function") failure(error);
+    };
+    nativeGetCurrentPosition(finishSuccess, error => {
+      if (error && Number(error.code) === 1) {
+        finishFailure(error);
         return;
       }
-      nativeGetCurrentPosition(onSuccess, fallbackError => {
+      nativeGetCurrentPosition(finishSuccess, fallbackError => {
         if (lastGoodPosition && Date.now() - Number(lastGoodPosition.timestamp || 0) <= 120000) {
-          onSuccess(lastGoodPosition);
+          finishSuccess(lastGoodPosition);
           return;
         }
-        if (typeof failure === "function") failure(fallbackError || error);
+        finishFailure(fallbackError || error);
       }, normalFallbackOptions(options));
-    };
-    nativeGetCurrentPosition(onSuccess, onFailure, preciseAttemptOptions(options));
+    }, preciseAttemptOptions(options));
   }
 
   function stopNative(record) {
     if (!record) return;
+    record.generation += 1;
     if (record.nativeWatchId != null) {
       try { nativeClearWatch(record.nativeWatchId); } catch (error) { /* already gone */ }
       record.nativeWatchId = null;
@@ -65,33 +73,60 @@
     }
   }
 
+  function cancelRecord(record) {
+    if (!record) return;
+    record.cancelled = true;
+    stopNative(record);
+    virtualWatches.delete(record.virtualId);
+  }
+
+  function cancelOtherWatches(exceptId) {
+    Array.from(virtualWatches.values()).forEach(record => {
+      if (record.virtualId !== exceptId) cancelRecord(record);
+    });
+  }
+
   function scheduleRestart(record, delay) {
-    if (!record || record.cancelled || record.restartTimer) return;
+    if (!record || record.cancelled || record.permissionDenied || record.restartTimer) return;
+    const scheduledGeneration = record.generation;
     record.restartTimer = setTimeout(() => {
       record.restartTimer = null;
+      if (record.cancelled || record.permissionDenied || record.generation !== scheduledGeneration) return;
       startNativeWatch(record);
     }, delay == null ? 1200 : delay);
   }
 
   function startNativeWatch(record) {
-    if (!record || record.cancelled) return;
+    if (!record || record.cancelled || record.permissionDenied) return;
+    cancelOtherWatches(record.virtualId);
     stopNative(record);
+    const generation = record.generation;
     const success = position => {
+      if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
       record.failureCount = 0;
+      record.permissionErrorReported = false;
       remember(position);
       if (typeof record.success === "function") record.success(position);
     };
     const failure = error => {
+      if (record.cancelled || record.generation !== generation) return;
       record.failureCount += 1;
-      if (error && error.code === 1) {
+      if (error && Number(error.code) === 1) {
+        record.permissionDenied = true;
+        stopNative(record);
         if (!record.permissionErrorReported && typeof record.failure === "function") {
           record.permissionErrorReported = true;
           record.failure(error);
         }
-        scheduleRestart(record, 5000);
         return;
       }
-      recoveredGetCurrentPosition(success, fallbackError => {
+      recoveredGetCurrentPosition(position => {
+        if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
+        record.failureCount = 0;
+        remember(position);
+        if (typeof record.success === "function") record.success(position);
+      }, fallbackError => {
+        if (record.cancelled || record.permissionDenied || record.generation !== generation) return;
         if (record.failureCount === 1 && typeof record.failure === "function") record.failure(fallbackError || error);
         scheduleRestart(record, Math.min(5000, 800 + record.failureCount * 700));
       }, record.options);
@@ -104,6 +139,7 @@
   }
 
   function recoveredWatchPosition(success, failure, options) {
+    cancelOtherWatches(null);
     const virtualId = nextVirtualWatchId++;
     const record = {
       virtualId,
@@ -114,7 +150,9 @@
       restartTimer: null,
       failureCount: 0,
       permissionErrorReported: false,
-      cancelled: false
+      permissionDenied: false,
+      cancelled: false,
+      generation: 0
     };
     virtualWatches.set(virtualId, record);
     startNativeWatch(record);
@@ -127,15 +165,12 @@
       try { nativeClearWatch(id); } catch (error) { /* unknown native id */ }
       return;
     }
-    record.cancelled = true;
-    stopNative(record);
-    virtualWatches.delete(id);
+    cancelRecord(record);
   }
 
   function reviveAll() {
     virtualWatches.forEach(record => {
-      if (record.cancelled) return;
-      record.permissionErrorReported = false;
+      if (record.cancelled || record.permissionDenied) return;
       scheduleRestart(record, 0);
     });
   }
