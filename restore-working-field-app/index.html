@@ -23,15 +23,29 @@
 </main>
 <script>
 (function(){
+  const RELEASE="3.13.0-home-test.5.3-safari-recovery-1";
   const button=document.getElementById("restore");
   const status=document.getElementById("status");
   let running=false;
+
+  function waitForActivation(registration){
+    const worker=registration.installing||registration.waiting||registration.active;
+    if(!worker||worker.state==="activated")return Promise.resolve();
+    return new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>reject(new Error("Safari recovery did not activate.")),30000);
+      worker.addEventListener("statechange",()=>{
+        if(worker.state==="activated"){clearTimeout(timer);resolve();}
+        else if(worker.state==="redundant"){clearTimeout(timer);reject(new Error("Safari recovery worker became redundant."));}
+      });
+    });
+  }
+
   button.addEventListener("click",async function(){
     if(running)return;
     running=true;
     button.disabled=true;
     button.textContent="RESTORING...";
-    status.textContent="Removing the broken saved app copy. Your inspection evidence is staying on this phone.";
+    status.textContent="Refreshing Safari's field-app connection. Your inspection evidence is staying on this phone.";
     try{
       if("serviceWorker" in navigator){
         const registrations=await navigator.serviceWorker.getRegistrations();
@@ -41,9 +55,13 @@
         const names=await caches.keys();
         await Promise.all(names.filter(name=>name.startsWith("property-inspector-home-test-313-offline-")).map(name=>caches.delete(name)));
       }
-      status.textContent="WORKING APP RESTORED. Opening it now...";
-      const target="/field-simple-test/?v=3.13.0-home-test.5.1-resume-1&deploy=field-proven-resume&restored="+Date.now();
-      setTimeout(()=>location.replace(target),500);
+      if(!("serviceWorker" in navigator))throw new Error("Safari service workers are unavailable.");
+      status.textContent="Installing the Safari recovery copy. Your inspection evidence is unchanged.";
+      const registration=await navigator.serviceWorker.register("/field-simple-test/sw.js?release="+encodeURIComponent(RELEASE)+"&t="+Date.now(),{scope:"/field-simple-test/"});
+      await waitForActivation(registration);
+      status.textContent="SAFARI RECOVERY READY. Opening the field app now...";
+      const target="/field-simple-test/?v="+encodeURIComponent(RELEASE)+"&deploy=safari-recovery&restored="+Date.now();
+      location.replace(target);
     }catch(error){
       running=false;
       button.disabled=false;
