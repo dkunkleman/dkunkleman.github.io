@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1";
+  const APP_VERSION = "3.13.0-home-test.5.2";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -4297,18 +4297,37 @@
       });
       simpleSetStatus("STARTING SUGGESTION LOADED - confirm it from what you see before starting", "warning");
     }));
-    document.getElementById("sectionStartWalking").addEventListener("click", () => {
-      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
-      const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
-      const conditions = {};
-      Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
-      const methodInput = content.querySelector('input[name="sectionMethod"]:checked');
+    document.getElementById("sectionStartWalking").addEventListener("click", async event => {
+      const startButton = event.currentTarget;
+      if (startButton.disabled) return;
+      startButton.disabled = true;
+      startButton.textContent = "TAP RECEIVED — GETTING GPS";
+      startButton.setAttribute("aria-busy", "true");
+      simpleSetStatus("TAP RECEIVED — GETTING GPS. The section will start automatically.", "warning");
       try {
-        const section = sectionMappingTools.startSection(data, { descriptions, conditions, method: methodInput && methodInput.value, position: lastPosition, source_planning_suggestion_id: selectedSuggestionId || settings.source || null });
+        const startPosition = await ensureFieldGpsReady();
+        if (!startPosition) {
+          startButton.disabled = false;
+          startButton.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
+          startButton.removeAttribute("aria-busy");
+          simpleSetStatus("SECTION NOT STARTED — allow Precise Location, then tap the large button again. Nothing was lost.", "warning");
+          return;
+        }
+        startButton.textContent = "GPS READY — SAVING SECTION";
+        const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
+        const conditions = {};
+        Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
+        const methodInput = content.querySelector('input[name="sectionMethod"]:checked');
+        const section = sectionMappingTools.startSection(data, { descriptions, conditions, method: methodInput && methodInput.value, position: startPosition, source_planning_suggestion_id: selectedSuggestionId || settings.source || null });
         activateSectionSession(section, "FIELD_BUTTONS");
-        simpleSetStatus(`${section.section_id} STARTED - descriptions, GPS, time, accuracy, and heading saved`, "saved");
+        simpleSetStatus(`${section.section_id} STARTED — GPS, time, accuracy, and heading saved`, "saved");
         renderSectionActive(section);
-      } catch (error) { simpleSetStatus(error.message, "warning"); }
+      } catch (error) {
+        startButton.disabled = false;
+        startButton.textContent = "SECTION NOT STARTED — TAP TO TRY AGAIN";
+        startButton.removeAttribute("aria-busy");
+        simpleSetStatus(`SECTION NOT STARTED — ${error.message}. Nothing was lost.`, "warning");
+      }
     });
     document.getElementById("sectionStartReturn").addEventListener("click", renderSimpleHome);
     bindSimpleLocator(); renderSimpleHeader();
