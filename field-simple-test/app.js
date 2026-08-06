@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.2";
+  const APP_VERSION = "3.13.0-home-test.5.1-resume-1";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -3797,12 +3797,8 @@
     if (!(await confirmLargePackage("report"))) return;
     packageBusy = true;
     updateControls();
-    if (watchId !== null) stopTracking({ silent: true, reason: "finish" });
-    else if (!data.stopped) {
-      data.stopped = new Date().toISOString();
-      data.lifecycle_events.push({ type: "inspection_finished", time: data.stopped, source: "button_press" });
-      saveState();
-    }
+    data.lifecycle_events.push({ type: "inspection_copy_created", time: new Date().toISOString(), source: "button_press" });
+    saveState();
     try {
       const result = await buildPackageWithRecovery("report", null);
       await presentPackage(result.fileName, result.blob, result.manifest);
@@ -4302,18 +4298,15 @@
       if (startButton.disabled) return;
       startButton.disabled = true;
       startButton.textContent = "TAP RECEIVED — GETTING GPS";
-      startButton.setAttribute("aria-busy", "true");
-      simpleSetStatus("TAP RECEIVED — GETTING GPS. The section will start automatically.", "warning");
+      simpleSetStatus("TAP RECEIVED — GETTING GPS", "warning");
       try {
         const startPosition = await ensureFieldGpsReady();
         if (!startPosition) {
           startButton.disabled = false;
           startButton.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
-          startButton.removeAttribute("aria-busy");
-          simpleSetStatus("SECTION NOT STARTED — allow Precise Location, then tap the large button again. Nothing was lost.", "warning");
+          simpleSetStatus("SECTION NOT STARTED — move into open sky and tap the large button again. Nothing was lost.", "warning");
           return;
         }
-        startButton.textContent = "GPS READY — SAVING SECTION";
         const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
         const conditions = {};
         Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
@@ -4325,7 +4318,6 @@
       } catch (error) {
         startButton.disabled = false;
         startButton.textContent = "SECTION NOT STARTED — TAP TO TRY AGAIN";
-        startButton.removeAttribute("aria-busy");
         simpleSetStatus(`SECTION NOT STARTED — ${error.message}. Nothing was lost.`, "warning");
       }
     });
@@ -4959,6 +4951,35 @@
     if (!content) return;
     simpleCloseDialogs();
     restoreSimplePageScrolling();
+    if (data.started && data.stopped && watchId === null) {
+      content.innerHTML = `<section class="simple-start"><h2>YOUR SAVED INSPECTION IS SAFE</h2><p>Tap the green button to turn GPS and the field buttons back on.</p><button id="simpleResumeSaved" type="button" ${offlineReady ? "" : "disabled"}>${offlineReady ? "RESUME EXISTING INSPECTION" : "PREPARING OFFLINE USE..."}</button><p class="simple-help">This keeps every photograph, GPS point, note, measurement, and section.</p></section>`;
+      const resume = document.getElementById("simpleResumeSaved");
+      if (resume && offlineReady) resume.addEventListener("click", async () => {
+        resume.disabled = true;
+        resume.textContent = "TAP RECEIVED — STARTING GPS";
+        simpleSetStatus("TAP RECEIVED — STARTING GPS", "warning");
+        const savedStoppedAt = data.stopped;
+        await startTracking();
+        const position = await ensureFieldGpsReady();
+        if (!position) {
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+          stopOrientationCapture();
+          releaseWakeLock();
+          data.stopped = savedStoppedAt || new Date().toISOString();
+          saveState();
+          updateControls();
+          resume.disabled = false;
+          resume.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
+          simpleSetStatus("GPS NOT READY — move into open sky and tap the green button again. Nothing was lost.", "warning");
+          return;
+        }
+        simpleSetStatus("INSPECTION RESUMED — FIELD BUTTONS ARE WORKING", "saved");
+        renderSimpleHome();
+      });
+      renderSimpleHeader();
+      return;
+    }
     if (!data.started) {
       content.innerHTML = `<section class="simple-start"><h2>ONE THING TO DO NEXT</h2><p>Tap the green button. Allow precise location when asked.</p><button id="simpleStart" type="button" ${offlineReady ? "" : "disabled"}>${offlineReady ? "START TEST INSPECTION" : "PREPARING OFFLINE USE..."}</button><p class="simple-help">This home test uses separate storage. It cannot clear or change the saved production inspection.</p></section>`;
       const start = document.getElementById("simpleStart");
