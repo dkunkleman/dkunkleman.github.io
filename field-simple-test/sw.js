@@ -1,7 +1,7 @@
 "use strict";
 
-const RELEASE = "3.13.0-home-test.5.3-safari-recovery-3";
-const CACHE_NAME = "property-inspector-home-test-313-offline-v5-3-safari-recovery-3";
+const RELEASE = "3.13.0-home-test.5.3-safari-recovery-4";
+const CACHE_NAME = "property-inspector-home-test-313-offline-v5-3-safari-recovery-4";
 const INDEX_URL = `./index.html?v=${RELEASE}`;
 const APP_URL = `./app.js?v=${RELEASE}`;
 const RECOVERY_URL = `./safari-geolocation-recovery.js?v=${RELEASE}`;
@@ -73,7 +73,7 @@ function patchFieldAppSource(source) {
 
   patched = patched.replace(
     "  let fieldGpsFixPromise = null;",
-    "  let fieldGpsFixPromise = null;\n  let gpsRestartTimer = null;\n  let gpsRestartAttempt = 0;\n  let lastGpsRecoverySnapshotAt = 0;\n  const GPS_RECOVERY_SNAPSHOT_INTERVAL_MS = 10000;"
+    "  let fieldGpsFixPromise = null;\n  let gpsRestartTimer = null;\n  let gpsRestartAttempt = 0;\n  let lastGpsRecoverySnapshotAt = 0;\n  let lastExportVerification = null;\n  const GPS_RECOVERY_SNAPSHOT_INTERVAL_MS = 10000;"
   );
 
   const abortSection = [
@@ -104,6 +104,11 @@ function patchFieldAppSource(source) {
   patched = patched.replace(
     '        simpleSetStatus(`${section.section_id} STARTED — GPS, time, accuracy, and heading saved`, "saved");',
     '        simpleSetStatus(startPosition ? `${section.section_id} STARTED — GPS, time, accuracy, and heading saved` : `${section.section_id} STARTED — WAITING FOR FIRST GPS POINT; section is safely started`, startPosition ? "saved" : "warning");'
+  );
+
+  patched = patched.replace(
+    "    point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;\n    data.points.push(point);",
+    "    point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;\n    const sectionAtFix = sectionMappingTools ? sectionMappingTools.activeSection(data) : null;\n    if (sectionAtFix && !sectionAtFix.capture_paused) { point.section_id = sectionAtFix.section_id; point.section_capture_status = \"ACTIVE_EDGE_CAPTURE\"; }\n    data.points.push(point);"
   );
 
   patched = patched.replace(
@@ -154,6 +159,73 @@ function patchFieldAppSource(source) {
     "    gpsRestartAttempt = 0;\n    document.getElementById(\"pointCount\").textContent = data.points.length;"
   );
 
+  const packageHelpers = `
+  function exactFieldEvidenceCounts() {
+    const sectionModel = sectionMappingTools ? sectionMappingTools.ensureModel(data) : { sections: [] };
+    return {
+      gps_points: data.points.length,
+      observations: data.markers.length,
+      photographs: data.photos.length,
+      voice_notes: data.voice_notes.length,
+      sections: Array.isArray(sectionModel.sections) ? sectionModel.sections.length : 0
+    };
+  }
+
+  function formatFieldEvidenceCounts(counts) {
+    return \\`${"${counts.gps_points}"} GPS | ${"${counts.observations}"} records | ${"${counts.photographs}"} photos | ${"${counts.voice_notes}"} voice | ${"${counts.sections}"} sections\\`;
+  }
+
+  function packageEvidenceCounts(result, fallbackSections) {
+    const summary = result && result.manifest && result.manifest.summary || {};
+    return {
+      gps_points: Number(summary.gps_track_point_count) || 0,
+      observations: Number(summary.field_event_count) || 0,
+      photographs: Number(summary.photo_count) || 0,
+      voice_notes: Number(summary.voice_note_count) || 0,
+      sections: Number(fallbackSections) || 0
+    };
+  }
+
+  function verifyExportCounts(before, result, inspectionWasActive) {
+    const after = exactFieldEvidenceCounts();
+    const packaged = packageEvidenceCounts(result, before.sections);
+    if (packaged.photographs !== before.photographs) throw new Error(\"Export photo count changed during packaging.\");
+    if (packaged.voice_notes !== before.voice_notes) throw new Error(\"Export voice-note count changed during packaging.\");
+    if (packaged.observations < before.observations) throw new Error(\"Export omitted saved field records.\");
+    if (packaged.gps_points < before.gps_points) throw new Error(\"Export omitted saved GPS points.\");
+    if (after.photographs < before.photographs || after.voice_notes < before.voice_notes || after.observations < before.observations || after.sections < before.sections) throw new Error(\"Saved evidence count decreased during export.\");
+    if (inspectionWasActive && data.stopped) throw new Error(\"Export ended the active inspection.\");
+    lastExportVerification = { before, packaged, after, inspection_active_before: inspectionWasActive, inspection_active_after: Boolean(data.started && !data.stopped) };
+    return lastExportVerification;
+  }
+
+  function exportVerificationText(verification) {
+    if (!verification) return \"\";
+    return \\`BEFORE: ${"${formatFieldEvidenceCounts(verification.before)}"} | PACKAGE: ${"${formatFieldEvidenceCounts(verification.packaged)}"} | AFTER: ${"${formatFieldEvidenceCounts(verification.after)}"} | INSPECTION STILL ACTIVE: ${"${verification.inspection_active_after ? \"YES\" : \"NO\"}"}\\`;
+  }
+
+`;
+  patched = patched.replace("  async function confirmLargePackage(mode) {", packageHelpers + "  async function confirmLargePackage(mode) {");
+
+  patched = patched.replace(
+    "    packageBusy = true;\n    updateControls();\n    data.lifecycle_events.push({ type: \"inspection_copy_created\"",
+    "    const exportCountsBefore = exactFieldEvidenceCounts();\n    const inspectionWasActive = Boolean(data.started && !data.stopped);\n    simpleSetStatus(`EXPORT STARTING — ${formatFieldEvidenceCounts(exportCountsBefore)} — inspection remains active`, \"warning\");\n    packageBusy = true;\n    updateControls();\n    data.lifecycle_events.push({ type: \"inspection_copy_created\""
+  );
+  patched = patched.replace(
+    "      const result = await buildPackageWithRecovery(\"report\", null);\n      await presentPackage(result.fileName, result.blob, result.manifest);\n      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE:",
+    "      const result = await buildPackageWithRecovery(\"report\", null);\n      const verification = verifyExportCounts(exportCountsBefore, result, inspectionWasActive);\n      await presentPackage(result.fileName, result.blob, result.manifest);\n      simpleSetStatus(`EXPORT VERIFIED — ${exportVerificationText(verification)}`, \"saved\");\n      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE:"
+  );
+
+  patched = patched.replace(
+    "    packageBusy = true;\n    updateControls();\n    try {\n      const result = await buildPackageWithRecovery(\"full_archive\", watchId !== null ? \"backup\" : null);\n      await presentPackage(result.fileName, result.blob, result.manifest);\n      setStatus(`FULL ARCHIVE READY:",
+    "    const exportCountsBefore = exactFieldEvidenceCounts();\n    const inspectionWasActive = Boolean(data.started && !data.stopped);\n    simpleSetStatus(`EXPORT STARTING — ${formatFieldEvidenceCounts(exportCountsBefore)} — inspection remains active`, \"warning\");\n    packageBusy = true;\n    updateControls();\n    try {\n      const result = await buildPackageWithRecovery(\"full_archive\", watchId !== null ? \"backup\" : null);\n      const verification = verifyExportCounts(exportCountsBefore, result, inspectionWasActive);\n      await presentPackage(result.fileName, result.blob, result.manifest);\n      simpleSetStatus(`EXPORT VERIFIED — ${exportVerificationText(verification)}`, \"saved\");\n      setStatus(`FULL ARCHIVE READY:"
+  );
+
+  patched = patched.replace(
+    "    document.getElementById(\"simpleShareZip\").addEventListener(\"click\", shareLastPackage);",
+    "    document.getElementById(\"simpleShareZip\").addEventListener(\"click\", shareLastPackage);\n    if (lastExportVerification) { const verification = document.createElement(\"p\"); verification.className = \"frontage-instruction\"; verification.textContent = exportVerificationText(lastExportVerification); result.appendChild(verification); }"
+  );
+
   patched = patched.replace(
     "      offlineState.textContent = \"Offline ready\";",
     "      offlineState.textContent = `Offline ready · ${APP_VERSION} · ${window.__FIELD_CACHE_NAME || \"cache active\"}`;"
@@ -161,16 +233,21 @@ function patchFieldAppSource(source) {
 
   patched = patched.replace(
     "  document.addEventListener(\"visibilitychange\", () => {\n    if (document.visibilityState === \"visible\") {",
-    "  document.addEventListener(\"visibilitychange\", () => {\n    if (document.visibilityState !== \"visible\") {\n      try { saveState(); lastGpsRecoverySnapshotAt = Date.now(); } catch (error) { /* canonical IndexedDB evidence remains */ }\n      return;\n    }\n    if (document.visibilityState === \"visible\") {"
+    "  document.addEventListener(\"visibilitychange\", () => {\n    if (document.visibilityState !== \"visible\") {\n      try { saveState(); lastGpsRecoverySnapshotAt = Date.now(); } catch (error) { /* additional snapshot only; canonical evidence is already committed */ }\n      return;\n    }\n    if (document.visibilityState === \"visible\") {"
   );
 
   const required = [
     `const APP_VERSION = \"${RELEASE}\";`,
     "SECTION SAVED — Safari GPS is reconnecting",
     "SECTION_FIRST_GPS_RECOVERED",
+    "section_capture_status = \"ACTIVE_EDGE_CAPTURE\"",
     "GPS INTERRUPTED — RECONNECTING AUTOMATICALLY",
     "GPS_RECOVERY_SNAPSHOT_INTERVAL_MS = 10000",
     "startTracking({ skipReconcile: true })",
+    "exactFieldEvidenceCounts",
+    "verifyExportCounts",
+    "EXPORT VERIFIED",
+    "INSPECTION STILL ACTIVE",
     "Offline ready · ${APP_VERSION}"
   ];
   if (!required.every(text => patched.includes(text))) throw new Error("Safari recovery source patch did not apply completely.");
