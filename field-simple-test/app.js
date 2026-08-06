@@ -4958,9 +4958,17 @@
         resume.disabled = true;
         resume.textContent = "TAP RECEIVED — STARTING GPS";
         simpleSetStatus("TAP RECEIVED — STARTING GPS", "warning");
+        const savedStoppedAt = data.stopped;
         await startTracking();
         const position = await ensureFieldGpsReady();
         if (!position) {
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+          stopOrientationCapture();
+          releaseWakeLock();
+          data.stopped = savedStoppedAt || new Date().toISOString();
+          saveState();
+          updateControls();
           resume.disabled = false;
           resume.textContent = "GPS NOT READY — TAP HERE TO TRY AGAIN";
           simpleSetStatus("GPS NOT READY — move into open sky and tap the green button again. Nothing was lost.", "warning");
