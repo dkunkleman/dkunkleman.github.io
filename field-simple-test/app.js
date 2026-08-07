@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-9";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -538,7 +538,7 @@
       state_storage: "IndexedDB canonical inspectionState",
       state_saved_at: new Date().toISOString()
     });
-    return typeof structuredClone === "function" ? structuredClone(recovery) : JSON.parse(JSON.stringify(recovery));
+    return recovery;
   }
 
   function compactLocalRecoverySnapshot() {
@@ -4839,7 +4839,7 @@
     data.simple_sessions.push(session);
     data.active_simple_session_id = session.simple_session_id;
     simpleActiveSessionId = session.simple_session_id;
-    saveState(); redraw();
+    redraw();
     return session;
   }
 
@@ -4893,9 +4893,9 @@
         section.location_status = tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS";
         section.location_requested_at = tappedAt;
         activateSectionSession(section, "FIELD_BUTTONS", tapPosition);
-        saveState();
         simpleSetStatus(tapPosition ? `${section.section_id} STARTED — GPS, time, accuracy, and heading saved` : `${section.section_id} SAVED — LOCATION PENDING; GPS is reconnecting`, tapPosition ? "saved" : "warning");
         renderSectionActive(section);
+        saveState();
         if (!tapPosition) ensureFieldGpsReady().catch(() => {});
       } catch (error) { simpleSetStatus(`SECTION NOT SAVED — ${error.message}`, "warning"); }
     });
