@@ -14,9 +14,11 @@ on:
       - 'tools/patch-direct-storage-quota-v2.js'
       - 'tools/patch-direct-gps-success-status.js'
       - 'tools/patch-direct-section-crash.js'
+      - 'tools/patch-direct-field-first-startup.js'
       - 'tests/ed42-safari-direct.test.js'
       - 'tests/gps-success-status.test.js'
       - 'tests/section-start-safari-crash.test.js'
+      - 'tests/field-first-startup.test.js'
       - 'tests/field-simple-storage-quota.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
       - 'tests/field-simple-export-survival.test.js'
@@ -78,6 +80,10 @@ jobs:
         run: node tools/patch-direct-section-crash.js
       - name: Verify section-start Safari crash path
         run: node tests/section-start-safari-crash.test.js
+      - name: Make field startup authoritative and nonblocking
+        run: node tools/patch-direct-field-first-startup.js
+      - name: Verify field-first startup and update-safe navigation
+        run: node tests/field-first-startup.test.js
       - name: Commit verified direct files
         run: |
           if git diff --quiet HEAD -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js; then
@@ -87,5 +93,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js
-          git commit -m 'Build verified ed42 Safari direct candidate v10'
+          git commit -m 'Build verified ed42 Safari direct candidate v11'
           git push origin HEAD:repair/field-simple-test-5.1-safari-direct
