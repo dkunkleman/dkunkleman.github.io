@@ -1,24 +1,24 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-direct-ed42-v4";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1-safari-direct-4";
+const CACHE_NAME = "property-inspector-home-test-313-direct-ed42-v5";
+const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1-safari-direct-5";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./water-intelligence.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./evidence-governance.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./evidence-sets.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./timber-reconnaissance.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./authoritative-weather.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./frontage-workflow.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./automatic-context.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./section-mapping.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./wet-edge-mapping.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./property-review.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./app.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./idb-recovery.js?v=3.13.0-home-test.5.1-safari-direct-4",
-  "./inspection-package.js?v=3.13.0-home-test.5.1-safari-direct-4",
+  "./inspection-coaching.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./water-intelligence.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./evidence-governance.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./evidence-sets.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./timber-reconnaissance.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./authoritative-weather.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./frontage-workflow.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./automatic-context.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./section-mapping.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./wet-edge-mapping.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./property-review.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./app.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./idb-recovery.js?v=3.13.0-home-test.5.1-safari-direct-5",
+  "./inspection-package.js?v=3.13.0-home-test.5.1-safari-direct-5",
   "./manifest.webmanifest",
   "./assets/parcels.json",
   "./assets/august-4-route-context.json"
