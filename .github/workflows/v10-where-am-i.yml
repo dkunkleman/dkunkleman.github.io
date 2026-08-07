@@ -43,9 +43,36 @@ jobs:
           git add -- field-simple-test-direct-v10-where-am-i
           if git diff --cached --quiet; then
             echo 'Verified candidate already matches branch.'
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Build verified v10 WHERE AM I candidate v2'
+            git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
+          fi
+      - name: Publish tested WHERE AM I v2 and clean staging markers
+        run: |
+          git fetch origin main repair/field-simple-test-direct-v10-section-pause
+          git checkout -B main origin/main
+          git checkout origin/repair/field-simple-test-direct-v10-section-pause -- field-simple-test-direct-v10-where-am-i
+          rm -f -- \
+            DO_NOT_USE_MARKER_4.txt \
+            FINAL_STOP.txt \
+            I_AM_STOPPING_MARKERS_NOW.txt \
+            LAST_ACCIDENT.txt \
+            NO_MORE.txt \
+            PLEASE_IGNORE_THIS_TOO.txt \
+            STOP_THIS.txt \
+            TEMP_DO_NOT_USE.txt \
+            WHERE_AM_I_V2_PUBLISHING.txt \
+            WHY.txt \
+            ZZZ_STOP.txt \
+            x
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Main already matches the tested WHERE AM I v2 publication.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Build verified v10 WHERE AM I candidate v2'
-          git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
+          git commit -m 'Publish tested WHERE AM I v2 and clean staging files'
+          git push origin HEAD:main
