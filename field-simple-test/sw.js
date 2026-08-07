@@ -1,24 +1,24 @@
 "use strict";
 
-const CACHE_NAME = "property-inspector-home-test-313-direct-ed42-v10";
-const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1-safari-direct-10";
+const CACHE_NAME = "property-inspector-home-test-313-direct-ed42-v11";
+const INDEX_URL = "./index.html?v=3.13.0-home-test.5.1-safari-direct-11";
 const CORE_OFFLINE_FILES = [
   INDEX_URL,
-  "./inspection-coaching.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./water-intelligence.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./evidence-governance.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./evidence-sets.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./timber-reconnaissance.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./authoritative-weather.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./frontage-workflow.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./automatic-context.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./section-mapping.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./wet-edge-mapping.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./property-review.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./app.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./idb-recovery.js?v=3.13.0-home-test.5.1-safari-direct-10",
-  "./inspection-package.js?v=3.13.0-home-test.5.1-safari-direct-10",
+  "./inspection-coaching.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./water-intelligence.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./evidence-governance.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./evidence-sets.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./timber-reconnaissance.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./reviewed-property-synthesis.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./authoritative-weather.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./frontage-workflow.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./automatic-context.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./section-mapping.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./wet-edge-mapping.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./property-review.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./app.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./idb-recovery.js?v=3.13.0-home-test.5.1-safari-direct-11",
+  "./inspection-package.js?v=3.13.0-home-test.5.1-safari-direct-11",
   "./manifest.webmanifest",
   "./assets/parcels.json",
   "./assets/august-4-route-context.json"
@@ -57,13 +57,15 @@ self.addEventListener("fetch", event => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(INDEX_URL)
+      // Always ask the network for the actual navigation URL first. This prevents
+      // an older worker from pinning Safari to an older index.html after a deployment.
+      fetch(request, { cache: "no-store" })
         .then(response => {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(INDEX_URL, copy));
           return response;
         })
-        .catch(() => caches.match(INDEX_URL))
+        .catch(() => caches.match(INDEX_URL, { ignoreSearch: true }))
     );
     return;
   }

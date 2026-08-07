@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-11";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -5844,7 +5844,8 @@
       offlineReady = true;
       updateControls();
       updateNextStep();
-      renderSimpleHome();
+      // Never yank the inspector out of an active field screen when offline setup finishes.
+      renderSimpleHeader();
     } catch (error) {
       offlineState.textContent = "Offline setup failed";
       offlineState.dataset.ready = "false";
@@ -5887,6 +5888,10 @@
       await restoreCanonicalInspectionState();
       saveState();
       await stateWriteQueue;
+      // Show the authoritative restored counts immediately. The tiny localStorage
+      // pointer must never look like the real inspection while slower startup work runs.
+      renderSimpleHeader();
+      simpleSetStatus(`FULL SAVED INSPECTION RESTORED — ${data.photos.length} photos | ${data.markers.length} records | ${data.voice_notes.length} voice`, "saved");
       await loadPendingPhotos();
       await reconcileGpsPoints();
       await migrateLegacyPhotos();
@@ -5901,8 +5906,12 @@
     redraw();
     renderConditions();
     renderAuthoritativeWeather();
-    await renderGallery();
-    await Promise.all([loadParcels(), registerOfflineWorker()]);
+    // Field controls must not wait for gallery thumbnails, parcel downloads, or
+    // service-worker installation. Those are useful background work, not startup gates.
+    renderGallery().catch(error => setStatus(`Gallery will load later: ${error.message}`, "warning"));
+    Promise.allSettled([loadParcels(), registerOfflineWorker()]).then(() => {
+      renderSimpleHeader();
+    });
     if (data.started && !data.stopped && !SIMPLE_AUTOMATION_MODE) {
       // A page refresh must never make David the debugger or silently start a
       // Safari geolocation request. The visible RECONNECT GPS button is the
