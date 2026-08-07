@@ -18,11 +18,12 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-7"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-8"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
 assert.match(app, /const photoDbName = "property-inspector-home-test-313-evidence"/);
+assert.match(app, /const stateStoreName = "inspectionState"/);
 assert.doesNotMatch(app, /propertyInspectorFixedTest313V1|property-inspector-fixed-test-313-evidence/);
 
 assert.match(app, /gpsWatchGeneration/);
@@ -64,6 +65,11 @@ assert.match(app, /inspection_copy_created/);
 assert.match(app, /await gpsWriteQueue/);
 assert.match(app, /EXPORT VERIFIED/);
 assert.match(app, /INSPECTION STILL ACTIVE/);
+assert.match(app, /local_recovery_compact: true/);
+assert.match(app, /state_storage: "IndexedDB canonical inspectionState"/);
+assert.match(app, /indexedDB\.open\(photoDbName, 4\)/);
+assert.match(app, /createObjectStore\(stateStoreName, \{ keyPath: "key" \}\)/);
+assert.match(app, /saveState\(\{ gpsOnly: true \}\)/);
 
 function extractFunction(name) {
   const re = new RegExp(`(?:async\\s+)?function\\s+${name}\\s*\\(`);
@@ -76,9 +82,9 @@ function extractFunction(name) {
     if (lineComment) { if (ch === "\n") lineComment = false; continue; }
     if (blockComment) { if (ch === "*" && next === "/") { blockComment = false; i += 1; } continue; }
     if (quote) {
-      if (escaped) { escaped = false; continue; }
-      if (ch === "\\") { escaped = true; continue; }
-      if (ch === quote) quote = null;
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === quote) quote = null;
       continue;
     }
     if (ch === "/" && next === "/") { lineComment = true; i += 1; continue; }
@@ -142,13 +148,29 @@ const hardTimeout = extractFunction("armManualGpsFallback");
 assert.match(hardTimeout, /GPS_MANUAL_HARD_TIMEOUT_MS/, "manual reconnect cannot hang indefinitely");
 assert.match(hardTimeout, /gpsManualRequestInFlight = false/, "hard timeout releases the reconnect UI");
 
+const saveStateBody = extractFunction("saveState");
+assert.doesNotMatch(saveStateBody, /throw\s+error/, "localStorage quota must not abort a field action");
+assert.match(saveStateBody, /compactLocalRecoverySnapshot/);
+assert.match(saveStateBody, /queueCanonicalStateSnapshot/);
+
+const restoreStateBody = extractFunction("restoreCanonicalInspectionState");
+assert.match(restoreStateBody, /inspectionStateGet/);
+assert.match(restoreStateBody, /loadedCompactRecovery/);
+
+const packageBody = extractFunction("buildPackageWithRecovery");
+assert.match(packageBody, /await stateWriteQueue/);
+assert.match(packageBody, /stateStorageFailed/);
+
 const initializeBody = extractFunction("initialize");
 assert.doesNotMatch(initializeBody, /startGpsWatcher\s*\(/, "page refresh must not silently start Safari geolocation");
 assert.match(initializeBody, /gpsUserActivatedThisPage = false/, "fresh page requires an explicit reconnect tap");
 assert.doesNotMatch(initializeBody, /await\s+startTracking\s*\(/, "page startup must not await heavyweight GPS startup");
+const restoreStateIndex = initializeBody.indexOf("await restoreCanonicalInspectionState();");
+const reconcileGpsIndex = initializeBody.indexOf("await reconcileGpsPoints();");
+assert.ok(restoreStateIndex >= 0 && reconcileGpsIndex > restoreStateIndex, "canonical inspection metadata restores before GPS reconciliation");
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-7/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v7/);
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-8/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v8/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -158,4 +180,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct v7 never starts GPS on refresh, starts the continuous watcher directly from RECONNECT GPS, hard-times out silent Safari, auto-recovers only after activation, preserves storage, and keeps pending-location recovery.");
+console.log("PASS: ed42 Safari-direct v8 keeps user-gated GPS recovery, moves canonical inspection state to IndexedDB so localStorage quota cannot block a field action, preserves evidence storage, and keeps export active.");
