@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-4";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-5";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -1615,10 +1615,33 @@
   }
 
   function inspectionStateGet() {
-    return withEvidenceTransaction(stateStoreName, "readonly", transaction => {
-      const request = transaction.objectStore(stateStoreName).get("active");
-      return transactionRequest(transaction, request, "Inspection state could not be read.", result => result || null);
-    });
+    return withEvidenceTransaction(stateStoreName, "readonly", transaction => new Promise((resolve, reject) => {
+      let settled = false;
+      let request;
+      try {
+        request = transaction.objectStore(stateStoreName).get("active");
+      } catch (error) {
+        reject(error);
+        return;
+      }
+      const finish = value => {
+        if (settled) return;
+        settled = true;
+        resolve(value || null);
+      };
+      const fail = error => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      };
+      // Safari can deliver the readonly get() result before transaction.oncomplete.
+      // The record is safe to consume at request success; do not hold startup hostage
+      // waiting for a later transaction-completion callback.
+      request.onsuccess = () => finish(request.result);
+      request.onerror = () => fail(request.error || new Error("Inspection state could not be read."));
+      transaction.onerror = () => fail(transaction.error || new Error("Inspection state could not be read."));
+      transaction.onabort = () => fail(transaction.error || new DOMException("Inspection state read was aborted.", "AbortError"));
+    }));
   }
 
   async function restoreCanonicalInspectionState() {
@@ -5945,9 +5968,20 @@
     // Nothing that touches the network, gallery, parcel map, service worker, or
     // photo-store health check may run before the canonical inspection is restored.
     loadState();
+    const showRestoreStage = (headline, detail) => {
+      const content = document.getElementById("simpleContent");
+      if (content) content.innerHTML = '<section class="simple-start"><h2>' + headline + '</h2><p>' + (detail || 'Do not press Clear. Saved evidence is not being changed.') + '</p></section>';
+      renderSimpleHeader();
+    };
+    showRestoreStage("OPENING SAVED INSPECTION DATABASE…", "Do not press Clear. This is reading the existing IndexedDB evidence store.");
     try {
+      let stageTimer = setTimeout(() => showRestoreStage("STILL OPENING SAVED DATABASE…", "Safari is taking longer than expected. Keep this page open; nothing is being erased or migrated."), 8000);
       await openPhotoDb();
+      clearTimeout(stageTimer);
+      showRestoreStage("READING FULL SAVED INSPECTION…", "The compact 3/3/3 emergency copy is not authoritative. Reading the full canonical inspection now.");
+      stageTimer = setTimeout(() => showRestoreStage("STILL READING FULL INSPECTION…", "Safari has not finished the IndexedDB read yet. Keep this page open; do not press Clear."), 8000);
       await restoreCanonicalInspectionState();
+      clearTimeout(stageTimer);
 
       governanceTools.ensureGovernanceModel(data);
       lastSavedOrientation = data.orientation_samples.length ? data.orientation_samples[data.orientation_samples.length - 1] : null;
@@ -5973,6 +6007,8 @@
     } catch (error) {
       setStatus(`CANONICAL INSPECTION RESTORE FAILED: ${error.message} Do not press Clear or clear Safari data.`, "error");
       startBtn.disabled = true;
+      const content = document.getElementById("simpleContent");
+      if (content) content.innerHTML = '<section class="simple-start"><h2>FULL INSPECTION RESTORE FAILED</h2><p>' + String(error && error.message || error) + '</p><p>Do not press Clear or clear Safari website data.</p></section>';
       renderSimpleHeader();
       return;
     }
