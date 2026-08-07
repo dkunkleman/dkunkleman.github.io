@@ -1,0 +1,1 @@
+The extra marker files are harmless; the actual candidate subtree remains isolated.
