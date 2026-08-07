@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-1";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-2";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -148,6 +148,10 @@
   let gpsPermissionDenied = false;
   let lastGpsFixReceivedAt = 0;
   const GPS_STALE_MS = 90000;
+  let gpsUserActivatedThisPage = false;
+  let lastGpsErrorCode = null;
+  let lastGpsErrorMessage = "";
+  let lastGpsErrorAt = null;
 
   const simpleShell = document.getElementById("simpleShell");
   if (simpleShell) {
@@ -2124,10 +2128,10 @@
     wakeLock = null;
   }
 
-  function updateControls() {
+    function updateControls() {
     const tracking = watchId !== null;
     const recordingVoice = Boolean(mediaRecorder && mediaRecorder.state === "recording");
-    startBtn.textContent = data.started && !tracking ? "Resume Existing Inspection" : "Start Inspection";
+    startBtn.textContent = data.started ? (tracking ? "GPS ACTIVE" : "START / RESTART GPS") : "START INSPECTION";
     startBtn.disabled = !offlineReady || tracking || photoBusy || packageBusy || recordingVoice;
     stopBtn.disabled = !tracking || photoBusy || packageBusy || recordingVoice;
     markerButtons.forEach(button => { button.disabled = photoBusy || packageBusy || recordingVoice; });
@@ -2143,6 +2147,7 @@
     document.getElementById("finishEvidenceSet").disabled = photoBusy || packageBusy || recordingVoice || !data.active_evidence_set_id;
     const activeSet = activeEvidenceSet();
     document.getElementById("addPlotTree").disabled = photoBusy || packageBusy || recordingVoice || !activeSet || activeSet.set_type !== "Timber Sample Plot";
+    renderSimpleHeader();
     updateNextStep();
   }
 
@@ -2269,6 +2274,9 @@
     lastGpsFixReceivedAt = Date.now();
     gpsRestartAttempt = 0;
     gpsPermissionDenied = false;
+    lastGpsErrorCode = null;
+    lastGpsErrorMessage = "";
+    lastGpsErrorAt = null;
     document.getElementById("pointCount").textContent = data.points.length;
     if (data.points.length === 1 || data.points.length % 5 === 0) redraw();
     lastPosition = point;
@@ -2332,26 +2340,30 @@
     return id;
   }
 
-  function explainGpsProblem(error) {
+    function explainGpsProblem(error) {
     const code = error && Number(error.code);
+    lastGpsErrorCode = Number.isFinite(code) ? code : 0;
+    lastGpsErrorMessage = error && error.message ? String(error.message) : "unknown error";
+    lastGpsErrorAt = new Date().toISOString();
     if (code === 1) {
       gpsPermissionDenied = true;
-      return "SAFARI LOCATION PERMISSION IS OFF. Open iPhone Settings > Privacy & Security > Location Services > Safari Websites, choose While Using the App, and turn Precise Location ON. Your field taps still save with location pending.";
+      return "GPS PERMISSION OFF. Safari cannot use location until Location access is allowed. Field records still save.";
     }
-    if (code === 2) return "Safari cannot get a location right now. Your field tap is saved with location pending; GPS will reconnect automatically.";
-    if (code === 3) return "Safari location timed out. Your field tap is saved with location pending; GPS will reconnect automatically.";
-    return `Safari GPS problem: ${error && error.message ? error.message : "unknown error"}. Your field tap is saved with location pending.`;
+    if (code === 2) return "GPS POSITION UNAVAILABLE. Safari has not produced a location. Field records still save.";
+    if (code === 3) return "GPS TIMEOUT. Safari did not return a location before the timeout. Field records still save.";
+    return `GPS ERROR: ${lastGpsErrorMessage}. Field records still save.`;
   }
 
-  function onGpsError(error, generation) {
+    function onGpsError(error, generation) {
     if (generation != null && generation !== gpsWatchGeneration) return;
     clearActiveGpsWatch();
     stopOrientationCapture();
     releaseWakeLock();
-    updateControls();
     const message = explainGpsProblem(error);
+    updateControls();
     setStatus(message, Number(error && error.code) === 1 ? "error" : "warning");
     simpleSetStatus(message, "warning");
+    renderSimpleHeader();
     if (gpsPermissionDenied) {
       clearTimeout(gpsRestartTimer);
       gpsRestartTimer = null;
@@ -2378,6 +2390,13 @@
       return;
     }
     if (gpsPermissionDenied && trackingOptions.recovery) return;
+    if (!trackingOptions.recovery) {
+      gpsUserActivatedThisPage = true;
+      gpsPermissionDenied = false;
+      lastGpsErrorCode = null;
+      lastGpsErrorMessage = "";
+      lastGpsErrorAt = null;
+    }
     const orientationPermission = requestOrientationAccess();
     try {
       await revalidatePhotoDb();
@@ -2406,6 +2425,11 @@
     }
     if (!trackingOptions.skipReconcile) await reconcileGpsPoints();
     startGpsWatcher();
+    if (!trackingOptions.recovery) {
+      setStatus("GPS STARTING — waiting for Safari to return the first location.", "active");
+      simpleSetStatus("GPS STARTING — waiting for Safari to return the first location.", "warning");
+      renderSimpleHeader();
+    }
     if (SIMPLE_AUTOMATION_MODE) {
       lastPosition = { lat: 30.489, lon: -87.091, accuracy_m: 3, altitude_m: 20, altitude_accuracy_m: 2, heading_deg: 90, speed_mps: 0, time: new Date().toISOString(), sequence: 1 };
       renderSimpleHeader();
@@ -2433,7 +2457,7 @@
         clearActiveGpsWatch();
         await startTracking({ recovery: true, skipReconcile: true });
       }
-      simpleSetStatus("GPS RECONNECTING — your field record is already saved; location will attach when Safari provides it.", "warning");
+      simpleSetStatus("GPS CHECK — requesting a current Safari location now.", "warning");
       const attempt = options => new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(position => {
           onPosition(position);
@@ -4264,15 +4288,18 @@
     element.dataset.kind = kind || "normal";
   }
 
-    function renderSimpleHeader() {
+      function renderSimpleHeader() {
     const gps = document.getElementById("simpleGpsStatus");
     const counts = document.getElementById("simpleCounts");
     const fresh = freshFieldPosition();
     if (gps) {
-      if (fresh) gps.textContent = `GPS +/-${Math.round(fresh.accuracy_m || 0)} m`;
-      else if (gpsPermissionDenied) gps.textContent = "GPS PERMISSION OFF — RECORDS STILL SAVE";
-      else if (data.started) gps.textContent = "GPS RECONNECTING — LOCATION PENDING";
-      else gps.textContent = "NOT STARTED";
+      if (fresh) gps.textContent = `GPS ACTIVE +/-${Math.round(fresh.accuracy_m || 0)} m`;
+      else if (gpsPermissionDenied || lastGpsErrorCode === 1) gps.textContent = "GPS PERMISSION OFF — TAP START / RESTART GPS AFTER FIXING LOCATION SETTINGS";
+      else if (lastGpsErrorCode === 2) gps.textContent = "GPS POSITION UNAVAILABLE — TAP START / RESTART GPS";
+      else if (lastGpsErrorCode === 3) gps.textContent = "GPS TIMEOUT — TAP START / RESTART GPS";
+      else if (watchId !== null) gps.textContent = "GPS STARTING — WAITING FOR FIRST LOCATION";
+      else if (data.started) gps.textContent = "GPS OFF — TAP START / RESTART GPS";
+      else gps.textContent = "NOT STARTED — TAP START INSPECTION";
     }
     if (counts) {
       const appPath = location.pathname.replace(/\/?$/, "/") + "app.js";
@@ -5555,7 +5582,10 @@
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
     if (data.started && !data.stopped && watchId === null && !SIMPLE_AUTOMATION_MODE) {
-      await startTracking();
+      gpsUserActivatedThisPage = false;
+      clearActiveGpsWatch();
+      updateControls();
+      renderSimpleHeader();
     }
     coverageSnapshot = null;
     coachingStateSnapshot = null;
@@ -5565,7 +5595,7 @@
     renderAuditHistory();
     renderEvidenceSets();
     if (statusEl.dataset.kind !== "error") {
-      setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap Resume Existing Inspection to continue, or Finish Inspection to create the package." : "Ready. Confirm Offline ready, then tap Start Inspection and allow Precise Location."), pendingPhotoQueue.length ? "warning" : "normal");
+      setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap START / RESTART GPS to turn location on." : "Ready. Confirm Offline ready, then tap START INSPECTION."), pendingPhotoQueue.length ? "warning" : "normal");
     }
     installSimpleReturnButtons();
     document.getElementById("simpleTopReturn").addEventListener("click", simpleReturnToFieldButtons);
@@ -5742,11 +5772,19 @@
     image.hidden = true;
     setStatus("A background map image is unavailable. GPS, observations, photos, and notes still work; continue using the parcel and route overlay.", "warning");
   }));
-  function revalidateGpsAfterReturn() {
-    if (!data.started || data.stopped || gpsPermissionDenied) return;
+    function revalidateGpsAfterReturn() {
+    if (!gpsUserActivatedThisPage || !data.started || data.stopped || gpsPermissionDenied) {
+      renderSimpleHeader();
+      return;
+    }
     if (!freshFieldPosition() || gpsWatcherIsStale()) {
       clearActiveGpsWatch();
-      startTracking({ recovery: true, skipReconcile: true }).catch(() => {});
+      startTracking({ recovery: true, skipReconcile: true }).catch(error => {
+        lastGpsErrorCode = 0;
+        lastGpsErrorMessage = error && error.message ? error.message : "reconnect failed";
+        lastGpsErrorAt = new Date().toISOString();
+        renderSimpleHeader();
+      });
     } else if (watchId !== null && !wakeLock) keepAwake();
   }
 
