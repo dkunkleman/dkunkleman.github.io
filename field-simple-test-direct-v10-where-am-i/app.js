@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-3";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-4";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -5058,6 +5058,12 @@
     return (data.points || []).filter(point => Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lon)));
   }
 
+  function whereAmITrackSegments() {
+    const model = currentSegmentedRoute();
+    const segments = model && Array.isArray(model.segments) ? model.segments : [];
+    return segments.map(segment => (segment && Array.isArray(segment.points) ? segment.points : []).filter(point => Number.isFinite(Number(point.lat)) && Number.isFinite(Number(point.lon)))).filter(segment => segment.length);
+  }
+
   function whereAmIBounds(points, rings) {
     const xs = []; const ys = [];
     (rings || []).forEach(ring => ring.forEach(point => { xs.push(sx(point[0])); ys.push(sy(point[1])); }));
@@ -5084,11 +5090,13 @@
     if(!svgEl||!stateEl) return;
     const rings=subjectRings();
     const trail=whereAmITrackPoints();
+    const trailSegments=whereAmITrackSegments();
     const boundary=rings.map((ring,idx)=>'<path d="'+ring.map((p,i)=>(i?'L':'M')+sx(p[0]).toFixed(1)+' '+sy(p[1]).toFixed(1)).join(' ')+' Z" fill="rgba(255,255,255,.12)" stroke="'+(idx===0?'#e21d1d':'#ff8b22')+'" stroke-width="12" vector-effect="non-scaling-stroke"/>').join('');
-    const trailPath=trail.length>1?'<polyline points="'+trail.map(p=>sx(p.lon).toFixed(1)+','+sy(p.lat).toFixed(1)).join(' ')+'" fill="none" stroke="#1664d8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9" vector-effect="non-scaling-stroke"/>':'';
+    const trailPaths=trailSegments.map(segment=>segment.length>1?'<polyline points="'+segment.map(p=>sx(p.lon).toFixed(1)+','+sy(p.lat).toFixed(1)).join(' ')+'" fill="none" stroke="#1664d8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity=".9" vector-effect="non-scaling-stroke"/>':'').join('');
+    const trailDots=trailSegments.filter(segment=>segment.length===1).map(segment=>'<circle cx="'+sx(segment[0].lon).toFixed(1)+'" cy="'+sy(segment[0].lat).toFixed(1)+'" r="7" fill="#1664d8" opacity=".8"/>').join('');
     const here=lastPosition?'<circle cx="'+sx(lastPosition.lon).toFixed(1)+'" cy="'+sy(lastPosition.lat).toFixed(1)+'" r="24" fill="#0a68ff" stroke="#fff" stroke-width="7" vector-effect="non-scaling-stroke"/><circle cx="'+sx(lastPosition.lon).toFixed(1)+'" cy="'+sy(lastPosition.lat).toFixed(1)+'" r="48" fill="none" stroke="#0a68ff" stroke-width="5" opacity=".38" vector-effect="non-scaling-stroke"/>':'';
-    svgEl.innerHTML='<rect width="1800" height="1500" fill="#d9ddd6"/>'+boundary+trailPath+here;
-    stateEl.textContent=(lastPosition?simpleLocatorState(rings):'LOCATION UNAVAILABLE')+' · '+trail.length+' GPS trail points';
+    svgEl.innerHTML='<rect width="1800" height="1500" fill="#d9ddd6"/>'+boundary+trailPaths+trailDots+here;
+    stateEl.textContent=(lastPosition?simpleLocatorState(rings):'LOCATION UNAVAILABLE')+' · '+trail.length+' GPS trail points · '+trailSegments.length+' walked segments';
     const b=mode==='center'&&lastPosition?{x:sx(lastPosition.lon)-260,y:sy(lastPosition.lat)-260,w:520,h:520}:whereAmIBounds(trail,rings);
     svgEl.setAttribute('viewBox',[b.x,b.y,b.w,b.h].join(' '));
     svgEl.dataset.baseViewBox=svgEl.getAttribute('viewBox');
