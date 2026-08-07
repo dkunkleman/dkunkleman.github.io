@@ -8,9 +8,14 @@ function need(text, message) {
   if (!app.includes(text)) throw new Error(message);
 }
 
-need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-4', 'v4 version missing');
+need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-5', 'v5 version missing');
 need('CANONICAL INSPECTION RESTORE FAILED', 'explicit canonical restore failure status missing');
-need('await openPhotoDb();\n      await restoreCanonicalInspectionState();', 'canonical IndexedDB restore is not immediate after DB open');
+need('OPENING SAVED INSPECTION DATABASE…', 'visible database-open restore stage missing');
+need('READING FULL SAVED INSPECTION…', 'visible canonical-read restore stage missing');
+need('STILL READING FULL INSPECTION…', 'slow Safari read status missing');
+need('FULL INSPECTION RESTORE FAILED', 'visible restore failure screen missing');
+need('await openPhotoDb();', 'canonical database open missing');
+need('await restoreCanonicalInspectionState();', 'canonical state restore missing');
 need('renderSimpleHeader();\n      renderSimpleHome();\n      saveState();', 'full restored field UI is not painted immediately after restore');
 need('renderGallery().catch(() => {});', 'gallery still blocks startup');
 need('Promise.allSettled([loadParcels(), registerOfflineWorker()])', 'parcel/offline background startup missing');
@@ -34,6 +39,6 @@ if (repaint < restore) throw new Error('restored UI repaint occurs before or wit
 if (preRestore.includes('saveState();')) throw new Error('saveState still runs between compact pointer load and canonical restore');
 if (!init.includes('fetch("./assets/august-4-route-context.json"')) throw new Error('August 4 reference fetch was lost instead of moved to background');
 if (!init.includes('setTimeout(() => controller.abort(), 5000)')) throw new Error('August 4 background fetch lacks a hard timeout');
-if (!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-4')) throw new Error('v4 service-worker cache missing');
+if (!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-5')) throw new Error('v5 service-worker cache missing');
 
-console.log('PASS: canonical IndexedDB inspection restore and repaint occur before every network/background task.');
+console.log('PASS: v5 canonical IndexedDB restore runs before every network/background task and exposes Safari restore progress.');
