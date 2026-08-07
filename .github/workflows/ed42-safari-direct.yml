@@ -10,6 +10,7 @@ on:
       - 'tools/patch-direct-gps-recovery-button.js'
       - 'tools/patch-direct-startup-order.js'
       - 'tools/patch-direct-gps-watch-hardening.js'
+      - 'tools/patch-direct-gps-user-gated.js'
       - 'tests/ed42-safari-direct.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
       - 'tests/field-simple-export-survival.test.js'
@@ -49,6 +50,8 @@ jobs:
         run: node tools/patch-direct-startup-order.js
       - name: Harden Safari GPS watcher recovery
         run: node tools/patch-direct-gps-watch-hardening.js
+      - name: Gate GPS startup behind visible user action
+        run: node tools/patch-direct-gps-user-gated.js
       - name: Verify direct Safari candidate
         run: node tests/ed42-safari-direct.test.js
       - name: Verify retry-safe photograph database
@@ -66,5 +69,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js
-          git commit -m 'Build verified ed42 Safari direct candidate v6'
+          git commit -m 'Build verified ed42 Safari direct candidate v7'
           git push origin HEAD:repair/field-simple-test-5.1-safari-direct
