@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-1";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-10-where-am-i-2";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -5115,6 +5115,9 @@
     document.getElementById('whereAmIWholeTrail').addEventListener('click',()=>drawWhereAmIMap('trail'));
     bindWhereAmIGestures();
     drawWhereAmIMap('center');
+    // If parcel geometry is still arriving in the background, redraw the map
+    // when it becomes available without blocking the field screen.
+    if (!parcelFeatures.length) loadParcels().then(() => drawWhereAmIMap('center')).catch(() => {});
   }
 
   function simpleLocatorMarkup() {
@@ -5962,7 +5965,12 @@
         restoredActiveSection.events.push({ event_type: "SECTION_AUTO_PAUSED_AFTER_APP_RESTART", recorded_at: new Date().toISOString() });
       }
       saveState();
-      await stateWriteQueue;
+      // The durable inspection has now been restored. Repaint the field UI immediately
+      // before any gallery reconciliation, migrations, parcel fetch, or offline setup.
+      redraw();
+      renderSimpleHeader();
+      renderSimpleHome();
+      stateWriteQueue.catch(() => {});
       await loadPendingPhotos();
       await reconcileGpsPoints();
       await migrateLegacyPhotos();
@@ -5977,8 +5985,12 @@
     redraw();
     renderConditions();
     renderAuthoritativeWeather();
-    await renderGallery();
-    await Promise.all([loadParcels(), registerOfflineWorker()]);
+    // Gallery, parcel loading, and offline setup are secondary. They must never
+    // hold the restored field screen on LOADING SAFE HOME TEST.
+    renderGallery().catch(() => {});
+    Promise.allSettled([loadParcels(), registerOfflineWorker()]).then(() => {
+      try { redraw(); renderSimpleHome(); } catch (error) {}
+    });
     if (data.started && !data.stopped && !SIMPLE_AUTOMATION_MODE) {
       // A page refresh must never make David the debugger or silently start a
       // Safari geolocation request. The visible RECONNECT GPS button is the
