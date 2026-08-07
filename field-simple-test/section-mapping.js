@@ -249,7 +249,6 @@
   function startOpenAndRevealLane(inspection, options) {
     const model = ensureModel(inspection);
     const settings = options || {};
-    if (!settings.position) throw new Error("WAIT HERE — GPS is not ready. Nothing was recorded yet.");
     const laneTypes = ["ROAD-TO-INTERIOR WALKING LANE", "WET-AREA VIEWING LANE", "CREEK-INSPECTION LANE", "SECTION-EDGE LANE", "CROSS-LANE", "CANDIDATE-AREA VIEWING LANE", "OTHER"];
     const laneType = laneTypes.includes(settings.lane_type) ? settings.lane_type : "OTHER";
     const number = Number(model.next_open_and_reveal_number) || 1;
@@ -260,8 +259,9 @@
       information_class: "INSPECTOR_PLANNING_INTERPRETATION", append_only: true,
       definition: "Selective cutting of dense smaller brush to create visibility and walking access before deciding whether broader clearing is worthwhile.",
       limitation: "Brush cutting may improve visibility and foot access. It does not drain or make soft or flooded ground usable.",
-      lane_type: laneType, started_at: now, finished_at: null, status: "PLANNED_FROM_START_POINT",
+      lane_type: laneType, started_at: now, finished_at: null, status: settings.position ? "PLANNED_FROM_START_POINT" : "PLANNED_LOCATION_PENDING",
       start: pointFrom(settings.position, now), end: null,
+      location_status: settings.position ? "CAPTURED_WITH_RECORD" : "PENDING_GPS", location_requested_at: now,
       planned_width_ft: settings.planned_width_ft == null ? null : Number(settings.planned_width_ft),
       approximate_length_ft: settings.approximate_length_ft == null ? null : Number(settings.approximate_length_ft),
       dominant_brush_diameter: settings.dominant_brush_diameter || null,

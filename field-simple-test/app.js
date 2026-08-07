@@ -1,7 +1,9 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-1";
+  const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
+  const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
   const SIMPLE_AUTOMATION_MODE = ["127.0.0.1", "localhost"].includes(location.hostname) && new URLSearchParams(location.search).get("automation") === "1";
   const W = 1800;
@@ -140,6 +142,22 @@
   let august4RouteContext = null;
   let aerialTraceDraft = null;
   let fieldGpsFixPromise = null;
+  let gpsWatchGeneration = 0;
+  let gpsRestartTimer = null;
+  let gpsRestartAttempt = 0;
+  let gpsPermissionDenied = false;
+  let lastGpsFixReceivedAt = 0;
+  const GPS_STALE_MS = 90000;
+
+  const simpleShell = document.getElementById("simpleShell");
+  if (simpleShell) {
+    simpleShell.addEventListener("click", event => {
+      const button = event.target && event.target.closest ? event.target.closest("button") : null;
+      if (!button || button.disabled || !simpleShell.contains(button)) return;
+      const label = String(button.textContent || "FIELD ACTION").trim().replace(/\s+/g, " ");
+      simpleSetStatus(`TAP SAVED — ${label}`, "warning");
+    }, true);
+  }
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -2112,8 +2130,8 @@
     startBtn.textContent = data.started && !tracking ? "Resume Existing Inspection" : "Start Inspection";
     startBtn.disabled = !offlineReady || tracking || photoBusy || packageBusy || recordingVoice;
     stopBtn.disabled = !tracking || photoBusy || packageBusy || recordingVoice;
-    markerButtons.forEach(button => { button.disabled = !tracking || photoBusy || packageBusy || recordingVoice; });
-    voiceBtn.disabled = !tracking || photoBusy || packageBusy;
+    markerButtons.forEach(button => { button.disabled = photoBusy || packageBusy || recordingVoice; });
+    voiceBtn.disabled = photoBusy || packageBusy;
     finishBtn.disabled = !data.started || photoBusy || packageBusy || recordingVoice;
     clearBtn.disabled = photoBusy || packageBusy || recordingVoice;
     document.getElementById("backup").disabled = !data.started || photoBusy || packageBusy || recordingVoice;
@@ -2211,17 +2229,24 @@
       } : null
     };
     point.sequence = data.points.length ? (data.points[data.points.length - 1].sequence || data.points.length) + 1 : 1;
+    const sectionAtFix = sectionMappingTools ? sectionMappingTools.activeSection(data) : null;
+    if (sectionAtFix && !sectionAtFix.capture_paused) {
+      point.section_id = sectionAtFix.section_id;
+      point.section_capture_status = "ACTIVE_EDGE_CAPTURE";
+    }
     data.points.push(point);
     if (sectionMappingTools) sectionMappingTools.appendWalkPoint(data, point, point.time);
     if (wetEdgeTools) wetEdgeTools.appendWalkPoint(data, point, point.time);
+    resolvePendingLocationRecords(point);
     if (!automaticContextGpsCapturedForRun) {
       captureAutomaticContext("first_precise_gps_after_start_or_resume", point);
       automaticContextGpsCapturedForRun = true;
       refreshAutomaticExternalContext(point);
     }
     coverageDirty = true;
+    const canonicalPointForWrite = Object.assign({}, point);
     gpsWriteQueue = gpsWriteQueue
-      .then(() => gpsPointPut(data.inspection_id, point))
+      .then(() => gpsPointPut(data.inspection_id, canonicalPointForWrite))
       .catch(error => {
         gpsStorageFailed = true;
         if (watchId !== null) navigator.geolocation.clearWatch(watchId);
@@ -2241,6 +2266,9 @@
       updateControls();
       return;
     }
+    lastGpsFixReceivedAt = Date.now();
+    gpsRestartAttempt = 0;
+    gpsPermissionDenied = false;
     document.getElementById("pointCount").textContent = data.points.length;
     if (data.points.length === 1 || data.points.length % 5 === 0) redraw();
     lastPosition = point;
@@ -2251,11 +2279,92 @@
     renderSimpleLocator();
   }
 
-  function onGpsError(error) {
-    setStatus(`GPS error: ${error.message}. Allow location access and Precise Location.`, "error");
+    function freshFieldPosition(maxAgeMs) {
+    if (!lastPosition) return null;
+    const ageLimit = Number.isFinite(Number(maxAgeMs)) ? Number(maxAgeMs) : 120000;
+    const recordedAt = Date.parse(lastPosition.time || "");
+    if (!Number.isFinite(recordedAt) || Date.now() - recordedAt > ageLimit) return null;
+    return lastPosition;
   }
 
-  async function startTracking() {
+  function clearActiveGpsWatch() {
+    gpsWatchGeneration += 1;
+    if (watchId !== null) {
+      try { navigator.geolocation.clearWatch(watchId); } catch (error) { /* Safari may already have dropped it. */ }
+    }
+    watchId = null;
+  }
+
+  function gpsWatcherIsStale() {
+    if (watchId === null) return true;
+    if (!lastGpsFixReceivedAt) return !freshFieldPosition();
+    return Date.now() - lastGpsFixReceivedAt > GPS_STALE_MS;
+  }
+
+  function scheduleGpsRestart(delayMs) {
+    if (gpsPermissionDenied || !data.started || data.stopped) return;
+    if (gpsRestartTimer) return;
+    const delay = Math.max(500, Math.min(Number(delayMs) || 1000, 10000));
+    gpsRestartTimer = setTimeout(() => {
+      gpsRestartTimer = null;
+      if (gpsPermissionDenied || !data.started || data.stopped) return;
+      startTracking({ recovery: true, skipReconcile: true }).catch(error => {
+        setStatus(`GPS reconnect failed: ${error.message}. Records still save with location pending.`, "warning");
+      });
+    }, delay);
+  }
+
+  function startGpsWatcher() {
+    clearActiveGpsWatch();
+    const generation = gpsWatchGeneration;
+    const id = navigator.geolocation.watchPosition(position => {
+      if (generation !== gpsWatchGeneration) return;
+      onPosition(position);
+    }, error => {
+      if (generation !== gpsWatchGeneration) return;
+      onGpsError(error, generation);
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    if (generation !== gpsWatchGeneration) {
+      try { navigator.geolocation.clearWatch(id); } catch (error) { /* superseded immediately */ }
+      return null;
+    }
+    watchId = id;
+    return id;
+  }
+
+  function explainGpsProblem(error) {
+    const code = error && Number(error.code);
+    if (code === 1) {
+      gpsPermissionDenied = true;
+      return "SAFARI LOCATION PERMISSION IS OFF. Open iPhone Settings > Privacy & Security > Location Services > Safari Websites, choose While Using the App, and turn Precise Location ON. Your field taps still save with location pending.";
+    }
+    if (code === 2) return "Safari cannot get a location right now. Your field tap is saved with location pending; GPS will reconnect automatically.";
+    if (code === 3) return "Safari location timed out. Your field tap is saved with location pending; GPS will reconnect automatically.";
+    return `Safari GPS problem: ${error && error.message ? error.message : "unknown error"}. Your field tap is saved with location pending.`;
+  }
+
+  function onGpsError(error, generation) {
+    if (generation != null && generation !== gpsWatchGeneration) return;
+    clearActiveGpsWatch();
+    stopOrientationCapture();
+    releaseWakeLock();
+    updateControls();
+    const message = explainGpsProblem(error);
+    setStatus(message, Number(error && error.code) === 1 ? "error" : "warning");
+    simpleSetStatus(message, "warning");
+    if (gpsPermissionDenied) {
+      clearTimeout(gpsRestartTimer);
+      gpsRestartTimer = null;
+      gpsRestartAttempt = 0;
+      return;
+    }
+    const delay = Math.min(10000, 1000 * Math.pow(2, Math.min(gpsRestartAttempt, 3)));
+    gpsRestartAttempt += 1;
+    scheduleGpsRestart(delay);
+  }
+
+    async function startTracking(options) {
+    const trackingOptions = options || {};
     if (gpsStorageFailed) {
       setStatus("GPS storage previously failed. Do not resume; finish and preserve the current inspection now.", "error");
       return;
@@ -2265,9 +2374,10 @@
       return;
     }
     if (!("geolocation" in navigator)) {
-      setStatus("This browser does not provide GPS. Inspection cannot begin.", "error");
+      setStatus("This browser does not provide GPS. Field records can still be preserved, but locations cannot be captured.", "error");
       return;
     }
+    if (gpsPermissionDenied && trackingOptions.recovery) return;
     const orientationPermission = requestOrientationAccess();
     try {
       await revalidatePhotoDb();
@@ -2285,47 +2395,63 @@
       data.conditions.inspection_date = startedAt.slice(0, 10);
       renderConditions();
     }
-    data.stopped = null;
-    data.lifecycle_events.push({ type: resuming ? "inspection_resumed" : "inspection_started", time: startedAt, source: "button_press" });
-    automaticContextGpsCapturedForRun = false;
-    captureAutomaticContext(resuming ? "inspection_resumed" : "inspection_started", null);
-    lastPosition = null;
-    saveState();
-    updateTimeMetrics();
-    await reconcileGpsPoints();
-    watchId = navigator.geolocation.watchPosition(onPosition, onGpsError, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    if (!trackingOptions.recovery) {
+      data.stopped = null;
+      data.lifecycle_events.push({ type: resuming ? "inspection_resumed" : "inspection_started", time: startedAt, source: "button_press" });
+      automaticContextGpsCapturedForRun = false;
+      captureAutomaticContext(resuming ? "inspection_resumed" : "inspection_started", null);
+      lastPosition = null;
+      saveState();
+      updateTimeMetrics();
+    }
+    if (!trackingOptions.skipReconcile) await reconcileGpsPoints();
+    startGpsWatcher();
     if (SIMPLE_AUTOMATION_MODE) {
       lastPosition = { lat: 30.489, lon: -87.091, accuracy_m: 3, altitude_m: 20, altitude_accuracy_m: 2, heading_deg: 90, speed_mps: 0, time: new Date().toISOString(), sequence: 1 };
       renderSimpleHeader();
     }
     updateControls();
     await keepAwake();
-    setStatus("GPS starting. Wait for the first precise location before adding evidence.", "active");
-    refreshAuthoritativeWeather({ silent: true }).catch(() => {
-      renderAuthoritativeWeather();
-    });
+    if (!trackingOptions.recovery) setStatus("GPS starting. Field buttons remain usable while location connects.", "active");
+    refreshAuthoritativeWeather({ silent: true }).catch(() => { renderAuthoritativeWeather(); });
   }
 
-  async function ensureFieldGpsReady() {
-    const recordedAt = lastPosition && Date.parse(lastPosition.time || "");
-    if (lastPosition && Number.isFinite(recordedAt) && Date.now() - recordedAt <= 120000) return lastPosition;
+    async function ensureFieldGpsReady() {
+    const fresh = freshFieldPosition();
+    if (fresh) return fresh;
+    if (gpsPermissionDenied) {
+      simpleSetStatus("LOCATION PERMISSION IS OFF — field records still save with location pending.", "warning");
+      return null;
+    }
     if (fieldGpsFixPromise) return fieldGpsFixPromise;
     fieldGpsFixPromise = (async () => {
       if (!("geolocation" in navigator)) {
-        simpleSetStatus("LOCATION IS NOT AVAILABLE ON THIS PHONE. Nothing was recorded.", "warning");
+        simpleSetStatus("LOCATION IS NOT AVAILABLE ON THIS PHONE. Field records still save with location pending.", "warning");
         return null;
       }
-      simpleSetStatus("GETTING YOUR LOCATION - WAIT HERE. Your tap will continue automatically.", "warning");
-      if (watchId === null) await startTracking();
-      return new Promise(resolve => {
+      if (gpsWatcherIsStale()) {
+        clearActiveGpsWatch();
+        await startTracking({ recovery: true, skipReconcile: true });
+      }
+      simpleSetStatus("GPS RECONNECTING — your field record is already saved; location will attach when Safari provides it.", "warning");
+      const attempt = options => new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(position => {
           onPosition(position);
-          resolve(lastPosition);
-        }, error => {
-          simpleSetStatus(`GPS IS NOT READY: ${error.message}. Allow Precise Location, then tap again. Nothing was lost.`, "warning");
-          resolve(null);
-        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+          resolve(freshFieldPosition());
+        }, error => resolve({ __gps_error: error }), options);
       });
+      let result = await attempt({ enableHighAccuracy: true, maximumAge: 0, timeout: 8000 });
+      if (result && !result.__gps_error) return result;
+      const firstError = result && result.__gps_error;
+      if (firstError && Number(firstError.code) === 1) {
+        onGpsError(firstError, gpsWatchGeneration);
+        return null;
+      }
+      result = await attempt({ enableHighAccuracy: false, maximumAge: 30000, timeout: 8000 });
+      if (result && !result.__gps_error) return result;
+      const finalError = result && result.__gps_error || firstError;
+      if (finalError) onGpsError(finalError, gpsWatchGeneration);
+      return null;
     })().finally(() => { fieldGpsFixPromise = null; });
     return fieldGpsFixPromise;
   }
@@ -2343,10 +2469,11 @@
     if (!settings.silent) setStatus("Tracking stopped. Use Finish Inspection to create the complete one-file package.", "normal");
   }
 
-  function markerFromPosition(type, note, photoId, time, positionOverride, details) {
-    const position = positionOverride || lastPosition;
+    function markerFromPosition(type, note, photoId, time, positionOverride, details) {
+    const position = positionOverride !== undefined ? positionOverride : freshFieldPosition();
     const settings = details || {};
     const context = currentEvidenceContext();
+    const recordedAt = time || new Date().toISOString();
     return {
       id: makeId("event"),
       source: settings.source || "button_press",
@@ -2363,12 +2490,15 @@
       area_id: settings.areaId || context.area_id,
       question_ids: Array.isArray(settings.questionIds) ? settings.questionIds.slice() : context.question_ids,
       question_links: Array.isArray(settings.questionLinks) ? settings.questionLinks.map(link => Object.assign({}, link)) : context.question_links,
-      time: time || new Date().toISOString(),
-      lat: position.lat,
-      lon: position.lon,
-      gps_accuracy_m: position.accuracy_m,
-      gps_position_at: position.time,
-      compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : position.heading_deg,
+      time: recordedAt,
+      lat: position && Number.isFinite(Number(position.lat)) ? Number(position.lat) : null,
+      lon: position && Number.isFinite(Number(position.lon)) ? Number(position.lon) : null,
+      gps_accuracy_m: position && Number.isFinite(Number(position.accuracy_m)) ? Number(position.accuracy_m) : null,
+      gps_position_at: position && position.time ? position.time : null,
+      gps_capture_delay_ms: position && position.time ? Math.max(0, Date.parse(position.time) - Date.parse(recordedAt)) : null,
+      location_status: position ? "CAPTURED_WITH_RECORD" : "PENDING_GPS",
+      location_requested_at: recordedAt,
+      compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : (position && position.heading_deg != null ? position.heading_deg : null),
       device_orientation: latestOrientation ? {
         alpha_deg: latestOrientation.alpha_deg,
         beta_deg: latestOrientation.beta_deg,
@@ -2379,11 +2509,78 @@
     };
   }
 
-  function addMarker(type, options) {
-    if (!lastPosition) {
-      setStatus("Waiting for the first current GPS location. Marker was not recorded.", "warning");
-      return;
+  function applyRecoveredLocation(record, point, recordedAt) {
+    if (!record || record.location_status !== "PENDING_GPS") return false;
+    const originalTime = recordedAt || record.location_requested_at || record.recorded_at || record.started_at || record.time;
+    const originalMs = Date.parse(originalTime || "");
+    const pointMs = Date.parse(point.time || "");
+    if (Number.isFinite(originalMs) && Number.isFinite(pointMs) && pointMs < originalMs) return false;
+    record.lat = point.lat;
+    record.lon = point.lon;
+    record.latitude = point.lat;
+    record.longitude = point.lon;
+    record.gps_accuracy_m = point.accuracy_m;
+    record.gps_position_at = point.time;
+    record.gps_capture_delay_ms = Number.isFinite(originalMs) && Number.isFinite(pointMs) ? Math.max(0, pointMs - originalMs) : null;
+    record.location_status = "RECOVERED_AFTER_PENDING";
+    return true;
+  }
+
+  function resolvePendingLocationRecords(point) {
+    let changed = false;
+    (data.markers || []).forEach(record => { if (applyRecoveredLocation(record, point, record.time)) changed = true; });
+    (data.simple_sessions || []).forEach(record => { if (applyRecoveredLocation(record, point, record.started_at)) changed = true; });
+    (data.voice_notes || []).forEach(record => { if (applyRecoveredLocation(record, point, record.started_at || record.recorded_at)) changed = true; });
+    if (data.pending_voice_note && applyRecoveredLocation(data.pending_voice_note, point, data.pending_voice_note.started_at)) changed = true;
+    (data.site_sound_records || []).forEach(record => { if (applyRecoveredLocation(record, point, record.recorded_at)) changed = true; });
+    if (frontageTools) {
+      const records = frontageTools.ensureModel(data).records || [];
+      records.forEach(record => { if (applyRecoveredLocation(record, point, record.recorded_at)) changed = true; });
     }
+    if (sectionMappingTools) {
+      const activeSection = sectionMappingTools.activeSection(data);
+      if (activeSection && !activeSection.start && activeSection.completion_status === "ACTIVE") {
+        const recoveredStart = {
+          information_class: "CAPTURED_BY_DEVICE",
+          latitude: Number(point.lat),
+          longitude: Number(point.lon),
+          gps_accuracy_m: point.accuracy_m == null ? null : Number(point.accuracy_m),
+          gps_position_at: point.time,
+          recorded_at: point.time,
+          heading_deg: point.heading_deg == null ? null : Number(point.heading_deg),
+          source_gps_sequence: point.sequence
+        };
+        activeSection.start = recoveredStart;
+        activeSection.gps_start_delay_ms = Math.max(0, Date.parse(point.time) - Date.parse(activeSection.started_at));
+        activeSection.events = Array.isArray(activeSection.events) ? activeSection.events : [];
+        activeSection.events.push({
+          event_type: "SECTION_FIRST_GPS_RECOVERED",
+          recorded_at: point.time,
+          original_section_tap_at: activeSection.started_at,
+          gps_start_delay_ms: activeSection.gps_start_delay_ms,
+          gps_accuracy_m: point.accuracy_m,
+          source_gps_sequence: point.sequence
+        });
+        changed = true;
+      }
+    }
+    (data.photos || []).forEach(photo => {
+      if (!applyRecoveredLocation(photo, point, photo.recorded_at || photo.time)) return;
+      changed = true;
+      photoStoreGet(photo.id).then(stored => {
+        if (!stored || !stored.metadata || stored.metadata.location_status !== "PENDING_GPS") return;
+        applyRecoveredLocation(stored.metadata, point, stored.metadata.recorded_at || stored.metadata.time);
+        if (stored.event) applyRecoveredLocation(stored.event, point, stored.event.time);
+        return photoStorePut(stored);
+      }).catch(() => {});
+    });
+    if (changed) {
+      try { saveState(); } catch (error) { /* canonical stores remain authoritative */ }
+      renderSimpleHeader();
+    }
+  }
+
+  function addMarker(type, options) {
     const settings = options || {};
     let note = settings.note || "";
     if (type === "note") {
@@ -2413,10 +2610,6 @@
   }
 
   function openObservationDialog(type) {
-    if (!lastPosition) {
-      setStatus("Waiting for the first current GPS location. Observation was not recorded.", "warning");
-      return;
-    }
     activeObservationType = type;
     preparePhotoStorage();
     document.getElementById("observationTitle").textContent = `Record ${buttonLabels[type]}`;
@@ -2446,7 +2639,7 @@
   }
 
   function saveStructuredObservation() {
-    if (!activeObservationType || !lastPosition) return;
+    if (!activeObservationType) return;
     const type = activeObservationType;
     const attributes = {};
     if (type === "wet") {
@@ -2494,10 +2687,7 @@
       mediaRecorder.stop();
       return false;
     }
-    if (!lastPosition) {
-      setStatus("Waiting for the first current GPS location. Voice note was not started.", "warning");
-      return false;
-    }
+
     if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function" || typeof MediaRecorder === "undefined") {
       setStatus("Voice recording is unavailable in this browser. Use Free Note instead.", "error");
       return;
@@ -2514,10 +2704,12 @@
         started_at: startedAt,
         recorded_at: startedAt,
         mime_type: mediaRecorder.mimeType || mimeType || "audio/mp4",
-        lat: lastPosition.lat,
-        lon: lastPosition.lon,
-        gps_accuracy_m: lastPosition.accuracy_m,
-        gps_position_at: lastPosition.time,
+        lat: freshFieldPosition() ? freshFieldPosition().lat : null,
+        lon: freshFieldPosition() ? freshFieldPosition().lon : null,
+        gps_accuracy_m: freshFieldPosition() ? freshFieldPosition().accuracy_m : null,
+        gps_position_at: freshFieldPosition() ? freshFieldPosition().time : null,
+        location_status: freshFieldPosition() ? "CAPTURED_WITH_RECORD" : "PENDING_GPS",
+        location_requested_at: startedAt,
         compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : lastPosition.heading_deg,
         sensor_orientation: latestOrientation ? {
           alpha_deg: latestOrientation.alpha_deg,
@@ -3332,10 +3524,6 @@
   }
 
   async function takePhoto(context) {
-    if (!lastPosition) {
-      setStatus("Waiting for the first current GPS location. Camera was not opened.", "warning");
-      return;
-    }
     const coachingContext = currentEvidenceContext();
     const activeSetForPhoto = data.active_evidence_set_id && evidenceSetTools ? evidenceSetTools.effectiveEvidenceSet(data, data.active_evidence_set_id) : null;
     const activePlotForPhoto = activeSetForPhoto && activeSetForPhoto.set_type === "Timber Sample Plot" && timberTools ? data.timber_plots.find(item => item.evidence_set_id === activeSetForPhoto.evidence_set_id) : null;
@@ -3398,7 +3586,6 @@
         readExifOrientation(file),
         createAnalysisJpeg(file)
       ]);
-      if (!position) throw new Error("No GPS position was available for the photograph.");
       if (!analysis || !(analysis.blob instanceof Blob) || !analysis.blob.size) throw new Error("No analysis-safe image copy was created.");
       const id = makeId("photo");
       const screenState = currentScreenOrientation();
@@ -3412,13 +3599,15 @@
         recorded_at: recordedAt,
         time: recordedAt,
         source_file_last_modified_at: sourceModified,
-        lat: position.lat,
-        lon: position.lon,
-        gps_accuracy_m: position.accuracy_m,
-        gps_position_at: position.time,
-        gps_position_age_ms: Math.max(0, new Date(recordedAt) - new Date(position.time)),
-        location_source: "live_browser_geolocation",
-        compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : position.heading_deg,
+        lat: position ? position.lat : null,
+        lon: position ? position.lon : null,
+        gps_accuracy_m: position ? position.accuracy_m : null,
+        gps_position_at: position ? position.time : null,
+        gps_position_age_ms: position && position.time ? Math.max(0, new Date(recordedAt) - new Date(position.time)) : null,
+        location_source: position ? "live_browser_geolocation" : "pending_browser_geolocation",
+        location_status: position ? "CAPTURED_WITH_RECORD" : "PENDING_GPS",
+        location_requested_at: recordedAt,
+        compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : (position ? position.heading_deg : null),
         sensor_orientation: latestOrientation ? {
           alpha_deg: latestOrientation.alpha_deg,
           beta_deg: latestOrientation.beta_deg,
@@ -3779,6 +3968,33 @@
     return confirm(`${mode === "full_archive" ? "FULL EVIDENCE ARCHIVE" : "CHATGPT ANALYSIS PACKAGE"} is estimated at ${formatBytes(bytes)}, which exceeds 500 MB. Keep Safari open and confirm the destination has enough free space. Continue?`);
   }
 
+    function exactFieldEvidenceCounts() {
+    const sectionModel = sectionMappingTools ? sectionMappingTools.ensureModel(data) : { sections: [] };
+    return {
+      gps_points: data.points.length,
+      records: data.markers.length,
+      photos: data.photos.length,
+      voice: data.voice_notes.length,
+      sections: Array.isArray(sectionModel.sections) ? sectionModel.sections.length : 0
+    };
+  }
+
+  function formatFieldEvidenceCounts(counts) {
+    return counts.gps_points + " GPS | " + counts.records + " records | " + counts.photos + " photos | " + counts.voice + " voice | " + counts.sections + " sections";
+  }
+
+  function verifyExportPreservedInspection(before, result, wasActive) {
+    const after = exactFieldEvidenceCounts();
+    const summary = result && result.manifest && result.manifest.summary || {};
+    if ((Number(summary.gps_track_point_count) || 0) < before.gps_points) throw new Error("Export omitted GPS points.");
+    if ((Number(summary.field_event_count) || 0) < before.records) throw new Error("Export omitted field records.");
+    if ((Number(summary.photo_count) || 0) !== before.photos) throw new Error("Export photo count mismatch.");
+    if ((Number(summary.voice_note_count) || 0) !== before.voice) throw new Error("Export voice-note count mismatch.");
+    if (after.records < before.records || after.photos < before.photos || after.voice < before.voice || after.sections < before.sections) throw new Error("Saved evidence count decreased during export.");
+    if (wasActive && data.stopped) throw new Error("Export ended the active inspection.");
+    return { before, after };
+  }
+
   async function finishInspection(options) {
     const settings = options || {};
     if (packageBusy || photoBusy) return;
@@ -3795,37 +4011,43 @@
       return;
     }
     if (!(await confirmLargePackage("report"))) return;
+    const before = exactFieldEvidenceCounts();
+    const wasActive = Boolean(data.started && !data.stopped);
     packageBusy = true;
     updateControls();
-    if (watchId !== null) stopTracking({ silent: true, reason: "finish" });
-    else if (!data.stopped) {
-      data.stopped = new Date().toISOString();
-      data.lifecycle_events.push({ type: "inspection_finished", time: data.stopped, source: "button_press" });
-      saveState();
-    }
+    data.lifecycle_events.push({ type: "inspection_copy_created", time: new Date().toISOString(), source: "button_press" });
+    saveState();
+    setStatus(`EXPORT STARTING — ${formatFieldEvidenceCounts(before)}`, "active");
     try {
+      await gpsWriteQueue;
       const result = await buildPackageWithRecovery("report", null);
+      const verification = verifyExportPreservedInspection(before, result, wasActive);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`CHATGPT ANALYSIS PACKAGE COMPLETE: every photograph is viewable and the evidence is organized around the five property decisions, with ${countLabel(data.points.length, "GPS point")}, ${countLabel(data.markers.length, "field event")}, and all ${countLabel(data.voice_notes.length, "voice note")} (${formatBytes(result.blob.size)}). Full-resolution originals remain safely stored for the FULL EVIDENCE ARCHIVE.`, "success");
+      setStatus(`EXPORT VERIFIED — BEFORE: ${formatFieldEvidenceCounts(verification.before)} | AFTER: ${formatFieldEvidenceCounts(verification.after)} | INSPECTION STILL ACTIVE: ${data.started && !data.stopped ? "YES" : "NO"}`, "success");
     } catch (error) {
-      setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
+      setStatus(`EXPORT NOT VERIFIED: ${error.message}. Your inspection remains saved. Do not press Clear.`, "error");
     } finally {
       packageBusy = false;
       updateControls();
     }
   }
 
-  async function exportBackupNow() {
+    async function exportBackupNow() {
     if (packageBusy || photoBusy || !data.started) return;
     if (!(await confirmLargePackage("full_archive"))) return;
+    const before = exactFieldEvidenceCounts();
+    const wasActive = Boolean(data.started && !data.stopped);
     packageBusy = true;
     updateControls();
+    setStatus(`BACKUP STARTING — ${formatFieldEvidenceCounts(before)}`, "active");
     try {
-      const result = await buildPackageWithRecovery("full_archive", watchId !== null ? "backup" : null);
+      await gpsWriteQueue;
+      const result = await buildPackageWithRecovery("full_archive", wasActive ? "backup" : null);
+      const verification = verifyExportPreservedInspection(before, result, wasActive);
       await presentPackage(result.fileName, result.blob, result.manifest);
-      setStatus(`FULL ARCHIVE READY: every original photograph byte is in ${result.fileName}.${watchId !== null ? " GPS tracking was not stopped." : ""}`, "success");
+      setStatus(`BACKUP VERIFIED — BEFORE: ${formatFieldEvidenceCounts(verification.before)} | AFTER: ${formatFieldEvidenceCounts(verification.after)} | INSPECTION STILL ACTIVE: ${data.started && !data.stopped ? "YES" : "NO"}`, "success");
     } catch (error) {
-      setStatus("Your inspection is safe. Close all Property Inspector tabs, reopen the app, and tap Finish Inspection again. Do not press Clear.", "error");
+      setStatus(`BACKUP NOT VERIFIED: ${error.message}. Your inspection remains saved. Do not press Clear.`, "error");
     } finally {
       packageBusy = false;
       updateControls();
@@ -3856,7 +4078,7 @@
 
   async function clearInspection() {
     if (!confirm("Erase the saved track, every marker, every note, and every stored photograph from this phone?")) return;
-    if (watchId !== null) stopTracking({ silent: true, reason: "clear" });
+    if (data.started && !data.stopped) { setStatus("ACTIVE INSPECTION CANNOT BE CLEARED. End the inspection first. Nothing was changed.", "warning"); return; }
     try {
       await gpsWriteQueue;
       await photoStoreClear();
@@ -4042,11 +4264,20 @@
     element.dataset.kind = kind || "normal";
   }
 
-  function renderSimpleHeader() {
+    function renderSimpleHeader() {
     const gps = document.getElementById("simpleGpsStatus");
     const counts = document.getElementById("simpleCounts");
-    if (gps) gps.textContent = lastPosition ? `GPS +/-${Math.round(lastPosition.accuracy_m || 0)} m` : (data.started ? "WAITING FOR GPS" : "NOT STARTED");
-    if (counts) counts.textContent = `${data.photos.length} photos | ${data.markers.length} records | ${data.voice_notes.length} voice`;
+    const fresh = freshFieldPosition();
+    if (gps) {
+      if (fresh) gps.textContent = `GPS +/-${Math.round(fresh.accuracy_m || 0)} m`;
+      else if (gpsPermissionDenied) gps.textContent = "GPS PERMISSION OFF — RECORDS STILL SAVE";
+      else if (data.started) gps.textContent = "GPS RECONNECTING — LOCATION PENDING";
+      else gps.textContent = "NOT STARTED";
+    }
+    if (counts) {
+      const appPath = location.pathname.replace(/\/?$/, "/") + "app.js";
+      counts.textContent = `${data.photos.length} photos | ${data.markers.length} records | ${data.voice_notes.length} voice · ${APP_VERSION} · DIRECT ${appPath}`;
+    }
   }
 
   function simplePointInRing(lon, lat, ring) {
@@ -4145,8 +4376,8 @@
     return session ? (data.site_sound_records || []).find(item => String(item.sound_id) === String(session.site_sound_record_id || session.details && session.details.site_sound_record_id)) || null : null;
   }
 
-  function openSiteSound(locationContext, returnScreen) {
-    if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+    function openSiteSound(locationContext, returnScreen) {
+    const tapPosition = freshFieldPosition();
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     const soundId = simpleNextIdentifier("site_sound");
     const now = new Date().toISOString();
@@ -4158,17 +4389,19 @@
       location_context: locationContext || "general_site",
       recorded_at: now,
       updated_at: now,
-      latitude: lastPosition.lat,
-      longitude: lastPosition.lon,
-      gps_accuracy_m: lastPosition.accuracy_m,
-      gps_position_at: lastPosition.time,
+      latitude: tapPosition ? tapPosition.lat : null,
+      longitude: tapPosition ? tapPosition.lon : null,
+      gps_accuracy_m: tapPosition ? tapPosition.accuracy_m : null,
+      gps_position_at: tapPosition ? tapPosition.time : null,
+      location_status: tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS",
+      location_requested_at: now,
       selected_experiences: [],
       ambient_audio_voice_note_id: null,
       voice_note_ids: [],
       external_weather_context_id: automaticContextTools ? automaticContextTools.ensureModel(data).last_external_refresh_at : null,
       completion_status: "ACTIVE"
     };
-    const marker = markerFromPosition("other", "Site sound / experience", null, now, lastPosition, {
+    const marker = markerFromPosition("other", "Site sound / experience", null, now, tapPosition, {
       informationClass: "OBSERVED_ON_SITE",
       attributes: { sound_id: soundId, location_context: record.location_context }
     });
@@ -4177,7 +4410,9 @@
       simple_session_id: makeId("simple-session"), feature_id: soundId, feature_type: "site_sound", site_sound_record_id: soundId,
       started_at: now, updated_at: now, finished_at: null, completion_status: "ACTIVE",
       return_screen: returnScreen || "FIELD_BUTTONS", details: { site_sound_record_id: soundId }, observation_id: marker.id,
-      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time
+      lat: tapPosition ? tapPosition.lat : null, lon: tapPosition ? tapPosition.lon : null,
+      gps_accuracy_m: tapPosition ? tapPosition.accuracy_m : null, gps_position_at: tapPosition ? tapPosition.time : null,
+      location_status: tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS", location_requested_at: now
     };
     data.site_sound_records.push(record);
     data.markers.push(marker);
@@ -4185,7 +4420,8 @@
     data.active_simple_session_id = session.simple_session_id;
     simpleActiveSessionId = session.simple_session_id;
     saveState();
-    simpleSetStatus(`${soundId} SAVED - every choice below is optional`, "saved");
+    simpleSetStatus(tapPosition ? `${soundId} SAVED - every choice below is optional` : `${soundId} SAVED — LOCATION PENDING; every choice below is optional`, tapPosition ? "saved" : "warning");
+    if (!tapPosition) ensureFieldGpsReady().catch(() => {});
     renderSiteSoundCapture(session);
   }
 
@@ -4232,12 +4468,13 @@
     return session && sectionMappingTools ? sectionMappingTools.sectionById(data, session.section_id || session.feature_id) : null;
   }
 
-  function activateSectionSession(section, returnScreen) {
+    function activateSectionSession(section, returnScreen, positionOverride) {
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     const now = new Date().toISOString();
+    const position = positionOverride !== undefined ? positionOverride : freshFieldPosition();
     let observationId = section.observation_id || null;
     if (!observationId) {
-      const marker = markerFromPosition("other", "Mapped land section", null, now, lastPosition, {
+      const marker = markerFromPosition("other", "Mapped land section", null, now, position, {
         informationClass: "OBSERVED_ON_SITE",
         attributes: { section_id: section.section_id, section_method: section.method, descriptions: section.description_selections }
       });
@@ -4250,7 +4487,8 @@
       simple_session_id: makeId("simple-session"), feature_id: section.section_id, feature_type: "map_section", section_id: section.section_id,
       started_at: now, updated_at: now, finished_at: null, completion_status: "ACTIVE", information_class: "OBSERVED_ON_SITE",
       return_screen: returnScreen || "FIELD_BUTTONS", details: { section_id: section.section_id }, observation_id: observationId,
-      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time
+      lat: position ? position.lat : null, lon: position ? position.lon : null, gps_accuracy_m: position ? position.accuracy_m : null, gps_position_at: position ? position.time : null,
+      location_status: position ? "CAPTURED_WITH_RECORD" : "PENDING_GPS", location_requested_at: now
     };
     data.simple_sessions.push(session);
     data.active_simple_session_id = session.simple_session_id;
@@ -4298,17 +4536,22 @@
       simpleSetStatus("STARTING SUGGESTION LOADED - confirm it from what you see before starting", "warning");
     }));
     document.getElementById("sectionStartWalking").addEventListener("click", () => {
-      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+      const tapPosition = freshFieldPosition();
+      const tappedAt = new Date().toISOString();
       const descriptions = Array.from(content.querySelectorAll('.section-description-list input:checked')).map(input => input.value);
       const conditions = {};
       Object.keys(sectionMappingTools.CONDITION_GROUPS || {}).forEach(group => { const chosen = content.querySelector(`input[name="section-${group}"]:checked`); conditions[group] = chosen ? chosen.value : null; });
       const methodInput = content.querySelector('input[name="sectionMethod"]:checked');
       try {
-        const section = sectionMappingTools.startSection(data, { descriptions, conditions, method: methodInput && methodInput.value, position: lastPosition, source_planning_suggestion_id: selectedSuggestionId || settings.source || null });
-        activateSectionSession(section, "FIELD_BUTTONS");
-        simpleSetStatus(`${section.section_id} STARTED - descriptions, GPS, time, accuracy, and heading saved`, "saved");
+        const section = sectionMappingTools.startSection(data, { descriptions, conditions, method: methodInput && methodInput.value, position: tapPosition, recorded_at: tappedAt, source_planning_suggestion_id: selectedSuggestionId || settings.source || null });
+        section.location_status = tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS";
+        section.location_requested_at = tappedAt;
+        activateSectionSession(section, "FIELD_BUTTONS", tapPosition);
+        saveState();
+        simpleSetStatus(tapPosition ? `${section.section_id} STARTED — GPS, time, accuracy, and heading saved` : `${section.section_id} SAVED — LOCATION PENDING; GPS is reconnecting`, tapPosition ? "saved" : "warning");
         renderSectionActive(section);
-      } catch (error) { simpleSetStatus(error.message, "warning"); }
+        if (!tapPosition) ensureFieldGpsReady().catch(() => {});
+      } catch (error) { simpleSetStatus(`SECTION NOT SAVED — ${error.message}`, "warning"); }
     });
     document.getElementById("sectionStartReturn").addEventListener("click", renderSimpleHome);
     bindSimpleLocator(); renderSimpleHeader();
@@ -4406,21 +4649,30 @@
     bindSimpleLocator(); renderSimpleHeader();
   }
 
-  function renderOpenRevealStart() {
+    function renderOpenRevealStart() {
     simpleCloseDialogs(); restoreSimplePageScrolling();
     const content = document.getElementById("simpleContent");
     const laneTypes = ["ROAD-TO-INTERIOR WALKING LANE", "WET-AREA VIEWING LANE", "CREEK-INSPECTION LANE", "SECTION-EDGE LANE", "CROSS-LANE", "CANDIDATE-AREA VIEWING LANE", "OTHER"];
     content.innerHTML = `${simpleLocatorMarkup()}<section class="simple-capture"><h2>OPEN AND REVEAL — OPTIONAL PLAN</h2><p class="frontage-instruction">Plan selective cutting of smaller brush so you can see and walk the property before deciding on broader clearing.</p><p class="frontage-warning">Cutting brush does not drain or make soft or flooded ground usable.</p><form id="openRevealForm"><label>Lane type<select name="lane_type">${laneTypes.map(item => `<option>${item}</option>`).join("")}</select></label><div class="simple-fields two"><label>Planned width, feet<input name="planned_width_ft" type="number" step="0.1" inputmode="decimal" placeholder="optional"></label><label>Approximate length, feet<input name="approximate_length_ft" type="number" step="1" inputmode="numeric" placeholder="optional"></label></div><label>Dominant brush diameter<input name="dominant_brush_diameter" placeholder="optional, for example 2–3 inches"></label><label>Large trees to preserve<input name="large_trees_to_preserve" placeholder="optional"></label><label>Standing water<input name="standing_water" placeholder="optional"></label><label>Soft ground<input name="soft_ground" placeholder="optional"></label><label>Equipment limitations<input name="equipment_limitations" placeholder="optional"></label></form><button id="openRevealStart" class="frontage-end" type="button">RECORD LANE START HERE</button><button id="openRevealReturn" class="simple-return" type="button">RETURN TO FIELD BUTTONS</button></section>`;
     document.getElementById("openRevealStart").addEventListener("click", () => {
-      if (!lastPosition) { simpleSetStatus("WAIT HERE - GPS is not ready. Nothing was recorded yet.", "warning"); return; }
+      const tapPosition = freshFieldPosition();
       const values = Object.fromEntries(new FormData(document.getElementById("openRevealForm")).entries());
       try {
-        const lane = sectionMappingTools.startOpenAndRevealLane(data, Object.assign({}, values, { position: lastPosition }));
         const now = new Date().toISOString();
-        const marker = markerFromPosition("other", lane.lane_id, null, now, lastPosition, { informationClass: "INSPECTOR_PLANNING_INTERPRETATION", attributes: { open_and_reveal_lane_id: lane.lane_id, lane_type: lane.lane_type } });
-        const session = { schema_name: "property-inspector-simple-capture-session", schema_version: "1.0", simple_session_id: makeId("simple-session"), feature_id: lane.lane_id, feature_type: "open_and_reveal", started_at: now, updated_at: now, completion_status: "ACTIVE", information_class: "INSPECTOR_PLANNING_INTERPRETATION", return_screen: "OPEN_AND_REVEAL", details: { lane_id: lane.lane_id }, observation_id: marker.id, lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m, gps_position_at: lastPosition.time };
+        const lane = sectionMappingTools.startOpenAndRevealLane(data, Object.assign({}, values, { position: tapPosition, recorded_at: now }));
+        const marker = markerFromPosition("other", lane.lane_id, null, now, tapPosition, { informationClass: "INSPECTOR_PLANNING_INTERPRETATION", attributes: { open_and_reveal_lane_id: lane.lane_id, lane_type: lane.lane_type } });
+        const session = {
+          schema_name: "property-inspector-simple-capture-session", schema_version: "1.0", simple_session_id: makeId("simple-session"),
+          feature_id: lane.lane_id, feature_type: "open_and_reveal", started_at: now, updated_at: now, completion_status: "ACTIVE",
+          information_class: "INSPECTOR_PLANNING_INTERPRETATION", return_screen: "OPEN_AND_REVEAL", details: { lane_id: lane.lane_id },
+          observation_id: marker.id, lat: tapPosition ? tapPosition.lat : null, lon: tapPosition ? tapPosition.lon : null,
+          gps_accuracy_m: tapPosition ? tapPosition.accuracy_m : null, gps_position_at: tapPosition ? tapPosition.time : null,
+          location_status: tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS", location_requested_at: now
+        };
         data.markers.push(marker); data.simple_sessions.push(session); data.active_simple_session_id = session.simple_session_id; simpleActiveSessionId = session.simple_session_id; saveState(); redraw();
-        renderOpenRevealActive(lane); simpleSetStatus(`${lane.lane_id} START SAVED`, "saved");
+        renderOpenRevealActive(lane);
+        simpleSetStatus(tapPosition ? `${lane.lane_id} START SAVED` : `${lane.lane_id} START SAVED — LOCATION PENDING`, tapPosition ? "saved" : "warning");
+        if (!tapPosition) ensureFieldGpsReady().catch(() => {});
       } catch (error) { simpleSetStatus(error.message, "warning"); }
     });
     document.getElementById("openRevealReturn").addEventListener("click", renderSimpleHome);
@@ -4477,11 +4729,11 @@
     return ({ frontage_end: "frontage_end", vehicle_crossing: "vehicle_crossing", ditch_change: "ditch", frontage_trees_brush: "thick", frontage_wet_soft: "wet", frontage_steep_slope: "blocked", frontage_photo: "photo", parking_staging: "parking_staging" })[recordType] || "other";
   }
 
-  async function saveFrontageRecord(recordType, attributes) {
-    if (!await ensureFieldGpsReady()) return null;
+    async function saveFrontageRecord(recordType, attributes) {
+    const tapPosition = freshFieldPosition();
     const now = new Date().toISOString();
-    const record = frontageTools.createRecord(data, recordType, lastPosition, latestOrientation, attributes || {}, now);
-    const marker = markerFromPosition(frontageMarkerType(recordType), "", null, now, lastPosition, {
+    const record = frontageTools.createRecord(data, recordType, tapPosition, latestOrientation, attributes || {}, now);
+    const marker = markerFromPosition(frontageMarkerType(recordType), "", null, now, tapPosition, {
       evidenceClassification: "Observed",
       attributes: Object.assign({ frontage_record_id: record.record_id, frontage_record_type: recordType }, record.attributes)
     });
@@ -4490,7 +4742,8 @@
     data.lifecycle_events.push({ type: "frontage_record_saved", time: now, record_id: record.record_id, record_type: recordType, source: "button_press" });
     saveState();
     redraw();
-    simpleSetStatus(`${record.record_id} SAVED`, "saved");
+    simpleSetStatus(tapPosition ? `${record.record_id} SAVED` : `${record.record_id} SAVED — LOCATION PENDING`, tapPosition ? "saved" : "warning");
+    if (!tapPosition) ensureFieldGpsReady().catch(() => {});
     return record;
   }
 
@@ -5087,8 +5340,8 @@
     renderSimpleHeader();
   }
 
-  async function openSimpleCapture(type, returnScreen) {
-    if (!await ensureFieldGpsReady()) return;
+    async function openSimpleCapture(type, returnScreen) {
+    const tapPosition = freshFieldPosition();
     if (currentSimpleSession()) simpleFinalizeActive("BASIC_RECORD_SAVED_DETAILS_INCOMPLETE");
     simpleCloseDialogs();
     const featureId = simpleNextIdentifier(type);
@@ -5098,20 +5351,22 @@
       simple_session_id: makeId("simple-session"), feature_id: featureId, feature_type: type,
       started_at: now, updated_at: now, finished_at: null,
       completion_status: "ACTIVE", information_class: "OBSERVED_ON_SITE", return_screen: returnScreen || "FIELD_BUTTONS", details: type === "water" ? { depth_tool: "Yardstick", surface_unit: "in" } : {},
-      lat: lastPosition.lat, lon: lastPosition.lon, gps_accuracy_m: lastPosition.accuracy_m,
-      gps_position_at: lastPosition.time, compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : lastPosition.heading_deg,
-      device_orientation: latestOrientation ? { alpha_deg: latestOrientation.alpha_deg, beta_deg: latestOrientation.beta_deg, gamma_deg: latestOrientation.gamma_deg, absolute: latestOrientation.absolute } : null
+      lat: tapPosition ? tapPosition.lat : null, lon: tapPosition ? tapPosition.lon : null, gps_accuracy_m: tapPosition ? tapPosition.accuracy_m : null,
+      gps_position_at: tapPosition ? tapPosition.time : null, compass_heading_deg: latestOrientation ? latestOrientation.compass_heading_deg : (tapPosition ? tapPosition.heading_deg : null),
+      device_orientation: latestOrientation ? { alpha_deg: latestOrientation.alpha_deg, beta_deg: latestOrientation.beta_deg, gamma_deg: latestOrientation.gamma_deg, absolute: latestOrientation.absolute } : null,
+      location_status: tapPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS", location_requested_at: now
     };
     if (type === "tree") session.details = { tree_kind: "Unknown", measurement_tool: "Flexible hospital/baby tape", measurement_height_in: 54, ground_basis: "Uphill side" };
-    const marker = markerFromPosition(simpleMarkerType(type), "", null, now, lastPosition, { attributes: { simple_session_id: session.simple_session_id, feature_id: featureId, simple_feature_type: type, completion_status: "ACTIVE" } });
+    const marker = markerFromPosition(simpleMarkerType(type), "", null, now, tapPosition, { attributes: { simple_session_id: session.simple_session_id, feature_id: featureId, simple_feature_type: type, completion_status: "ACTIVE" } });
     session.observation_id = marker.id;
     data.markers.push(marker);
     data.simple_sessions.push(session);
     data.active_simple_session_id = session.simple_session_id;
     simpleActiveSessionId = session.simple_session_id;
     saveState(); redraw();
-    simpleLastSavedMessage = `FEATURE SAVED - ${featureId}`;
-    simpleSetStatus(simpleLastSavedMessage, "saved");
+    simpleLastSavedMessage = tapPosition ? `FEATURE SAVED - ${featureId}` : `FEATURE SAVED - ${featureId} - LOCATION PENDING`;
+    simpleSetStatus(simpleLastSavedMessage, tapPosition ? "saved" : "warning");
+    if (!tapPosition) ensureFieldGpsReady().catch(() => {});
     if (type === "photo") { simpleTakePhoto(); return; }
     renderSimpleCapture();
   }
@@ -5487,13 +5742,23 @@
     image.hidden = true;
     setStatus("A background map image is unavailable. GPS, observations, photos, and notes still work; continue using the parcel and route overlay.", "warning");
   }));
+  function revalidateGpsAfterReturn() {
+    if (!data.started || data.stopped || gpsPermissionDenied) return;
+    if (!freshFieldPosition() || gpsWatcherIsStale()) {
+      clearActiveGpsWatch();
+      startTracking({ recovery: true, skipReconcile: true }).catch(() => {});
+    } else if (watchId !== null && !wakeLock) keepAwake();
+  }
+
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      if (watchId !== null && !wakeLock) keepAwake();
-      if (data.started && !data.stopped && watchId === null) startTracking();
-      preparePhotoStorage();
+    if (document.visibilityState !== "visible") {
+      try { saveState(); } catch (error) { /* background save is only an extra snapshot */ }
+      return;
     }
+    revalidateGpsAfterReturn();
+    preparePhotoStorage();
   });
+  window.addEventListener("pageshow", revalidateGpsAfterReturn);
   window.addEventListener("beforeunload", event => {
     if (photoBusy || packageBusy) {
       event.preventDefault();

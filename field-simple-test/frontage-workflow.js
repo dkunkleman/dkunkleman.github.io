@@ -71,20 +71,22 @@
     };
   }
 
-  function createRecord(inspection, recordType, position, orientation, attributes, now) {
-    if (!position || !Number.isFinite(Number(position.lat)) || !Number.isFinite(Number(position.lon))) throw new Error("A current GPS position is required.");
+    function createRecord(inspection, recordType, position, orientation, attributes, now) {
     const model = ensureModel(inspection);
     const recordId = nextIdentifier(inspection, recordType);
     const recordedAt = now || new Date().toISOString();
+    const hasPosition = Boolean(position && Number.isFinite(Number(position.lat)) && Number.isFinite(Number(position.lon)));
     const record = {
       record_id: recordId,
       record_type: recordType,
       recorded_at: recordedAt,
-      latitude: Number(position.lat),
-      longitude: Number(position.lon),
-      gps_accuracy_m: position.accuracy_m == null ? null : Number(position.accuracy_m),
-      gps_position_at: position.time || null,
-      compass_heading_deg: orientation && orientation.compass_heading_deg != null ? orientation.compass_heading_deg : (position.heading_deg == null ? null : position.heading_deg),
+      latitude: hasPosition ? Number(position.lat) : null,
+      longitude: hasPosition ? Number(position.lon) : null,
+      gps_accuracy_m: hasPosition && position.accuracy_m != null ? Number(position.accuracy_m) : null,
+      gps_position_at: hasPosition ? (position.time || null) : null,
+      location_status: hasPosition ? "CAPTURED_WITH_RECORD" : "PENDING_GPS",
+      location_requested_at: recordedAt,
+      compass_heading_deg: orientation && orientation.compass_heading_deg != null ? orientation.compass_heading_deg : (hasPosition && position.heading_deg != null ? position.heading_deg : null),
       device_orientation: orientationSnapshot(orientation),
       information_class: "OBSERVED_ON_SITE",
       completion_status: "BASIC_RECORD_SAVED",
