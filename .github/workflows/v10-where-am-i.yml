@@ -8,9 +8,11 @@ on:
       - 'tools/build-v10-where-am-i.js'
       - 'tools/patch-v10-where-am-i-startup.js'
       - 'tools/patch-v10-where-am-i-segmented-trail.js'
+      - 'tools/patch-v10-where-am-i-safari-state-read.js'
       - 'tests/v10-where-am-i.test.js'
       - 'tests/v10-where-am-i-startup.test.js'
       - 'tests/v10-where-am-i-segmented-trail.test.js'
+      - 'tests/v10-where-am-i-safari-state-read.test.js'
       - '.github/workflows/v10-where-am-i.yml'
   workflow_dispatch:
 
@@ -34,10 +36,14 @@ jobs:
         run: node tools/patch-v10-where-am-i-startup.js
       - name: Apply segmented walked-trail patch
         run: node tools/patch-v10-where-am-i-segmented-trail.js
+      - name: Apply Safari canonical-state read patch
+        run: node tools/patch-v10-where-am-i-safari-state-read.js
       - name: Verify WHERE AM I behavior
         run: node tests/v10-where-am-i.test.js
       - name: Verify canonical restore is first
         run: node tests/v10-where-am-i-startup.test.js
+      - name: Verify Safari state read does not wait for transaction completion
+        run: node tests/v10-where-am-i-safari-state-read.test.js
       - name: Verify trail never invents relocation lines
         run: node tests/v10-where-am-i-segmented-trail.test.js
       - name: Verify unchanged IndexedDB recovery
@@ -52,22 +58,22 @@ jobs:
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Build verified v10 WHERE AM I candidate v4'
+            git commit -m 'Build verified v10 WHERE AM I candidate v5'
             git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
           fi
-      - name: Publish tested WHERE AM I v4 at fresh Safari path
+      - name: Publish tested WHERE AM I v5 at fresh Safari path
         run: |
           git fetch origin main repair/field-simple-test-direct-v10-section-pause
           git checkout -B main origin/main
           git checkout origin/repair/field-simple-test-direct-v10-section-pause -- field-simple-test-direct-v10-where-am-i
-          rm -rf field-simple-test-direct-v10-where-am-i-v4
-          cp -R field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v4
-          git add -A -- field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v4
+          rm -rf field-simple-test-direct-v10-where-am-i-v5
+          cp -R field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v5
+          git add -A -- field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v5
           if git diff --cached --quiet; then
-            echo 'Main already matches the tested WHERE AM I v4 publication.'
+            echo 'Main already matches the tested WHERE AM I v5 publication.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Publish tested WHERE AM I v4 at fresh Safari path'
+          git commit -m 'Publish tested WHERE AM I v5 at fresh Safari path'
           git push origin HEAD:main
