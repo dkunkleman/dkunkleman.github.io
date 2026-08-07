@@ -1,0 +1,3 @@
+Publish field-simple-test-direct v2 from verified repair branch commit 1284fb6501da9b53ba64df5aaf83bd4c30d415d3.
+Source subtree: field-simple-test tree 195bc6404190e747e4a02972b348b2f1e2f8cbb7.
+Target: /field-simple-test-direct/ only. Do not modify /field-simple-test/.
