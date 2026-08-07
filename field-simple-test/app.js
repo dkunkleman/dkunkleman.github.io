@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-6";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-7";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -198,7 +198,7 @@
     message.textContent = visibleGpsMessage();
   }
 
-      function requestGpsFromVisibleControl() {
+        function requestGpsFromVisibleControl() {
     gpsUserActivatedThisPage = true;
     gpsManualRequestInFlight = true;
     gpsRecoveryReason = "";
@@ -207,7 +207,7 @@
     lastGpsErrorMessage = "";
     lastGpsErrorAt = null;
     clearManualGpsFallback();
-    refreshGpsPermissionState().catch(() => {});
+
     if (!("geolocation" in navigator)) {
       gpsManualRequestInFlight = false;
       lastGpsErrorCode = 0;
@@ -227,15 +227,17 @@
       data.stopped = null;
       data.lifecycle_events.push({ type: "inspection_resumed", time: now, source: "visible_gps_button" });
     }
-    data.lifecycle_events.push({ type: "gps_reconnect_tapped", time: now, source: "visible_gps_button" });
-    saveState();
 
-    // Use the same continuous watchPosition mechanism that records the field track.
-    // It is started synchronously inside the user's tap; there are no awaits first.
+    // The first browser API call from this tap is the same watchPosition API used
+    // for the continuous field track. No await, promise, permission query, or
+    // storage operation is allowed before it.
     try {
       startGpsWatcher();
       const generation = gpsWatchGeneration;
+      data.lifecycle_events.push({ type: "gps_reconnect_tapped", time: now, source: "visible_gps_button", generation });
+      try { saveState(); } catch (error) { /* canonical evidence stores remain authoritative */ }
       armManualGpsFallback(generation);
+      refreshGpsPermissionState().catch(() => {});
       simpleSetStatus("GPS REQUEST SENT — waiting for Safari location.", "warning");
       setStatus("GPS REQUEST SENT — waiting for Safari location.", "active");
       updateVisibleGpsControl();
@@ -2622,9 +2624,14 @@
     refreshAuthoritativeWeather({ silent: true }).catch(() => { renderAuthoritativeWeather(); });
   }
 
-      async function ensureFieldGpsReady() {
+        async function ensureFieldGpsReady() {
     const fresh = freshFieldPosition();
     if (fresh) return fresh;
+    if (!gpsUserActivatedThisPage) {
+      simpleSetStatus("LOCATION PENDING — tap RECONNECT GPS when you want Safari to restart location tracking.", "warning");
+      updateVisibleGpsControl();
+      return null;
+    }
     if (gpsPermissionDenied || gpsPermissionState === "denied") {
       simpleSetStatus("LOCATION PERMISSION IS OFF — field records still save with location pending.", "warning");
       updateVisibleGpsControl();
@@ -5741,17 +5748,15 @@
     await renderGallery();
     await Promise.all([loadParcels(), registerOfflineWorker()]);
     if (data.started && !data.stopped && !SIMPLE_AUTOMATION_MODE) {
-      gpsUserActivatedThisPage = true;
+      // A page refresh must never make David the debugger or silently start a
+      // Safari geolocation request. The visible RECONNECT GPS button is the
+      // explicit user gesture. Once he taps it, background/return recovery is automatic.
+      gpsUserActivatedThisPage = false;
+      gpsRecoveryReason = "";
+      gpsManualRequestInFlight = false;
+      clearManualGpsFallback();
+      clearActiveGpsWatch();
       refreshGpsPermissionState().catch(() => {});
-      try {
-        gpsRecoveryReason = "GPS STARTING — restoring field location tracking.";
-        startGpsWatcher();
-      } catch (error) {
-        lastGpsErrorCode = 0;
-        lastGpsErrorMessage = error && error.message ? error.message : "watcher start failed";
-        lastGpsErrorAt = new Date().toISOString();
-        gpsRecoveryReason = `GPS STARTUP RECOVERY FAILED: ${lastGpsErrorMessage}. Tap RECONNECT GPS.`;
-      }
       updateControls();
       renderSimpleHeader();
     }
@@ -5940,12 +5945,11 @@
     image.hidden = true;
     setStatus("A background map image is unavailable. GPS, observations, photos, and notes still work; continue using the parcel and route overlay.", "warning");
   }));
-      function revalidateGpsAfterReturn() {
-    if (!data.started || data.stopped || gpsPermissionDenied || gpsPermissionState === "denied") {
+        function revalidateGpsAfterReturn() {
+    if (!gpsUserActivatedThisPage || !data.started || data.stopped || gpsPermissionDenied || gpsPermissionState === "denied") {
       renderSimpleHeader();
       return;
     }
-    gpsUserActivatedThisPage = true;
     if (!freshFieldPosition() && (watchId === null || gpsWatcherIsStale())) {
       try {
         gpsRecoveryReason = "GPS RETURN RECOVERY — starting a fresh Safari location watcher.";
@@ -5979,8 +5983,8 @@
   });
   setInterval(updateTimeMetrics, 30000);
 
-    function gpsRecoveryWatchdog() {
-    if (!data.started || data.stopped || gpsPermissionDenied || gpsPermissionState === "denied" || gpsManualRequestInFlight) {
+      function gpsRecoveryWatchdog() {
+    if (!gpsUserActivatedThisPage || !data.started || data.stopped || gpsPermissionDenied || gpsPermissionState === "denied" || gpsManualRequestInFlight) {
       updateVisibleGpsControl();
       return;
     }
