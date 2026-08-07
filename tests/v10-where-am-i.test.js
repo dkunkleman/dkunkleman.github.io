@@ -4,7 +4,7 @@ const app=fs.readFileSync('field-simple-test-direct-v10-where-am-i/app.js','utf8
 const sw=fs.readFileSync('field-simple-test-direct-v10-where-am-i/sw.js','utf8');
 new vm.Script(app);
 function need(text,msg){if(!app.includes(text)) throw new Error(msg);}
-need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-2','version missing');
+need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-3','version missing');
 need('const stateKey = "propertyInspectorHomeTest313V1"','state key changed');
 need('const photoDbName = "property-inspector-home-test-313-evidence"','photo DB changed');
 need('WHERE AM I?','WHERE AM I button missing');
@@ -17,5 +17,5 @@ need('CENTER ON ME','center control missing');
 need("viewport.addEventListener('pointermove'",'drag/pan gesture missing');
 need('startDistance/dist','pinch zoom calculation missing');
 need('Approximate field locator only — not a survey or legal boundary determination.','boundary disclaimer missing');
-if(!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-2')) throw new Error('unique cache missing');
-console.log('PASS: WHERE AM I map has parcel boundary, live location, saved trail, pan, pinch zoom, and unchanged evidence storage.');
+if(!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-3')) throw new Error('unique v3 cache missing');
+console.log('PASS: WHERE AM I v3 has parcel boundary, live location, saved trail, pan, pinch zoom, and unchanged evidence storage.');
