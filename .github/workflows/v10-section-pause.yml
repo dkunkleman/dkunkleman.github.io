@@ -1,0 +1,45 @@
+name: Verify v10 section pause candidate
+
+on:
+  push:
+    branches:
+      - repair/field-simple-test-direct-v10-section-pause
+    paths:
+      - 'tools/build-v10-section-pause.js'
+      - 'tests/v10-section-pause.test.js'
+      - '.github/workflows/v10-section-pause.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build candidate from frozen v10 directory
+        run: node tools/build-v10-section-pause.js
+      - name: Verify section pause and resume behavior
+        run: node tests/v10-section-pause.test.js
+      - name: Verify unchanged IndexedDB recovery module
+        run: node tests/field-simple-idb-recovery.test.js
+      - name: Verify section mapping math/model
+        run: node tests/section-mapping.test.js
+      - name: Commit verified candidate directory
+        run: |
+          if git diff --quiet HEAD -- field-simple-test-direct-v10-section-pause; then
+            echo 'Verified candidate already matches branch.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- field-simple-test-direct-v10-section-pause
+          git commit -m 'Build verified v10 section pause candidate'
+          git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
