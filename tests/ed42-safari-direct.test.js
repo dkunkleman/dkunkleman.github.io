@@ -18,7 +18,7 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-1"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-2"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 
@@ -30,9 +30,12 @@ assert.match(app, /gpsWatchGeneration/);
 assert.match(app, /generation !== gpsWatchGeneration/);
 assert.match(app, /clearActiveGpsWatch\(\)/);
 assert.match(app, /GPS_STALE_MS = 90000/);
-assert.match(app, /pageshow/);
-assert.match(app, /gpsPermissionDenied/);
-assert.match(app, /SAFARI LOCATION PERMISSION IS OFF/);
+assert.match(app, /gpsUserActivatedThisPage/);
+assert.match(app, /GPS OFF — TAP START \/ RESTART GPS/);
+assert.match(app, /GPS POSITION UNAVAILABLE — TAP START \/ RESTART GPS/);
+assert.match(app, /GPS TIMEOUT — TAP START \/ RESTART GPS/);
+assert.match(app, /GPS PERMISSION OFF — TAP START \/ RESTART GPS AFTER FIXING LOCATION SETTINGS/);
+assert.doesNotMatch(app, /GPS RECONNECTING — LOCATION PENDING/);
 
 assert.match(app, /PENDING_GPS/);
 assert.match(app, /FEATURE SAVED - \$\{featureId\} - LOCATION PENDING/);
@@ -82,8 +85,13 @@ for (const name of ["finishInspection", "exportBackupNow"]) {
   assert.doesNotMatch(body, /data\.stopped\s*=/, `${name} cannot end inspection`);
 }
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-1/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v1/);
+const initializeBody = extractFunction("initialize");
+assert.doesNotMatch(initializeBody, /await startTracking\(\)/, "page load must not request GPS automatically");
+const returnBody = extractFunction("revalidateGpsAfterReturn");
+assert.match(returnBody, /!gpsUserActivatedThisPage/, "background recovery only starts after user activated GPS on this page");
+
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-2/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v2/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -94,4 +102,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct candidate is a normal direct app with preserved storage and pending-location recovery.");
+console.log("PASS: ed42 Safari-direct candidate requires explicit GPS activation, shows exact GPS state, preserves storage, and keeps pending-location recovery.");
