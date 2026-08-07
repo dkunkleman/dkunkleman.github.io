@@ -6,7 +6,9 @@ on:
       - repair/field-simple-test-direct-v10-section-pause
     paths:
       - 'tools/build-v10-where-am-i.js'
+      - 'tools/patch-v10-where-am-i-startup.js'
       - 'tests/v10-where-am-i.test.js'
+      - 'tests/v10-where-am-i-startup.test.js'
       - '.github/workflows/v10-where-am-i.yml'
   workflow_dispatch:
 
@@ -26,8 +28,12 @@ jobs:
           node-version: '22'
       - name: Build WHERE AM I candidate
         run: node tools/build-v10-where-am-i.js
+      - name: Apply field-first startup patch
+        run: node tools/patch-v10-where-am-i-startup.js
       - name: Verify WHERE AM I behavior
         run: node tests/v10-where-am-i.test.js
+      - name: Verify field-first durable restore
+        run: node tests/v10-where-am-i-startup.test.js
       - name: Verify unchanged IndexedDB recovery
         run: node tests/field-simple-idb-recovery.test.js
       - name: Verify section mapping model
@@ -41,5 +47,5 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Build verified v10 WHERE AM I candidate'
+          git commit -m 'Build verified v10 WHERE AM I candidate v2'
           git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
