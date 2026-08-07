@@ -18,7 +18,7 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-4"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-5"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
@@ -49,6 +49,12 @@ assert.match(app, /function requestGpsFromVisibleControl\(\)/);
 assert.doesNotMatch(app, /async function requestGpsFromVisibleControl/);
 assert.match(app, /navigator\.geolocation\.getCurrentPosition\(position =>/);
 assert.match(app, /Keep the Safari geolocation request directly inside the user's tap handler/);
+
+const dataInit = app.indexOf("let data = emptyInspection();");
+const gpsInstall = app.indexOf("installVisibleGpsControl();");
+assert.ok(dataInit >= 0, "inspection data initialization exists");
+assert.ok(gpsInstall > dataInit, "GPS control must install only after inspection data exists");
+assert.equal(app.indexOf("installVisibleGpsControl();", gpsInstall + 1), -1, "GPS control installs exactly once");
 
 assert.match(app, /PENDING_GPS/);
 assert.match(app, /FEATURE SAVED - \$\{featureId\} - LOCATION PENDING/);
@@ -99,8 +105,8 @@ assert.doesNotMatch(initializeBody, /await startTracking\(\)/, "page load must n
 const returnBody = extractFunction("revalidateGpsAfterReturn");
 assert.match(returnBody, /!gpsUserActivatedThisPage/, "background recovery only starts after user activated GPS on this page");
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-4/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v4/);
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-5/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v5/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -110,4 +116,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct candidate auto-recovers dead GPS, exposes a direct RECONNECT GPS fallback, preserves storage, and keeps pending-location recovery.");
+console.log("PASS: ed42 Safari-direct candidate starts cleanly, auto-recovers dead GPS, exposes a direct RECONNECT GPS fallback, preserves storage, and keeps pending-location recovery.");
