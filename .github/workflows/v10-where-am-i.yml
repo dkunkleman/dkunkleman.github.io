@@ -28,11 +28,11 @@ jobs:
           node-version: '22'
       - name: Build WHERE AM I candidate
         run: node tools/build-v10-where-am-i.js
-      - name: Apply field-first startup patch
+      - name: Apply restore-first startup patch
         run: node tools/patch-v10-where-am-i-startup.js
       - name: Verify WHERE AM I behavior
         run: node tests/v10-where-am-i.test.js
-      - name: Verify field-first durable restore
+      - name: Verify canonical restore is first
         run: node tests/v10-where-am-i-startup.test.js
       - name: Verify unchanged IndexedDB recovery
         run: node tests/field-simple-idb-recovery.test.js
@@ -46,35 +46,22 @@ jobs:
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Build verified v10 WHERE AM I candidate v2'
+            git commit -m 'Build verified v10 WHERE AM I candidate v3'
             git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
           fi
-      - name: Publish tested WHERE AM I v2 and fresh Safari path
+      - name: Publish tested WHERE AM I v3 at fresh Safari path
         run: |
           git fetch origin main repair/field-simple-test-direct-v10-section-pause
           git checkout -B main origin/main
           git checkout origin/repair/field-simple-test-direct-v10-section-pause -- field-simple-test-direct-v10-where-am-i
-          rm -rf field-simple-test-direct-v10-where-am-i-v2
-          cp -R field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v2
-          rm -f -- \
-            DO_NOT_USE_MARKER_4.txt \
-            FINAL_STOP.txt \
-            I_AM_STOPPING_MARKERS_NOW.txt \
-            LAST_ACCIDENT.txt \
-            NO_MORE.txt \
-            PLEASE_IGNORE_THIS_TOO.txt \
-            STOP_THIS.txt \
-            TEMP_DO_NOT_USE.txt \
-            WHERE_AM_I_V2_PUBLISHING.txt \
-            WHY.txt \
-            ZZZ_STOP.txt \
-            x
-          git add -A
+          rm -rf field-simple-test-direct-v10-where-am-i-v3
+          cp -R field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v3
+          git add -A -- field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v3
           if git diff --cached --quiet; then
-            echo 'Main already matches the tested WHERE AM I v2 publication.'
+            echo 'Main already matches the tested WHERE AM I v3 publication.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Publish tested WHERE AM I v2 at fresh Safari path'
+          git commit -m 'Publish tested WHERE AM I v3 at fresh Safari path'
           git push origin HEAD:main
