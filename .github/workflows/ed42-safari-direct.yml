@@ -47,8 +47,8 @@ jobs:
         run: node tests/field-simple-export-survival.test.js
       - name: Commit verified direct files
         run: |
-          if git diff --quiet -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js; then
-            echo 'Verified files already match.'
+          if git diff --quiet HEAD -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js; then
+            echo 'Verified files already match the branch.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
