@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-4";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-5";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -257,7 +257,6 @@
     updateVisibleGpsControl();
   }
 
-  installVisibleGpsControl();
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -372,6 +371,7 @@
   }
 
   let data = emptyInspection();
+  installVisibleGpsControl();
 
   function setStatus(message, kind) {
     statusEl.textContent = message;
