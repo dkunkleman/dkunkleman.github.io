@@ -18,7 +18,7 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-2"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-3"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 
@@ -31,10 +31,12 @@ assert.match(app, /generation !== gpsWatchGeneration/);
 assert.match(app, /clearActiveGpsWatch\(\)/);
 assert.match(app, /GPS_STALE_MS = 90000/);
 assert.match(app, /gpsUserActivatedThisPage/);
-assert.match(app, /GPS OFF — TAP START \/ RESTART GPS/);
-assert.match(app, /GPS POSITION UNAVAILABLE — TAP START \/ RESTART GPS/);
-assert.match(app, /GPS TIMEOUT — TAP START \/ RESTART GPS/);
-assert.match(app, /GPS PERMISSION OFF — TAP START \/ RESTART GPS AFTER FIXING LOCATION SETTINGS/);
+assert.match(app, /simpleGpsControlWrap/);
+assert.match(app, /simpleGpsControl/);
+assert.match(app, /START \/ RESTART GPS/);
+assert.match(app, /GPS POSITION UNAVAILABLE/);
+assert.match(app, /GPS TIMEOUT/);
+assert.match(app, /GPS PERMISSION OFF/);
 assert.doesNotMatch(app, /GPS RECONNECTING — LOCATION PENDING/);
 
 assert.match(app, /PENDING_GPS/);
@@ -89,9 +91,12 @@ const initializeBody = extractFunction("initialize");
 assert.doesNotMatch(initializeBody, /await startTracking\(\)/, "page load must not request GPS automatically");
 const returnBody = extractFunction("revalidateGpsAfterReturn");
 assert.match(returnBody, /!gpsUserActivatedThisPage/, "background recovery only starts after user activated GPS on this page");
+const visibleGpsBody = extractFunction("requestGpsFromVisibleControl");
+assert.doesNotMatch(visibleGpsBody, /\bawait\b/, "visible GPS tap must not pass through an async wait before Safari geolocation");
+assert.match(visibleGpsBody, /navigator\.geolocation\.getCurrentPosition\(/, "visible GPS tap must call Safari geolocation directly");
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-2/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v2/);
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-3/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v3/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -102,4 +107,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct candidate requires explicit GPS activation, shows exact GPS state, preserves storage, and keeps pending-location recovery.");
+console.log("PASS: ed42 Safari-direct candidate has a visible synchronous GPS button, exact GPS states, preserved storage, and pending-location recovery.");
