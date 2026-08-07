@@ -34,12 +34,12 @@ jobs:
         run: node tests/section-mapping.test.js
       - name: Commit verified candidate directory
         run: |
-          if git diff --quiet HEAD -- field-simple-test-direct-v10-section-pause; then
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A -- field-simple-test-direct-v10-section-pause
+          if git diff --cached --quiet; then
             echo 'Verified candidate already matches branch.'
             exit 0
           fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- field-simple-test-direct-v10-section-pause
           git commit -m 'Build verified v10 section pause candidate'
           git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
