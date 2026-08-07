@@ -14,6 +14,7 @@ on:
       - 'tools/patch-direct-storage-quota-v2.js'
       - 'tools/patch-direct-gps-success-status.js'
       - 'tests/ed42-safari-direct.test.js'
+      - 'tests/gps-success-status.test.js'
       - 'tests/field-simple-storage-quota.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
       - 'tests/field-simple-export-survival.test.js'
@@ -57,8 +58,6 @@ jobs:
         run: node tools/patch-direct-gps-user-gated.js
       - name: Move inspection state out of localStorage quota path
         run: node tools/patch-direct-storage-quota-v2.js
-      - name: Clear stale GPS waiting banner after successful fix
-        run: node tools/patch-direct-gps-success-status.js
       - name: Verify direct Safari candidate
         run: node tests/ed42-safari-direct.test.js
       - name: Verify Safari quota-safe state persistence
@@ -69,6 +68,10 @@ jobs:
         run: node tests/section-mapping.test.js
       - name: Verify export without ending active inspection
         run: node tests/field-simple-export-survival.test.js
+      - name: Clear stale GPS waiting banner after successful fix
+        run: node tools/patch-direct-gps-success-status.js
+      - name: Verify GPS success display
+        run: node tests/gps-success-status.test.js
       - name: Commit verified direct files
         run: |
           if git diff --quiet HEAD -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js; then
