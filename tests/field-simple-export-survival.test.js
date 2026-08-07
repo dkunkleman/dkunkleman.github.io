@@ -8,6 +8,7 @@ const Package = require("../field-simple-test/inspection-package.js");
 async function main() {
   const root = path.resolve(__dirname, "..");
   const photoBytes = fs.readFileSync(path.join(root, "icon-192.png"));
+  const parcelsText = fs.readFileSync(path.join(root, "field-simple-test", "assets", "parcels.json"), "utf8");
   const recordedAt = "2026-08-06T18:00:10.000Z";
   const pointOne = { sequence: 1, time: "2026-08-06T18:00:00.000Z", lat: 30.489, lon: -87.091, accuracy_m: 4, heading_deg: 90 };
   const pointTwo = { sequence: 2, time: recordedAt, lat: 30.4891, lon: -87.0909, accuracy_m: 5, heading_deg: 92, section_id: "SECTION-001", section_capture_status: "ACTIVE_EDGE_CAPTURE" };
@@ -101,7 +102,7 @@ async function main() {
     originalBlob: new Blob([photoBytes], { type: "image/png" }),
     analysisBlob: new Blob([photoBytes], { type: "image/png" })
   }];
-  const mapContext = { parcelsText: JSON.stringify({ features: [] }) };
+  const mapContext = { parcelsText };
 
   const result = await Package.createInspectionPackage({
     inspection,
