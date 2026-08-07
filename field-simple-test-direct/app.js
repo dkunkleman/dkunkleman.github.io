@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-7";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-8";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -19,6 +19,7 @@
   const voiceStoreName = "voiceNotes";
   const voiceChunkStoreName = "voiceChunks";
   const gpsStoreName = "gpsPoints";
+  const stateStoreName = "inspectionState";
   const packageTools = window.InspectionPackage;
   const dbRecoveryTools = window.IndexedDbRecovery;
   const coachingTools = window.InspectionCoaching;
@@ -102,6 +103,12 @@
   let voiceChunkSequence = 0;
   let voiceChunkWrites = Promise.resolve();
   let gpsWriteQueue = Promise.resolve();
+  let stateWriteQueue = Promise.resolve();
+  let stateStorageFailed = false;
+  let stateStorageErrorMessage = "";
+  let loadedCompactRecovery = false;
+  let canonicalStateRestored = false;
+  let canonicalStateLastQueuedAt = null;
   let gpsStorageFailed = false;
   let activeObservationType = null;
   let pendingPhotoContext = null;
@@ -480,15 +487,7 @@
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
-  function loadState() {
-    try {
-      const current = localStorage.getItem(stateKey);
-      const legacy = localStorage.getItem(legacyStateKey);
-      const parsed = JSON.parse(current || legacy || "null");
-      if (parsed && Array.isArray(parsed.points)) data = Object.assign(emptyInspection(), parsed);
-    } catch (error) {
-      setStatus("Saved inspection metadata could not be read. Do not begin until the record is cleared or recovered.", "error");
-    }
+    function normalizeLoadedState() {
     data.points = Array.isArray(data.points) ? data.points : [];
     data.markers = Array.isArray(data.markers) ? data.markers : [];
     data.photos = Array.isArray(data.photos) ? data.photos : [];
@@ -518,17 +517,119 @@
     if (synthesisTools) synthesisTools.ensureModel(data);
   }
 
-  function saveState() {
+  function loadState() {
     try {
-      const recoverySnapshot = Object.assign({}, data, {
-        points: data.points.slice(-500),
-        points_total: data.points.length,
-        gps_storage: "IndexedDB canonical; localStorage carries the latest 500 fixes for immediate crash recovery"
-      });
-      localStorage.setItem(stateKey, JSON.stringify(recoverySnapshot));
+      const current = localStorage.getItem(stateKey);
+      const legacy = localStorage.getItem(legacyStateKey);
+      const parsed = JSON.parse(current || legacy || "null");
+      loadedCompactRecovery = Boolean(parsed && parsed.local_recovery_compact === true);
+      if (parsed && Array.isArray(parsed.points)) data = Object.assign(emptyInspection(), parsed);
     } catch (error) {
-      setStatus("LOCAL RECOVERY STORAGE FAILED. Stop walking and finish the inspection now; new field data may not survive an app close.", "error");
-      throw error;
+      setStatus("Saved inspection metadata could not be read. Do not begin until the record is recovered from durable storage.", "error");
+    }
+    normalizeLoadedState();
+  }
+
+    function durableInspectionStateSnapshot() {
+    const recovery = Object.assign({}, data, {
+      points: data.points.slice(-500),
+      points_total: data.points.length,
+      gps_storage: "IndexedDB gpsPoints is canonical; inspectionState stores complete inspection metadata plus the latest 500 fixes",
+      state_storage: "IndexedDB canonical inspectionState",
+      state_saved_at: new Date().toISOString()
+    });
+    return typeof structuredClone === "function" ? structuredClone(recovery) : JSON.parse(JSON.stringify(recovery));
+  }
+
+  function compactLocalRecoverySnapshot() {
+    const activeSection = sectionMappingTools ? sectionMappingTools.activeSection(data) : null;
+    const activeSectionSummary = activeSection ? {
+      section_id: activeSection.section_id,
+      started_at: activeSection.started_at,
+      completion_status: activeSection.completion_status,
+      method: activeSection.method,
+      location_status: activeSection.location_status || null,
+      raw_edge_point_count: Array.isArray(activeSection.raw_walked_edge_points) ? activeSection.raw_walked_edge_points.length : 0
+    } : null;
+    return {
+      schema_name: data.schema_name,
+      schema_version: data.schema_version,
+      build_mode: data.build_mode,
+      property_id: data.property_id,
+      inspection_id: data.inspection_id,
+      started: data.started,
+      stopped: data.stopped,
+      local_recovery_compact: true,
+      canonical_state_store: stateStoreName,
+      canonical_state_key: "active",
+      canonical_state_last_queued_at: canonicalStateLastQueuedAt,
+      points: data.points.slice(-20),
+      points_total: data.points.length,
+      markers: data.markers.slice(-3),
+      photos: data.photos.slice(-3),
+      voice_notes: data.voice_notes.slice(-3),
+      lifecycle_events: data.lifecycle_events.slice(-10),
+      simple_sessions: data.simple_sessions.slice(-5),
+      simple_counters: Object.assign({}, data.simple_counters || {}),
+      active_simple_session_id: data.active_simple_session_id || null,
+      active_section_summary: activeSectionSummary,
+      conditions: Object.assign({}, data.conditions || {}),
+      recovery_counts: {
+        records: data.markers.length,
+        photos: data.photos.length,
+        voice: data.voice_notes.length,
+        sections: sectionMappingTools ? sectionMappingTools.ensureModel(data).sections.length : 0
+      }
+    };
+  }
+
+  function queueCanonicalStateSnapshot(snapshot) {
+    canonicalStateLastQueuedAt = snapshot.state_saved_at || new Date().toISOString();
+    stateWriteQueue = stateWriteQueue
+      .catch(() => {})
+      .then(() => inspectionStatePut(snapshot))
+      .then(() => {
+        stateStorageFailed = false;
+        stateStorageErrorMessage = "";
+        canonicalStateRestored = true;
+      })
+      .catch(error => {
+        stateStorageFailed = true;
+        stateStorageErrorMessage = error && error.message ? error.message : "canonical state write failed";
+        setStatus("DURABLE INSPECTION STATE SAVE FAILED: " + stateStorageErrorMessage + ". Existing photos and GPS remain preserved; stop adding new field records until storage recovers.", "error");
+      });
+    return stateWriteQueue;
+  }
+
+  function saveState(options) {
+    const settings = options || {};
+    if (!settings.gpsOnly && (!loadedCompactRecovery || canonicalStateRestored)) {
+      queueCanonicalStateSnapshot(durableInspectionStateSnapshot());
+    }
+    const compact = compactLocalRecoverySnapshot();
+    try {
+      localStorage.setItem(stateKey, JSON.stringify(compact));
+    } catch (error) {
+      try {
+        localStorage.setItem(stateKey, JSON.stringify({
+          schema_name: data.schema_name,
+          schema_version: data.schema_version,
+          build_mode: data.build_mode,
+          property_id: data.property_id,
+          inspection_id: data.inspection_id,
+          started: data.started,
+          stopped: data.stopped,
+          local_recovery_compact: true,
+          canonical_state_store: stateStoreName,
+          canonical_state_key: "active",
+          canonical_state_last_queued_at: canonicalStateLastQueuedAt,
+          points: data.points.slice(-2),
+          points_total: data.points.length,
+          recovery_counts: { records: data.markers.length, photos: data.photos.length, voice: data.voice_notes.length }
+        }));
+      } catch (fallbackError) {
+        setStatus("LOCAL RECOVERY POINTER IS FULL. IndexedDB remains the canonical inspection store; do not clear website data.", "warning");
+      }
     }
   }
 
@@ -1445,7 +1546,7 @@
         reject(new Error("IndexedDB is unavailable."));
         return;
       }
-      const request = indexedDB.open(photoDbName, 3);
+      const request = indexedDB.open(photoDbName, 4);
       request.onupgradeneeded = () => {
         const db = request.result;
         if (!db.objectStoreNames.contains(photoStoreName)) db.createObjectStore(photoStoreName, { keyPath: "id" });
@@ -1458,6 +1559,7 @@
           const gps = db.createObjectStore(gpsStoreName, { keyPath: "key" });
           gps.createIndex("inspection_id", "inspection_id", { unique: false });
         }
+        if (!db.objectStoreNames.contains(stateStoreName)) db.createObjectStore(stateStoreName, { keyPath: "key" });
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error || new Error("Evidence database could not be opened."));
@@ -1496,6 +1598,49 @@
       transaction.onerror = () => reject(transaction.error || new Error(message));
       transaction.onabort = () => reject(transaction.error || new DOMException(message, "AbortError"));
     });
+  }
+
+  function inspectionStatePut(snapshot) {
+    const record = {
+      key: "active",
+      inspection_id: snapshot && snapshot.inspection_id || null,
+      saved_at: snapshot && snapshot.state_saved_at || new Date().toISOString(),
+      app_version: APP_VERSION,
+      state: snapshot
+    };
+    return withEvidenceTransaction(stateStoreName, "readwrite", transaction => {
+      const request = transaction.objectStore(stateStoreName).put(record);
+      return transactionRequest(transaction, request, "Inspection state could not be stored.");
+    });
+  }
+
+  function inspectionStateGet() {
+    return withEvidenceTransaction(stateStoreName, "readonly", transaction => {
+      const request = transaction.objectStore(stateStoreName).get("active");
+      return transactionRequest(transaction, request, "Inspection state could not be read.", result => result || null);
+    });
+  }
+
+  async function restoreCanonicalInspectionState() {
+    await stateWriteQueue.catch(() => {});
+    const record = await inspectionStateGet();
+    if (record && record.state) {
+      const currentInspectionId = data.inspection_id == null ? null : String(data.inspection_id);
+      const storedInspectionId = record.inspection_id == null ? null : String(record.inspection_id);
+      if (!currentInspectionId || !storedInspectionId || currentInspectionId === storedInspectionId || loadedCompactRecovery) {
+        data = Object.assign(emptyInspection(), record.state);
+        canonicalStateRestored = true;
+        loadedCompactRecovery = false;
+        normalizeLoadedState();
+        return true;
+      }
+    }
+    if (loadedCompactRecovery) throw new Error("The compact recovery pointer exists but the canonical inspectionState record is missing. Do not clear Safari data.");
+    const snapshot = durableInspectionStateSnapshot();
+    await inspectionStatePut(snapshot);
+    canonicalStateRestored = true;
+    loadedCompactRecovery = false;
+    return false;
   }
 
   function photoStorePut(record) {
@@ -1555,11 +1700,12 @@
   }
 
   function photoStoreClear() {
-    return withEvidenceTransaction([photoStoreName, voiceStoreName, voiceChunkStoreName, gpsStoreName], "readwrite", transaction => {
+    return withEvidenceTransaction([photoStoreName, voiceStoreName, voiceChunkStoreName, gpsStoreName, stateStoreName], "readwrite", transaction => {
       transaction.objectStore(photoStoreName).clear();
       transaction.objectStore(voiceStoreName).clear();
       transaction.objectStore(voiceChunkStoreName).clear();
       transaction.objectStore(gpsStoreName).clear();
+      transaction.objectStore(stateStoreName).clear();
       return transactionCompletion(transaction, "Evidence attachments could not be cleared.");
     });
   }
@@ -2428,7 +2574,7 @@
         updateControls();
       });
     try {
-      saveState();
+      saveState({ gpsOnly: true });
     } catch (error) {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       watchId = null;
@@ -4121,6 +4267,8 @@
     let lastError = null;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
+        await stateWriteQueue;
+        if (stateStorageFailed) throw new Error("Durable inspection state is not current: " + stateStorageErrorMessage);
         await gpsWriteQueue;
         await voiceChunkWrites;
         await revalidatePhotoDb();
@@ -5731,6 +5879,9 @@
     try {
       await openPhotoDb();
       await revalidatePhotoDb();
+      await restoreCanonicalInspectionState();
+      saveState();
+      await stateWriteQueue;
       await loadPendingPhotos();
       await reconcileGpsPoints();
       await migrateLegacyPhotos();
