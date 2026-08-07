@@ -7,6 +7,7 @@ on:
     paths:
       - 'tools/build-ed42-safari-direct.js'
       - 'tools/patch-direct-gps-explicit.js'
+      - 'tools/patch-direct-gps-recovery-button.js'
       - 'tests/ed42-safari-direct.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
       - 'tests/field-simple-export-survival.test.js'
@@ -40,6 +41,8 @@ jobs:
         run: node tools/build-ed42-safari-direct.js
       - name: Apply explicit Safari GPS activation patch
         run: node tools/patch-direct-gps-explicit.js
+      - name: Apply GPS recovery button patch
+        run: node tools/patch-direct-gps-recovery-button.js
       - name: Verify direct Safari candidate
         run: node tests/ed42-safari-direct.test.js
       - name: Verify retry-safe photograph database
@@ -57,5 +60,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js
-          git commit -m 'Build verified ed42 Safari direct candidate v2'
+          git commit -m 'Build verified ed42 Safari direct candidate v4'
           git push origin HEAD:repair/field-simple-test-5.1-safari-direct
