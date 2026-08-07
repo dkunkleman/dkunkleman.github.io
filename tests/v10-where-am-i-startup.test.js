@@ -8,7 +8,7 @@ function need(text, message) {
   if (!app.includes(text)) throw new Error(message);
 }
 
-need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-3', 'v3 version missing');
+need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-4', 'v4 version missing');
 need('CANONICAL INSPECTION RESTORE FAILED', 'explicit canonical restore failure status missing');
 need('await openPhotoDb();\n      await restoreCanonicalInspectionState();', 'canonical IndexedDB restore is not immediate after DB open');
 need('renderSimpleHeader();\n      renderSimpleHome();\n      saveState();', 'full restored field UI is not painted immediately after restore');
@@ -34,6 +34,6 @@ if (repaint < restore) throw new Error('restored UI repaint occurs before or wit
 if (preRestore.includes('saveState();')) throw new Error('saveState still runs between compact pointer load and canonical restore');
 if (!init.includes('fetch("./assets/august-4-route-context.json"')) throw new Error('August 4 reference fetch was lost instead of moved to background');
 if (!init.includes('setTimeout(() => controller.abort(), 5000)')) throw new Error('August 4 background fetch lacks a hard timeout');
-if (!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-3')) throw new Error('v3 service-worker cache missing');
+if (!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-4')) throw new Error('v4 service-worker cache missing');
 
 console.log('PASS: canonical IndexedDB inspection restore and repaint occur before every network/background task.');
