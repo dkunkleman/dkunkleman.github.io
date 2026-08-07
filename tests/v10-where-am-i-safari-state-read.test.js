@@ -16,7 +16,7 @@ const start = app.indexOf('  function inspectionStateGet() {');
 const end = app.indexOf('\n\n  async function restoreCanonicalInspectionState()', start);
 if (start < 0 || end < 0) throw new Error('inspectionStateGet boundaries missing');
 const body = app.slice(start, end);
-if (body.includes('transaction.oncomplete')) throw new Error('canonical readonly state read still waits for transaction.oncomplete');
-if (body.includes('transactionRequest(')) throw new Error('canonical readonly state read still uses the generic transaction-completion helper');
+if (body.includes('return transactionRequest(transaction, request')) throw new Error('canonical readonly state read still uses the old transaction-completion helper');
+if (!body.includes('request.onsuccess = () => finish(request.result);')) throw new Error('request success is not the canonical read completion point');
 
-console.log('PASS: Safari canonical state restore resolves on IndexedDB get() success without waiting for transaction completion.');
+console.log('PASS: Safari canonical state restore resolves from IndexedDB get() success instead of the old transaction-completion helper.');
