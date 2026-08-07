@@ -18,7 +18,7 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-6"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-7"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
@@ -39,6 +39,7 @@ assert.match(app, /simpleGpsControlWrap/);
 assert.match(app, /RECONNECT GPS/);
 assert.match(app, /GPS REQUEST SENT — waiting for Safari location/);
 assert.doesNotMatch(app, /GPS RECONNECTING — LOCATION PENDING/);
+assert.doesNotMatch(app, /GPS STARTING — restoring field location tracking/);
 assert.match(app, /button\.id === "simpleGpsControl"/);
 assert.match(app, /function gpsRecoveryWatchdog\(\)/);
 assert.match(app, /setInterval\(gpsRecoveryWatchdog, 15000\)/);
@@ -103,6 +104,9 @@ assert.doesNotMatch(manualGps, /\bawait\b/, "RECONNECT GPS must not await before
 assert.doesNotMatch(manualGps, /getCurrentPosition\s*\(/, "RECONNECT GPS must not use one-shot geolocation as its gate");
 assert.match(manualGps, /startGpsWatcher\(\)/, "RECONNECT GPS must start the continuous watcher directly");
 assert.match(manualGps, /armManualGpsFallback\(generation\)/, "RECONNECT GPS must have an independent hard timeout");
+const watcherStartIndex = manualGps.indexOf("startGpsWatcher();");
+const permissionQueryIndex = manualGps.indexOf("refreshGpsPermissionState()");
+assert.ok(watcherStartIndex >= 0 && permissionQueryIndex > watcherStartIndex, "the tap must start watchPosition before querying permission state");
 
 const watcher = extractFunction("startGpsWatcher");
 assert.match(watcher, /watchPosition\s*\(/, "field GPS must use continuous watchPosition");
@@ -118,17 +122,20 @@ assert.match(scheduled, /startGpsWatcher\(\)/, "automatic retry starts GPS direc
 assert.doesNotMatch(scheduled, /startTracking\s*\(/, "automatic retry must not run heavyweight inspection startup");
 
 const fieldReady = extractFunction("ensureFieldGpsReady");
-assert.match(fieldReady, /startGpsWatcher\(\)/, "field actions may trigger nonblocking watcher recovery");
+assert.match(fieldReady, /!gpsUserActivatedThisPage/, "field actions cannot silently start Safari GPS before the visible reconnect tap");
+assert.match(fieldReady, /startGpsWatcher\(\)/, "after activation, field actions may trigger nonblocking watcher recovery");
 assert.doesNotMatch(fieldReady, /getCurrentPosition\s*\(/, "field actions must not block on one-shot geolocation");
 assert.doesNotMatch(fieldReady, /await\s+startTracking\s*\(/, "field actions must not await heavyweight inspection startup");
 
 const returned = extractFunction("revalidateGpsAfterReturn");
-assert.match(returned, /startGpsWatcher\(\)/, "return from background directly restores watcher");
+assert.match(returned, /!gpsUserActivatedThisPage/, "background return recovery is allowed only after this page received the reconnect tap");
+assert.match(returned, /startGpsWatcher\(\)/, "return from background directly restores watcher after activation");
 assert.doesNotMatch(returned, /startTracking\s*\(/, "return recovery must not run heavyweight inspection startup");
 
 const watchdog = extractFunction("gpsRecoveryWatchdog");
-assert.match(watchdog, /watchId === null \|\| gpsWatcherIsStale\(\)/, "watchdog handles disconnected or stale watcher");
-assert.match(watchdog, /startGpsWatcher\(\)/, "watchdog starts a fresh watcher directly");
+assert.match(watchdog, /!gpsUserActivatedThisPage/, "watchdog cannot silently start GPS on a fresh page load");
+assert.match(watchdog, /watchId === null \|\| gpsWatcherIsStale\(\)/, "watchdog handles disconnected or stale watcher after activation");
+assert.match(watchdog, /startGpsWatcher\(\)/, "watchdog starts a fresh watcher directly after activation");
 assert.doesNotMatch(watchdog, /startTracking\s*\(/, "watchdog must not run heavyweight inspection startup");
 
 const hardTimeout = extractFunction("armManualGpsFallback");
@@ -136,11 +143,12 @@ assert.match(hardTimeout, /GPS_MANUAL_HARD_TIMEOUT_MS/, "manual reconnect cannot
 assert.match(hardTimeout, /gpsManualRequestInFlight = false/, "hard timeout releases the reconnect UI");
 
 const initializeBody = extractFunction("initialize");
-assert.match(initializeBody, /startGpsWatcher\(\)/, "active inspection restores continuous GPS after safe startup");
+assert.doesNotMatch(initializeBody, /startGpsWatcher\s*\(/, "page refresh must not silently start Safari geolocation");
+assert.match(initializeBody, /gpsUserActivatedThisPage = false/, "fresh page requires an explicit reconnect tap");
 assert.doesNotMatch(initializeBody, /await\s+startTracking\s*\(/, "page startup must not await heavyweight GPS startup");
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-6/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v6/);
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-7/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v7/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -150,4 +158,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct v6 starts cleanly, uses a continuous watcher with first-fix grace, hard-times out a silent Safari reconnect, auto-recovers without heavyweight startup, preserves storage, and keeps pending-location recovery.");
+console.log("PASS: ed42 Safari-direct v7 never starts GPS on refresh, starts the continuous watcher directly from RECONNECT GPS, hard-times out silent Safari, auto-recovers only after activation, preserves storage, and keeps pending-location recovery.");
