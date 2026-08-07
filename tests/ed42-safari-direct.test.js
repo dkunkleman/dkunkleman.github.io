@@ -18,7 +18,7 @@ new Function(idb);
 new Function(frontage);
 new Function(sections);
 
-assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-3"/);
+assert.match(app, /const APP_VERSION = "3\.13\.0-home-test\.5\.1-safari-direct-4"/);
 assert.match(app, /DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7"/);
 assert.match(app, /DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH/);
 assert.match(app, /const stateKey = "propertyInspectorHomeTest313V1"/);
@@ -30,18 +30,25 @@ assert.match(app, /generation !== gpsWatchGeneration/);
 assert.match(app, /clearActiveGpsWatch\(\)/);
 assert.match(app, /GPS_STALE_MS = 90000/);
 assert.match(app, /gpsUserActivatedThisPage/);
+assert.match(app, /gpsManualRequestInFlight/);
+assert.match(app, /gpsRecoveryReason/);
 assert.match(app, /simpleGpsControlWrap/);
 assert.match(app, /simpleGpsControl/);
-assert.match(app, /START \/ RESTART GPS/);
+assert.match(app, /RECONNECT GPS/);
 assert.match(app, /GPS POSITION UNAVAILABLE/);
 assert.match(app, /GPS TIMEOUT/);
 assert.match(app, /GPS PERMISSION OFF/);
+assert.match(app, /GPS REQUEST SENT — waiting for Safari location/);
 assert.doesNotMatch(app, /GPS RECONNECTING — LOCATION PENDING/);
+assert.match(app, /button\.id === "simpleGpsControl"/);
+assert.match(app, /function gpsRecoveryWatchdog\(\)/);
+assert.match(app, /setInterval\(gpsRecoveryWatchdog, 15000\)/);
+assert.match(app, /GPS STALLED — automatic recovery started/);
 
 assert.match(app, /function requestGpsFromVisibleControl\(\)/);
 assert.doesNotMatch(app, /async function requestGpsFromVisibleControl/);
 assert.match(app, /navigator\.geolocation\.getCurrentPosition\(position =>/);
-assert.match(app, /This call is intentionally made synchronously inside the user's click handler/);
+assert.match(app, /Keep the Safari geolocation request directly inside the user's tap handler/);
 
 assert.match(app, /PENDING_GPS/);
 assert.match(app, /FEATURE SAVED - \$\{featureId\} - LOCATION PENDING/);
@@ -92,8 +99,8 @@ assert.doesNotMatch(initializeBody, /await startTracking\(\)/, "page load must n
 const returnBody = extractFunction("revalidateGpsAfterReturn");
 assert.match(returnBody, /!gpsUserActivatedThisPage/, "background recovery only starts after user activated GPS on this page");
 
-assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-3/);
-assert.match(sw, /property-inspector-home-test-313-direct-ed42-v3/);
+assert.match(index, /app\.js\?v=3\.13\.0-home-test\.5\.1-safari-direct-4/);
+assert.match(sw, /property-inspector-home-test-313-direct-ed42-v4/);
 assert.match(sw, /ignoreSearch:\s*true/);
 assert.doesNotMatch(sw, /patchFieldAppSource|recoveredAppResponse|safari-geolocation-recovery/);
 assert.doesNotMatch(sw, /startsWith\("property-inspector-home-test-313-"\)/);
@@ -103,4 +110,4 @@ assert.match(idb, /isRetryableConnectionError/);
 assert.match(frontage, /location_status: hasPosition \? "CAPTURED_WITH_RECORD" : "PENDING_GPS"/);
 assert.match(sections, /PLANNED_LOCATION_PENDING/);
 
-console.log("PASS: ed42 Safari-direct candidate has a visible synchronous GPS button, exact GPS states, preserved storage, and pending-location recovery.");
+console.log("PASS: ed42 Safari-direct candidate auto-recovers dead GPS, exposes a direct RECONNECT GPS fallback, preserves storage, and keeps pending-location recovery.");
