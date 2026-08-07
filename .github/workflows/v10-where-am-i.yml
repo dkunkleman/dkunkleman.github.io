@@ -49,11 +49,13 @@ jobs:
             git commit -m 'Build verified v10 WHERE AM I candidate v2'
             git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
           fi
-      - name: Publish tested WHERE AM I v2 and clean staging markers
+      - name: Publish tested WHERE AM I v2 and fresh Safari path
         run: |
           git fetch origin main repair/field-simple-test-direct-v10-section-pause
           git checkout -B main origin/main
           git checkout origin/repair/field-simple-test-direct-v10-section-pause -- field-simple-test-direct-v10-where-am-i
+          rm -rf field-simple-test-direct-v10-where-am-i-v2
+          cp -R field-simple-test-direct-v10-where-am-i field-simple-test-direct-v10-where-am-i-v2
           rm -f -- \
             DO_NOT_USE_MARKER_4.txt \
             FINAL_STOP.txt \
@@ -74,5 +76,5 @@ jobs:
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Publish tested WHERE AM I v2 and clean staging files'
+          git commit -m 'Publish tested WHERE AM I v2 at fresh Safari path'
           git push origin HEAD:main
