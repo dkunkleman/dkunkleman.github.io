@@ -8,6 +8,7 @@ on:
       - 'tools/build-ed42-safari-direct.js'
       - 'tests/ed42-safari-direct.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
+      - 'tests/field-simple-export-survival.test.js'
       - '.github/workflows/ed42-safari-direct.yml'
   workflow_dispatch:
 
@@ -42,6 +43,8 @@ jobs:
         run: node tests/field-simple-idb-recovery.test.js
       - name: Verify section mapping
         run: node tests/section-mapping.test.js
+      - name: Verify export without ending active inspection
+        run: node tests/field-simple-export-survival.test.js
       - name: Commit verified direct files
         run: |
           if git diff --quiet -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js; then
