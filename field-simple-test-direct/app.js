@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-3";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-4";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -152,44 +152,57 @@
   let lastGpsErrorCode = null;
   let lastGpsErrorMessage = "";
   let lastGpsErrorAt = null;
+  let gpsManualRequestInFlight = false;
+  let gpsRecoveryReason = "";
 
   const simpleShell = document.getElementById("simpleShell");
   if (simpleShell) {
     simpleShell.addEventListener("click", event => {
       const button = event.target && event.target.closest ? event.target.closest("button") : null;
       if (!button || button.disabled || !simpleShell.contains(button)) return;
+      if (button.id === "simpleGpsControl") return;
       const label = String(button.textContent || "FIELD ACTION").trim().replace(/\s+/g, " ");
       simpleSetStatus(`TAP SAVED — ${label}`, "warning");
     }, true);
   }
 
-  function visibleGpsMessage() {
+    function visibleGpsMessage() {
     const fresh = freshFieldPosition();
     if (fresh) return `GPS ACTIVE — accuracy +/-${Math.round(fresh.accuracy_m || 0)} m`;
+    if (gpsManualRequestInFlight) return "GPS REQUEST SENT — waiting for Safari location.";
     if (gpsPermissionDenied || lastGpsErrorCode === 1) return "GPS PERMISSION OFF — Safari is not allowed to use location.";
-    if (lastGpsErrorCode === 2) return "GPS POSITION UNAVAILABLE — Safari did not produce a location.";
-    if (lastGpsErrorCode === 3) return "GPS TIMEOUT — Safari did not return a location in time.";
+    if (lastGpsErrorCode === 2) return "GPS POSITION UNAVAILABLE — automatic recovery is trying; tap RECONNECT GPS if needed.";
+    if (lastGpsErrorCode === 3) return "GPS TIMEOUT — automatic recovery is trying; tap RECONNECT GPS if needed.";
+    if (gpsRecoveryReason) return gpsRecoveryReason;
     if (watchId !== null) return "GPS STARTING — waiting for Safari location.";
-    return "GPS OFF — tap the green button below.";
+    if (data.started) return "GPS IS NOT CONNECTED — tap RECONNECT GPS.";
+    return "GPS has not started yet.";
   }
 
-  function updateVisibleGpsControl() {
+    function updateVisibleGpsControl() {
+    const wrap = document.getElementById("simpleGpsControlWrap");
     const button = document.getElementById("simpleGpsControl");
     const message = document.getElementById("simpleGpsControlStatus");
-    if (!button || !message) return;
+    if (!wrap || !button || !message) return;
     const fresh = freshFieldPosition();
-    button.disabled = Boolean(fresh);
-    button.textContent = fresh ? "GPS ACTIVE" : "START / RESTART GPS";
+    const stale = data.started && !data.stopped && watchId !== null && gpsWatcherIsStale();
+    const needsRecovery = Boolean(data.started && !data.stopped && !fresh && (gpsManualRequestInFlight || lastGpsErrorCode != null || gpsRecoveryReason || watchId === null || stale));
+    wrap.hidden = !needsRecovery;
+    button.disabled = gpsManualRequestInFlight;
+    button.textContent = gpsManualRequestInFlight ? "GPS REQUEST IN PROGRESS" : "RECONNECT GPS";
     message.textContent = visibleGpsMessage();
   }
 
-  function requestGpsFromVisibleControl() {
+    function requestGpsFromVisibleControl() {
     gpsUserActivatedThisPage = true;
+    gpsManualRequestInFlight = true;
+    gpsRecoveryReason = "";
     gpsPermissionDenied = false;
     lastGpsErrorCode = null;
     lastGpsErrorMessage = "";
     lastGpsErrorAt = null;
     if (!("geolocation" in navigator)) {
+      gpsManualRequestInFlight = false;
       lastGpsErrorCode = 0;
       lastGpsErrorMessage = "geolocation unavailable";
       updateVisibleGpsControl();
@@ -198,7 +211,6 @@
     }
 
     const now = new Date().toISOString();
-    const wasStarted = Boolean(data.started);
     if (!data.inspection_id) data.inspection_id = makeId("inspection");
     if (!data.started) {
       data.started = now;
@@ -207,36 +219,39 @@
     } else if (data.stopped) {
       data.stopped = null;
       data.lifecycle_events.push({ type: "inspection_resumed", time: now, source: "visible_gps_button" });
-    } else if (wasStarted) {
+    } else {
       data.lifecycle_events.push({ type: "gps_restart_requested", time: now, source: "visible_gps_button" });
     }
     saveState();
     clearActiveGpsWatch();
-    simpleSetStatus("GPS REQUEST SENT TO SAFARI — waiting for location.", "warning");
-    setStatus("GPS REQUEST SENT TO SAFARI — waiting for location.", "active");
-    updateControls();
+    simpleSetStatus("GPS REQUEST SENT — waiting for Safari location.", "warning");
+    setStatus("GPS REQUEST SENT — waiting for Safari location.", "active");
     updateVisibleGpsControl();
 
-    // This call is intentionally made synchronously inside the user's click handler.
+    // Keep the Safari geolocation request directly inside the user's tap handler.
     navigator.geolocation.getCurrentPosition(position => {
+      gpsManualRequestInFlight = false;
+      gpsRecoveryReason = "";
       onPosition(position);
       if (watchId === null) startGpsWatcher();
       keepAwake();
       updateControls();
       updateVisibleGpsControl();
     }, error => {
+      gpsManualRequestInFlight = false;
       onGpsError(error, gpsWatchGeneration);
       updateVisibleGpsControl();
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 });
   }
 
-  function installVisibleGpsControl() {
+    function installVisibleGpsControl() {
     if (!simpleShell || document.getElementById("simpleGpsControlWrap")) return;
     const wrap = document.createElement("section");
     wrap.id = "simpleGpsControlWrap";
-    wrap.setAttribute("aria-label", "GPS control");
-    wrap.style.cssText = "margin:10px;padding:12px;border:4px solid #0b5d2a;border-radius:10px;background:#fff;position:relative;z-index:30";
-    wrap.innerHTML = '<div id="simpleGpsControlStatus" style="font-weight:900;font-size:17px;line-height:1.3;margin-bottom:8px">GPS OFF — tap the green button below.</div><button id="simpleGpsControl" type="button" style="width:100%;min-height:68px;background:#087a32;color:#fff;font-size:20px;font-weight:900;border:0;border-radius:9px">START / RESTART GPS</button>';
+    wrap.hidden = true;
+    wrap.setAttribute("aria-label", "GPS recovery control");
+    wrap.style.cssText = "margin:10px;padding:12px;border:4px solid #b33a00;border-radius:10px;background:#fff7ed;position:relative;z-index:30";
+    wrap.innerHTML = '<div id="simpleGpsControlStatus" style="font-weight:900;font-size:17px;line-height:1.3;margin-bottom:8px"></div><button id="simpleGpsControl" type="button" style="width:100%;min-height:68px;background:#b33a00;color:#fff;font-size:20px;font-weight:900;border:0;border-radius:9px">RECONNECT GPS</button>';
     simpleShell.insertBefore(wrap, simpleShell.firstChild);
     document.getElementById("simpleGpsControl").addEventListener("click", requestGpsFromVisibleControl);
     updateVisibleGpsControl();
@@ -2353,6 +2368,8 @@
       return;
     }
     lastGpsFixReceivedAt = Date.now();
+    gpsManualRequestInFlight = false;
+    gpsRecoveryReason = "";
     gpsRestartAttempt = 0;
     gpsPermissionDenied = false;
     lastGpsErrorCode = null;
@@ -2435,8 +2452,10 @@
     return `GPS ERROR: ${lastGpsErrorMessage}. Field records still save.`;
   }
 
-    function onGpsError(error, generation) {
+      function onGpsError(error, generation) {
     if (generation != null && generation !== gpsWatchGeneration) return;
+    gpsManualRequestInFlight = false;
+    gpsRecoveryReason = "GPS LOST — automatic recovery is trying. You can tap RECONNECT GPS now.";
     clearActiveGpsWatch();
     stopOrientationCapture();
     releaseWakeLock();
@@ -5879,6 +5898,31 @@
     }
   });
   setInterval(updateTimeMetrics, 30000);
+
+  function gpsRecoveryWatchdog() {
+    if (!data.started || data.stopped || !gpsUserActivatedThisPage || gpsPermissionDenied || gpsManualRequestInFlight) {
+      updateVisibleGpsControl();
+      return;
+    }
+    if (freshFieldPosition()) {
+      gpsRecoveryReason = "";
+      updateVisibleGpsControl();
+      return;
+    }
+    if (watchId !== null && gpsWatcherIsStale()) {
+      gpsRecoveryReason = "GPS STALLED — automatic recovery started. Tap RECONNECT GPS if it does not recover.";
+      clearActiveGpsWatch();
+      updateVisibleGpsControl();
+      startTracking({ recovery: true, skipReconcile: true }).catch(error => {
+        gpsRecoveryReason = `GPS AUTOMATIC RECOVERY FAILED: ${error && error.message ? error.message : "unknown error"}. Tap RECONNECT GPS.`;
+        updateVisibleGpsControl();
+      });
+    } else {
+      updateVisibleGpsControl();
+    }
+  }
+
+  setInterval(gpsRecoveryWatchdog, 15000);
 
   initialize();
 })();
