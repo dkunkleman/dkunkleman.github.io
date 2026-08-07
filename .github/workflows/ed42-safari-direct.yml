@@ -11,7 +11,9 @@ on:
       - 'tools/patch-direct-startup-order.js'
       - 'tools/patch-direct-gps-watch-hardening.js'
       - 'tools/patch-direct-gps-user-gated.js'
+      - 'tools/patch-direct-storage-quota.js'
       - 'tests/ed42-safari-direct.test.js'
+      - 'tests/field-simple-storage-quota.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
       - 'tests/field-simple-export-survival.test.js'
       - '.github/workflows/ed42-safari-direct.yml'
@@ -52,8 +54,12 @@ jobs:
         run: node tools/patch-direct-gps-watch-hardening.js
       - name: Gate GPS startup behind visible user action
         run: node tools/patch-direct-gps-user-gated.js
+      - name: Move inspection state out of localStorage quota path
+        run: node tools/patch-direct-storage-quota.js
       - name: Verify direct Safari candidate
         run: node tests/ed42-safari-direct.test.js
+      - name: Verify Safari quota-safe state persistence
+        run: node tests/field-simple-storage-quota.test.js
       - name: Verify retry-safe photograph database
         run: node tests/field-simple-idb-recovery.test.js
       - name: Verify section mapping
@@ -69,5 +75,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- field-simple-test/app.js field-simple-test/index.html field-simple-test/sw.js field-simple-test/frontage-workflow.js field-simple-test/section-mapping.js
-          git commit -m 'Build verified ed42 Safari direct candidate v7'
+          git commit -m 'Build verified ed42 Safari direct candidate v8'
           git push origin HEAD:repair/field-simple-test-5.1-safari-direct
