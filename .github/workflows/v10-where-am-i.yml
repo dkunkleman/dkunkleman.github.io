@@ -1,0 +1,45 @@
+name: Verify v10 WHERE AM I candidate
+
+on:
+  push:
+    branches:
+      - repair/field-simple-test-direct-v10-section-pause
+    paths:
+      - 'tools/build-v10-where-am-i.js'
+      - 'tests/v10-where-am-i.test.js'
+      - '.github/workflows/v10-where-am-i.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build WHERE AM I candidate
+        run: node tools/build-v10-where-am-i.js
+      - name: Verify WHERE AM I behavior
+        run: node tests/v10-where-am-i.test.js
+      - name: Verify unchanged IndexedDB recovery
+        run: node tests/field-simple-idb-recovery.test.js
+      - name: Verify section mapping model
+        run: node tests/section-mapping.test.js
+      - name: Commit verified candidate
+        run: |
+          git add -- field-simple-test-direct-v10-where-am-i
+          if git diff --cached --quiet; then
+            echo 'Verified candidate already matches branch.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Build verified v10 WHERE AM I candidate'
+          git push origin HEAD:repair/field-simple-test-direct-v10-section-pause
