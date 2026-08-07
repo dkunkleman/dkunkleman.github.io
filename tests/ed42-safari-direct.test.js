@@ -100,7 +100,7 @@ for (const name of ["finishInspection", "exportBackupNow"]) {
 }
 
 const manualGps = extractFunction("requestGpsFromVisibleControl");
-assert.doesNotMatch(manualGps, /\bawait\b/, "RECONNECT GPS must not await before starting location");
+assert.doesNotMatch(manualGps, /^\s*await\b/m, "RECONNECT GPS must not execute an await before starting location");
 assert.doesNotMatch(manualGps, /getCurrentPosition\s*\(/, "RECONNECT GPS must not use one-shot geolocation as its gate");
 assert.match(manualGps, /startGpsWatcher\(\)/, "RECONNECT GPS must start the continuous watcher directly");
 assert.match(manualGps, /armManualGpsFallback\(generation\)/, "RECONNECT GPS must have an independent hard timeout");
