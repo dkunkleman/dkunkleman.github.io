@@ -11,7 +11,7 @@ on:
       - 'tools/patch-direct-startup-order.js'
       - 'tools/patch-direct-gps-watch-hardening.js'
       - 'tools/patch-direct-gps-user-gated.js'
-      - 'tools/patch-direct-storage-quota.js'
+      - 'tools/patch-direct-storage-quota-v2.js'
       - 'tests/ed42-safari-direct.test.js'
       - 'tests/field-simple-storage-quota.test.js'
       - 'tests/field-simple-idb-recovery.test.js'
@@ -55,7 +55,7 @@ jobs:
       - name: Gate GPS startup behind visible user action
         run: node tools/patch-direct-gps-user-gated.js
       - name: Move inspection state out of localStorage quota path
-        run: node tools/patch-direct-storage-quota.js
+        run: node tools/patch-direct-storage-quota-v2.js
       - name: Verify direct Safari candidate
         run: node tests/ed42-safari-direct.test.js
       - name: Verify Safari quota-safe state persistence
