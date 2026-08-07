@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-2";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-3";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -162,6 +162,87 @@
       simpleSetStatus(`TAP SAVED — ${label}`, "warning");
     }, true);
   }
+
+  function visibleGpsMessage() {
+    const fresh = freshFieldPosition();
+    if (fresh) return `GPS ACTIVE — accuracy +/-${Math.round(fresh.accuracy_m || 0)} m`;
+    if (gpsPermissionDenied || lastGpsErrorCode === 1) return "GPS PERMISSION OFF — Safari is not allowed to use location.";
+    if (lastGpsErrorCode === 2) return "GPS POSITION UNAVAILABLE — Safari did not produce a location.";
+    if (lastGpsErrorCode === 3) return "GPS TIMEOUT — Safari did not return a location in time.";
+    if (watchId !== null) return "GPS STARTING — waiting for Safari location.";
+    return "GPS OFF — tap the green button below.";
+  }
+
+  function updateVisibleGpsControl() {
+    const button = document.getElementById("simpleGpsControl");
+    const message = document.getElementById("simpleGpsControlStatus");
+    if (!button || !message) return;
+    const fresh = freshFieldPosition();
+    button.disabled = Boolean(fresh);
+    button.textContent = fresh ? "GPS ACTIVE" : "START / RESTART GPS";
+    message.textContent = visibleGpsMessage();
+  }
+
+  function requestGpsFromVisibleControl() {
+    gpsUserActivatedThisPage = true;
+    gpsPermissionDenied = false;
+    lastGpsErrorCode = null;
+    lastGpsErrorMessage = "";
+    lastGpsErrorAt = null;
+    if (!("geolocation" in navigator)) {
+      lastGpsErrorCode = 0;
+      lastGpsErrorMessage = "geolocation unavailable";
+      updateVisibleGpsControl();
+      simpleSetStatus("GPS UNAVAILABLE ON THIS PHONE. Field records still save.", "warning");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const wasStarted = Boolean(data.started);
+    if (!data.inspection_id) data.inspection_id = makeId("inspection");
+    if (!data.started) {
+      data.started = now;
+      if (!data.conditions.inspection_date) data.conditions.inspection_date = now.slice(0, 10);
+      data.lifecycle_events.push({ type: "inspection_started", time: now, source: "visible_gps_button" });
+    } else if (data.stopped) {
+      data.stopped = null;
+      data.lifecycle_events.push({ type: "inspection_resumed", time: now, source: "visible_gps_button" });
+    } else if (wasStarted) {
+      data.lifecycle_events.push({ type: "gps_restart_requested", time: now, source: "visible_gps_button" });
+    }
+    saveState();
+    clearActiveGpsWatch();
+    simpleSetStatus("GPS REQUEST SENT TO SAFARI — waiting for location.", "warning");
+    setStatus("GPS REQUEST SENT TO SAFARI — waiting for location.", "active");
+    updateControls();
+    updateVisibleGpsControl();
+
+    // This call is intentionally made synchronously inside the user's click handler.
+    navigator.geolocation.getCurrentPosition(position => {
+      onPosition(position);
+      if (watchId === null) startGpsWatcher();
+      keepAwake();
+      updateControls();
+      updateVisibleGpsControl();
+    }, error => {
+      onGpsError(error, gpsWatchGeneration);
+      updateVisibleGpsControl();
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 });
+  }
+
+  function installVisibleGpsControl() {
+    if (!simpleShell || document.getElementById("simpleGpsControlWrap")) return;
+    const wrap = document.createElement("section");
+    wrap.id = "simpleGpsControlWrap";
+    wrap.setAttribute("aria-label", "GPS control");
+    wrap.style.cssText = "margin:10px;padding:12px;border:4px solid #0b5d2a;border-radius:10px;background:#fff;position:relative;z-index:30";
+    wrap.innerHTML = '<div id="simpleGpsControlStatus" style="font-weight:900;font-size:17px;line-height:1.3;margin-bottom:8px">GPS OFF — tap the green button below.</div><button id="simpleGpsControl" type="button" style="width:100%;min-height:68px;background:#087a32;color:#fff;font-size:20px;font-weight:900;border:0;border-radius:9px">START / RESTART GPS</button>';
+    simpleShell.insertBefore(wrap, simpleShell.firstChild);
+    document.getElementById("simpleGpsControl").addEventListener("click", requestGpsFromVisibleControl);
+    updateVisibleGpsControl();
+  }
+
+  installVisibleGpsControl();
 
   function captureAutomaticContext(reason, position) {
     if (!automaticContextTools) return null;
@@ -2364,6 +2445,7 @@
     setStatus(message, Number(error && error.code) === 1 ? "error" : "warning");
     simpleSetStatus(message, "warning");
     renderSimpleHeader();
+    updateVisibleGpsControl();
     if (gpsPermissionDenied) {
       clearTimeout(gpsRestartTimer);
       gpsRestartTimer = null;
@@ -4292,19 +4374,12 @@
     const gps = document.getElementById("simpleGpsStatus");
     const counts = document.getElementById("simpleCounts");
     const fresh = freshFieldPosition();
-    if (gps) {
-      if (fresh) gps.textContent = `GPS ACTIVE +/-${Math.round(fresh.accuracy_m || 0)} m`;
-      else if (gpsPermissionDenied || lastGpsErrorCode === 1) gps.textContent = "GPS PERMISSION OFF — TAP START / RESTART GPS AFTER FIXING LOCATION SETTINGS";
-      else if (lastGpsErrorCode === 2) gps.textContent = "GPS POSITION UNAVAILABLE — TAP START / RESTART GPS";
-      else if (lastGpsErrorCode === 3) gps.textContent = "GPS TIMEOUT — TAP START / RESTART GPS";
-      else if (watchId !== null) gps.textContent = "GPS STARTING — WAITING FOR FIRST LOCATION";
-      else if (data.started) gps.textContent = "GPS OFF — TAP START / RESTART GPS";
-      else gps.textContent = "NOT STARTED — TAP START INSPECTION";
-    }
+    if (gps) gps.textContent = visibleGpsMessage();
     if (counts) {
       const appPath = location.pathname.replace(/\/?$/, "/") + "app.js";
       counts.textContent = `${data.photos.length} photos | ${data.markers.length} records | ${data.voice_notes.length} voice · ${APP_VERSION} · DIRECT ${appPath}`;
     }
+    updateVisibleGpsControl();
   }
 
   function simplePointInRing(lon, lat, ring) {
@@ -5595,7 +5670,7 @@
     renderAuditHistory();
     renderEvidenceSets();
     if (statusEl.dataset.kind !== "error") {
-      setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Tap START / RESTART GPS to turn location on." : "Ready. Confirm Offline ready, then tap START INSPECTION."), pendingPhotoQueue.length ? "warning" : "normal");
+      setStatus(pendingPhotoQueue.length ? "Photo is waiting to be saved. Keep this page open and tap Retry Pending Photo." : (data.started ? "Saved inspection loaded. Use the green GPS button at the top of the field screen." : "Ready. Use the green GPS button at the top of the field screen."), pendingPhotoQueue.length ? "warning" : "normal");
     }
     installSimpleReturnButtons();
     document.getElementById("simpleTopReturn").addEventListener("click", simpleReturnToFieldButtons);
