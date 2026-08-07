@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-8";
+  const APP_VERSION = "3.13.0-home-test.5.1-safari-direct-9";
   const DIRECT_BASELINE_COMMIT = "ed42ca2df4f6ca01fc05f52a652c3821a2007da7";
   const DIRECT_APP_MODE = "DIRECT_APP_FILE_NO_RUNTIME_SOURCE_PATCH";
   const SIMPLE_TEST_BUILD = "field-simple-test-313";
@@ -2598,6 +2598,11 @@
     document.getElementById("accuracy").textContent = `${Math.round(coordinates.accuracy)} m`;
     document.getElementById("location").textContent = `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`;
     setStatus(`GPS active · accuracy ±${Math.round(coordinates.accuracy)} m · ${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}`, "active");
+    const simpleGpsStatus = document.getElementById("simpleSaveStatus");
+    const simpleGpsText = simpleGpsStatus ? String(simpleGpsStatus.textContent || "") : "";
+    if (/^(GPS REQUEST SENT|GPS STARTING|GPS RECOVERY|GPS RETURN RECOVERY|GPS DISCONNECTED|GPS STALLED|SAFARI DID NOT RETURN A LOCATION|SAFARI HAS NOT FINISHED THE LOCATION REQUEST)/.test(simpleGpsText)) {
+      simpleSetStatus(`GPS ACTIVE — accuracy +/-${Math.round(coordinates.accuracy)} m`, "saved");
+    }
     renderSimpleHeader();
     renderSimpleLocator();
   }
