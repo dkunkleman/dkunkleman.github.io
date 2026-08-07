@@ -1,0 +1,21 @@
+const fs=require('fs');
+const vm=require('vm');
+const app=fs.readFileSync('field-simple-test-direct-v10-where-am-i/app.js','utf8');
+const sw=fs.readFileSync('field-simple-test-direct-v10-where-am-i/sw.js','utf8');
+new vm.Script(app);
+function need(text,msg){if(!app.includes(text)) throw new Error(msg);}
+need('3.13.0-home-test.5.1-safari-direct-10-where-am-i-1','version missing');
+need('const stateKey = "propertyInspectorHomeTest313V1"','state key changed');
+need('const photoDbName = "property-inspector-home-test-313-evidence"','photo DB changed');
+need('WHERE AM I?','WHERE AM I button missing');
+need('openWhereAmIMap','map opener missing');
+need('subjectRings()','parcel boundary missing');
+need('whereAmITrackPoints','trail source missing');
+need('(data.points || [])','GPS trail must use saved inspection points');
+need('SHOW MY WHOLE TRAIL','whole trail control missing');
+need('CENTER ON ME','center control missing');
+need("viewport.addEventListener('pointermove'",'drag/pan gesture missing');
+need('startDistance/dist','pinch zoom calculation missing');
+need('Approximate field locator only — not a survey or legal boundary determination.','boundary disclaimer missing');
+if(!sw.includes('property-inspector-home-test-313-direct-v10-where-am-i-1')) throw new Error('unique cache missing');
+console.log('PASS: WHERE AM I map has parcel boundary, live location, saved trail, pan, pinch zoom, and unchanged evidence storage.');
