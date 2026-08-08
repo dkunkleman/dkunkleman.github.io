@@ -18,10 +18,22 @@
       expected_benefit:"Let an owner or buyer walk beside and understand the creek as a property feature without altering the creek itself."
     },
     SMALL_CLEARING_PATHS: {
-      parcel:"SMALL PARCEL", name:"SMALL-PARCEL CLEARING & TWO APPROACH PATHS",
-      primary_objective:"Reveal one selected clearing and prepare understandable walking paths to it from both Pearson Road approaches: the north/south frontage and the northwest approach.",
-      included_scope:["Selectively open the approved clearing", "Prepare one walking connection from the north/south Pearson Road frontage", "Prepare one walking connection from the northwest Pearson Road approach", "Preserve selected mature trees and useful privacy screening", "Create matched before-and-after photographs"],
-      expected_benefit:"Help a buyer enter from either approach, reach the same clearing, and understand how the small parcel could be experienced."
+      parcel:"SMALL PARCEL", name:"WESTERN CANDIDATE HOMESITE CLEARING & TWO APPROACHES",
+      primary_objective:"Reveal one western candidate homesite among selected mature trees, prepare 5-foot walking connections from both Pearson Road approaches, and open a selective westward view toward the sunset.",
+      included_scope:["Selectively reveal the approved candidate homesite without clear-cutting it", "Prepare one approximately 5-foot walking connection from the north/south Pearson Road frontage", "Prepare one approximately 5-foot walking connection from the northwest Pearson Road approach", "Open a selective westward sunset-view corridor from the center of the candidate homesite", "Preserve selected mature trees and useful privacy screening", "Create matched before-and-after photographs"],
+      expected_benefit:"Help a buyer enter from either approach, stand among mature trees at the candidate homesite, and see westward toward the sunset while understanding how the small parcel could be experienced."
+    },
+    SMALL_EASTERN_HOMESITE: {
+      parcel:"SMALL PARCEL", name:"EASTERN CANDIDATE HOMESITE REVEAL",
+      primary_objective:"Selectively reveal the eastern candidate homesite area so its size, mature-tree setting, access relationship, ground conditions, and nearby water can be evaluated.",
+      included_scope:["Selectively open only David's approved eastern outline", "Preserve selected mature trees and useful privacy screening", "Keep cut material out of observed water and drainage routes", "Create matched before-and-after photographs"],
+      expected_benefit:"Let the owner and prospective buyers see and evaluate the eastern candidate homesite without implying that buildability, septic suitability, wetlands status, or regulatory approval has been established."
+    },
+    LARGE_WESTERN_HOMESITE: {
+      parcel:"LARGE PARCEL", name:"LARGE-PARCEL WESTERN HOMESITE & ACCESS CONCEPT",
+      primary_objective:"Selectively reveal one candidate opening near the western side of the large parcel and a 5-foot walking connection toward Pearson Road so the area can be evaluated in person.",
+      included_scope:["Selectively reveal only David's approved candidate-opening outline", "Prepare one approximately 5-foot walking connection toward Pearson Road", "Preserve selected mature trees and useful privacy screening", "Keep cut material out of observed water and drainage routes", "Create matched before-and-after photographs"],
+      expected_benefit:"Let the owner and prospective buyers reach and understand one candidate opening on the large parcel before deciding whether any broader clearing is worthwhile."
     },
     LARGE_CLEARING: {
       parcel:"LARGE PARCEL", name:"LARGE-PARCEL PROPOSED CLEARED AREA",
@@ -40,6 +52,23 @@
     [-87.09269,30.49008],[-87.09253,30.49014],[-87.09236,30.49030],[-87.09237,30.49055],
     [-87.09229,30.49063],[-87.09216,30.49071],[-87.09220,30.49078],[-87.09218,30.49088],
     [-87.09210,30.49096],[-87.09199,30.49103],[-87.09191,30.49112],[-87.09186,30.49117]
+  ];
+  const WESTERN_HOMESITE_SHAPE = [
+    [-87.092310,30.490217],[-87.092048,30.490217],[-87.092048,30.489922],[-87.092032,30.489922],
+    [-87.092032,30.490217],[-87.092000,30.490217],[-87.092000,30.490541],[-87.092310,30.490541]
+  ];
+  const WESTERN_HOMESITE_CORNER_INDEXES = [0,5,6,7];
+  const WESTERN_SUNSET_SIGHTLINE = [[-87.092155,30.490379],[-87.092731,30.490379]];
+  const EASTERN_HOMESITE_SHAPE = [
+    [-87.091489,30.490769],[-87.091439,30.490868],[-87.091393,30.490952],[-87.091310,30.490978],
+    [-87.091169,30.490972],[-87.091058,30.490946],[-87.091027,30.490850],[-87.091024,30.490740],
+    [-87.090984,30.490597],[-87.091020,30.490504],[-87.091064,30.490431],[-87.091125,30.490381],
+    [-87.091190,30.490348],[-87.091267,30.490327],[-87.091353,30.490303],[-87.091405,30.490393],
+    [-87.091454,30.490426],[-87.091433,30.490554],[-87.091489,30.490640]
+  ];
+  const LARGE_WESTERN_HOMESITE_SHAPE = [
+    [-87.092730,30.488880],[-87.092360,30.488880],[-87.092360,30.489050],[-87.092470,30.489050],
+    [-87.092470,30.489580],[-87.092486,30.489580],[-87.092486,30.489050],[-87.092730,30.489050]
   ];
   const HIGH_RESOLUTION_MAX_ZOOM = 22;
   const USGS_NATIVE_MAX_ZOOM = 16;
@@ -73,7 +102,7 @@
   const state = {
     model: loadModel(), source: {}, map: null, groups: {}, photoMarkers: new Map(), selectedPhotoId: null,
     selectedProposalId: null, mode: "EVIDENCE", filter: "WATER", activeDates: new Set(Object.keys(DAY_COLORS)), photoPulseMarker: null,
-    draw: null, rectangleEditor: null, pathEditor: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
+    draw: null, rectangleEditor: null, pathEditor: null, shapeEditor: null, homesiteGuide: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
     currentPhotoSet: [], currentPhotoIndex: -1, currentPhotoCollectionLabel: "ALL VISIBLE PHOTOS", touchStartX: null
   };
   let statusTimer = null;
@@ -626,18 +655,26 @@
     const ids=[...(p(zone).before_photo_ids||[]),...(p(zone).linked_before_photo_ids||[])];
     return [...new Set(ids)].map((id)=>state.source.photos.features.find((photo)=>p(photo).photo_id===id)).filter(Boolean).map((photo)=>`<button type="button" data-proposal-photo="${safe(p(photo).photo_id)}"><img src="${photoPath(photo)}" alt="${safe(p(photo).photo_number)}"><span>${safe(p(photo).photo_number)}</span></button>`).join("")||"<p>Before photographs: UNKNOWN</p>";
   }
+  function componentMeasurementsHtml(props){
+    const components=Array.isArray(props.component_measurements)?props.component_measurements:[];
+    if(!components.length)return "";
+    return `<div class="component-measurements"><b>Approximate proposal pieces</b><ul>${components.map((item)=>{
+      const size=item.area_sq_ft?`${Number(item.area_sq_ft).toLocaleString()} sq ft (${Number(item.acreage_exact||0).toFixed(2)} acre)`:item.approx_length_ft&&item.approx_width_ft?`${item.approx_length_ft} x ${item.approx_width_ft} ft`:"SIZE UNKNOWN";
+      return `<li><b>${safe(item.component)}</b>: ${safe(size)}${item.overlap_note?`<br><small>${safe(item.overlap_note)}</small>`:""}</li>`;
+    }).join("")}</ul><small>Overlapping pieces are counted only once in the total outline.</small></div>`;
+  }
   function renderProposalSheet(){
     const zones=state.model.proposals.features,zone=zones.find((feature)=>feature.id===state.selectedProposalId)||zones[0];
     if(!zone){
       document.getElementById("proposalTotal").textContent="NO WORK AREA YET";
-      document.getElementById("mapProposalSummary").innerHTML='<article class="simple-zone-card"><span class="eyebrow">START HERE</span><h3>Choose what you want to mark</h3><p>Press <b>PROPOSAL</b>, choose one of the three plain-language projects, then tap two corners on the map.</p></article>';
+      document.getElementById("mapProposalSummary").innerHTML='<article class="simple-zone-card"><span class="eyebrow">START HERE</span><h3>Choose what you want to mark</h3><p>Press <b>PROPOSAL</b>, choose a plain-language project, then adjust the orange handles.</p></article>';
       document.getElementById("starterReveal").innerHTML="";
       document.getElementById("acceptanceStatus").innerHTML="";
       return;
     }
     const props=p(zone),total=Core.proposalTotal(zones);
     document.getElementById("proposalTotal").textContent=total.complete?`TOTAL: ${formatMoney(total.priced_total)}`:"TOTAL: UNKNOWN";
-    document.getElementById("mapProposalSummary").innerHTML=`<article class="simple-zone-card"><span class="eyebrow">SELECTED WORK AREA</span><h3>${safe(props.name)}</h3><p><strong>${safe(props.acreage)} acres</strong></p><p>${safe(props.finish_level||"REVEAL FINISH")}</p><p class="simple-zone-price">${formatMoney(props.price)}</p><span class="editing-label">EDIT WITH THE SIMPLE CONTROLS AT LEFT</span></article>`;
+    document.getElementById("mapProposalSummary").innerHTML=`<article class="simple-zone-card"><span class="eyebrow">SELECTED WORK AREA</span><h3>${safe(props.name)}</h3><p><strong>${safe(props.area_sq_ft||"UNKNOWN")} square feet / ${safe(props.acreage)} acres</strong></p>${componentMeasurementsHtml(props)}<p>${safe(props.finish_level||"REVEAL FINISH")}</p><p class="simple-zone-price">${formatMoney(props.price)}</p><span class="editing-label">EDIT WITH THE SIMPLE CONTROLS AT LEFT</span></article>`;
     const next=["Candidate homesite / view reveal — NOT INCLUDED IN CURRENT PRICE","Creek / water-walk extension — NOT INCLUDED IN CURRENT PRICE","Eastern open-area / pasture-potential reveal — NOT INCLUDED IN CURRENT PRICE"];
     document.getElementById("starterReveal").innerHTML=`<article class="starter-zone"><div><span class="eyebrow">RECOMMENDED FIRST PROJECT</span><h3>${safe(props.name)}</h3><p><b>${safe(props.acreage)} acres</b> &middot; approximately ${safe(props.approx_length_ft)} x ${safe(props.approx_width_ft)} feet &middot; ${safe(props.perimeter_ft)}-foot perimeter</p><p><small>${safe(props.geometry_measurement_basis)}</small></p><p><b>Base finish:</b> ${safe(props.finish_level||"REVEAL FINISH")}</p><p><b>Optional upgrade:</b> ${safe(props.optional_upgrade||"UNKNOWN")}</p>${props.geometry_status?`<p class="status-warn">${safe(props.geometry_status)}</p>`:""}<p><b>Existing condition:</b> ${safe(props.current_condition||props.existing_condition||"UNKNOWN")}</p><p><b>Primary objective:</b> ${safe(props.primary_objective||"UNKNOWN")}</p><b>Work included</b>${listHtml(props.included_scope)}<b>What is preserved</b>${listHtml(props.preserve)}<b>Not included</b>${listHtml(props.exclusions)}<p><b>Expected customer / marketing benefit:</b> ${safe(props.expected_benefit||"UNKNOWN")}</p><p><b>Expected visible result:</b> ${safe(props.expected_visible_result||"UNKNOWN")}</p><p><b>Target start:</b> ${safe(props.target_start||"UNKNOWN")}<br><b>Target completion:</b> ${safe(props.target_completion||"UNKNOWN")}</p><p><b>Fixed proposed price:</b> ${formatMoney(props.price)} ${props.price_status!=="VALIDATED"?'<span class="status-warn">NEEDS PRODUCTION TEST / NOT YET VALIDATED</span>':''}</p></div><div><h3>Featured before photographs (${new Set(props.before_photo_ids||[]).size})</h3><p>Click any photo, then use Previous / Next within this proposal only.</p><div class="proposal-photo-row">${proposalPhotoButtons(zone)}</div><div class="next-opportunities"><b>OPTIONAL NEXT OPPORTUNITIES</b>${listHtml(next)}</div></div></article>`;
     document.querySelectorAll("[data-proposal-photo]").forEach((button)=>button.onclick=()=>{const photo=state.source.photos.features.find((item)=>p(item).photo_id===button.dataset.proposalPhoto);if(photo)openPhoto(photo,{photos:photosForProposal(zone.id),label:`${props.name} PHOTOS`});});
@@ -696,6 +733,9 @@
     const pathEditor=state.pathEditor;
     if(pathEditor){pathEditor.corridorLayer.remove();pathEditor.centerlineLayer.remove();if(pathEditor.waterLineLayer)pathEditor.waterLineLayer.remove();pathEditor.handles.forEach((marker)=>marker.remove());}
     state.pathEditor=null;
+    const shapeEditor=state.shapeEditor;
+    if(shapeEditor){shapeEditor.layer.remove();shapeEditor.waterLineLayer?.remove();shapeEditor.protectedPathLayer?.remove();shapeEditor.sunsetSightlineLayer?.remove();shapeEditor.handles.forEach((marker)=>marker.remove());}
+    state.shapeEditor=null;
     if(state.draw?.anchorMarker)state.draw.anchorMarker.remove();
     if(state.draw?.preview)state.draw.preview.remove();
     (state.draw?.pointMarkers||[]).forEach((marker)=>marker.remove());
@@ -746,6 +786,16 @@
       restart.textContent="RESET PATH";
       pathWidths.hidden=false;
       document.querySelectorAll("[data-path-width]").forEach((button)=>button.classList.toggle("active",Number(button.dataset.pathWidth)===state.pathEditor?.widthFt));
+    }else if(step==="SHAPE_EDIT"){
+      const editor=state.shapeEditor,metrics=editor?.metrics;
+      title.textContent=editor?.templateKey==="SMALL_EASTERN_HOMESITE"?"I DREW THE EASTERN HOMESITE AREA":editor?.templateKey==="LARGE_WESTERN_HOMESITE"?"I DREW THE LARGE-PARCEL HOMESITE & ACCESS":"I DREW THE WESTERN HOMESITE & APPROACHES";
+      text.textContent=metrics?`Overall span: about ${metrics.approx_length_ft} by ${metrics.approx_width_ft} feet. Total proposed clearing: ${metrics.area_sq_ft.toLocaleString()} square feet (${metrics.acreage_exact.toFixed(2)} acres). ${editor.conflict?"MOVE THE RED AREA OFF THE BLUE STREAM AND CREEK PATH.":editor.templateKey==="SMALL_CLEARING_PATHS"?"The dashed gold line shows the westward sunset view only; it is not added clearing. Drag an orange dot to adjust the opening.":editor.templateKey==="LARGE_WESTERN_HOMESITE"?"The narrow leg is a 5-foot walking connection. Drag an orange dot to match your sketch.":"Drag an orange dot to adjust it; the blue stream and protected path stay outside."}`:"Drag an orange dot to adjust the proposal.";
+      actions.hidden=false;
+      savedActions.hidden=true;
+      cancel.hidden=false;
+      keep.textContent="KEEP THIS AREA";
+      keep.disabled=Boolean(editor?.conflict);
+      restart.textContent="RESET AREA";
     }else{
       title.textContent="MAKE THE BOX FIT";
       text.textContent="Drag a white square to resize it. Drag MOVE to move the whole box.";
@@ -781,6 +831,7 @@
   }
   function beginRectangle(templateKey){
     if(templateKey==="SMALL_CREEK_PATH")return beginCreekPathEditor();
+    if(["SMALL_CLEARING_PATHS","SMALL_EASTERN_HOMESITE","LARGE_WESTERN_HOMESITE"].includes(templateKey))return beginProposalShapeEditor(templateKey);
     removeRectangleEditor();
     const template=PROPOSAL_TEMPLATES[templateKey]||null;
     state.draw={mode:"RECTANGLE",points:[],targetFeatureId:null,templateKey:templateKey||null,template,anchorMarker:null};
@@ -857,6 +908,149 @@
     removeRectangleEditor();saveModel();renderAll();setDrawCoach("SAVED");
     status("Creek-side path saved. Water markers are now summarized by the blue creek line; the original evidence remains unchanged.");
   }
+  function closedRing(points){return [...points,points[0]];}
+  function orientation(a,b,c){return Math.sign((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]));}
+  function segmentsIntersect(a,b,c,d){
+    const o1=orientation(a,b,c),o2=orientation(a,b,d),o3=orientation(c,d,a),o4=orientation(c,d,b);
+    return o1!==o2&&o3!==o4;
+  }
+  function pointInRing(point,ring){
+    let inside=false;
+    for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+      const a=ring[i],b=ring[j];
+      if(((a[1]>point[1])!==(b[1]>point[1]))&&(point[0]<(b[0]-a[0])*(point[1]-a[1])/(b[1]-a[1])+a[0]))inside=!inside;
+    }
+    return inside;
+  }
+  function ringsIntersect(first,second){
+    for(let i=0;i<first.length-1;i++)for(let j=0;j<second.length-1;j++)if(segmentsIntersect(first[i],first[i+1],second[j],second[j+1]))return true;
+    return pointInRing(first[0],second)||pointInRing(second[0],first);
+  }
+  function proposalShapeMeasurements(points){
+    const coordinates=[closedRing(points)],base=Core.polygonMetrics(coordinates),exactAcres=Core.polygonAreaAcres(coordinates)||0;
+    return {...base,acreage_exact:exactAcres,area_sq_ft:Math.round(exactAcres*43560)};
+  }
+  function proposalShapeComponents(templateKey,points){
+    if(templateKey==="SMALL_EASTERN_HOMESITE")return [{component:"EASTERN CANDIDATE HOMESITE REVEAL",...proposalShapeMeasurements(points),counts_toward_total:true}];
+    if(templateKey==="LARGE_WESTERN_HOMESITE"){
+      const component=(name,indexes,extra={})=>({component:name,...proposalShapeMeasurements(indexes.map((index)=>points[index])),counts_toward_total:true,...extra});
+      return [
+        component("CANDIDATE OPENING",[0,1,2,7]),
+        component("PEARSON ROAD WALKING CONNECTION",[3,4,5,6],{standard_width_ft:5})
+      ];
+    }
+    const component=(name,indexes,extra={})=>({component:name,...proposalShapeMeasurements(indexes.map((index)=>points[index])),counts_toward_total:true,...extra});
+    const house=component("SELECTIVE HOUSE OPENING AMONG MATURE TREES",[0,5,6,7]);
+    const southPath=component("SOUTH APPROACH WALKING PATH",[1,2,3,4],{standard_width_ft:5});
+    return [
+      house,
+      southPath,
+      {component:"NORTHWEST APPROACH CONNECTION",approx_width_ft:5,standard_width_ft:5,counts_toward_total:false,measurement_status:"TO BE ADJUSTED BESIDE THE VISIBLE CREEK; NOT INCLUDED IN THIS CLEARING POLYGON"},
+      {component:"WESTWARD SUNSET VIEW",target_width_ft:40,counts_toward_total:false,measurement_status:"DIRECTIONAL SIGHTLINE ONLY; SELECTIVE VIEW WORK TO BE CONFIRMED IN THE FIELD WITHOUT CLEARING THE CREEK"}
+    ];
+  }
+  function stopHomesiteGuide(){
+    const guide=state.homesiteGuide;if(!guide)return;
+    guide.markers.forEach((marker)=>marker.remove());
+    guide.locationMarker?.remove();
+    guide.accuracyCircle?.remove();
+    if(guide.watchId!==null&&navigator.geolocation)navigator.geolocation.clearWatch(guide.watchId);
+    state.homesiteGuide=null;
+    const button=document.getElementById("showHomesiteCorners");if(button)button.textContent="SHOW MY 4 HOMESITE CORNERS";
+  }
+  function homesiteCornerIcon(number){return L.divIcon({className:"homesite-corner-marker",html:String(number),iconSize:[34,34],iconAnchor:[17,17]});}
+  function showHomesiteCorners(){
+    if(state.homesiteGuide){stopHomesiteGuide();return status("Homesite corner guidance hidden.");}
+    const saved=[...state.model.proposals.features].reverse().find((feature)=>p(feature).proposal_template==="SMALL_CLEARING_PATHS");
+    const sourcePoints=state.shapeEditor?.templateKey==="SMALL_CLEARING_PATHS"?state.shapeEditor.points:(saved?.geometry?.coordinates?.[0]?.slice(0,-1)||WESTERN_HOMESITE_SHAPE);
+    const corners=WESTERN_HOMESITE_CORNER_INDEXES.map((index)=>sourcePoints[index]);
+    const markers=corners.map(([lng,lat],index)=>L.marker([lat,lng],{icon:homesiteCornerIcon(index+1),zIndexOffset:2300,title:`Homesite planning corner ${index+1}`}).addTo(state.map).bindPopup(`<b>HOMESITE CORNER ${index+1}</b><br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>Approximate phone-GPS planning point — not a survey.</small>`));
+    const guide={corners,markers,locationMarker:null,accuracyCircle:null,watchId:null};
+    state.homesiteGuide=guide;
+    state.map.fitBounds(L.latLngBounds(corners.map(([lng,lat])=>[lat,lng])).pad(.75));
+    document.getElementById("showHomesiteCorners").textContent="HIDE HOMESITE CORNERS";
+    if(!navigator.geolocation)return status("Four homesite corners are shown. Live location is not available in this browser.");
+    guide.watchId=navigator.geolocation.watchPosition((position)=>{
+      if(state.homesiteGuide!==guide)return;
+      const here=[position.coords.latitude,position.coords.longitude],accuracy=Math.max(0,position.coords.accuracy||0);
+      if(!guide.locationMarker)guide.locationMarker=L.circleMarker(here,{radius:11,color:"#fff",weight:4,fillColor:"#087cca",fillOpacity:1,zIndexOffset:2400}).addTo(state.map).bindTooltip("YOU ARE HERE",{permanent:false});
+      else guide.locationMarker.setLatLng(here);
+      if(!guide.accuracyCircle)guide.accuracyCircle=L.circle(here,{radius:accuracy,color:"#087cca",weight:1,fillColor:"#55b9f3",fillOpacity:.1,interactive:false}).addTo(state.map);
+      else guide.accuracyCircle.setLatLng(here).setRadius(accuracy);
+      const distances=corners.map(([lng,lat],index)=>({number:index+1,feet:Math.round(state.map.distance(here,[lat,lng])*3.28084)})).sort((a,b)=>a.feet-b.feet);
+      status(`Blue circle is you. Nearest target: corner ${distances[0].number}, about ${distances[0].feet} feet away. Phone GPS ±${Math.round(accuracy*3.28084)} feet.`);
+    },(error)=>status(`Four homesite corners are shown. To see your blue circle, allow location in Safari. ${error.message||""}`),{enableHighAccuracy:true,maximumAge:3000,timeout:15000});
+    status("Four numbered homesite corners are shown. Allow location; your position will be the blue circle.");
+  }
+  function protectedCreekPathRing(){
+    const saved=[...state.model.proposals.features].reverse().find((feature)=>p(feature).proposal_template==="SMALL_CREEK_PATH");
+    return saved?.geometry?.coordinates?.[0]||bufferedPathRing(CREEK_PATH_CENTERLINE,CREEK_PATH_DEFAULT_WIDTH_FT)[0];
+  }
+  function proposalShapeHandleIcon(index){return L.divIcon({className:"proposal-shape-handle",html:String(index+1),iconSize:[28,28],iconAnchor:[14,14]});}
+  function updateProposalShapeEditor(){
+    const editor=state.shapeEditor;if(!editor)return;
+    const ring=closedRing(editor.points),protectSmallCreek=editor.templateKey!=="LARGE_WESTERN_HOMESITE",protectedPath=protectSmallCreek?protectedCreekPathRing():null,streamBuffer=protectSmallCreek?bufferedPathRing(CREEK_WATER_CENTERLINE,8)[0]:null;
+    editor.metrics=proposalShapeMeasurements(editor.points);
+    editor.components=proposalShapeComponents(editor.templateKey,editor.points);
+    editor.conflict=protectSmallCreek&&(ringsIntersect(ring,protectedPath)||ringsIntersect(ring,streamBuffer));
+    editor.layer.setLatLngs(ring.map(([lng,lat])=>[lat,lng]));
+    editor.layer.setStyle({color:editor.conflict?"#b51f1f":"#f29f05",fillColor:editor.conflict?"#ef7777":"#f8d24a"});
+    status(editor.conflict?"Move the red clearing off the blue creek and protected creek-side path.":`${editor.metrics.area_sq_ft.toLocaleString()} square feet (${editor.metrics.acreage_exact.toFixed(2)} acres) proposed for clearing.`);
+    setDrawCoach("SHAPE_EDIT");
+  }
+  function beginProposalShapeEditor(templateKey){
+    removeRectangleEditor();
+    const template=PROPOSAL_TEMPLATES[templateKey];if(!template)return;
+    fitProposalTemplate(template);
+    const points=Core.clone(templateKey==="SMALL_EASTERN_HOMESITE"?EASTERN_HOMESITE_SHAPE:templateKey==="LARGE_WESTERN_HOMESITE"?LARGE_WESTERN_HOMESITE_SHAPE:WESTERN_HOMESITE_SHAPE);
+    const protectSmallCreek=templateKey!=="LARGE_WESTERN_HOMESITE",protectedPath=protectSmallCreek?protectedCreekPathRing():null;
+    const protectedPathLayer=protectSmallCreek?L.polygon(protectedPath.map(([lng,lat])=>[lat,lng]),{color:"#13a4da",fillColor:"#cdefff",fillOpacity:.16,weight:4,dashArray:"8 5",interactive:false}).addTo(state.map):null;
+    const layer=L.polygon(closedRing(points).map(([lng,lat])=>[lat,lng]),{color:"#f29f05",fillColor:"#f8d24a",fillOpacity:.28,weight:5,interactive:false}).addTo(state.map);
+    const waterLineLayer=protectSmallCreek?L.polyline(CREEK_WATER_CENTERLINE.map(([lng,lat])=>[lat,lng]),{color:"#087cca",weight:6,opacity:1,interactive:false}).addTo(state.map):null;
+    const sunsetSightlineLayer=templateKey==="SMALL_CLEARING_PATHS"?L.polyline(WESTERN_SUNSET_SIGHTLINE.map(([lng,lat])=>[lat,lng]),{color:"#ffd84a",weight:5,opacity:1,dashArray:"12 10",interactive:false}).addTo(state.map).bindTooltip("WESTWARD SUNSET VIEW — DIRECTION ONLY",{permanent:false}):null;
+    const editor={templateKey,points,layer,protectedPathLayer,waterLineLayer,sunsetSightlineLayer,handles:[],metrics:null,components:[],conflict:false};
+    state.shapeEditor=editor;
+    points.forEach(([lng,lat],index)=>{
+      const marker=L.marker([lat,lng],{icon:proposalShapeHandleIcon(index),draggable:true,zIndexOffset:2100,title:`Move proposal point ${index+1}`}).addTo(state.map);
+      marker.on("drag",(event)=>{const point=event.target.getLatLng();editor.points[index]=[point.lng,point.lat];updateProposalShapeEditor();});
+      editor.handles.push(marker);
+    });
+    closeControlPanel();
+    updateProposalShapeEditor();
+  }
+  function saveProposalShape(){
+    const editor=state.shapeEditor;if(!editor)return status("Open a homesite proposal first.");
+    updateProposalShapeEditor();if(editor.conflict)return status("This clearing overlaps the blue creek or protected path. Move the red handles before saving.");
+    const template=PROPOSAL_TEMPLATES[editor.templateKey],metrics=editor.metrics,ring=[closedRing(editor.points)],isSmallWestern=editor.templateKey==="SMALL_CLEARING_PATHS",isLargeWestern=editor.templateKey==="LARGE_WESTERN_HOMESITE";
+    const id=`PROPOSAL-ZONE-${String(state.model.proposals.features.length+1).padStart(3,"0")}`;
+    const properties={
+      proposal_zone_id:id,proposal_template:editor.templateKey,parcel:template.parcel,name:template.name,
+      work_type:"HOMESITE REVEAL",service_type:"STARTER REVEAL",finish_level:"REVEAL FINISH",
+      optional_upgrade:"UPGRADE TO CLEAN STAGING FINISH - NOT INCLUDED IN CURRENT PRICE",
+      current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:template.primary_objective,
+      proposed_intervention:"SELECTIVE CANDIDATE-HOMESITE AND APPROACH REVEAL WITHIN DAVID'S ADJUSTED OUTLINE",
+      included_scope:template.included_scope,
+      preserve:isLargeWestern?["Observed water and drainage routes, mature trees selected by David, and original field evidence","Vegetation outside the approved proposal outline"]:["The creek, creek-side path, observed water, mature trees selected by David, and original field evidence","Vegetation outside the approved proposal outline"],
+      remove:[],
+      exclusions:[...(isLargeWestern?[]:["The creek and creek-side walking corridor are outside this clearing area"]),"No buildability, septic, wetlands, drainage, grading, excavation, stump-grubbing, or regulatory-approval claim","Clean Staging Finish is not included unless separately selected"],
+      expected_benefit:template.expected_benefit,expected_visible_result:"An understandable candidate homesite/opening for evaluation; not a build-ready site.",
+      target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",
+      market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,unit:"acre",
+      acreage:Number(metrics.acreage_exact.toFixed(2)),area_sq_ft:metrics.area_sq_ft,quantity:Number(metrics.acreage_exact.toFixed(2)),
+      perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:metrics.approx_width_ft,
+      component_measurements:Core.clone(editor.components),universal_walking_path_width_ft:5,
+      house_opening_character:"SELECTIVE OPENING AMONG MATURE TREES - NOT CLEAR-CUT",
+      ...(isSmallWestern?{sunset_view_direction:"WESTWARD FROM THE CENTER OF THE CANDIDATE HOUSE OPENING",sunset_view_target_width_ft:40,sunset_view_geometry_status:"DIRECTIONAL SIGHTLINE ONLY - NOT INCLUDED AS CLEARING ACROSS THE CREEK",sunset_view_sightline:Core.clone(WESTERN_SUNSET_SIGHTLINE)}:{}),
+      geometry_measurement_basis:metrics.basis,geometry_shape:"EDITABLE DAVID-SKETCH POLYGON",
+      geometry_status:"CODEX-DRAWN FROM DAVID'S ANNOTATED SCREENSHOT - DAVID MUST REVIEW AND ADJUST",
+      protected_exclusions:isLargeWestern?["OBSERVED WATER AND DRAINAGE ROUTES"]:["APPROXIMATE CREEK / STREAM","CREEK-SIDE WALKING CORRIDOR"],
+      before_photo_ids:[],linked_before_photo_ids:[],evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK"
+    };
+    Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry:{type:"Polygon",coordinates:ring},properties},"DRAW_HOMESITE_PROPOSAL_FROM_DAVID_SKETCH");
+    state.selectedProposalId=id;
+    removeRectangleEditor();saveModel();renderAll();setDrawCoach("SAVED");
+    status(`Homesite proposal saved: ${metrics.area_sq_ft.toLocaleString()} square feet (${metrics.acreage_exact.toFixed(2)} acres). ${isLargeWestern?"Observed water and drainage remain protected unless separately approved.":"The creek and protected path remain outside."}`);
+  }
   function beginTemplateArea(templateKey){
     removeRectangleEditor();
     const template=PROPOSAL_TEMPLATES[templateKey]||null;
@@ -903,11 +1097,13 @@
     status("Custom path boundary saved. Photos, GPS, and field evidence were not changed.");
   }
   function finishCurrentDrawing(){
+    if(state.shapeEditor)return saveProposalShape();
     if(state.pathEditor)return saveCreekPath();
     if(state.draw?.mode==="TEMPLATE_AREA")return finishTemplateArea();
     return saveRectangle();
   }
   function restartCurrentDrawing(){
+    if(state.shapeEditor)return beginProposalShapeEditor(state.shapeEditor.templateKey);
     if(state.pathEditor)return beginCreekPathEditor();
     if(state.draw?.mode==="TEMPLATE_AREA")return beginTemplateArea(state.draw.templateKey);
     return restartRectangle();
@@ -1066,6 +1262,7 @@
     }));
     document.querySelectorAll("[data-edit]").forEach(button=>button.addEventListener("click",()=>editProposal(button.dataset.edit)));
     document.querySelectorAll("[data-proposal-template]").forEach(button=>button.addEventListener("click",()=>beginRectangle(button.dataset.proposalTemplate)));
+    document.getElementById("showHomesiteCorners").addEventListener("click",showHomesiteCorners);
     document.getElementById("saveRectangle").addEventListener("click",saveRectangle);
     document.getElementById("cancelRectangle").addEventListener("click",cancelRectangle);
     document.getElementById("keepRectangle").addEventListener("click",finishCurrentDrawing);

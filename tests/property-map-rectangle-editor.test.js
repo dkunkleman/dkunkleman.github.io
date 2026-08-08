@@ -11,6 +11,9 @@ const app = fs.readFileSync(path.join(root, "pearson-road-map", "app.js"), "utf8
 
 assert.match(html, /data-proposal-template="SMALL_CREEK_PATH"[^>]*>SMALL PARCEL [^<]*CREEK-SIDE PATH</, "small-parcel creek-side path choice is missing");
 assert.match(html, /data-proposal-template="SMALL_CLEARING_PATHS"[^>]*>SMALL PARCEL [^<]*CLEARING &amp; TWO PATHS</, "small-parcel clearing and path choice is missing");
+assert.match(html, /data-proposal-template="SMALL_EASTERN_HOMESITE"[^>]*>SMALL PARCEL [^<]*EASTERN HOMESITE AREA</, "small-parcel eastern homesite choice is missing");
+assert.match(html, /data-proposal-template="LARGE_WESTERN_HOMESITE"[^>]*>LARGE PARCEL [^<]*HOMESITE &amp; ACCESS</, "large-parcel homesite and access choice is missing");
+assert.match(html, /id="showHomesiteCorners"[^>]*>SHOW MY 4 HOMESITE CORNERS</, "four-corner homesite guidance button is missing");
 assert.match(html, /data-proposal-template="LARGE_CLEARING"[^>]*>LARGE PARCEL [^<]*CLEARED AREA</, "large-parcel clearing choice is missing");
 assert.match(html, /data-edit="DRAW_RECTANGLE"[^>]*>ADD ANOTHER BOX</, "generic add-box button is missing");
 assert.match(html, /data-edit="RESIZE_RECTANGLE"[^>]*>MOVE \/ RESIZE SELECTED BOX</, "rectangle resize button is missing");
@@ -30,6 +33,16 @@ assert.match(app, /function handleRectangleClickCapture\(event\)/, "marker-safe 
 assert.match(app, /even on a photo or map symbol/, "second-corner instruction does not explain that map symbols are tappable");
 assert.match(app, /templateKey==="SMALL_CREEK_PATH"\)return beginCreekPathEditor/, "creek-side path does not open the Codex-drawn editable corridor");
 assert.match(app, /const CREEK_PATH_DEFAULT_WIDTH_FT = 5/, "creek-side path must begin at five feet for two people side by side");
+assert.match(app, /universal_walking_path_width_ft:5/, "homesite proposal must preserve the universal five-foot path width");
+assert.match(app, /house_opening_character:"SELECTIVE OPENING AMONG MATURE TREES - NOT CLEAR-CUT"/, "western homesite opening must preserve mature-tree character");
+assert.match(app, /sunset_view_direction:"WESTWARD FROM THE CENTER OF THE CANDIDATE HOUSE OPENING"/, "western sunset-view intent is missing");
+assert.match(app, /sunset_view_target_width_ft:40/, "western sunset-view planning width must begin at 40 feet");
+assert.match(app, /sunset_view_geometry_status:"DIRECTIONAL SIGHTLINE ONLY - NOT INCLUDED AS CLEARING ACROSS THE CREEK"/, "sunset sightline must not be misrepresented as creek clearing");
+assert.match(app, /component_measurements:Core\.clone\(editor\.components\)/, "homesite component dimensions are not exported");
+assert.match(app, /ringsIntersect\(ring,protectedPath\)\|\|ringsIntersect\(ring,streamBuffer\)/, "homesite clearing is not prevented from covering the creek or protected path");
+assert.match(app, /navigator\.geolocation\.watchPosition/, "homesite guidance does not show David's live blue location");
+assert.match(app, /WESTERN_HOMESITE_CORNER_INDEXES = \[0,5,6,7\]/, "homesite guidance does not use the four candidate-opening corners");
+assert.match(app, /Phone GPS ±/, "homesite guidance does not disclose phone-GPS uncertainty");
 assert.match(app, /presentation_creek_centerline=Core\.clone\(CREEK_WATER_CENTERLINE\)/, "saved creek-side path does not preserve the separate blue creek interpretation line");
 assert.match(app, /Water markers are now summarized by the blue creek line; the original evidence remains unchanged/, "saving the corridor does not explain the marker-to-line presentation change");
 assert.match(html, />DRAW IT MYSELF</, "custom path drawing fallback is missing");
@@ -39,8 +52,9 @@ assert.match(app, /property-intelligence-experience-map-v0\.3/, "proposal reset 
 assert.match(app, /const SEED_OLD_PROPOSAL = false/, "old western proposal must not seed into the new map");
 assert.match(app, /if \(SEED_OLD_PROPOSAL &&/, "the old proposal seed must remain explicitly gated off");
 assert.match(app, /SOUTHEAST CREEK-SIDE PATH/, "creek-side proposal metadata is missing");
-assert.match(app, /SMALL-PARCEL CLEARING & TWO APPROACH PATHS/, "two-approach clearing metadata is missing");
+assert.match(app, /WESTERN CANDIDATE HOMESITE CLEARING & TWO APPROACHES/, "two-approach clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
+assert.match(app, /LARGE-PARCEL WESTERN HOMESITE & ACCESS CONCEPT/, "large-parcel homesite proposal metadata is missing");
 assert.match(app, /async function captureCurrentMapPicture/, "current map view cannot be saved as a picture");
 assert.match(app, /crossOrigin: "anonymous"/, "map imagery is not configured for safe picture capture");
 
