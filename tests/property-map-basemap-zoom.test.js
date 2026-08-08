@@ -15,5 +15,8 @@ assert.match(source, /maxNativeZoom: USGS_NATIVE_MAX_ZOOM/, "topography must ove
 assert.match(source, /authorizedImageryUrl/, "authorized higher-resolution imagery must be configurable without removing the USGS fallback");
 assert.match(source, /World_Imagery\/MapServer\/tile/, "the close-review fallback must use a high-resolution aerial source");
 assert.match(source, /developmentImageryNativeMaxZoom \|\| 19/, "the imagery fallback must preserve native tiles through close-review zoom");
+assert.match(source, /zoomSnap: \.25/, "map zoom must support small quarter-step increments");
+assert.match(source, /zoomDelta: \.25/, "buttons and double-click must zoom by only one quarter-step");
+assert.match(source, /wheelPxPerZoomLevel: 240/, "mouse-wheel zoom must be slowed for precise property review");
 
-process.stdout.write("PASS: aerial imagery and topography remain rendered through each provider's useful close-review zoom range.\n");
+process.stdout.write("PASS: aerial imagery remains visible and zoom controls move in precise quarter-step increments.\n");

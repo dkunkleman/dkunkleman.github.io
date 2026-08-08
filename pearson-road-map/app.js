@@ -209,7 +209,15 @@
     const imagery = authorizedImagery || config.developmentImageryUrl || "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
     const imageryNativeMaxZoom = authorizedImagery ? Number(config.authorizedImageryNativeMaxZoom || HIGH_RESOLUTION_MAX_ZOOM) : Number(config.developmentImageryNativeMaxZoom || 19);
     const applicationMaxZoom = Number(config.applicationMaxZoom || HIGH_RESOLUTION_MAX_ZOOM);
-    state.map = L.map("map", { zoomControl: true, preferCanvas: true, maxZoom: applicationMaxZoom }).setView([30.4896, -87.0893], 16);
+    state.map = L.map("map", {
+      zoomControl: true,
+      preferCanvas: true,
+      maxZoom: applicationMaxZoom,
+      zoomSnap: .25,
+      zoomDelta: .25,
+      wheelPxPerZoomLevel: 240,
+      wheelDebounceTime: 80
+    }).setView([30.4896, -87.0893], 16);
     document.getElementById("presentationProfile").value=state.model.presentation.profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile||"INTERNAL_EDITABLE";document.getElementById("customerViewToggle").textContent=document.body.dataset.profile==="CUSTOMER_REVIEW"?"DAVID VIEW":"CUSTOMER VIEW";
     state.baseLayer = L.tileLayer(imagery, {
       maxNativeZoom: imageryNativeMaxZoom,
