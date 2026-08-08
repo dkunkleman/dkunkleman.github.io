@@ -62,6 +62,7 @@ aside button,aside select{width:100%;margin:3px 0}
 .gps-point{pointer-events:none}
 #evidenceTotals p{margin:3px 0;font-size:12px}#evidenceTotals strong{font-size:16px}
 .proposal-label{background:#fff8d6;border:2px solid #7c5500;border-radius:5px;padding:2px 5px;font-weight:900}
+.proposal-draft-label{background:rgba(255,248,214,.96);border:2px dashed #7c5500;border-radius:7px;padding:4px 7px;color:#312300;font-size:12px;font-weight:900;text-align:center;box-shadow:0 2px 7px #0004;cursor:pointer}
 .tool-help{margin:0 0 9px;font-size:13px;line-height:1.35;color:#33443a}
 .proposal-template-button{min-height:58px!important;margin:6px 0!important;padding:10px 12px!important;background:#174c31!important;color:#fff!important;border:3px solid #0c2e1d!important;font-size:14px!important;line-height:1.2!important;text-align:left!important}
 .rectangle-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;padding:9px;border:2px solid #f29f05;border-radius:9px;background:#fff8d6}
