@@ -238,6 +238,7 @@
     ["parcel","walks","gps","photos","waterPhotos","findings","waterFindings","sections","waterSections","transect","interpretation","wetDryInterpretation","proposal","assets"].forEach((name) => { state.groups[name] = L.layerGroup().addTo(state.map); });
     state.map.on("mousemove", (event) => updateFilmstrip([event.latlng.lng, event.latlng.lat]));
     state.map.on("click", handleMapClick);
+    state.map.getContainer().addEventListener("click", handleRectangleClickCapture, true);
     renderAll();
     const bounds = L.geoJSON(state.source.parcel).getBounds();
     state.contourLayer = config.contourTileTemplate
@@ -691,7 +692,7 @@
       cancel.hidden=false;
     }else if(step==="SECOND"){
       title.textContent="2 OF 2 — TAP WHERE THE BOX ENDS";
-      text.textContent="Tap the opposite corner. A box will appear.";
+      text.textContent="Tap the opposite corner anywhere on the map — even on a photo or map symbol.";
       actions.hidden=true;
       savedActions.hidden=true;
       cancel.hidden=false;
@@ -775,23 +776,37 @@
   }
   function cancelRectangle(){removeRectangleEditor();status("Rectangle change canceled. Nothing was changed.");}
 
-  function handleMapClick(event){
-    if(state.draw?.mode==="RECTANGLE"){
-      state.draw.points.push([event.latlng.lng,event.latlng.lat]);
-      if(state.draw.points.length===1){
-        state.draw.anchorMarker=L.circleMarker(event.latlng,{radius:8,color:"#fff",weight:3,fillColor:"#f29f05",fillOpacity:1}).addTo(state.map);
-        setDrawCoach("SECOND");
-        status("First corner saved. Tap the opposite corner.");
-        return;
-      }
-      const bounds=Core.rectangleBoundsFromCorners(state.draw.points[0],state.draw.points[1]);
-      const targetFeatureId=state.draw.targetFeatureId;
-      const templateKey=state.draw.templateKey;
-      if(!bounds){state.draw.points.pop();return status("Choose an opposite corner farther away.");}
-      showRectangleEditor(bounds,targetFeatureId,templateKey);
-      document.getElementById("saveRectangle").disabled=false;
-      return;
+  function acceptRectanglePoint(latlng){
+    if(state.draw?.mode!=="RECTANGLE")return false;
+    state.draw.points.push([latlng.lng,latlng.lat]);
+    if(state.draw.points.length===1){
+      state.draw.anchorMarker=L.circleMarker(latlng,{radius:8,color:"#fff",weight:3,fillColor:"#f29f05",fillOpacity:1}).addTo(state.map);
+      setDrawCoach("SECOND");
+      status("First corner saved. Tap the opposite corner anywhere on the map.");
+      return true;
     }
+    const bounds=Core.rectangleBoundsFromCorners(state.draw.points[0],state.draw.points[1]);
+    const targetFeatureId=state.draw.targetFeatureId;
+    const templateKey=state.draw.templateKey;
+    if(!bounds){state.draw.points.pop();status("Choose an opposite corner farther away.");return true;}
+    showRectangleEditor(bounds,targetFeatureId,templateKey);
+    document.getElementById("saveRectangle").disabled=false;
+    return true;
+  }
+
+  function handleRectangleClickCapture(event){
+    if(state.draw?.mode!=="RECTANGLE"||state.rectangleEditor)return;
+    if(event.button!==undefined&&event.button!==0)return;
+    if(event.target.closest(".leaflet-control"))return;
+    const latlng=state.map.mouseEventToLatLng(event);
+    event.preventDefault();
+    event.stopPropagation();
+    if(event.stopImmediatePropagation)event.stopImmediatePropagation();
+    acceptRectanglePoint(latlng);
+  }
+
+  function handleMapClick(event){
+    if(state.draw?.mode==="RECTANGLE")return acceptRectanglePoint(event.latlng);
     if(!state.draw){updateFilmstrip([event.latlng.lng,event.latlng.lat]);return;}
     state.draw.points.push([event.latlng.lng,event.latlng.lat]);
     if(state.draw.preview)state.draw.preview.remove();
