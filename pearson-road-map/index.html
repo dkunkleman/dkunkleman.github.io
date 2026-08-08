@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Pearson Road Water &amp; Clearing Review Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=6">
+  <link rel="stylesheet" href="./styles.css?v=7">
   <script src="./config.local.js" onerror="this.remove()"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -152,8 +152,16 @@
         <section id="drawCoach" class="draw-coach" hidden aria-live="assertive">
           <strong id="drawCoachTitle">TAP WHERE THE BOX STARTS</strong>
           <p id="drawCoachText">Tap once on the map.</p>
+          <div id="pathWidthControls" class="path-width-controls" hidden>
+            <strong>PATH WIDTH</strong>
+            <button type="button" data-path-width="3">3 FEET</button>
+            <button type="button" data-path-width="4">4 FEET</button>
+            <button type="button" data-path-width="5">5 FEET</button>
+            <button id="drawPathMyself" type="button">DRAW IT MYSELF</button>
+          </div>
           <div id="drawCoachActions" hidden>
             <button id="keepRectangle" class="primary-action" type="button">KEEP THIS BOX</button>
+            <button id="undoDrawPoint" type="button" hidden>UNDO LAST POINT</button>
             <button id="restartRectangle" type="button">START OVER</button>
           </div>
           <div id="drawCoachSavedActions" hidden>
@@ -219,7 +227,6 @@
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./property-map-core.js?v=5"></script>
-  <script src="./app.js?v=14"></script>
+  <script src="./app.js?v=16"></script>
 </body>
 </html>
-
