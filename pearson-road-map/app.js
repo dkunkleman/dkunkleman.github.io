@@ -114,8 +114,18 @@
     } catch (_) { return Core.createModel(PROPERTY_ID); }
   }
   function saveModel() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.model)); }
+  function visibleProposals(){return state.model.proposals.features.filter((feature)=>p(feature).proposal_template!=="LARGE_WESTERN_HOMESITE");}
   function applyPresentationProfile(profile){state.model.presentation.profile=profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile;document.getElementById("customerViewToggle").textContent=state.model.presentation.profile==="CUSTOMER_REVIEW"?"DAVID VIEW":"CUSTOMER VIEW";closeControlPanel();saveModel();if(state.map)renderAll();setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
-  function closeControlPanel(){document.body.removeAttribute("data-open-panel");document.getElementById("controlDrawer").setAttribute("aria-hidden","true");document.querySelectorAll("[data-open-panel]").forEach(button=>button.classList.remove("active"));}
+  function closeControlPanel(){document.body.removeAttribute("data-open-panel");document.getElementById("controlDrawer").setAttribute("aria-hidden","true");document.querySelectorAll("[data-open-panel]").forEach(button=>button.classList.remove("active"));setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
+  function closeMapDetails(){document.body.removeAttribute("data-map-details-open");document.getElementById("mapDetailsPanel").setAttribute("aria-hidden","true");setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
+  function showMapDetails(title,html){
+    closeControlPanel();
+    document.getElementById("mapDetailsTitle").textContent=title||"MAP DETAILS";
+    document.getElementById("mapDetailsContent").innerHTML=html||"<p>No additional details were recorded.</p>";
+    document.body.dataset.mapDetailsOpen="true";
+    document.getElementById("mapDetailsPanel").setAttribute("aria-hidden","false");
+    setTimeout(()=>state.map&&state.map.invalidateSize(),0);
+  }
   function openControlPanel(panel){
     if(document.body.dataset.openPanel===panel)return closeControlPanel();
     if(panel==="proposal"){
@@ -153,7 +163,7 @@
     deepFreeze(state.source);
     state.model.source_evidence = { immutable: true, feature_collections: sourceCollections() };
     seedPresentationAndProposal();
-    if (!state.selectedProposalId) state.selectedProposalId = state.model.proposals.features[0]?.id || null;
+    if (!visibleProposals().some((feature)=>feature.id===state.selectedProposalId)) state.selectedProposalId = visibleProposals()[0]?.id || null;
   }
 
   function seedPresentationAndProposal() {
@@ -277,6 +287,12 @@
     ["parcel","walks","gps","photos","waterPhotos","findings","waterFindings","sections","waterSections","transect","interpretation","wetDryInterpretation","proposal","assets"].forEach((name) => { state.groups[name] = L.layerGroup().addTo(state.map); });
     state.map.on("mousemove", (event) => updateFilmstrip([event.latlng.lng, event.latlng.lat]));
     state.map.on("click", handleMapClick);
+    state.map.on("popupopen",(event)=>{
+      const content=event.popup.getContent();
+      const html=typeof content==="string"?content:(content?.outerHTML||content?.textContent||"");
+      state.map.closePopup(event.popup);
+      showMapDetails("MAP DETAILS",html);
+    });
     state.map.getContainer().addEventListener("click", handleRectangleClickCapture, true);
     renderAll();
     const bounds = L.geoJSON(state.source.parcel).getBounds();
@@ -494,18 +510,17 @@
   }
   function renderProposals() {
     renderDraftProposalGuides();
-    state.model.proposals.features.forEach((feature) => {
+    visibleProposals().forEach((feature) => {
       const primary=p(feature).recommended_first_project===true;
       const creekLine=p(feature).presentation_creek_centerline;
       if(Array.isArray(creekLine)&&creekLine.length>1){
         const latlngs=creekLine.map(([lng,lat])=>[lat,lng]);
         L.polyline(latlngs,{color:"#fff",weight:10,opacity:.95,interactive:false}).addTo(state.groups.proposal);
         L.polyline(latlngs,{color:"#087cca",weight:6,opacity:1}).addTo(state.groups.proposal)
-          .bindTooltip("APPROXIMATE CREEK / STREAM<br>Based on photographed water locations and phone GPS — not surveyed",{sticky:true,className:"creek-line-label"});
+          .on("click",()=>showMapDetails("APPROXIMATE CREEK / STREAM","<p>Based on photographed water locations and phone GPS. This is not a surveyed stream centerline.</p>"));
       }
       const layer = L.geoJSON(feature, { style: { color:p(feature).color || "#f29f05",fillColor:p(feature).color || "#f29f05",fillOpacity:primary?.30:.10,weight:primary?5:3,dashArray:primary?null:"8 7" } }).addTo(state.groups.proposal);
       layer.eachLayer((part) => {
-        part.bindTooltip(`${safe(p(feature).name)}<br>${p(feature).acreage || "?"} acres${primary?"<br>RECOMMENDED FIRST PROJECT":"<br>OPTIONAL - NOT INCLUDED"}${p(feature).geometry_status?`<br>${safe(p(feature).geometry_status)}`:""}`, { permanent:true,direction:"center",className:"proposal-label" });
         part.on("click", (event) => { L.DomEvent.stopPropagation(event); state.selectedProposalId=feature.id; showProposal(feature); renderProposalSheet(); renderInternalPricing(); });
       });
     });
@@ -529,16 +544,11 @@
         label:"EASTERN HOMESITE",
         geometry:{type:"Polygon",coordinates:[closedRing(EASTERN_HOMESITE_SHAPE)]}
       },
-      {
-        templateKey:"LARGE_WESTERN_HOMESITE",
-        label:"LARGE-PARCEL HOMESITE",
-        geometry:{type:"Polygon",coordinates:[closedRing(LARGE_WESTERN_HOMESITE_SHAPE)]}
-      }
     ].filter((guide)=>!savedTemplates.has(guide.templateKey));
   }
   function fitAllVisibleProposals() {
     const features=[
-      ...state.model.proposals.features,
+      ...visibleProposals(),
       ...proposalDraftGuides().map((guide)=>({type:"Feature",geometry:guide.geometry,properties:{proposal_template:guide.templateKey}}))
     ];
     if(features.length)state.map.fitBounds(L.geoJSON({type:"FeatureCollection",features}).getBounds().pad(.18));
@@ -553,7 +563,6 @@
       const feature={type:"Feature",geometry:guide.geometry,properties:{proposal_template:guide.templateKey}};
       const layer=L.geoJSON(feature,{style:{color:"#f29f05",fillColor:"#f8d24a",fillOpacity:.20,weight:4,dashArray:"10 7"}}).addTo(state.groups.proposal);
       layer.eachLayer((part)=>{
-        part.bindTooltip(`${guide.label}<br>DRAFT - CLICK TO EDIT`,{permanent:true,direction:"center",className:"proposal-draft-label"});
         part.on("click",(event)=>{
           L.DomEvent.stopPropagation(event);
           guide.templateKey==="SMALL_CREEK_PATH"?beginCreekPathEditor():beginProposalShapeEditor(guide.templateKey);
@@ -674,17 +683,19 @@
     document.getElementById("featurePhoto").onclick=()=>{const set=[...state.currentPhotoSet],label=state.currentPhotoCollectionLabel,index=state.currentPhotoIndex;Core.setFeatured(state.model,id,!meta.featured,"Selected during map review","David");saveModel();renderAll();state.currentPhotoSet=set;state.currentPhotoCollectionLabel=label;state.currentPhotoIndex=index;renderOpenPhoto();};
     document.getElementById("favoritePhoto").onclick=()=>{const set=[...state.currentPhotoSet],label=state.currentPhotoCollectionLabel,index=state.currentPhotoIndex;Core.toggleFavorite(state.model,id,state.selectedProposalId,VIEWER_ID);saveModel();renderAll();state.currentPhotoSet=set;state.currentPhotoCollectionLabel=label;state.currentPhotoIndex=index;renderOpenPhoto();};
     pulsePhoto(photo);
-    if(dialog.showModal&&!dialog.open) dialog.showModal();
+    if(dialog.show&&!dialog.open)dialog.show();
+    document.body.classList.add("photo-viewer-open");
+    setTimeout(()=>state.map&&state.map.invalidateSize(),0);
   }
   function movePhoto(step){if(!state.currentPhotoSet.length)return;state.currentPhotoIndex=(state.currentPhotoIndex+step+state.currentPhotoSet.length)%state.currentPhotoSet.length;renderOpenPhoto();}
   function reorderFeatured(event,targetId){const sourceId=event.dataTransfer.getData("text/photo-id");if(!sourceId||sourceId===targetId)return;const ids=state.model.presentation.photo_metadata.filter(x=>x.featured).sort((a,b)=>(a.featured_rank||999)-(b.featured_rank||999)).map(x=>x.photo_id);const from=ids.indexOf(sourceId),to=ids.indexOf(targetId);if(from<0||to<0)return;ids.splice(to,0,ids.splice(from,1)[0]);Core.reorderFeatured(state.model,ids);saveModel();renderAll();}
 
   function formatMoney(value){const amount=Core.money(value);return amount===null?"UNKNOWN":amount.toLocaleString("en-US",{style:"currency",currency:"USD"});}
   function listHtml(values){return `<ul class="scope-list">${(values&&values.length?values:["UNKNOWN"]).map((value)=>`<li>${safe(value)}</li>`).join("")}</ul>`;}
-  function showProposal(feature){const props=p(feature);document.getElementById("selection").innerHTML=`<h2>${safe(props.name)}</h2><p><b>${safe(props.work_type)}</b><br>${safe(props.acreage)} acres &middot; approximately ${safe(props.approx_length_ft)} x ${safe(props.approx_width_ft)} feet<br>${safe(props.proposed_intervention)}<br><b>Benefit:</b> ${safe(props.expected_benefit)}<br><b>Customer price:</b> ${formatMoney(props.price)}</p><p><small>${safe(props.geometry_measurement_basis)}</small></p>`;}
+  function showProposal(feature){const props=p(feature),html=`<p><b>${safe(props.work_type)}</b><br>${safe(props.acreage)} acres &middot; approximately ${safe(props.approx_length_ft)} x ${safe(props.approx_width_ft)} feet<br>${safe(props.proposed_intervention)}<br><b>Benefit:</b> ${safe(props.expected_benefit)}<br><b>Customer price:</b> ${formatMoney(props.price)}</p><p><small>${safe(props.geometry_measurement_basis)}</small></p>`;document.getElementById("selection").innerHTML=`<h2>${safe(props.name)}</h2>${html}`;showMapDetails(props.name,html);}
   function productionTestFor(zoneId){return state.model.production_tests.find((test)=>test.proposal_zone_id===zoneId)||null;}
   function renderInternalPricing(){
-    const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];
+    const zone=visibleProposals().find((feature)=>feature.id===state.selectedProposalId)||visibleProposals()[0];
     if(!zone){
       document.getElementById("pricingStatus").innerHTML='<b>NO WORK AREA SELECTED.</b><br>Choose one of the three projects above and mark its box first.';
       document.getElementById("marketReference").textContent="Market reference: UNKNOWN until a work area exists.";
@@ -715,7 +726,7 @@
     }).join("")}</ul><small>Overlapping pieces are counted only once in the total outline.</small></div>`;
   }
   function renderProposalSheet(){
-    const zones=state.model.proposals.features,zone=zones.find((feature)=>feature.id===state.selectedProposalId)||zones[0];
+    const zones=visibleProposals(),zone=zones.find((feature)=>feature.id===state.selectedProposalId)||zones[0];
     if(!zone){
       document.getElementById("proposalTotal").textContent="NO WORK AREA YET";
       document.getElementById("mapProposalSummary").innerHTML='<article class="simple-zone-card"><span class="eyebrow">START HERE</span><h3>Choose what you want to mark</h3><p>Press <b>PROPOSAL</b>, choose a plain-language project, then adjust the orange handles.</p></article>';
@@ -733,13 +744,13 @@
     document.getElementById("acceptanceStatus").innerHTML=lastWork?`<div class="work-order-summary"><b>ACCEPTED PROPOSAL BECAME WORK ORDER</b><br>${safe(lastWork.work_order_id)} &middot; ${safe(lastWork.status)}<br>Payment processing: NOT ACTIVATED<br>Outcome: UNPERFORMED</div>`:"";
   }
   function saveSellPrice(){
-    const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];if(!zone)return;
+    const zone=visibleProposals().find((feature)=>feature.id===state.selectedProposalId)||visibleProposals()[0];if(!zone)return;
     const raw=document.getElementById("sellPrice").value.trim(),value=Core.money(raw),validated=document.getElementById("validatePrice").checked;
     const targetStart=document.getElementById("targetStart").value||"UNKNOWN",targetCompletion=document.getElementById("targetCompletion").value||"UNKNOWN";
     const patch={price:value,estimated_price:value===null?"UNKNOWN":value,price_status:value!==null&&validated?"VALIDATED":"DRAFT",target_start:targetStart,target_completion:targetCompletion};
     Core.replaceFeature(state.model,"proposals",zone.id,patch,"SET_PROPOSED_SELL_PRICE");saveModel();renderProposalSheet();renderInternalPricing();status(value===null?"Price remains UNKNOWN.":"Internal proposed price saved. Customer acceptance remains blocked until David validates it.");
   }
-  function captureCustomerMessage(kind){const message=prompt(kind==="QUESTION"?"What is your question?":"What would you like changed?","");if(!message)return;const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];Core.addCustomerMessage(state.model,kind,message,"PEARSON-STARTER-REVEAL",p(zone).proposal_zone_id,VIEWER_ID);saveModel();document.getElementById("acceptanceStatus").textContent=kind==="QUESTION"?"Question saved for David.":"Change request saved for David.";}
+  function captureCustomerMessage(kind){const message=prompt(kind==="QUESTION"?"What is your question?":"What would you like changed?","");if(!message)return;const zone=visibleProposals().find((feature)=>feature.id===state.selectedProposalId)||visibleProposals()[0];if(!zone){status("There is no visible proposal selected.");return;}Core.addCustomerMessage(state.model,kind,message,"PEARSON-STARTER-REVEAL",p(zone).proposal_zone_id,VIEWER_ID);saveModel();document.getElementById("acceptanceStatus").textContent=kind==="QUESTION"?"Question saved for David.":"Change request saved for David.";}
   function acceptCurrentProposal(){try{const result=Core.acceptProposal(state.model,"Prototype customer",VIEWER_ID);saveModel();renderProposalSheet();status(`Proposal accepted and frozen. Work order ${result.work_order.work_order_id} created; no payment was activated.`);}catch(error){document.getElementById("acceptanceStatus").innerHTML=`<span class="status-warn">NOT ACCEPTED: ${safe(error.message)}</span>`;}}
 
   function rectangleHandlePositions(bounds){
@@ -792,12 +803,13 @@
     (state.draw?.pointMarkers||[]).forEach((marker)=>marker.remove());
     state.draw=null;
     const actions=document.getElementById("rectangleActions");if(actions)actions.hidden=true;
-    const coach=document.getElementById("drawCoach");if(coach)coach.hidden=true;
+    const coach=document.getElementById("drawCoach");if(coach)coach.hidden=true;document.body.classList.remove("drawing-panel-open");
   }
   function setDrawCoach(step){
     const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap"),keep=document.getElementById("keepRectangle"),undoPoint=document.getElementById("undoDrawPoint"),restart=document.getElementById("restartRectangle"),pathWidths=document.getElementById("pathWidthControls");
     if(!coach)return;
     coach.hidden=false;
+    document.body.classList.add("drawing-panel-open");
     keep.textContent="KEEP THIS BOX";keep.disabled=false;undoPoint.hidden=true;restart.textContent="START OVER";pathWidths.hidden=true;
     if(step==="FIRST"){
       title.textContent="1 OF 2 — TAP WHERE THE BOX STARTS";
@@ -1282,7 +1294,7 @@
     const path=(coords)=>coords.map((pt,i)=>`${i?"L":"M"}${projectExport(pt,inner,W,H).join(" ")}`).join(" ");let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#e8eee9"/><text x="${pad}" y="48" font-family="Arial" font-size="32" font-weight="bold">PEARSON ROAD — WATER &amp; CLEARING REVIEW</text>`;
     const rings=state.source.parcel.features.flatMap(feature=>feature.geometry.coordinates);svg+=rings.map(r=>`<path d="${path(r)}Z" fill="#f4d03f18" stroke="#9c7d00" stroke-width="7"/>`).join("");
     state.source.waterSections.features.filter((feature)=>visibleDate(dateOf(feature))).forEach((feature)=>{const kind=String(p(feature).condition||p(feature).section_type||"").toUpperCase();const color=kind.includes("DRY")&&!kind.includes("WET")?"#e0a400":"#00a5cf";svg+=`<path d="${path(feature.geometry.coordinates)}" fill="none" stroke="#ffffff" stroke-width="11"/><path d="${path(feature.geometry.coordinates)}" fill="none" stroke="${color}" stroke-width="6"/>`;});
-    state.model.proposals.features.forEach((f,index)=>{const color=p(f).color||"#f29f05";svg+=`<path d="${path(f.geometry.coordinates[0])}Z" fill="${color}55" stroke="${color}" stroke-width="8"/><text x="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[0]}" y="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[1]}" font-family="Arial" font-size="28" font-weight="bold">${String.fromCharCode(65+index)} — ${p(f).name} (${p(f).acreage} ac)</text>`;});
+    visibleProposals().forEach((f,index)=>{const color=p(f).color||"#f29f05";svg+=`<path d="${path(f.geometry.coordinates[0])}Z" fill="${color}55" stroke="${color}" stroke-width="8"/><text x="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[0]}" y="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[1]}" font-family="Arial" font-size="28" font-weight="bold">${String.fromCharCode(65+index)} — ${p(f).name} (${p(f).acreage} ac)</text>`;});
     state.source.waterPhotos.features.filter((feature)=>visibleDate(dateOf(feature))).forEach(f=>{const q=projectExport(f.geometry.coordinates,inner,W,H);const kind=waterReviewClass(f);const fill=kind==="RECORDED_WATER"?"#0756a3":kind==="VISIBLE_WATER_IN_PHOTO"?"#00b8d9":"#ffffff";const label=kind==="POSSIBLE_WATER_IN_PHOTO"?"?":"W";svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="10" fill="${fill}" stroke="#063e66" stroke-width="3"/><text x="${q[0]}" y="${q[1]+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${kind==="POSSIBLE_WATER_IN_PHOTO"?'#063e66':'#ffffff'}">${label}</text>`;});svg+=`<g font-family="Arial" font-size="22"><text x="${pad}" y="${H-90}">Dark blue W: recorded water · Cyan W: water visible in photo · White ?: possible water</text><text x="${pad}" y="${H-50}" font-weight="bold">APPROXIMATE PHONE GPS AND COUNTY PARCEL — NOT A SURVEY</text></g></svg>`;
     const image=new Image(),url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"}));image.onload=()=>{const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;canvas.getContext("2d").drawImage(image,0,0);URL.revokeObjectURL(url);canvas.toBlob(blob=>download("PEARSON_ROAD_WATER_CLEARING_REVIEW.png",blob),"image/png");};image.src=url;
   }
@@ -1323,7 +1335,7 @@
     document.getElementById("drawPathMyself").addEventListener("click",()=>beginTemplateArea("SMALL_CREEK_PATH"));
     document.getElementById("cancelRectangleMap").addEventListener("click",cancelRectangle);
     document.getElementById("savePictureAfterBox").addEventListener("click",captureCurrentMapPicture);
-    document.getElementById("doneAfterBox").addEventListener("click",()=>document.getElementById("drawCoach").hidden=true);
+    document.getElementById("doneAfterBox").addEventListener("click",()=>{document.getElementById("drawCoach").hidden=true;document.body.classList.remove("drawing-panel-open");setTimeout(()=>state.map&&state.map.invalidateSize(),0);});
     document.getElementById("saveCurrentMapPicture").addEventListener("click",captureCurrentMapPicture);
     document.getElementById("undoEdit").addEventListener("click",()=>{Core.undo(state.model);saveModel();renderAll();});
     document.getElementById("waterReviewFilter").addEventListener("click",()=>setPhotoFilter("WATER"));
@@ -1334,12 +1346,13 @@
     document.getElementById("topographyToggle").addEventListener("change",event=>event.target.checked?state.topoLayer.addTo(state.map):state.map.removeLayer(state.topoLayer));
     document.getElementById("contoursToggle").addEventListener("change",event=>event.target.checked?state.contourLayer.addTo(state.map):state.map.removeLayer(state.contourLayer));
     document.getElementById("exportMap").addEventListener("click",exportData);document.getElementById("exportImage").addEventListener("click",exportImage);document.getElementById("printMap").addEventListener("click",()=>window.print());
+    document.getElementById("closeMapDetails").addEventListener("click",closeMapDetails);
     document.getElementById("closePhoto").addEventListener("click",()=>document.getElementById("photoDialog").close());
     document.getElementById("previousPhoto").addEventListener("click",()=>movePhoto(-1));document.getElementById("nextPhoto").addEventListener("click",()=>movePhoto(1));
-    document.addEventListener("keydown",(event)=>{const dialog=document.getElementById("photoDialog");if(event.key==="Escape"&&!dialog.open){closeControlPanel();return;}if(!dialog.open)return;if(event.key==="ArrowLeft"){event.preventDefault();movePhoto(-1);}if(event.key==="ArrowRight"){event.preventDefault();movePhoto(1);}});
-    const dialog=document.getElementById("photoDialog");dialog.addEventListener("touchstart",(event)=>{state.touchStartX=event.changedTouches[0]?.clientX??null;},{passive:true});dialog.addEventListener("touchend",(event)=>{if(state.touchStartX===null)return;const delta=(event.changedTouches[0]?.clientX??state.touchStartX)-state.touchStartX;state.touchStartX=null;if(Math.abs(delta)>55)movePhoto(delta<0?1:-1);},{passive:true});
+    document.addEventListener("keydown",(event)=>{const dialog=document.getElementById("photoDialog");if(event.key==="Escape"&&dialog.open){dialog.close();return;}if(event.key==="Escape"&&!dialog.open){closeMapDetails();closeControlPanel();return;}if(!dialog.open)return;if(event.key==="ArrowLeft"){event.preventDefault();movePhoto(-1);}if(event.key==="ArrowRight"){event.preventDefault();movePhoto(1);}});
+    const dialog=document.getElementById("photoDialog");dialog.addEventListener("close",()=>{document.body.classList.remove("photo-viewer-open");setTimeout(()=>state.map&&state.map.invalidateSize(),0);});dialog.addEventListener("touchstart",(event)=>{state.touchStartX=event.changedTouches[0]?.clientX??null;},{passive:true});dialog.addEventListener("touchend",(event)=>{if(state.touchStartX===null)return;const delta=(event.changedTouches[0]?.clientX??state.touchStartX)-state.touchStartX;state.touchStartX=null;if(Math.abs(delta)>55)movePhoto(delta<0?1:-1);},{passive:true});
     document.getElementById("fullPropertyView").addEventListener("click",()=>{state.map.fitBounds(L.geoJSON(state.source.parcel).getBounds().pad(.08));document.getElementById("fullPropertyView").classList.add("active");document.getElementById("zoneDetailView").classList.remove("active");});
-    document.getElementById("zoneDetailView").addEventListener("click",()=>{const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];if(!zone)return status("Select a proposal zone first.");state.map.fitBounds(L.geoJSON(zone).getBounds().pad(.35));document.getElementById("zoneDetailView").classList.add("active");document.getElementById("fullPropertyView").classList.remove("active");updateFilmstrip(zone.geometry.coordinates[0][0]);});
+    document.getElementById("zoneDetailView").addEventListener("click",()=>{const zone=visibleProposals().find((feature)=>feature.id===state.selectedProposalId)||visibleProposals()[0];if(!zone)return status("Select a proposal zone first.");state.map.fitBounds(L.geoJSON(zone).getBounds().pad(.35));document.getElementById("zoneDetailView").classList.add("active");document.getElementById("fullPropertyView").classList.remove("active");updateFilmstrip(zone.geometry.coordinates[0][0]);});
     document.getElementById("saveSellPrice").addEventListener("click",saveSellPrice);document.getElementById("askQuestion").addEventListener("click",()=>captureCustomerMessage("QUESTION"));document.getElementById("requestChange").addEventListener("click",()=>captureCustomerMessage("CHANGE_REQUEST"));document.getElementById("acceptProposal").addEventListener("click",acceptCurrentProposal);
     document.getElementById("presentationProfile").addEventListener("change",(event)=>applyPresentationProfile(event.target.value));
     document.getElementById("assetSelect").addEventListener("change",renderAssetTimeline);document.getElementById("addCulvertObservation").addEventListener("click",addCulvertObservation);

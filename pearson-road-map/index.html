@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Pearson Road Water &amp; Clearing Review Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=8">
+  <link rel="stylesheet" href="./styles.css?v=9">
   <script src="./config.local.js" onerror="this.remove()"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -68,7 +68,6 @@
         <button class="proposal-template-button" data-proposal-template="SMALL_CREEK_PATH" type="button">SMALL PARCEL — CREEK-SIDE PATH</button>
         <button class="proposal-template-button" data-proposal-template="SMALL_CLEARING_PATHS" type="button">SMALL PARCEL — CLEARING &amp; TWO PATHS</button>
         <button class="proposal-template-button" data-proposal-template="SMALL_EASTERN_HOMESITE" type="button">SMALL PARCEL — EASTERN HOMESITE AREA</button>
-        <button class="proposal-template-button" data-proposal-template="LARGE_WESTERN_HOMESITE" type="button">LARGE PARCEL — HOMESITE &amp; ACCESS</button>
         <button class="proposal-template-button" data-proposal-template="LARGE_CLEARING" type="button">LARGE PARCEL — CLEARED AREA</button>
         <button id="showHomesiteCorners" class="primary-action" type="button">SHOW MY 4 HOMESITE CORNERS</button>
         <button data-edit="DRAW_RECTANGLE" type="button">ADD ANOTHER BOX</button>
@@ -176,6 +175,10 @@
         <div id="photoFilmstrip" aria-label="Geographically nearby photographs"></div>
         <div class="map-disclaimer">APPROXIMATE PHONE GPS / COUNTY PARCEL &mdash; NOT A SURVEY</div>
       </div>
+      <aside id="mapDetailsPanel" aria-label="Selected map details" aria-hidden="true">
+        <div class="outside-panel-heading"><strong id="mapDetailsTitle">MAP DETAILS</strong><button id="closeMapDetails" type="button">CLOSE</button></div>
+        <div id="mapDetailsContent"></div>
+      </aside>
       <div class="legend"><b>PHONE GPS / COUNTY PARCEL &mdash; APPROXIMATE, NOT A SURVEY</b><span class="finding-key water-key">W</span>Recorded water <span class="finding-key visible-water-key">W</span>Visible in photo <span class="finding-key possible-water-key">?</span>Possible water <span class="section-key"></span>Wet/dry section</div>
       <section id="customerProposal" class="proposal-sheet" aria-live="polite">
         <div class="proposal-sheet-heading">
@@ -230,6 +233,6 @@
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./property-map-core.js?v=5"></script>
-  <script src="./app.js?v=19"></script>
+  <script src="./app.js?v=20"></script>
 </body>
 </html>
