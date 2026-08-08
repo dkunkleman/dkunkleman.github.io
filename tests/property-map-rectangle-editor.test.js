@@ -55,6 +55,13 @@ assert.match(app, /SOUTHEAST CREEK-SIDE PATH/, "creek-side proposal metadata is 
 assert.match(app, /WESTERN CANDIDATE HOMESITE CLEARING & TWO APPROACHES/, "two-approach clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL WESTERN HOMESITE & ACCESS CONCEPT/, "large-parcel homesite proposal metadata is missing");
+assert.match(app, /function proposalDraftGuides\(\)/, "the map does not assemble all unsaved proposal drafts for simultaneous display");
+assert.match(app, /CREEK-SIDE PATH[\s\S]*WESTERN HOMESITE[\s\S]*EASTERN HOMESITE[\s\S]*LARGE-PARCEL HOMESITE/, "all four proposal drafts are not clearly labeled together");
+assert.match(app, /!savedTemplates\.has\(guide\.templateKey\)/, "a saved proposal can be duplicated by its unsaved draft guide");
+assert.match(app, /DRAFT - CLICK TO EDIT/, "visible proposal drafts do not explain that they can be edited");
+assert.match(app, /guide\.templateKey==="SMALL_CREEK_PATH"\?beginCreekPathEditor\(\):beginProposalShapeEditor\(guide\.templateKey\)/, "clicking a visible proposal draft does not open its correct editor");
+assert.match(app, /function fitAllVisibleProposals\(\)/, "opening Proposal does not fit every visible proposal into the map");
+assert.match(app, /if\(features\.length\)state\.map\.fitBounds/, "the proposal overview does not zoom to the combined proposal extent");
 assert.match(app, /async function captureCurrentMapPicture/, "current map view cannot be saved as a picture");
 assert.match(app, /crossOrigin: "anonymous"/, "map imagery is not configured for safe picture capture");
 
