@@ -19,6 +19,9 @@ assert.match(html, /id="cancelRectangle"[^>]*>CANCEL</, "rectangle cancel contro
 assert.match(html, /id="drawCoach"/, "plain-language map drawing coach is missing");
 assert.match(html, /id="keepRectangle"[^>]*>KEEP THIS BOX</, "map-level keep button is missing");
 assert.match(html, /id="restartRectangle"[^>]*>START OVER</, "map-level restart button is missing");
+assert.match(html, /id="savePictureAfterBox"[^>]*>SAVE PICTURE</, "post-save picture button is missing");
+assert.match(html, /id="saveCurrentMapPicture"[^>]*>SAVE PICTURE OF THIS MAP</, "persistent map picture button is missing");
+assert.match(html, /html2canvas@1\.4\.1/, "pinned map-picture renderer is missing");
 assert.match(app, /rectangleHandlePositions/, "corner, side, and center handles are not implemented");
 assert.match(app, /rectangle-move-handle/, "rectangle center-move handle is missing");
 assert.match(app, /Core\.replaceFeatureGeometry\(state\.model,"proposals"/, "saved rectangle does not update only the editable proposal layer");
@@ -28,6 +31,8 @@ assert.match(app, /if \(SEED_OLD_PROPOSAL &&/, "the old proposal seed must remai
 assert.match(app, /SOUTHEAST CREEK-SIDE PATH/, "creek-side proposal metadata is missing");
 assert.match(app, /SMALL-PARCEL CLEARING & TWO APPROACH PATHS/, "two-approach clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
+assert.match(app, /async function captureCurrentMapPicture/, "current map view cannot be saved as a picture");
+assert.match(app, /crossOrigin: "anonymous"/, "map imagery is not configured for safe picture capture");
 
 const bounds = Core.rectangleBoundsFromCorners([-87.1, 30.4], [-87.09, 30.41]);
 assert.deepEqual(bounds, { west: -87.1, east: -87.09, south: 30.4, north: 30.41 });

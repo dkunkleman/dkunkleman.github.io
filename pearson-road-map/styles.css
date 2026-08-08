@@ -76,6 +76,13 @@ aside button,aside select{width:100%;margin:3px 0}
 .draw-coach p{margin:7px 0 10px;font-size:16px;font-weight:700}
 .draw-coach button{min-height:50px;margin:4px;padding:8px 14px;font-size:14px;font-weight:900}
 #drawCoachActions:not([hidden]){display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+#drawCoachSavedActions:not([hidden]){display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+body.saving-map-picture #mapTitleBar,
+body.saving-map-picture .floating-map-controls,
+body.saving-map-picture .customer-view-toggle,
+body.saving-map-picture .map-orientation,
+body.saving-map-picture .draw-coach,
+body.saving-map-picture #photoFilmstrip{display:none!important}
 dialog{width:min(980px,96vw);height:min(900px,94vh);max-height:94vh;border:3px solid var(--green);border-radius:12px;padding:12px;overflow:hidden;position:relative}
 dialog[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr)}
 dialog::backdrop{background:rgba(0,0,0,.65)}

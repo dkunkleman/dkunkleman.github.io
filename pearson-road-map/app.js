@@ -215,12 +215,14 @@
       maxNativeZoom: imageryNativeMaxZoom,
       maxZoom: applicationMaxZoom,
       keepBuffer: 4,
+      crossOrigin: "anonymous",
       attribution: authorizedImagery ? (config.authorizedImageryAttribution || "Authorized imagery provider") : (config.developmentImageryAttribution || "Esri World Imagery")
     }).addTo(state.map);
     state.topoLayer = L.tileLayer(config.usgsTopoUrl || "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}", {
       maxNativeZoom: USGS_NATIVE_MAX_ZOOM,
       maxZoom: applicationMaxZoom,
       keepBuffer: 4,
+      crossOrigin: "anonymous",
       opacity: .76,
       attribution: "USGS Topo"
     });
@@ -231,7 +233,7 @@
     renderAll();
     const bounds = L.geoJSON(state.source.parcel).getBounds();
     state.contourLayer = config.contourTileTemplate
-      ? L.tileLayer(config.contourTileTemplate, { maxZoom: applicationMaxZoom, opacity: .72 })
+      ? L.tileLayer(config.contourTileTemplate, { maxZoom: applicationMaxZoom, opacity: .72, crossOrigin: "anonymous" })
       : L.imageOverlay("data/usgs-contours-2ft.png", bounds, { opacity: .72, interactive: false });
     state.map.fitBounds(bounds.pad(.08));
     const providerMessage = authorizedImagery
@@ -670,21 +672,33 @@
     const coach=document.getElementById("drawCoach");if(coach)coach.hidden=true;
   }
   function setDrawCoach(step){
-    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions");
+    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap");
     if(!coach)return;
     coach.hidden=false;
     if(step==="FIRST"){
       title.textContent="1 OF 2 — TAP WHERE THE BOX STARTS";
       text.textContent="Tap one corner of the area you want to mark.";
       actions.hidden=true;
+      savedActions.hidden=true;
+      cancel.hidden=false;
     }else if(step==="SECOND"){
       title.textContent="2 OF 2 — TAP WHERE THE BOX ENDS";
       text.textContent="Tap the opposite corner. A box will appear.";
       actions.hidden=true;
+      savedActions.hidden=true;
+      cancel.hidden=false;
+    }else if(step==="SAVED"){
+      title.textContent="YOUR BOX IS SAVED";
+      text.textContent="Press SAVE PICTURE to download this exact map view.";
+      actions.hidden=true;
+      savedActions.hidden=false;
+      cancel.hidden=true;
     }else{
       title.textContent="MAKE THE BOX FIT";
       text.textContent="Drag a white square to resize it. Drag MOVE to move the whole box.";
       actions.hidden=false;
+      savedActions.hidden=true;
+      cancel.hidden=false;
     }
   }
   function fitProposalTemplate(template){
@@ -748,7 +762,7 @@
       Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry,properties:{proposal_zone_id:id,proposal_template:editor.templateKey||"OTHER",parcel:template.parcel||"UNKNOWN",name:template.name||`Zone ${state.model.proposals.features.length+1}`,work_type:"CLEAR / REVEAL",service_type:"STARTER REVEAL",finish_level:"REVEAL FINISH",optional_upgrade:"UPGRADE TO CLEAN STAGING FINISH - NOT INCLUDED IN CURRENT PRICE",current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:template.primary_objective||"UNKNOWN",proposed_intervention:"SELECTIVE CLEAR / REVEAL WITHIN DAVID'S MARKED AREA",included_scope:template.included_scope||[],preserve:["Original field evidence and GPS records", "Water, drainage, mature trees, or other features not separately approved for alteration"],remove:[],exclusions:["No grading, excavation, stump grubbing, drainage engineering, or build-ready claim", "Clean Staging Finish is not included unless separately selected"],expected_benefit:template.expected_benefit||"UNKNOWN",expected_visible_result:"A selectively revealed natural area for review; not a finished construction site.",target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,unit:"acre",before_photo_ids:[],linked_before_photo_ids:[],evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK",...geometryPatch}},"DRAW_RECTANGLE");
       state.selectedProposalId=id;
     }
-    removeRectangleEditor();saveModel();renderAll();
+    removeRectangleEditor();saveModel();renderAll();setDrawCoach("SAVED");
     status("Rectangle saved as a new proposal-map version. Photos, GPS, and field evidence were not changed.");
   }
   function cancelRectangle(){removeRectangleEditor();status("Rectangle change canceled. Nothing was changed.");}
@@ -803,6 +817,26 @@
   function addCulvertObservation(){const id=document.getElementById("assetSelect").value;const value=prompt("How many inches from the water surface UP to the inside top of the culvert? Leave blank if unknown.","");const measured=value!==null&&value.trim()!==""?Number(value):null;Core.addAssetObservation(state.model,id,{date_time:new Date().toISOString(),water_to_top_in:Number.isFinite(measured)?measured:null,water_to_invert_in:null,water_depth_in:null,flowing:"UNKNOWN",flow_direction:"UNKNOWN",road_overtopping:"UNKNOWN",road_water_distance:null,tide_condition:prompt("Tide: HIGH / LOW / BETWEEN / UNKNOWN","UNKNOWN")||"UNKNOWN",measurement_method:prompt("Method: MEASURED / ESTIMATED","MEASURED")||"UNKNOWN",confidence:"INSPECTOR ENTERED",recent_rainfall:"Link authoritative weather separately",note:prompt("Optional note","")||"",information_class:"FIELD_OBSERVATION_ENTERED_DURING_MAP_REVIEW"});saveModel();renderAssetTimeline();}
 
   function download(name,blob){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+  async function captureCurrentMapPicture(){
+    if(!window.html2canvas)return status("SAVE PICTURE is still loading. Wait a moment and press it again.");
+    const wrap=document.querySelector(".map-wrap");
+    document.body.classList.add("saving-map-picture");
+    try{
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const scale=Math.min(2,Math.max(1,window.devicePixelRatio||1));
+      const canvas=await window.html2canvas(wrap,{useCORS:true,allowTaint:false,backgroundColor:"#d6ddd8",scale,logging:false});
+      const blob=await new Promise((resolve)=>canvas.toBlob(resolve,"image/png"));
+      if(!blob)throw new Error("The picture could not be created.");
+      const stamp=new Date().toISOString().replace(/[:.]/g,"-");
+      download(`PEARSON_ROAD_MAP_${stamp}.png`,blob);
+      status("Picture saved to Downloads. Your map and evidence were not changed.");
+    }catch(error){
+      console.error(error);
+      status("PICTURE NOT SAVED. Keep the map open and try SAVE PICTURE again.");
+    }finally{
+      document.body.classList.remove("saving-map-picture");
+    }
+  }
   function exportData(){const payload=Core.clone(state.model);payload.source_evidence.embedded_feature_collections=state.source;download(`PROPERTY_MAP_${PROPERTY_ID}_v${Math.max(state.model.proposals.current_version||0,state.model.presentation.current_version||0)}.json`,new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));}
   function projectExport(point,bounds,width,height){const x=(point[0]-bounds.minX)/(bounds.maxX-bounds.minX)*width,y=height-(point[1]-bounds.minY)/(bounds.maxY-bounds.minY)*height;return[x,y];}
   function exportImage(){
@@ -846,6 +880,9 @@
     document.getElementById("keepRectangle").addEventListener("click",saveRectangle);
     document.getElementById("restartRectangle").addEventListener("click",restartRectangle);
     document.getElementById("cancelRectangleMap").addEventListener("click",cancelRectangle);
+    document.getElementById("savePictureAfterBox").addEventListener("click",captureCurrentMapPicture);
+    document.getElementById("doneAfterBox").addEventListener("click",()=>document.getElementById("drawCoach").hidden=true);
+    document.getElementById("saveCurrentMapPicture").addEventListener("click",captureCurrentMapPicture);
     document.getElementById("undoEdit").addEventListener("click",()=>{Core.undo(state.model);saveModel();renderAll();});
     document.getElementById("waterReviewFilter").addEventListener("click",()=>setPhotoFilter("WATER"));
     document.getElementById("allPhotoFilter").addEventListener("click",()=>setPhotoFilter("ALL"));

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="./styles.css?v=5">
   <script src="./config.local.js" onerror="this.remove()"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <header id="mapTitleBar">
@@ -69,6 +70,7 @@
         <button class="proposal-template-button" data-proposal-template="LARGE_CLEARING" type="button">LARGE PARCEL — CLEARED AREA</button>
         <button data-edit="DRAW_RECTANGLE" type="button">ADD ANOTHER BOX</button>
         <button data-edit="RESIZE_RECTANGLE" type="button">MOVE / RESIZE SELECTED BOX</button>
+        <button id="saveCurrentMapPicture" class="primary-action" type="button">SAVE PICTURE OF THIS MAP</button>
         <div id="rectangleActions" class="rectangle-actions" hidden>
           <button id="saveRectangle" class="primary-action" type="button">SAVE RECTANGLE</button>
           <button id="cancelRectangle" type="button">CANCEL</button>
@@ -153,6 +155,10 @@
           <div id="drawCoachActions" hidden>
             <button id="keepRectangle" class="primary-action" type="button">KEEP THIS BOX</button>
             <button id="restartRectangle" type="button">START OVER</button>
+          </div>
+          <div id="drawCoachSavedActions" hidden>
+            <button id="savePictureAfterBox" class="primary-action" type="button">SAVE PICTURE</button>
+            <button id="doneAfterBox" type="button">DONE</button>
           </div>
           <button id="cancelRectangleMap" type="button">CANCEL</button>
         </section>
