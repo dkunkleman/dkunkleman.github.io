@@ -1,0 +1,12 @@
+{
+  "schema_name": "property-intelligence-service-library",
+  "schema_version": 1,
+  "services": [
+    {"service_code":"CREEK-PATH","customer_title":"Creek Walk Reveal","normal_width_ft":{"minimum":3,"default":5,"maximum":5},"production_class":"NEEDS PRODUCTION TEST","preserve":["creek banks","roots","mature trees","drainage"],"exclusions":["excavation","dredging","grading"]},
+    {"service_code":"WALK-PATH","customer_title":"Walking Connection","normal_width_ft":{"default":5},"production_class":"NEEDS PRODUCTION TEST","exclusions":["vehicle-access representation","grading","excavation"]},
+    {"service_code":"HOMESITE-REVEAL","customer_title":"Candidate Homesite Reveal","production_class":"NEEDS PRODUCTION TEST","exclusions":["house pad","buildability representation","septic representation"]},
+    {"service_code":"LIGHT-BRUSH","customer_title":"Light-Brush Reveal","production_class":"PRINCIPALLY 1-2 INCH WOODY BRUSH - FIELD VERIFICATION REQUIRED","exclusions":["root removal","stump grubbing","grading"]},
+    {"service_code":"HEAVY-BRUSH","customer_title":"Heavy-Brush Reveal","production_class":"PRINCIPALLY 3-4 INCH WOODY BRUSH - FIELD VERIFICATION REQUIRED","exclusions":["root removal","stump grubbing","grading","finished-pasture representation"]},
+    {"service_code":"VIEW-REVEAL","customer_title":"Selective View Reveal","production_class":"NEEDS PRODUCTION TEST","directional_sightline_counts_as_treatment_area":false,"exclusions":["unapproved clearing geometry"]}
+  ]
+}

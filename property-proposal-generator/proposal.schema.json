@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "property-intelligence-proposal.schema.json",
+  "title": "Property Intelligence Proposal",
+  "type": "object",
+  "required": ["property_id", "proposal_id", "proposal_version", "proposal_status", "options", "package", "payment", "version_history"],
+  "properties": {
+    "property_id": {"type":"string"},
+    "proposal_id": {"type":"string"},
+    "proposal_version": {"type":"integer","minimum":1},
+    "proposal_status": {"enum":["DRAFT","REVIEW","SENT","ACCEPTED","SUPERSEDED"]},
+    "customer": {"type":"object"},
+    "property": {"type":"object"},
+    "map_url": {"type":"string"},
+    "options": {"type":"array","items":{"type":"object","required":["option_id","proposal_zone_id","service_code","geometry","measurement_basis","standalone_price","price_status"]}},
+    "package": {"type":"object","required":["selected","discount_type","discount_status"]},
+    "payment": {"type":"object"},
+    "acceptance": {"type":["object","null"]},
+    "version_history": {"type":"array"}
+  }
+}

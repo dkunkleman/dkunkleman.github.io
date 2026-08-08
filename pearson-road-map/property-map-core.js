@@ -5,7 +5,6 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const METERS_PER_DEGREE_LAT = 111320;
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const nowIso = () => new Date().toISOString();
   const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
@@ -18,6 +17,15 @@
       source_evidence: { immutable: true, feature_collections: [] },
       interpretation: { features: [], current_version: 0 },
       proposals: { features: [], current_version: 0 },
+      package_offer: {
+        selected: false,
+        discount_type: "AMOUNT",
+        discount_percent: null,
+        discount_amount: null,
+        discount_status: "DRAFT",
+        minimum_package_price: null,
+        floor_override_approved: false
+      },
       proposal_versions: [],
       accepted_proposals: [],
       work_orders: [],
@@ -166,33 +174,117 @@
     const ring = coordinates && coordinates[0];
     if (!ring || ring.length < 4) return null;
     const avgLat = ring.reduce((sum, point) => sum + point[1], 0) / ring.length;
-    const xScale = METERS_PER_DEGREE_LAT * Math.cos(avgLat * Math.PI / 180);
+    const scales = localDegreeScales(avgLat);
     let twiceArea = 0;
     for (let i = 0; i < ring.length - 1; i += 1) {
       const a = ring[i], b = ring[i + 1];
-      twiceArea += (a[0] * xScale) * (b[1] * METERS_PER_DEGREE_LAT) - (b[0] * xScale) * (a[1] * METERS_PER_DEGREE_LAT);
+      twiceArea += (a[0] * scales.longitude) * (b[1] * scales.latitude) - (b[0] * scales.longitude) * (a[1] * scales.latitude);
     }
     return Math.abs(twiceArea / 2) / 4046.8564224;
+  }
+
+  function localDegreeScales(latitudeDegrees) {
+    const latitude = Number(latitudeDegrees) * Math.PI / 180;
+    return {
+      latitude: 111132.92 - 559.82 * Math.cos(2 * latitude) + 1.175 * Math.cos(4 * latitude) - 0.0023 * Math.cos(6 * latitude),
+      longitude: 111412.84 * Math.cos(latitude) - 93.5 * Math.cos(3 * latitude) + 0.118 * Math.cos(5 * latitude)
+    };
+  }
+
+  function lineLengthFeet(coordinates) {
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+    let meters = 0;
+    for (let index = 1; index < coordinates.length; index += 1) {
+      const before = coordinates[index - 1], after = coordinates[index];
+      const latitude = (Number(before[1]) + Number(after[1])) / 2;
+      const scales = localDegreeScales(latitude);
+      meters += Math.hypot(
+        (Number(after[0]) - Number(before[0])) * scales.longitude,
+        (Number(after[1]) - Number(before[1])) * scales.latitude
+      );
+    }
+    return meters * 3.280839895;
   }
 
   function polygonMetrics(coordinates) {
     const ring = coordinates && coordinates[0];
     if (!ring || ring.length < 4) return null;
     const avgLat = ring.reduce((sum, point) => sum + point[1], 0) / ring.length;
-    const xScale = METERS_PER_DEGREE_LAT * Math.cos(avgLat * Math.PI / 180);
-    const local = ring.map((point) => [point[0] * xScale, point[1] * METERS_PER_DEGREE_LAT]);
+    const scales = localDegreeScales(avgLat);
+    const local = ring.map((point) => [point[0] * scales.longitude, point[1] * scales.latitude]);
     let perimeterMeters = 0;
     for (let index = 0; index < local.length - 1; index += 1) perimeterMeters += Math.hypot(local[index + 1][0] - local[index][0], local[index + 1][1] - local[index][1]);
     const xs = local.map((point) => point[0]);
     const ys = local.map((point) => point[1]);
     const spansFeet = [(Math.max(...xs) - Math.min(...xs)) * 3.28084, (Math.max(...ys) - Math.min(...ys)) * 3.28084].sort((a, b) => b - a);
+    const acreageExact = polygonAreaAcres(coordinates);
     return {
-      acreage: Number(polygonAreaAcres(coordinates).toFixed(2)),
+      area_sq_ft: Math.round(acreageExact * 43560),
+      acreage: Number(acreageExact.toFixed(3)),
       perimeter_ft: Math.round(perimeterMeters * 3.28084),
-      approx_length_ft: Math.round(spansFeet[0]),
-      approx_width_ft: Math.round(spansFeet[1]),
+      approx_length_ft: Number(spansFeet[0].toFixed(1)),
+      approx_width_ft: Number(spansFeet[1].toFixed(1)),
       basis: "APPROXIMATE FROM DRAFT MAP GEOMETRY - NOT A SURVEY"
     };
+  }
+
+  function componentPolygon(ring, indexes) {
+    if (!Array.isArray(ring) || !Array.isArray(indexes) || !indexes.length) return null;
+    const points = indexes.map((index) => ring[index]).filter(Boolean);
+    if (points.length < 3) return null;
+    return [points.concat([points[0]])];
+  }
+
+  function proposalQuantities(feature) {
+    const props = feature && feature.properties || {};
+    const geometry = feature && feature.geometry;
+    const ring = geometry && geometry.type === "Polygon" && geometry.coordinates && geometry.coordinates[0];
+    const base = ring ? polygonMetrics(geometry.coordinates) : null;
+    const code = props.option_code || ({
+      SMALL_CREEK_PATH: "A",
+      SMALL_CLEARING_PATHS: "B",
+      SMALL_EASTERN_HOMESITE: "C",
+      LARGE_WESTERN_HOMESITE: "D"
+    })[props.proposal_template] || null;
+    if (!base || !code) return base;
+    const result = { ...base, option_code: code, components: [], excluded_quantities: [] };
+    if (code === "A") {
+      const width = Number(props.corridor_width_ft || 5);
+      const length = lineLengthFeet(props.editable_centerline || []);
+      const area = Number.isFinite(length) ? length * width : base.area_sq_ft;
+      Object.assign(result, {
+        centerline_ft: Number.isFinite(length) ? Math.round(length) : null,
+        corridor_width_ft: width,
+        area_sq_ft: Math.round(area),
+        acreage: Number((area / 43560).toFixed(3)),
+        approx_length_ft: Number.isFinite(length) ? Math.round(length) : base.approx_length_ft,
+        approx_width_ft: width
+      });
+      result.components.push({ component: "CREEK-SIDE WALKING PATH", approx_length_ft: result.centerline_ft, standard_width_ft: width, area_sq_ft: result.area_sq_ft, acreage: result.acreage, counts_toward_total: true });
+    } else if (code === "B") {
+      const opening = polygonMetrics(componentPolygon(ring, [0, 5, 6, 7]));
+      const south = polygonMetrics(componentPolygon(ring, [1, 2, 3, 4]));
+      const sunsetLength = lineLengthFeet(props.sunset_view_sightline || []);
+      result.components.push(
+        { component: "SELECTIVE HOUSE OPENING AMONG MATURE TREES", ...opening, counts_toward_total: true },
+        { component: "SOUTH APPROACH WALKING PATH", ...south, standard_width_ft: 5, counts_toward_total: true },
+        { component: "NORTHWEST 5-FOOT APPROACH", measurement_status: "TBD", standard_width_ft: 5, counts_toward_total: false },
+        { component: "WESTWARD SUNSET SIGHTLINE", approx_length_ft: Number.isFinite(sunsetLength) ? Math.round(sunsetLength) : null, target_width_ft: Number(props.sunset_view_target_width_ft || 40), measurement_status: "DIRECTIONAL ONLY - NOT CLEARING AREA", counts_toward_total: false }
+      );
+    } else if (code === "C") {
+      result.components.push({ component: "EASTERN HEAVY-BRUSH CUTOUT", ...base, vegetation_work_class: "PREDOMINANTLY 3-4 INCH WOODY BRUSH - SUBJECT TO FIELD VERIFICATION", counts_toward_total: true });
+    } else if (code === "D") {
+      const opening = polygonMetrics(componentPolygon(ring, [0, 1, 2, 7]));
+      const approach = polygonMetrics(componentPolygon(ring, [3, 4, 5, 6]));
+      result.components.push(
+        { component: "CANDIDATE OPENING", ...opening, counts_toward_total: true },
+        { component: "PEARSON ROAD WALKING CONNECTION", ...approach, standard_width_ft: 5, counts_toward_total: true },
+        { component: "WEST-FACING SUNSET VIEW TARGET", target_width_ft: Number(props.sunset_view_target_width_ft || 40), measurement_status: "DIRECTIONAL ONLY - SELECTIVE VIEW WORK WITHIN/AT APPROVED OPENING", counts_toward_total: false }
+      );
+    }
+    result.clearing_area_sq_ft = result.area_sq_ft;
+    result.clearing_acres = result.acreage;
+    return result;
   }
 
   function rectangleBoundsFromCorners(first, second) {
@@ -315,13 +407,67 @@
   }
 
   function proposalTotal(zones) {
-    const selected = (zones || []).filter((zone) => (zone.properties || {}).customer_selected !== false);
+    const selected = (zones || []).filter((zone) => (zone.properties || {}).customer_selected === true);
     const missing = selected.filter((zone) => money((zone.properties || {}).price) === null).map((zone) => (zone.properties || {}).proposal_zone_id || zone.id);
     return {
       selected_zone_ids: selected.map((zone) => (zone.properties || {}).proposal_zone_id || zone.id),
       priced_total: selected.reduce((sum, zone) => sum + (money((zone.properties || {}).price) || 0), 0),
       unpriced_zone_ids: missing,
       complete: missing.length === 0 && selected.length > 0
+    };
+  }
+
+  function proposalPackageSummary(zones, packageOffer) {
+    const options = (zones || []).filter((zone) => ["A", "B", "C", "D"].includes((zone.properties || {}).option_code));
+    const missing = options.filter((zone) => money((zone.properties || {}).price) === null).map((zone) => (zone.properties || {}).option_code);
+    const standaloneSum = options.reduce((sum, zone) => sum + (money((zone.properties || {}).price) || 0), 0);
+    const offer = packageOffer || {};
+    const discountType = offer.discount_type === "PERCENT" ? "PERCENT" : "AMOUNT";
+    const discountPercent = money(offer.discount_percent);
+    const enteredAmount = money(offer.discount_amount !== undefined ? offer.discount_amount : offer.discount);
+    const discountAmount = discountType === "PERCENT"
+      ? (discountPercent !== null && !missing.length ? Math.round((standaloneSum * discountPercent / 100) * 100) / 100 : null)
+      : enteredAmount;
+    const discountValid = discountAmount !== null && discountAmount > 0 && discountAmount < standaloneSum && (discountType !== "PERCENT" || (discountPercent > 0 && discountPercent < 100));
+    const finalPackagePrice = missing.length || !discountValid ? null : Math.round((standaloneSum - discountAmount) * 100) / 100;
+    const explicitFloor = money(offer.minimum_package_price);
+    const optionFloors = options.map((zone) => money((zone.properties || {}).minimum_approved_price)).filter((value) => value !== null);
+    const requiredFloor = explicitFloor !== null ? explicitFloor : (optionFloors.length === options.length ? Math.round(optionFloors.reduce((sum, value) => sum + value, 0) * 100) / 100 : null);
+    const belowRequiredFloor = finalPackagePrice !== null && requiredFloor !== null && finalPackagePrice < requiredFloor;
+    const floorOverrideApproved = Boolean(offer.floor_override_approved);
+    return {
+      option_codes: options.map((zone) => (zone.properties || {}).option_code),
+      standalone_sum: missing.length ? null : Math.round(standaloneSum * 100) / 100,
+      unpriced_option_codes: missing,
+      discount_type: discountType,
+      discount_percent: discountType === "PERCENT" ? discountPercent : null,
+      discount_amount: discountAmount,
+      package_savings: discountAmount,
+      final_package_price: finalPackagePrice,
+      required_floor: requiredFloor,
+      below_required_floor: belowRequiredFloor,
+      floor_override_approved: floorOverrideApproved,
+      warning: belowRequiredFloor && !floorOverrideApproved ? "PACKAGE PRICE IS BELOW THE CONFIGURED MARGIN / PROFIT FLOOR" : null,
+      discount_status: offer.discount_status || "DRAFT",
+      complete: options.length === 4 && missing.length === 0 && discountValid && offer.discount_status === "VALIDATED" && (!belowRequiredFloor || floorOverrideApproved)
+    };
+  }
+
+  function proposalClearingTotals(zones, optionCodes) {
+    const wanted = new Set(optionCodes || ["A", "B", "C", "D"]);
+    const matched = (zones || []).filter((zone) => wanted.has((zone.properties || {}).option_code));
+    const missing = [...wanted].filter((code) => !matched.some((zone) => (zone.properties || {}).option_code === code));
+    const areaSqFt = matched.reduce((sum, zone) => {
+      const quantities = proposalQuantities(zone);
+      return sum + (quantities && Number.isFinite(quantities.clearing_area_sq_ft) ? quantities.clearing_area_sq_ft : 0);
+    }, 0);
+    return {
+      option_codes: [...wanted],
+      missing_option_codes: missing,
+      area_sq_ft: areaSqFt,
+      acreage: Number((areaSqFt / 43560).toFixed(3)),
+      complete: missing.length === 0,
+      exclusions: ["TBD northwest approach quantity", "directional-only sunset sightlines", "future separately drawn clearing corridors"]
     };
   }
 
@@ -351,22 +497,32 @@
   }
 
   function acceptProposal(model, acceptedBy, viewerSessionId) {
+    const packageSelected = Boolean(model.package_offer && model.package_offer.selected);
+    if (packageSelected) {
+      model.proposals.features.forEach((zone) => {
+        if (["A", "B", "C", "D"].includes((zone.properties || {}).option_code)) zone.properties.customer_selected = true;
+      });
+    }
     const total = proposalTotal(model.proposals.features);
     if (!total.complete) throw new Error("Every selected zone needs a price before acceptance.");
     const selected = model.proposals.features.filter((zone) => total.selected_zone_ids.includes((zone.properties || {}).proposal_zone_id || zone.id));
     const unvalidated = selected.filter((zone) => (zone.properties || {}).price_status !== "VALIDATED");
     if (unvalidated.length) throw new Error("David must validate every selected zone price before acceptance.");
+    const packageSummary = proposalPackageSummary(model.proposals.features, model.package_offer || {});
+    if (packageSelected && !packageSummary.complete) throw new Error("The complete package needs four validated prices and David's validated package discount before acceptance.");
     const proposalId = uid("accepted-proposal");
     const acceptedAt = nowIso();
     const snapshot = clone(selected);
     const version = {
       proposal_version_id: uid("proposal-version"), proposal_id: proposalId,
       property_id: model.property_id, accepted_at: acceptedAt, accepted_by: acceptedBy || "Customer",
-      viewer_or_session_id: viewerSessionId || "customer-session", total_price: total.priced_total,
-      selected_zone_ids: total.selected_zone_ids, frozen_zones: snapshot, status: "ACCEPTED", immutable: true
+      viewer_or_session_id: viewerSessionId || "customer-session", total_price: packageSelected ? packageSummary.final_package_price : total.priced_total,
+      selected_zone_ids: total.selected_zone_ids, frozen_zones: snapshot,
+      package_offer: packageSelected ? clone(packageSummary) : null,
+      payment_terms: clone(model.payment_terms || null), status: "ACCEPTED", immutable: true
     };
     model.proposal_versions.push(version);
-    model.accepted_proposals.push({ proposal_id: proposalId, proposal_version_id: version.proposal_version_id, accepted_at: acceptedAt, total_price: total.priced_total, status: "ACCEPTED" });
+    model.accepted_proposals.push({ proposal_id: proposalId, proposal_version_id: version.proposal_version_id, accepted_at: acceptedAt, total_price: version.total_price, status: "ACCEPTED" });
     const workOrder = {
       work_order_id: uid("work-order"), property_id: model.property_id, proposal_id: proposalId,
       proposal_version_id: version.proposal_version_id, created_at: acceptedAt, status: "NOT_STARTED",
@@ -409,5 +565,5 @@
     return saved;
   }
 
-  return { clone, createModel, recordEdit, addFeature, replaceFeature, replaceFeatureGeometry, undo, setFeatured, reorderFeatured, toggleFavorite, haversineMeters, rankPhotos, polygonAreaAcres, polygonMetrics, rectangleBoundsFromCorners, rectangleBoundsFromGeometry, rectangleRing, money, estimateZone, createPricingCrewModel, addMarketBenchmark, proposalTotal, setZoneSelection, addCustomerMessage, acceptProposal, createRecurringOpportunity, createAsset, addAssetObservation };
+  return { clone, createModel, recordEdit, addFeature, replaceFeature, replaceFeatureGeometry, undo, setFeatured, reorderFeatured, toggleFavorite, haversineMeters, rankPhotos, polygonAreaAcres, polygonMetrics, lineLengthFeet, proposalQuantities, proposalClearingTotals, rectangleBoundsFromCorners, rectangleBoundsFromGeometry, rectangleRing, money, estimateZone, createPricingCrewModel, addMarketBenchmark, proposalTotal, proposalPackageSummary, setZoneSelection, addCustomerMessage, acceptProposal, createRecurringOpportunity, createAsset, addAssetObservation };
 });

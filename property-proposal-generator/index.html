@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Property Intelligence Proposal Generator Candidate</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header><div><strong>PROPERTY INTELLIGENCE</strong><span>Fast Contracting Proposal Generator - isolated candidate</span></div><b id="proposalIdentity">Loading proposal...</b></header>
+  <main>
+    <section class="map-panel"><iframe id="propertyMap" src="../pearson-road-map/index.html" title="Pearson Road proposal map"></iframe></section>
+    <aside>
+      <div class="workflow">MAP / MEASURE / SERVICE / PRICE / PACKAGE / PROPOSAL</div>
+      <section id="optionEditor"></section>
+      <section id="packageEditor"></section>
+      <div class="actions"><button id="previewProposal" type="button">PREVIEW CUSTOMER PROPOSAL</button><button id="exportProposal" type="button">EXPORT STRUCTURED PROPOSAL</button></div>
+      <p class="notice">Prices and production rates remain UNKNOWN until David enters and validates them. Proposal geometry never changes field evidence.</p>
+    </aside>
+  </main>
+  <dialog id="proposalPreview"><button id="closePreview" type="button">CLOSE</button><div id="proposalPreviewContent"></div></dialog>
+  <script src="../pearson-road-map/property-map-core.js"></script>
+  <script src="./proposal-generator-core.js"></script>
+  <script src="./pearson-road-candidate.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

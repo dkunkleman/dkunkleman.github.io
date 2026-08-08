@@ -109,6 +109,24 @@
         </label>
         <button id="saveSellPrice" type="button">SAVE INTERNAL PRICE</button>
         <div id="marketReference"></div>
+        <hr>
+        <h3>Complete Property Reveal Package</h3>
+        <label>Discount method
+          <select id="packageDiscountType">
+            <option value="AMOUNT">Dollar amount</option>
+            <option value="PERCENT">Percentage</option>
+          </select>
+        </label>
+        <label>Approved package discount
+          <input id="packageDiscountValue" inputmode="decimal" placeholder="UNKNOWN">
+        </label>
+        <label>Required minimum package price
+          <input id="minimumPackagePrice" inputmode="decimal" placeholder="UNKNOWN">
+        </label>
+        <label><input id="validatePackageDiscount" type="checkbox"> David has validated this package discount</label>
+        <label><input id="approveFloorOverride" type="checkbox"> David explicitly approves a below-floor package price</label>
+        <button id="savePackageDiscount" type="button">SAVE PACKAGE PRICING</button>
+        <div id="packagePricingStatus"></div>
       </section>
       <section data-control-panel="more">
         <h2>Output</h2>
@@ -187,6 +205,8 @@
           <div id="proposalTotal" class="proposal-total">TOTAL: UNKNOWN</div>
         </div>
         <div id="mapProposalSummary"></div>
+        <section id="proposalOptions" class="proposal-options" aria-label="Selectable proposal options"></section>
+        <section id="packageOffer" class="package-offer" aria-label="Complete property reveal package"></section>
         <div id="starterReveal"></div>
         <section class="proposal-explanation">
           <h2>Why this first project</h2>
@@ -233,7 +253,7 @@
     <div id="photoDetails"></div>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./property-map-core.js?v=5"></script>
-  <script src="./app.js?v=21"></script>
+  <script src="./property-map-core.js?v=6"></script>
+  <script src="./app.js?v=22"></script>
 </body>
 </html>

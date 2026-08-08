@@ -51,10 +51,10 @@ assert.match(app, /Core\.replaceFeatureGeometry\(state\.model,"proposals"/, "sav
 assert.match(app, /property-intelligence-experience-map-v0\.3/, "proposal reset must use a new presentation-storage version without altering older saved map edits");
 assert.match(app, /const SEED_OLD_PROPOSAL = false/, "old western proposal must not seed into the new map");
 assert.match(app, /if \(SEED_OLD_PROPOSAL &&/, "the old proposal seed must remain explicitly gated off");
-assert.match(app, /SOUTHEAST CREEK-SIDE PATH/, "creek-side proposal metadata is missing");
-assert.match(app, /WESTERN CANDIDATE HOMESITE CLEARING & TWO APPROACHES/, "two-approach clearing metadata is missing");
+assert.match(app, /A — CREEK WALK REVEAL/, "creek-side proposal metadata is missing");
+assert.match(app, /B — SMALL HOMESITE \/ APPROACH \/ SUNSET REVEAL/, "two-approach clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
-assert.match(app, /LARGE-PARCEL WESTERN HOMESITE & ACCESS CONCEPT/, "large-parcel homesite proposal metadata is missing");
+assert.match(app, /D — LARGE HOMESITE \/ APPROACH \/ SUNSET REVEAL/, "large-parcel homesite proposal metadata is missing");
 assert.match(app, /function proposalDraftGuides\(\)/, "the map does not assemble all unsaved proposal drafts for simultaneous display");
 assert.match(app, /CREEK-SIDE PATH[\s\S]*WESTERN HOMESITE[\s\S]*EASTERN HOMESITE[\s\S]*LARGE-PARCEL HOMESITE/, "all four current proposal drafts are not assembled together");
 assert.match(app, /function visibleProposals\(\).*feature\.id!=="PROPOSAL-ZONE-001"/, "the old Western Frontage, Entrance & Water-Feature Reveal proposal is not hidden from presentation");
