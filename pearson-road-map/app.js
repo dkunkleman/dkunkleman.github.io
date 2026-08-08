@@ -676,14 +676,17 @@
     if(editor){editor.layer.remove();Object.values(editor.handles).forEach((marker)=>marker.remove());}
     state.rectangleEditor=null;
     if(state.draw?.anchorMarker)state.draw.anchorMarker.remove();
+    if(state.draw?.preview)state.draw.preview.remove();
+    (state.draw?.pointMarkers||[]).forEach((marker)=>marker.remove());
     state.draw=null;
     const actions=document.getElementById("rectangleActions");if(actions)actions.hidden=true;
     const coach=document.getElementById("drawCoach");if(coach)coach.hidden=true;
   }
   function setDrawCoach(step){
-    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap");
+    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap"),keep=document.getElementById("keepRectangle"),undoPoint=document.getElementById("undoDrawPoint"),restart=document.getElementById("restartRectangle");
     if(!coach)return;
     coach.hidden=false;
+    keep.textContent="KEEP THIS BOX";keep.disabled=false;undoPoint.hidden=true;restart.textContent="START OVER";
     if(step==="FIRST"){
       title.textContent="1 OF 2 — TAP WHERE THE BOX STARTS";
       text.textContent="Tap one corner of the area you want to mark.";
@@ -697,11 +700,21 @@
       savedActions.hidden=true;
       cancel.hidden=false;
     }else if(step==="SAVED"){
-      title.textContent="YOUR BOX IS SAVED";
+      title.textContent="YOUR SHAPE IS SAVED";
       text.textContent="Press SAVE PICTURE to download this exact map view.";
       actions.hidden=true;
       savedActions.hidden=false;
       cancel.hidden=true;
+    }else if(step==="AREA"){
+      const count=state.draw?.points?.length||0;
+      title.textContent="TRACE THE PATH — TAP ALONG ITS OUTSIDE EDGE";
+      text.textContent=count<3?`Tap around the boundary. ${count} point${count===1?"":"s"} placed; at least 3 are needed.`:`${count} points placed. Keep tapping, or press FINISH SHAPE when the outline is right.`;
+      actions.hidden=false;
+      savedActions.hidden=true;
+      cancel.hidden=false;
+      keep.textContent="FINISH SHAPE";
+      keep.disabled=count<3;
+      undoPoint.hidden=count===0;
     }else{
       title.textContent="MAKE THE BOX FIT";
       text.textContent="Drag a white square to resize it. Drag MOVE to move the whole box.";
@@ -736,6 +749,7 @@
     status(`Box ready: about ${metrics.acreage} acres. Drag it if needed, then press KEEP THIS BOX.`);
   }
   function beginRectangle(templateKey){
+    if(templateKey==="SMALL_CREEK_PATH")return beginTemplateArea(templateKey);
     removeRectangleEditor();
     const template=PROPOSAL_TEMPLATES[templateKey]||null;
     state.draw={mode:"RECTANGLE",points:[],targetFeatureId:null,templateKey:templateKey||null,template,anchorMarker:null};
@@ -745,6 +759,59 @@
     if(template)fitProposalTemplate(template);
     setDrawCoach("FIRST");
     status("Tap one corner of the area you want to mark.");
+  }
+  function beginTemplateArea(templateKey){
+    removeRectangleEditor();
+    const template=PROPOSAL_TEMPLATES[templateKey]||null;
+    state.draw={mode:"TEMPLATE_AREA",points:[],targetFeatureId:null,templateKey,template,preview:null,pointMarkers:[]};
+    document.getElementById("rectangleActions").hidden=true;
+    closeControlPanel();
+    if(template)fitProposalTemplate(template);
+    setDrawCoach("AREA");
+    status("Tap around the outside edge of the path. The orange outline will follow you.");
+  }
+  function renderTemplateAreaDraft(){
+    const draw=state.draw;if(draw?.mode!=="TEMPLATE_AREA")return;
+    if(draw.preview)draw.preview.remove();
+    draw.preview=null;
+    const latlngs=draw.points.map(([lng,lat])=>[lat,lng]);
+    if(latlngs.length>=3)draw.preview=L.polygon(latlngs,{color:"#f29f05",fillColor:"#f29f05",fillOpacity:.2,weight:5,dashArray:"8 6",interactive:false}).addTo(state.map);
+    else if(latlngs.length>=2)draw.preview=L.polyline(latlngs,{color:"#f29f05",weight:5,dashArray:"8 6",interactive:false}).addTo(state.map);
+  }
+  function acceptTemplateAreaPoint(latlng){
+    const draw=state.draw;if(draw?.mode!=="TEMPLATE_AREA")return false;
+    draw.points.push([latlng.lng,latlng.lat]);
+    draw.pointMarkers.push(L.circleMarker(latlng,{radius:6,color:"#fff",weight:3,fillColor:"#f29f05",fillOpacity:1,interactive:false}).addTo(state.map));
+    renderTemplateAreaDraft();
+    setDrawCoach("AREA");
+    status(`${draw.points.length} boundary point${draw.points.length===1?"":"s"} placed. Keep tracing the outside edge.`);
+    return true;
+  }
+  function undoTemplateAreaPoint(){
+    const draw=state.draw;if(draw?.mode!=="TEMPLATE_AREA"||!draw.points.length)return;
+    draw.points.pop();
+    const marker=draw.pointMarkers.pop();if(marker)marker.remove();
+    renderTemplateAreaDraft();
+    setDrawCoach("AREA");
+    status("Last point removed. Continue tracing the boundary.");
+  }
+  function finishTemplateArea(){
+    const draw=state.draw;if(draw?.mode!=="TEMPLATE_AREA"||draw.points.length<3)return status("Place at least 3 boundary points before finishing the shape.");
+    const ring=[[...draw.points,draw.points[0]]],metrics=Core.polygonMetrics(ring),template=PROPOSAL_TEMPLATES[draw.templateKey]||{};
+    const id=`PROPOSAL-ZONE-${String(state.model.proposals.features.length+1).padStart(3,"0")}`;
+    const geometryPatch={acreage:metrics.acreage,quantity:metrics.acreage,perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:metrics.approx_width_ft,geometry_measurement_basis:metrics.basis,geometry_shape:"CUSTOM POLYGON",geometry_status:"DAVID-DRAWN CUSTOM BOUNDARY - REVIEW BEFORE CUSTOMER USE"};
+    Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry:{type:"Polygon",coordinates:ring},properties:{proposal_zone_id:id,proposal_template:draw.templateKey,parcel:template.parcel||"UNKNOWN",name:template.name||`Zone ${state.model.proposals.features.length+1}`,work_type:"CLEAR / REVEAL",service_type:"STARTER REVEAL",finish_level:"REVEAL FINISH",optional_upgrade:"UPGRADE TO CLEAN STAGING FINISH - NOT INCLUDED IN CURRENT PRICE",current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:template.primary_objective||"UNKNOWN",proposed_intervention:"SELECTIVE CLEAR / REVEAL WITHIN DAVID'S MARKED AREA",included_scope:template.included_scope||[],preserve:["Original field evidence and GPS records","Water, drainage, mature trees, or other features not separately approved for alteration"],remove:[],exclusions:["No grading, excavation, stump grubbing, drainage engineering, or build-ready claim","Clean Staging Finish is not included unless separately selected"],expected_benefit:template.expected_benefit||"UNKNOWN",expected_visible_result:"A selectively revealed natural area for review; not a finished construction site.",target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,unit:"acre",before_photo_ids:[],linked_before_photo_ids:[],evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK",...geometryPatch}},"DRAW_CUSTOM_PROPOSAL_BOUNDARY");
+    state.selectedProposalId=id;
+    removeRectangleEditor();saveModel();renderAll();setDrawCoach("SAVED");
+    status("Custom path boundary saved. Photos, GPS, and field evidence were not changed.");
+  }
+  function finishCurrentDrawing(){
+    if(state.draw?.mode==="TEMPLATE_AREA")return finishTemplateArea();
+    return saveRectangle();
+  }
+  function restartCurrentDrawing(){
+    if(state.draw?.mode==="TEMPLATE_AREA")return beginTemplateArea(state.draw.templateKey);
+    return restartRectangle();
   }
   function beginRectangleResize(){
     const feature=state.model.proposals.features.find((item)=>item.id===state.selectedProposalId);
@@ -795,18 +862,20 @@
   }
 
   function handleRectangleClickCapture(event){
-    if(state.draw?.mode!=="RECTANGLE"||state.rectangleEditor)return;
+    if(!["RECTANGLE","TEMPLATE_AREA"].includes(state.draw?.mode)||state.rectangleEditor)return;
     if(event.button!==undefined&&event.button!==0)return;
     if(event.target.closest(".leaflet-control"))return;
     const latlng=state.map.mouseEventToLatLng(event);
     event.preventDefault();
     event.stopPropagation();
     if(event.stopImmediatePropagation)event.stopImmediatePropagation();
-    acceptRectanglePoint(latlng);
+    if(state.draw.mode==="TEMPLATE_AREA")acceptTemplateAreaPoint(latlng);
+    else acceptRectanglePoint(latlng);
   }
 
   function handleMapClick(event){
     if(state.draw?.mode==="RECTANGLE")return acceptRectanglePoint(event.latlng);
+    if(state.draw?.mode==="TEMPLATE_AREA")return acceptTemplateAreaPoint(event.latlng);
     if(!state.draw){updateFilmstrip([event.latlng.lng,event.latlng.lat]);return;}
     state.draw.points.push([event.latlng.lng,event.latlng.lat]);
     if(state.draw.preview)state.draw.preview.remove();
@@ -900,8 +969,9 @@
     document.querySelectorAll("[data-proposal-template]").forEach(button=>button.addEventListener("click",()=>beginRectangle(button.dataset.proposalTemplate)));
     document.getElementById("saveRectangle").addEventListener("click",saveRectangle);
     document.getElementById("cancelRectangle").addEventListener("click",cancelRectangle);
-    document.getElementById("keepRectangle").addEventListener("click",saveRectangle);
-    document.getElementById("restartRectangle").addEventListener("click",restartRectangle);
+    document.getElementById("keepRectangle").addEventListener("click",finishCurrentDrawing);
+    document.getElementById("undoDrawPoint").addEventListener("click",undoTemplateAreaPoint);
+    document.getElementById("restartRectangle").addEventListener("click",restartCurrentDrawing);
     document.getElementById("cancelRectangleMap").addEventListener("click",cancelRectangle);
     document.getElementById("savePictureAfterBox").addEventListener("click",captureCurrentMapPicture);
     document.getElementById("doneAfterBox").addEventListener("click",()=>document.getElementById("drawCoach").hidden=true);
