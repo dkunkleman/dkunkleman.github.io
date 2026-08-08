@@ -20,6 +20,7 @@ assert.match(html, /id="drawCoach"/, "plain-language map drawing coach is missin
 assert.match(html, /id="keepRectangle"[^>]*>KEEP THIS BOX</, "map-level keep button is missing");
 assert.match(html, /id="restartRectangle"[^>]*>START OVER</, "map-level restart button is missing");
 assert.match(html, /id="savePictureAfterBox"[^>]*>SAVE PICTURE</, "post-save picture button is missing");
+assert.match(html, /id="undoDrawPoint"[^>]*>UNDO LAST POINT</, "custom path drawing cannot undo a bad boundary point");
 assert.match(html, /id="saveCurrentMapPicture"[^>]*>SAVE PICTURE OF THIS MAP</, "persistent map picture button is missing");
 assert.match(html, /html2canvas@1\.4\.1/, "pinned map-picture renderer is missing");
 assert.match(app, /rectangleHandlePositions/, "corner, side, and center handles are not implemented");
@@ -27,6 +28,9 @@ assert.match(app, /rectangle-move-handle/, "rectangle center-move handle is miss
 assert.match(app, /getContainer\(\)\.addEventListener\("click", handleRectangleClickCapture, true\)/, "rectangle taps are not captured above map markers and overlays");
 assert.match(app, /function handleRectangleClickCapture\(event\)/, "marker-safe rectangle click handler is missing");
 assert.match(app, /even on a photo or map symbol/, "second-corner instruction does not explain that map symbols are tappable");
+assert.match(app, /templateKey==="SMALL_CREEK_PATH"\)return beginTemplateArea/, "creek-side path still uses a rectangle instead of a traced boundary");
+assert.match(app, /TRACE THE PATH — TAP ALONG ITS OUTSIDE EDGE/, "plain-language creek-path tracing instructions are missing");
+assert.match(app, /DRAW_CUSTOM_PROPOSAL_BOUNDARY/, "custom creek-path geometry is not versioned separately from evidence");
 assert.match(app, /Core\.replaceFeatureGeometry\(state\.model,"proposals"/, "saved rectangle does not update only the editable proposal layer");
 assert.match(app, /property-intelligence-experience-map-v0\.3/, "proposal reset must use a new presentation-storage version without altering older saved map edits");
 assert.match(app, /const SEED_OLD_PROPOSAL = false/, "old western proposal must not seed into the new map");
