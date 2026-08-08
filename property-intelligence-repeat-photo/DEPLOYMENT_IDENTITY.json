@@ -1,0 +1,13 @@
+{
+  "application": "Property Intelligence Permanent Repeat Photo Points",
+  "deployment_kind": "ISOLATED_PHYSICAL_IPHONE_TEST",
+  "source_branch": "feature/repeat-photo-points-poc-20260808",
+  "source_commit": "a9a6ed54ac3c557ed6d4d2429b985933964ba9b1",
+  "storage_name": "property-intelligence-repeat-photo-poc-v1",
+  "service_worker_scope": "/property-intelligence-repeat-photo/",
+  "initial_test_storage": "EMPTY",
+  "private_property_evidence_included": false,
+  "protected_field_apps_modified": false,
+  "protected_property_map_modified": false,
+  "deployed_product_feature_changes": false
+}
