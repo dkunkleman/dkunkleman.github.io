@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#143b2a">
+  <title>Repeat Photo Points — Property Intelligence</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <span class="eyebrow">ISOLATED PROOF OF CONCEPT</span>
+      <h1>Repeat Photo Points</h1>
+      <p>Return to the same place. Line up the same view. Preserve a new photograph.</p>
+      <p class="build-identity">BUILD <code>a9a6ed54ac3c557ed6d4d2429b985933964ba9b1</code></p>
+    </div>
+    <span id="offlineBadge" class="connection-badge">CHECKING STORAGE</span>
+  </header>
+
+  <div id="tapStatus" role="status" aria-live="assertive">Ready. Choose a photo point.</div>
+
+  <main>
+    <section id="pointsView" class="view active" aria-labelledby="pointsHeading">
+      <div class="plain-warning">
+        <strong>Separate test storage</strong>
+        <span>This prototype cannot read, change, clear, or migrate either working field app.</span>
+      </div>
+      <details class="iphone-test-card">
+        <summary>PHYSICAL IPHONE TEST — TAP FOR 16 SHORT STEPS</summary>
+        <ol>
+          <li>Open fresh in iPhone Safari.</li>
+          <li>Create a photo point.</li>
+          <li>Capture a real BEFORE image.</li>
+          <li>Deny or disable one sensor; confirm the photo still saves.</li>
+          <li>Background or close Safari, then reopen.</li>
+          <li>Confirm the record remains.</li>
+          <li>Turn on Airplane Mode.</li>
+          <li>Reload or reopen; confirm saved evidence remains.</li>
+          <li>Return to the photo point.</li>
+          <li>Use the reference-image alignment overlay.</li>
+          <li>Capture AFTER.</li>
+          <li>Compare BEFORE and AFTER.</li>
+          <li>Export.</li>
+          <li>Import the exported package.</li>
+          <li>Confirm both images and immutable metadata survive.</li>
+          <li>Confirm no sideways scrolling and every control remains usable.</li>
+        </ol>
+      </details>
+      <div class="section-heading">
+        <div><span class="step-number">1</span><h2 id="pointsHeading">Choose a photo point</h2></div>
+        <button id="createPoint" class="primary-action" type="button">CREATE NEW PHOTO POINT</button>
+      </div>
+      <div id="resumeBanner" class="resume-banner" hidden>
+        <strong>Unfinished repeat photo found</strong>
+        <button id="resumeSession" type="button">RESUME</button>
+      </div>
+      <div id="pointList" class="point-list"></div>
+      <details class="data-tools">
+        <summary>Backup or move these photo points</summary>
+        <button id="exportPoints" type="button">EXPORT PHOTO-POINT RECORDS</button>
+        <button id="importPoints" type="button">IMPORT PHOTO-POINT RECORDS</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+        <p>Export and import never end an inspection and never alter the original photograph in an existing record.</p>
+      </details>
+    </section>
+
+    <section id="createView" class="view" aria-labelledby="createHeading" hidden>
+      <button class="back-button" data-back type="button">← RETURN TO PHOTO POINTS</button>
+      <div class="section-heading simple"><div><span class="step-number">1</span><h2 id="createHeading">Establish a permanent photo point</h2></div></div>
+      <p class="lead">Take or choose the reference photograph first. GPS and sensor information help, but they are never required to save the photograph.</p>
+      <label>Property ID <input id="newPropertyId" value="PROPERTY-TEST-001" autocomplete="off"></label>
+      <label>What should be centered in the picture? <input id="newTarget" placeholder="Example: entrance opening and large pine"></label>
+      <label>Camera height, if you know it <span class="inline-fields"><input id="newCameraHeight" inputmode="decimal" placeholder="Optional"><select id="newCameraHeightUnit"><option value="in">inches</option><option value="ft">feet</option></select></span></label>
+      <label>Ordinary note <textarea id="newNotes" rows="3" placeholder="Optional — use the iPhone keyboard microphone if you want to speak"></textarea></label>
+      <button id="takeReferencePhoto" class="camera-action" type="button">TAKE REFERENCE PHOTO</button>
+      <input id="referenceFile" type="file" accept="image/*" capture="environment" hidden>
+      <button class="secondary-action" data-back type="button">CANCEL</button>
+    </section>
+
+    <section id="pointView" class="view" aria-labelledby="pointHeading" hidden>
+      <button class="back-button" data-back type="button">← RETURN TO PHOTO POINTS</button>
+      <div class="point-title-row">
+        <div><span class="eyebrow" id="pointProperty"></span><h2 id="pointHeading">Photo point</h2><p id="pointTarget"></p></div>
+        <span id="captureCount" class="count-chip"></span>
+      </div>
+
+      <div class="workflow-strip" aria-label="Repeat photograph workflow">
+        <span class="complete">1 CHOOSE</span><span>2 RETURN</span><span>3 ALIGN</span><span>4 CAPTURE</span>
+      </div>
+
+      <section class="guidance-card">
+        <div class="section-heading simple"><div><span class="step-number">2</span><h3>Return to the recorded point</h3></div></div>
+        <div class="guidance-grid">
+          <div><small>DISTANCE</small><strong id="distanceValue">GPS NOT STARTED</strong></div>
+          <div><small>DIRECTION</small><strong id="directionValue">UNKNOWN</strong></div>
+          <div><small>GPS ACCURACY</small><strong id="accuracyValue">UNKNOWN</strong></div>
+        </div>
+        <button id="startGuidance" class="primary-action" type="button">START LOCATION GUIDANCE</button>
+        <p id="guidanceLimit" class="limitation">Phone GPS is approximate. It is guidance, not a surveyed position.</p>
+      </section>
+
+      <section class="reference-card">
+        <div class="section-heading simple"><div><span class="step-number">3</span><h3>Line up the original view</h3></div></div>
+        <div class="reference-preview"><img id="referenceImage" alt="Original reference photograph"></div>
+        <div class="alignment-grid">
+          <div><small>REFERENCE HEADING</small><strong id="referenceHeading">UNAVAILABLE</strong></div>
+          <div><small>CURRENT HEADING</small><strong id="currentHeading">UNAVAILABLE</strong></div>
+          <div><small>TURN</small><strong id="turnDirection">UNKNOWN</strong></div>
+          <div><small>CAMERA HEIGHT</small><strong id="referenceHeight">NOT RECORDED</strong></div>
+        </div>
+        <button id="openAlignment" class="primary-action" type="button">OPEN CAMERA ALIGNMENT</button>
+      </section>
+
+      <section id="alignmentPanel" class="alignment-panel" hidden>
+        <div class="section-heading simple"><div><span class="step-number">3</span><h3>Match the reference</h3></div></div>
+        <div class="camera-stage">
+          <video id="cameraPreview" autoplay playsinline muted></video>
+          <img id="ghostImage" alt="Translucent reference alignment overlay">
+          <div id="cameraUnavailable" class="camera-unavailable" hidden>LIVE CAMERA PREVIEW UNAVAILABLE<br><small>You may still take and save the repeat photograph.</small></div>
+        </div>
+        <label class="opacity-control">REFERENCE OVERLAY <input id="ghostOpacity" type="range" min="0" max="100" value="45"><output id="opacityValue">45%</output></label>
+        <div class="sensor-grid">
+          <div><small>HEADING</small><strong id="sensorHeading">UNAVAILABLE</strong></div>
+          <div><small>PITCH ESTIMATE</small><strong id="sensorPitch">UNAVAILABLE</strong></div>
+          <div><small>ROLL ESTIMATE</small><strong id="sensorRoll">UNAVAILABLE</strong></div>
+        </div>
+        <p class="limitation"><b>Measured when available:</b> GPS distance, compass heading, and browser-reported device tilt. <b>Human judgment:</b> exact camera height, lens choice, target, and framing.</p>
+        <label>Why are you taking this repeat photograph?
+          <select id="repeatPurpose"><option value="AFTER">AFTER</option><option value="WORK">DURING WORK</option><option value="MONITORING">MONITORING</option></select>
+        </label>
+        <label>Alignment note <textarea id="alignmentNote" rows="2" placeholder="Optional"></textarea></label>
+        <button id="takeRepeatPhoto" class="camera-action" type="button">TAKE REPEAT PHOTO</button>
+        <input id="repeatFile" type="file" accept="image/*" capture="environment" hidden>
+        <button id="closeAlignment" class="secondary-action" type="button">CLOSE ALIGNMENT</button>
+      </section>
+
+      <section class="review-card">
+        <div class="section-heading simple"><div><span class="step-number">4</span><h3>Before and latest repeat</h3></div></div>
+        <div class="comparison-grid">
+          <figure><img id="beforeReview" alt="Original reference capture"><figcaption>REFERENCE / BEFORE — NEVER OVERWRITTEN</figcaption></figure>
+          <figure><img id="afterReview" alt="Latest repeat capture"><figcaption id="afterCaption">NO REPEAT CAPTURE YET</figcaption></figure>
+        </div>
+        <div id="captureTimeline" class="capture-timeline"></div>
+      </section>
+    </section>
+  </main>
+
+  <template id="pointCardTemplate">
+    <article class="point-card"><img alt="Photo point reference"><div><span class="eyebrow"></span><h3></h3><p></p><small></small></div><button type="button">OPEN THIS PHOTO POINT</button></article>
+  </template>
+
+  <script src="./photo-point-core.js"></script>
+  <script src="./idb-store.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
