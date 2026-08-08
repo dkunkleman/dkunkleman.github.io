@@ -120,8 +120,7 @@
     if(document.body.dataset.openPanel===panel)return closeControlPanel();
     if(panel==="proposal"){
       if(state.mode!=="PROPOSAL")document.querySelector('[data-mode="PROPOSAL"]').click();
-      const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];
-      if(zone)state.map.fitBounds(L.geoJSON(zone).getBounds().pad(.35));
+      fitAllVisibleProposals();
     }
     document.body.dataset.openPanel=panel;
     document.getElementById("controlDrawer").setAttribute("aria-hidden","false");
@@ -494,6 +493,7 @@
     });
   }
   function renderProposals() {
+    renderDraftProposalGuides();
     state.model.proposals.features.forEach((feature) => {
       const primary=p(feature).recommended_first_project===true;
       const creekLine=p(feature).presentation_creek_centerline;
@@ -507,6 +507,57 @@
       layer.eachLayer((part) => {
         part.bindTooltip(`${safe(p(feature).name)}<br>${p(feature).acreage || "?"} acres${primary?"<br>RECOMMENDED FIRST PROJECT":"<br>OPTIONAL - NOT INCLUDED"}${p(feature).geometry_status?`<br>${safe(p(feature).geometry_status)}`:""}`, { permanent:true,direction:"center",className:"proposal-label" });
         part.on("click", (event) => { L.DomEvent.stopPropagation(event); state.selectedProposalId=feature.id; showProposal(feature); renderProposalSheet(); renderInternalPricing(); });
+      });
+    });
+  }
+  function proposalDraftGuides() {
+    const savedTemplates=new Set(state.model.proposals.features.map((feature)=>p(feature).proposal_template).filter(Boolean));
+    return [
+      {
+        templateKey:"SMALL_CREEK_PATH",
+        label:"CREEK-SIDE PATH",
+        geometry:{type:"Polygon",coordinates:bufferedPathRing(CREEK_PATH_CENTERLINE,CREEK_PATH_DEFAULT_WIDTH_FT)},
+        creekLine:CREEK_WATER_CENTERLINE
+      },
+      {
+        templateKey:"SMALL_CLEARING_PATHS",
+        label:"WESTERN HOMESITE",
+        geometry:{type:"Polygon",coordinates:[closedRing(WESTERN_HOMESITE_SHAPE)]}
+      },
+      {
+        templateKey:"SMALL_EASTERN_HOMESITE",
+        label:"EASTERN HOMESITE",
+        geometry:{type:"Polygon",coordinates:[closedRing(EASTERN_HOMESITE_SHAPE)]}
+      },
+      {
+        templateKey:"LARGE_WESTERN_HOMESITE",
+        label:"LARGE-PARCEL HOMESITE",
+        geometry:{type:"Polygon",coordinates:[closedRing(LARGE_WESTERN_HOMESITE_SHAPE)]}
+      }
+    ].filter((guide)=>!savedTemplates.has(guide.templateKey));
+  }
+  function fitAllVisibleProposals() {
+    const features=[
+      ...state.model.proposals.features,
+      ...proposalDraftGuides().map((guide)=>({type:"Feature",geometry:guide.geometry,properties:{proposal_template:guide.templateKey}}))
+    ];
+    if(features.length)state.map.fitBounds(L.geoJSON({type:"FeatureCollection",features}).getBounds().pad(.18));
+  }
+  function renderDraftProposalGuides() {
+    proposalDraftGuides().forEach((guide)=>{
+      if(guide.creekLine){
+        const latlngs=guide.creekLine.map(([lng,lat])=>[lat,lng]);
+        L.polyline(latlngs,{color:"#fff",weight:10,opacity:.92,interactive:false}).addTo(state.groups.proposal);
+        L.polyline(latlngs,{color:"#087cca",weight:6,opacity:1,interactive:false}).addTo(state.groups.proposal);
+      }
+      const feature={type:"Feature",geometry:guide.geometry,properties:{proposal_template:guide.templateKey}};
+      const layer=L.geoJSON(feature,{style:{color:"#f29f05",fillColor:"#f8d24a",fillOpacity:.20,weight:4,dashArray:"10 7"}}).addTo(state.groups.proposal);
+      layer.eachLayer((part)=>{
+        part.bindTooltip(`${guide.label}<br>DRAFT - CLICK TO EDIT`,{permanent:true,direction:"center",className:"proposal-draft-label"});
+        part.on("click",(event)=>{
+          L.DomEvent.stopPropagation(event);
+          guide.templateKey==="SMALL_CREEK_PATH"?beginCreekPathEditor():beginProposalShapeEditor(guide.templateKey);
+        });
       });
     });
   }
