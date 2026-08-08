@@ -1,0 +1,3417 @@
+{
+  "type": "FeatureCollection",
+  "name": "ALL_SUBJECT_WATER_FINDINGS",
+  "properties": {
+    "property_id": "221S280000001010000",
+    "original_evidence_modified": false,
+    "boundary_rule": "Includes recorded water findings inside either subject-parcel component and nearby points that may reflect phone-GPS uncertainty."
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09148756288526,
+          30.490349253062416
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-137a2205-5475-465f-a885-a82934edf9ae",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:11:22.212Z",
+        "gps_accuracy_m": 4.733774864535207,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-f01320f6-cc0f-4e50-bd09-0873f935d44a",
+              "photo_number": "P13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.15862304322263648,
+              "time_delta_ms": 7231,
+              "analysis_path": "photos/013_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-6c67b8df-6b2a-4012-8101-257492a25493",
+              "photo_number": "P15",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.6176419236221213,
+              "time_delta_ms": 32862,
+              "analysis_path": "photos/015_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e850770e-a9bc-45a4-a322-e6025136224d",
+              "photo_number": "P14",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 5.717383220484273,
+              "time_delta_ms": 25387,
+              "analysis_path": "photos/014_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 18.012089018960726,
+              "time_delta_ms": 5809964,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 38.95176339792135,
+              "time_delta_ms": 91067281,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 51.329122515604624,
+              "time_delta_ms": 90751954,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09151638496891,
+          30.49036498863605
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-9399cc93-346f-483b-8628-ecf5b25be327",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:11:58.283Z",
+        "gps_accuracy_m": 10.269273873081932,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-6c67b8df-6b2a-4012-8101-257492a25493",
+              "photo_number": "P15",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.4585976373824824,
+              "time_delta_ms": 3209,
+              "analysis_path": "photos/015_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e850770e-a9bc-45a4-a322-e6025136224d",
+              "photo_number": "P14",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.548843699813502,
+              "time_delta_ms": 10684,
+              "analysis_path": "photos/014_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f01320f6-cc0f-4e50-bd09-0873f935d44a",
+              "photo_number": "P13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.186915808510745,
+              "time_delta_ms": 43302,
+              "analysis_path": "photos/013_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 21.083595956361076,
+              "time_delta_ms": 5773893,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 41.705418589785914,
+              "time_delta_ms": 91031210,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 53.93013938636418,
+              "time_delta_ms": 90715883,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09151285054202,
+          30.490367539877155
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-5ca28ee7-4948-42e7-8ab6-ac2ed57206ea",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:11:59.369Z",
+        "gps_accuracy_m": 10.137207138190098,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-6c67b8df-6b2a-4012-8101-257492a25493",
+              "photo_number": "P15",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.48111550490827454,
+              "time_delta_ms": 4295,
+              "analysis_path": "photos/015_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e850770e-a9bc-45a4-a322-e6025136224d",
+              "photo_number": "P14",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.55756703501977,
+              "time_delta_ms": 11770,
+              "analysis_path": "photos/014_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f01320f6-cc0f-4e50-bd09-0873f935d44a",
+              "photo_number": "P13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.063336827654512,
+              "time_delta_ms": 44388,
+              "analysis_path": "photos/013_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 21.094079410710666,
+              "time_delta_ms": 5772807,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 41.3726158413772,
+              "time_delta_ms": 91030124,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 53.5737471000076,
+              "time_delta_ms": 90714797,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09155718955166,
+          30.490387920222663
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-ba5282e3-f0da-4e50-a1b7-ad5a8299b9c3",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:13:12.286Z",
+        "gps_accuracy_m": 10.853177115016544,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-1ba987a3-7b54-41d0-88ca-d041bff2d8b7",
+              "photo_number": "P16",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.6782205642964863,
+              "time_delta_ms": 30596,
+              "analysis_path": "photos/016_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-104fb842-8975-4578-9d1d-041adcc48d04",
+              "photo_number": "P17",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.2922737262584936,
+              "time_delta_ms": 18741,
+              "analysis_path": "photos/017_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-4820d2c9-a8d1-4576-8408-4eecf2b3b672",
+              "photo_number": "P18",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.7375358845621687,
+              "time_delta_ms": 9351,
+              "analysis_path": "photos/018_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 25.569932503154764,
+              "time_delta_ms": 5699890,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 45.72530883628504,
+              "time_delta_ms": 90957207,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 57.72741284273561,
+              "time_delta_ms": 90641880,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09159264619757,
+          30.490355968072212
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-374bba69-0450-4da2-9b6c-b86a3e9c83a7",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:14:41.330Z",
+        "gps_accuracy_m": 9.427984142298016,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-d43776db-6c4e-435d-bfbe-750e4de4629f",
+              "photo_number": "P19",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.6820340964529674,
+              "time_delta_ms": 61888,
+              "analysis_path": "photos/019_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-73ceee63-b519-4954-9a7e-ecff352e1a34",
+              "photo_number": "P21",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.0710906738041546,
+              "time_delta_ms": 32769,
+              "analysis_path": "photos/021_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-4820d2c9-a8d1-4576-8408-4eecf2b3b672",
+              "photo_number": "P18",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.1937678208882185,
+              "time_delta_ms": 98395,
+              "analysis_path": "photos/018_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 25.706997147476073,
+              "time_delta_ms": 5610846,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 49.007572666104465,
+              "time_delta_ms": 90868163,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 61.2904748818381,
+              "time_delta_ms": 90552836,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160996206356,
+          30.490423496586782
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-282ee523-46c4-4e5d-a9ad-6c0cea252ac6",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:15:34.015Z",
+        "gps_accuracy_m": 10.134235217597748,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-f3600fb1-e9ca-4f90-ba03-38463fa6f67f",
+              "photo_number": "P24",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.06414518288889914,
+              "time_delta_ms": 5606,
+              "analysis_path": "photos/024_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-19d294ea-d56c-40bb-be46-35d6d3d2c269",
+              "photo_number": "P23",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.8930242148086569,
+              "time_delta_ms": 17016,
+              "analysis_path": "photos/023_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-0ab71d6d-8f39-412a-95f3-004392da511d",
+              "photo_number": "P22",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.029567080151493,
+              "time_delta_ms": 59277,
+              "analysis_path": "photos/022_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 31.91827548699924,
+              "time_delta_ms": 5558161,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 51.17647250503244,
+              "time_delta_ms": 90815478,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 62.839247513154305,
+              "time_delta_ms": 90500151,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09150870476424,
+          30.49046621557127
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-13096162-362a-4283-8aee-7a9a561912be",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:16:10.483Z",
+        "gps_accuracy_m": 9.740881294561085,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-68ca164c-ce76-4c20-a387-689f3d6bb254",
+              "photo_number": "P25",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.5203471810616233,
+              "time_delta_ms": 14250,
+              "analysis_path": "photos/025_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-1150aae5-b1f4-48b8-96c9-096637b92082",
+              "photo_number": "P26",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 6.497337918691509,
+              "time_delta_ms": 48861,
+              "analysis_path": "photos/026_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-68f4af31-985d-4ad9-9e53-a4dad7afa06d",
+              "photo_number": "P27",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 7.18293800069649,
+              "time_delta_ms": 60239,
+              "analysis_path": "photos/027_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 30.33151534125395,
+              "time_delta_ms": 5521693,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 42.67422855602999,
+              "time_delta_ms": 90779010,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-ba248c8f-f65e-4577-a336-a393f023d14d",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 53.61551110567896,
+              "time_delta_ms": 90463683,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09154577310399,
+          30.490521847565272
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-0af56ca3-e039-4a0f-9fa8-ac73e2c85291",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:17:13.779Z",
+        "gps_accuracy_m": 9.8302532385785,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-68f4af31-985d-4ad9-9e53-a4dad7afa06d",
+              "photo_number": "P27",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.17181828465428958,
+              "time_delta_ms": 3057,
+              "analysis_path": "photos/027_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-1150aae5-b1f4-48b8-96c9-096637b92082",
+              "photo_number": "P26",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.6438975961266291,
+              "time_delta_ms": 14435,
+              "analysis_path": "photos/026_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-951d4290-8314-4441-bc65-17b65d2a7cf4",
+              "photo_number": "P28",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 5.975539896114251,
+              "time_delta_ms": 73043,
+              "analysis_path": "photos/028_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 37.43955981696152,
+              "time_delta_ms": 5458397,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 48.07233761188661,
+              "time_delta_ms": 90715714,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 58.05713274029428,
+              "time_delta_ms": 90652076,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09159095989156,
+          30.490668530546827
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-c7a1e8ef-afb2-4274-802c-017fbe15bcf5",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:19:44.926Z",
+        "gps_accuracy_m": 9.140315589088567,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-e1f5387e-b0ff-4bab-8009-ca80c5306902",
+              "photo_number": "P32",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.0109855552854519,
+              "time_delta_ms": 2379,
+              "analysis_path": "photos/032_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-6def6007-1607-403d-8d44-682a6486ab48",
+              "photo_number": "P31",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.507567075165065,
+              "time_delta_ms": 11642,
+              "analysis_path": "photos/031_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-578b1651-1185-425a-b875-ae2f0daa0f90",
+              "photo_number": "P34",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 5.371700972776497,
+              "time_delta_ms": 86296,
+              "analysis_path": "photos/034_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 53.055096946634734,
+              "time_delta_ms": 2872640,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 54.11340472372808,
+              "time_delta_ms": 5307250,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 59.7761502785165,
+              "time_delta_ms": 90564567,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09158855175168,
+          30.490707173088243
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-d2ed4f23-9224-40e2-96a0-dfdecab8c7d6",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:20:43.217Z",
+        "gps_accuracy_m": 12.438941885788104,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-578b1651-1185-425a-b875-ae2f0daa0f90",
+              "photo_number": "P34",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.9643108383644552,
+              "time_delta_ms": 28005,
+              "analysis_path": "photos/034_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-96f8a6fb-fc51-45ca-bb78-58bb1449ccf8",
+              "photo_number": "P33",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.2593910801653143,
+              "time_delta_ms": 22393,
+              "analysis_path": "photos/033_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e1f5387e-b0ff-4bab-8009-ca80c5306902",
+              "photo_number": "P32",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.600134353829109,
+              "time_delta_ms": 60670,
+              "analysis_path": "photos/032_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 50.348598061457494,
+              "time_delta_ms": 2814349,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 58.0328670943763,
+              "time_delta_ms": 5248959,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 62.171408088555204,
+              "time_delta_ms": 90506276,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160699580173,
+          30.490713232715088
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-987702bc-9226-41e1-b3c2-60405f8999cc",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:21:13.997Z",
+        "gps_accuracy_m": 13.142786885487318,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-578b1651-1185-425a-b875-ae2f0daa0f90",
+              "photo_number": "P34",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.17545552465493403,
+              "time_delta_ms": 2775,
+              "analysis_path": "photos/034_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-96f8a6fb-fc51-45ca-bb78-58bb1449ccf8",
+              "photo_number": "P33",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.2811579670520232,
+              "time_delta_ms": 8387,
+              "analysis_path": "photos/033_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e1f5387e-b0ff-4bab-8009-ca80c5306902",
+              "photo_number": "P32",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.271516054281104,
+              "time_delta_ms": 91450,
+              "analysis_path": "photos/032_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 48.567542834878125,
+              "time_delta_ms": 2783569,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 59.297712163270106,
+              "time_delta_ms": 5218179,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 63.97590593882441,
+              "time_delta_ms": 90475496,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09159240189788,
+          30.490709007041605
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-6c343bd7-917d-453e-88fc-d2152f4431b1",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:21:32.792Z",
+        "gps_accuracy_m": 12.81061226079846,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-578b1651-1185-425a-b875-ae2f0daa0f90",
+              "photo_number": "P34",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.5436858130314615,
+              "time_delta_ms": 21570,
+              "analysis_path": "photos/034_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-96f8a6fb-fc51-45ca-bb78-58bb1449ccf8",
+              "photo_number": "P33",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.0666245262807723,
+              "time_delta_ms": 27182,
+              "analysis_path": "photos/033_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e1f5387e-b0ff-4bab-8009-ca80c5306902",
+              "photo_number": "P32",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.7333352891558094,
+              "time_delta_ms": 110245,
+              "analysis_path": "photos/032_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 49.93522150018723,
+              "time_delta_ms": 2764774,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 58.35329022083765,
+              "time_delta_ms": 5199384,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 62.58703398670619,
+              "time_delta_ms": 90456701,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160839367574,
+          30.490822637062823
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-67d1f8af-d16c-49a1-bb52-c9c0a694837e",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:23:33.740Z",
+        "gps_accuracy_m": 12.454039826058962,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-5e063436-3606-498c-b0ad-77708cc183a0",
+              "photo_number": "P38",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.961196987124285,
+              "time_delta_ms": 100074,
+              "analysis_path": "photos/038_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-47584afb-7bc9-4446-a78e-5c14a33d2d47",
+              "photo_number": "P42",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.9983997688336084,
+              "time_delta_ms": 187671,
+              "analysis_path": "photos/042_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-58f9f9e1-f46b-4f72-ac63-7594c6d6c3cf",
+              "photo_number": "P43",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.6758702392292726,
+              "time_delta_ms": 202278,
+              "analysis_path": "photos/043_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 41.51132961087471,
+              "time_delta_ms": 2643826,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 70.7802266672598,
+              "time_delta_ms": 5078436,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 72.20620159934835,
+              "time_delta_ms": 90335753,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09153881537989,
+          30.490848034375677
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-8f52f53f-e203-49d5-8e07-2a2b61df06d0",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:25:37.364Z",
+        "gps_accuracy_m": 9.378772621699651,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-571d0b18-19a8-41d4-9c3d-cac9388414c9",
+              "photo_number": "P40",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.6111131485000143,
+              "time_delta_ms": 2642,
+              "analysis_path": "photos/040_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-69ca9226-1854-45a1-9515-b38757b4359c",
+              "photo_number": "P41",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.8128719649901188,
+              "time_delta_ms": 21576,
+              "analysis_path": "photos/041_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-359e5a79-016b-48db-96fc-67df1746057e",
+              "photo_number": "P39",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.6762777423895563,
+              "time_delta_ms": 9824,
+              "analysis_path": "photos/039_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 46.39326857241963,
+              "time_delta_ms": 2520202,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 69.88566549063742,
+              "time_delta_ms": 90212129,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 71.7410568604028,
+              "time_delta_ms": 4954812,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09151252215266,
+          30.49086964364438
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-46596ea0-2427-439e-af43-f5d800fff391",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:25:50.739Z",
+        "gps_accuracy_m": 9.327609234902928,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-69ca9226-1854-45a1-9515-b38757b4359c",
+              "photo_number": "P41",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.243903173384772,
+              "time_delta_ms": 8201,
+              "analysis_path": "photos/041_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-571d0b18-19a8-41d4-9c3d-cac9388414c9",
+              "photo_number": "P40",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.8056549380601785,
+              "time_delta_ms": 16017,
+              "analysis_path": "photos/040_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-359e5a79-016b-48db-96fc-67df1746057e",
+              "photo_number": "P39",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 5.856037996446763,
+              "time_delta_ms": 23199,
+              "analysis_path": "photos/039_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 47.97417412856324,
+              "time_delta_ms": 2506827,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 70.26165824985415,
+              "time_delta_ms": 90198754,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 73.31830128030263,
+              "time_delta_ms": 90135116,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09158253030564,
+          30.490844149574507
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-b1ddb977-daae-4f15-8d10-033aa0e154fb",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:26:59.065Z",
+        "gps_accuracy_m": 10.103735738974335,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-5e063436-3606-498c-b0ad-77708cc183a0",
+              "photo_number": "P38",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.5486388849275198,
+              "time_delta_ms": 105251,
+              "analysis_path": "photos/038_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-58f9f9e1-f46b-4f72-ac63-7594c6d6c3cf",
+              "photo_number": "P43",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.5525863335865144,
+              "time_delta_ms": 3047,
+              "analysis_path": "photos/043_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-47584afb-7bc9-4446-a78e-5c14a33d2d47",
+              "photo_number": "P42",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.8554724556060433,
+              "time_delta_ms": 17654,
+              "analysis_path": "photos/042_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 42.68917167603699,
+              "time_delta_ms": 2438501,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 72.2638180080351,
+              "time_delta_ms": 90130428,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 72.34367288822733,
+              "time_delta_ms": 4873111,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09157989006529,
+          30.49084303669811
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-50ef8f2a-922d-4f99-9dff-6953289733e9",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:27:00.070Z",
+        "gps_accuracy_m": 9.995903053057244,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-58f9f9e1-f46b-4f72-ac63-7594c6d6c3cf",
+              "photo_number": "P43",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.2710055492613674,
+              "time_delta_ms": 4052,
+              "analysis_path": "photos/043_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-5e063436-3606-498c-b0ad-77708cc183a0",
+              "photo_number": "P38",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.7762497749145001,
+              "time_delta_ms": 106256,
+              "analysis_path": "photos/038_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-47584afb-7bc9-4446-a78e-5c14a33d2d47",
+              "photo_number": "P42",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.1269487494545092,
+              "time_delta_ms": 18659,
+              "analysis_path": "photos/042_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 42.970584099447215,
+              "time_delta_ms": 2437496,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 72.00328071279155,
+              "time_delta_ms": 90129423,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 72.15613560890179,
+              "time_delta_ms": 4872106,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09152835269572,
+          30.49084886962128
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-41ae529d-d958-4019-9582-d3e51eaf28a6",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:28:16.914Z",
+        "gps_accuracy_m": 13.449105036341289,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-571d0b18-19a8-41d4-9c3d-cac9388414c9",
+              "photo_number": "P40",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.0784855441112922,
+              "time_delta_ms": 162192,
+              "analysis_path": "photos/040_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-69ca9226-1854-45a1-9515-b38757b4359c",
+              "photo_number": "P41",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.7996579882764139,
+              "time_delta_ms": 137974,
+              "analysis_path": "photos/041_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-359e5a79-016b-48db-96fc-67df1746057e",
+              "photo_number": "P39",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.68263325853802,
+              "time_delta_ms": 169374,
+              "analysis_path": "photos/039_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 47.29609962270243,
+              "time_delta_ms": 2360652,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 69.33404926005414,
+              "time_delta_ms": 90052579,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 71.62250130486984,
+              "time_delta_ms": 4795262,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09181724005568,
+          30.490448618101233
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-9267e3f3-6d25-4904-bf71-2267ac009c41",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:39:22.195Z",
+        "gps_accuracy_m": 11.404022665882675,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-5f729ea3-596b-4165-933b-4542adc503a0",
+              "photo_number": "P67",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.39633709577412424,
+              "time_delta_ms": 26313,
+              "analysis_path": "photos/067_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-b0012967-3a5d-4a9f-9164-a5404067f354",
+              "photo_number": "P69",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.0002462824840908,
+              "time_delta_ms": 2887,
+              "analysis_path": "photos/069_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-523a4fd6-49d6-4f68-b989-864cf2887aad",
+              "photo_number": "P68",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.2365649638983105,
+              "time_delta_ms": 18348,
+              "analysis_path": "photos/068_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 49.336220436623655,
+              "time_delta_ms": 4129981,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 63.42750078582557,
+              "time_delta_ms": 1695371,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 71.23293732866803,
+              "time_delta_ms": 89387298,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09194183497503,
+          30.49044564410067
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-7d58f35e-1b7e-4003-8ef8-4967d5311e3f",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:39:59.937Z",
+        "gps_accuracy_m": 9.475085239004589,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-9cd7493d-01b4-4fe6-8f7b-8ee32ae66149",
+              "photo_number": "P70",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.610683714634197,
+              "time_delta_ms": 21241,
+              "analysis_path": "photos/070_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-974f88f0-36a3-44b5-8250-56fe004c6aa3",
+              "photo_number": "P75",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.9804471850009335,
+              "time_delta_ms": 173298,
+              "analysis_path": "photos/075_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-4edee66d-6081-4718-9647-61b808ad83de",
+              "photo_number": "P74",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 6.735749412052526,
+              "time_delta_ms": 161872,
+              "analysis_path": "photos/074_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 59.717404169823666,
+              "time_delta_ms": 4092239,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 61.73128391743408,
+              "time_delta_ms": 1657629,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 83.0308094139238,
+              "time_delta_ms": 89349556,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09240224423966,
+          30.49055619255756
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-2bcf1cfd-bc8b-49ce-81e7-7e301969f1f3",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:54:27.712Z",
+        "gps_accuracy_m": 14.962701581414207,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-f9601e23-834d-48c4-a562-9eb1769657f1",
+              "photo_number": "P111",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.903708409917657,
+              "time_delta_ms": 26927,
+              "analysis_path": "photos/111_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f48ccd42-760d-4057-bebc-99abd1d1c5f5",
+              "photo_number": "P110",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.2262112104666625,
+              "time_delta_ms": 15951,
+              "analysis_path": "photos/110_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-7d6330a8-61bc-493a-a24f-fbb83166e007",
+              "photo_number": "P112",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.357697882584158,
+              "time_delta_ms": 43535,
+              "analysis_path": "photos/112_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 63.140888495096945,
+              "time_delta_ms": 789854,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 105.15708849236117,
+              "time_delta_ms": 3224464,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 128.47271678986982,
+              "time_delta_ms": 88481781,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09215882549148,
+          30.49068403040647
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-4c0cc740-7079-458d-9bed-4231f745265f",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T13:59:56.522Z",
+        "gps_accuracy_m": 14.632609925052659,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-c34cd7f6-78bb-4168-bee9-898a300e2a5a",
+              "photo_number": "P125",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 9.01158955358842,
+              "time_delta_ms": 96661,
+              "analysis_path": "photos/125_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f9e318a6-71dd-4f63-a52c-e6486d539b34",
+              "photo_number": "P124",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 9.294232870609166,
+              "time_delta_ms": 68517,
+              "analysis_path": "photos/124_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-05c78626-27ad-449d-87bd-c1c22c57a88d",
+              "photo_number": "P116",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 9.878601164890902,
+              "time_delta_ms": 149990,
+              "analysis_path": "photos/116_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 38.60024065498463,
+              "time_delta_ms": 461044,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 91.06062562702562,
+              "time_delta_ms": 2895654,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 109.41239739430227,
+              "time_delta_ms": 88152971,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09216016352251,
+          30.490725353686983
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-205e712b-4472-46b4-bddd-02d93f47d55e",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:00:13.392Z",
+        "gps_accuracy_m": 13.983137853053181,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-f9e318a6-71dd-4f63-a52c-e6486d539b34",
+              "photo_number": "P124",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 4.832945956228757,
+              "time_delta_ms": 51647,
+              "analysis_path": "photos/124_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-c34cd7f6-78bb-4168-bee9-898a300e2a5a",
+              "photo_number": "P125",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 5.019727518879809,
+              "time_delta_ms": 79791,
+              "analysis_path": "photos/125_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-63f7a4a2-41aa-4356-924d-450b0e6f7d24",
+              "photo_number": "P123",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 6.746664841547818,
+              "time_delta_ms": 41784,
+              "analysis_path": "photos/123_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 34.541908621098045,
+              "time_delta_ms": 444174,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 93.85388284274697,
+              "time_delta_ms": 2878784,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 111.13585471981878,
+              "time_delta_ms": 88136101,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09214219812405,
+          30.490780802504915
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-63a89244-3ddf-42c4-bcac-ee7396ab138c",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:01:09.200Z",
+        "gps_accuracy_m": 17.99478208644921,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-63f7a4a2-41aa-4356-924d-450b0e6f7d24",
+              "photo_number": "P123",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.939849118221576,
+              "time_delta_ms": 14024,
+              "analysis_path": "photos/123_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f9e318a6-71dd-4f63-a52c-e6486d539b34",
+              "photo_number": "P124",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.5836608410746482,
+              "time_delta_ms": 4161,
+              "analysis_path": "photos/124_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-1b4fa369-7e40-4a98-a458-86195ce43589",
+              "photo_number": "P122",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.8888754480131424,
+              "time_delta_ms": 20846,
+              "analysis_path": "photos/122_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 28.327673114832887,
+              "time_delta_ms": 388366,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 96.36859489861021,
+              "time_delta_ms": 2822976,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 111.97785048610426,
+              "time_delta_ms": 88080293,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0921283704359,
+          30.490799931444442
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-ed38f4c9-e201-4126-a86b-d1985550927c",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:01:22.484Z",
+        "gps_accuracy_m": 17.30230341897008,
+        "note": "",
+        "attributes": {},
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-63f7a4a2-41aa-4356-924d-450b0e6f7d24",
+              "photo_number": "P123",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.128035283078666,
+              "time_delta_ms": 27308,
+              "analysis_path": "photos/123_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-1b4fa369-7e40-4a98-a458-86195ce43589",
+              "photo_number": "P122",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.5489166653111353,
+              "time_delta_ms": 34130,
+              "analysis_path": "photos/122_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-7af62ffb-fae7-45e5-bbc7-0102f714786c",
+              "photo_number": "P126",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.4119776579193166,
+              "time_delta_ms": 58331,
+              "analysis_path": "photos/126_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 25.822106240100158,
+              "time_delta_ms": 375082,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 96.77390573772068,
+              "time_delta_ms": 2809692,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 111.69429433251727,
+              "time_delta_ms": 88067009,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09212194138165,
+          30.490955184196675
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-c66abfd3-0770-40d2-85d3-01cfd3cbbf5a",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:06:14.221Z",
+        "gps_accuracy_m": 3.7504769605912456,
+        "note": "",
+        "attributes": {
+          "water_depth": "7–12 inches",
+          "water_depth_unit": null,
+          "water_depth_basis": "Unknown",
+          "water_condition": "",
+          "extent_note": ""
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-de1672f6-3bb0-48c8-9212-61078a38891a",
+              "photo_number": "P131",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.6523406163155443,
+              "time_delta_ms": 125849,
+              "analysis_path": "photos/131_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-3e626c60-252b-4798-8a64-7fc736ab6e8a",
+              "photo_number": "P133",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.3685959610127023,
+              "time_delta_ms": 40483,
+              "analysis_path": "photos/133_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-d6755a64-c507-47cb-b7a7-517bb1042889",
+              "photo_number": "P132",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.4937182737361123,
+              "time_delta_ms": 118804,
+              "analysis_path": "photos/132_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 13.551500527364984,
+              "time_delta_ms": 83345,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 108.66890525673634,
+              "time_delta_ms": 2517955,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 119.76882332996067,
+              "time_delta_ms": 87775272,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09187127895919,
+          30.49115783542903
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-5a486fd6-4699-4d87-9906-b0da3303160a",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:13:16.355Z",
+        "gps_accuracy_m": 14.90658822505405,
+        "note": "",
+        "attributes": {
+          "water_depth": "4–6 inches",
+          "water_depth_unit": null,
+          "water_depth_basis": "Unknown",
+          "water_condition": "",
+          "extent_note": ""
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-13a58c4d-a5e3-4376-8b52-5aef572ee99b",
+              "photo_number": "P144",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.0699561218560498,
+              "time_delta_ms": 41581,
+              "analysis_path": "photos/144_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-f9d4e54f-a8aa-43fb-82a7-72ffa1236119",
+              "photo_number": "P143",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.1564543593741607,
+              "time_delta_ms": 57489,
+              "analysis_path": "photos/143_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-04f94eb7-66b2-403d-a5c5-e553c184ebe7",
+              "photo_number": "P146",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 8.084617901213067,
+              "time_delta_ms": 34229,
+              "analysis_path": "photos/146_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 20.98899281958778,
+              "time_delta_ms": 338789,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 114.71894355102647,
+              "time_delta_ms": 2095821,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 116.74060969877095,
+              "time_delta_ms": 87353138,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09159383584026,
+          30.49104814496122
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-87167755-581f-4566-a73e-c21f79a504a3",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:17:57.236Z",
+        "gps_accuracy_m": 5.80700947551159,
+        "note": "",
+        "attributes": {
+          "water_depth": "unknown",
+          "water_depth_unit": null,
+          "water_depth_basis": "Unknown",
+          "water_condition": "",
+          "extent_note": ""
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-bc9bae95-e799-40c9-b26b-d0eae45da576",
+              "photo_number": "P160",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.0641303457199023,
+              "time_delta_ms": 29367,
+              "analysis_path": "photos/160_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-9da16950-34db-4dee-876d-57dd12536436",
+              "photo_number": "P159",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.220655696879151,
+              "time_delta_ms": 18081,
+              "analysis_path": "photos/159_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-280b757d-e17b-41db-a794-9ec2bb143e4a",
+              "photo_number": "P157",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.413898758214365,
+              "time_delta_ms": 59317,
+              "analysis_path": "photos/157_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 38.35443727176476,
+              "time_delta_ms": 619670,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 91.0548504343572,
+              "time_delta_ms": 87072257,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 92.98479776064929,
+              "time_delta_ms": 87008619,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09148375075539,
+          30.490970501483748
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-1cca7b8c-4c17-4102-8e55-8bc85400773f",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:19:58.368Z",
+        "gps_accuracy_m": 11.74100642327517,
+        "note": "",
+        "attributes": {
+          "water_depth": "unknown",
+          "water_depth_unit": null,
+          "water_depth_basis": "Unknown",
+          "water_condition": "",
+          "extent_note": ""
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-3454ba9f-0109-40d8-ba91-068dcdcb2312",
+              "photo_number": "P162",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.6352916700180518,
+              "time_delta_ms": 18101,
+              "analysis_path": "photos/162_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-e150ece5-1789-448d-a44d-285a4b7167e0",
+              "photo_number": "P161",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.504634762410641,
+              "time_delta_ms": 28088,
+              "analysis_path": "photos/161_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-79749fa1-a67b-4e5a-a22e-e2593fe1e8ec",
+              "photo_number": "P163",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.7906804821447735,
+              "time_delta_ms": 19097,
+              "analysis_path": "photos/163_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e219b3b8-2904-4576-82b1-a9e5429df8f6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 48.62040388449786,
+              "time_delta_ms": 740802,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c261b0e1-1c4a-4881-b09e-e1fd89f13cee",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 78.20916823050862,
+              "time_delta_ms": 86951125,
+              "audio_path": "voice-notes/009_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 79.5602719227408,
+              "time_delta_ms": 86887487,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09108578717331,
+          30.49110766710509
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-a50227de-591a-4c1e-a38d-298e82ca5395",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-03",
+        "timestamp": "2026-08-03T14:26:15.689Z",
+        "gps_accuracy_m": 4.354958389650741,
+        "note": "",
+        "attributes": {
+          "water_depth": "unknown",
+          "water_depth_unit": null,
+          "water_depth_basis": "Unknown",
+          "water_condition": "",
+          "extent_note": ""
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-5d615718-8058-4251-8a72-60daa47f0dfd",
+              "photo_number": "P180",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.5118470665361108,
+              "time_delta_ms": 14451,
+              "analysis_path": "photos/180_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-0c0e704d-cd2f-4255-b985-0115bb85abdb",
+              "photo_number": "P179",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.6124362797050655,
+              "time_delta_ms": 22601,
+              "analysis_path": "photos/179_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-d507caea-6499-4bb3-9648-9b4f052d55e1",
+              "photo_number": "P175",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.311698900999792,
+              "time_delta_ms": 73546,
+              "analysis_path": "photos/175_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-815c0496-12bf-403f-b0a2-940afdebd883",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 48.49573294195683,
+              "time_delta_ms": 85790534,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-f442fe11-a829-4d02-a83f-daf431a59a96",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 49.4197298458747,
+              "time_delta_ms": 85517379,
+              "audio_path": "voice-notes/004_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 77.37134643316621,
+              "time_delta_ms": 86510166,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "SMALL_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09064583405343,
+          30.491331289854177
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-ae4c3ac1-476d-4511-b6d8-00b3030f7e4d",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-04",
+        "timestamp": "2026-08-04T14:08:01.423Z",
+        "gps_accuracy_m": 6.002136608543436,
+        "note": "",
+        "attributes": {
+          "feature_session_id": "feature-acf61545-21d0-4721-8a5e-fff8ca2df877",
+          "feature_session_status_at_creation": "draft",
+          "geometry_basis": "phone_location_only"
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-ad866adb-2da1-43d7-85d2-dbab86150900",
+              "photo_number": "P198",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.079051167816275,
+              "time_delta_ms": 453504,
+              "analysis_path": "photos/198_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-2fa1ac96-9d1d-45fa-bf1e-a64cbb0ff8f9",
+              "photo_number": "P6",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.2324154151567788,
+              "time_delta_ms": 90137305,
+              "analysis_path": "photos/006_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-fa6a21b0-542c-433e-969f-d7d55b37b3f3",
+              "photo_number": "P9",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.3416497052113785,
+              "time_delta_ms": 90069270,
+              "analysis_path": "photos/009_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-f442fe11-a829-4d02-a83f-daf431a59a96",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 0.5898094837110013,
+              "time_delta_ms": 211645,
+              "audio_path": "voice-notes/004_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-815c0496-12bf-403f-b0a2-940afdebd883",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.6856723615231797,
+              "time_delta_ms": 484800,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-9f94e20b-0905-4c24-bd6e-685c7ade07c8",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 105.2989205582984,
+              "time_delta_ms": 1204432,
+              "audio_path": "voice-notes/008_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "NEAR_PARCEL_GPS_UNCERTAINTY",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0908038650935,
+          30.489314709267894
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-7fb238ec-1915-4622-b944-3d239f775731",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-04",
+        "timestamp": "2026-08-04T14:53:53.954Z",
+        "gps_accuracy_m": 3.5312040198222276,
+        "note": "",
+        "attributes": {
+          "feature_session_id": "feature-6fba608a-10db-4bb8-a395-1b4c9f491186",
+          "feature_session_status_at_creation": "draft",
+          "geometry_basis": "phone_location_only"
+        },
+        "attachments": {
+          "photo_id": null,
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-7152620c-6562-41a9-ac9b-52e8c17ddcca",
+              "photo_number": "P204",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 1.9101723880850137,
+              "time_delta_ms": 466577,
+              "analysis_path": "photos/204_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-a288984d-2fc8-4d74-b869-25c916bd722b",
+              "photo_number": "P205",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.2152898453780763,
+              "time_delta_ms": 558333,
+              "analysis_path": "photos/205_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-a1cacb63-2a3b-4fdb-a500-7d27364de92c",
+              "photo_number": "P203",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 88.36240783970328,
+              "time_delta_ms": 775308,
+              "analysis_path": "photos/203_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-44071224-d087-463c-b140-ee22c0348cfe",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 6.854269048087635,
+              "time_delta_ms": 492157,
+              "audio_path": "voice-notes/011_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-70ccf912-d95a-4927-85d9-cca13812bc35",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 89.09750559413678,
+              "time_delta_ms": 1055642,
+              "audio_path": "voice-notes/010_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-c9f9add0-0106-48e9-a712-f659cf58fd91",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 114.49326743483343,
+              "time_delta_ms": 86741778,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_3_4_ORIGINAL_FIELD",
+        "source_file": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json",
+        "source_files": [
+          "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip::AI_ANALYSIS.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09283516431618,
+          30.488278979433268
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-9e6f75cf-6212-4435-8c79-00f47e0c3146",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-05",
+        "timestamp": "2026-08-05T13:03:32.607Z",
+        "gps_accuracy_m": 12.362705369290392,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "FRONTAGE-WET-SOFT-001",
+          "frontage_record_type": "frontage_wet_soft",
+          "ground_firmness": "Unknown",
+          "note": "",
+          "simple_session_id": "simple-session-bb358090-db73-4dab-ba03-a1329af7757c",
+          "feature_id": "FRONTAGE-WET-SOFT-001",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "WET / SOFT"
+        },
+        "attachments": {
+          "photo_id": "photo-83461960-de82-4fff-94a3-5abe2060211a",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-83461960-de82-4fff-94a3-5abe2060211a",
+              "photo_number": "P48",
+              "relationship": "direct",
+              "distance_m": 9.931300582182319,
+              "time_delta_ms": 17056,
+              "analysis_path": "photos/045_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-4ecb5ec6-b083-4647-a4da-d26abd92ed96",
+              "photo_number": "P47",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.1036208011418265,
+              "time_delta_ms": 72794,
+              "analysis_path": "photos/044_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-140317f5-3425-4848-899d-d4f251ee7ce6",
+              "photo_number": "P49",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 52.94849878690464,
+              "time_delta_ms": 196824,
+              "analysis_path": "photos/046_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-d47b8b29-44ed-4722-ad6e-5119028e8a16",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 2.1958189874371326,
+              "time_delta_ms": 146640,
+              "audio_path": "voice-notes/001_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-76f72d5e-b956-4890-88ce-14a1207c90c4",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 3.127413223434558,
+              "time_delta_ms": 136187,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-e4d2ff42-7ec6-48f6-9f57-129dfe818880",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 10.520172693994116,
+              "time_delta_ms": 123550,
+              "audio_path": "voice-notes/004_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "NEAR_PARCEL_GPS_UNCERTAINTY",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09089871663778,
+          30.490440953965077
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-aaf20c17-b408-47ca-9a8f-44da9e5b1ad2",
+        "observation_type": "field.photo",
+        "label": "Photo",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-05",
+        "timestamp": "2026-08-05T13:15:15.443Z",
+        "gps_accuracy_m": 9.673655094557363,
+        "note": "You’ll notice that to the west of me the water is still running, but east of me in the next picture the water is stagnant",
+        "attributes": {
+          "photo_number": "P53",
+          "category": "DITCH CHANGE",
+          "associated_observation_id": "event-04bbf51e-e135-4a9d-bbc5-5722f2671673",
+          "observation_attributes": {
+            "width": "48",
+            "depth": "4",
+            "water_present": "Yes",
+            "measurement_unit": "in",
+            "note": "You’ll notice that to the west of me the water is still running, but east of me in the next picture the water is stagnant",
+            "simple_session_id": "simple-session-9ab1c8be-a724-4135-adfc-10e5dea60053",
+            "feature_id": "DITCH-CHANGE-002",
+            "photo_role": "Context"
+          },
+          "section_id": null
+        },
+        "attachments": {
+          "photo_id": "photo-a068c5be-313a-4001-8172-34381ebb9f5b",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-a068c5be-313a-4001-8172-34381ebb9f5b",
+              "photo_number": "P53",
+              "relationship": "direct",
+              "distance_m": 0,
+              "time_delta_ms": 0,
+              "analysis_path": "photos/050_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-da56ec86-c572-4010-8a4b-212a56b48b3c",
+              "photo_number": "P52",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 7.075105516773461,
+              "time_delta_ms": 104353,
+              "analysis_path": "photos/049_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-507548f8-1967-42fc-b90f-d27e9a5a71b3",
+              "photo_number": "P58",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 8.150967175729754,
+              "time_delta_ms": 505222,
+              "analysis_path": "photos/055_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-45189d49-d58d-4d77-811c-24ee237215f5",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 7.477090205943618,
+              "time_delta_ms": 27217,
+              "audio_path": "voice-notes/007_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-f8d561d4-d5b6-4922-b9d4-fbb6b379db13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 8.370404387296869,
+              "time_delta_ms": 67344,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-efeb600a-8b14-4c3e-a249-f39eda1c4a5e",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 8.560600562291585,
+              "time_delta_ms": 63189,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "NEAR_PARCEL_GPS_UNCERTAINTY",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09061048886693,
+          30.491290013443884
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-c2ee15c2-75fa-407e-ab8a-9ab987c7e9d4",
+        "observation_type": "field.photo",
+        "label": "Photo",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-05",
+        "timestamp": "2026-08-05T13:17:07.261Z",
+        "gps_accuracy_m": 6.211710116550755,
+        "note": "The height of the berm at the survey Mark North boundary still very much standing water behind the berm",
+        "attributes": {
+          "frontage_record_id": "FRONTAGE-PHOTO-001",
+          "frontage_record_type": "frontage_photo",
+          "note": "The height of the berm at the survey Mark North boundary still very much standing water behind the berm",
+          "simple_session_id": "simple-session-c1dea437-9a91-4cf1-b76c-b5b6872a4087",
+          "feature_id": "FRONTAGE-PHOTO-001",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 2,
+          "voice_note_count": 0,
+          "category": "FRONTAGE PHOTO"
+        },
+        "attachments": {
+          "photo_id": "photo-d0157d2e-2787-484a-abfe-f75f7e5ac87a",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-d0157d2e-2787-484a-abfe-f75f7e5ac87a",
+              "photo_number": "P55",
+              "relationship": "direct",
+              "distance_m": 2.796412790439439,
+              "time_delta_ms": 65044,
+              "analysis_path": "photos/052_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-0f1f73c3-a870-44eb-b143-7f13684a7309",
+              "photo_number": "P54",
+              "relationship": "direct",
+              "distance_m": 3.876802803415588,
+              "time_delta_ms": 25893,
+              "analysis_path": "photos/051_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-ea344b31-823e-4261-a210-4e164d717d5e",
+              "photo_number": "P56",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 19.624461365889704,
+              "time_delta_ms": 200020,
+              "analysis_path": "photos/053_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-45189d49-d58d-4d77-811c-24ee237215f5",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 104.5540373150692,
+              "time_delta_ms": 139035,
+              "audio_path": "voice-notes/007_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-efeb600a-8b14-4c3e-a249-f39eda1c4a5e",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 105.38913117157938,
+              "time_delta_ms": 175007,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-f8d561d4-d5b6-4922-b9d4-fbb6b379db13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 105.39793678115886,
+              "time_delta_ms": 179162,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0920477332789,
+          30.48966518010549
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-ae382095-76a3-43c9-8190-93b0d087e042",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-07",
+        "timestamp": "2026-08-07T14:12:12.666Z",
+        "gps_accuracy_m": 3.519030217160577,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-f7fa9209-39f3-4cbd-a8e3-a9774a0ca30b",
+          "feature_id": "WATER-003",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "in",
+          "length": "8",
+          "width": "6",
+          "depth": "4.5",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        },
+        "attachments": {
+          "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+              "photo_number": "P64",
+              "relationship": "direct",
+              "distance_m": 2.614524001210875,
+              "time_delta_ms": 105636,
+              "analysis_path": "photos/064_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+              "photo_number": "P65",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 8.156808990238712,
+              "time_delta_ms": 170232,
+              "analysis_path": "photos/065_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+              "photo_number": "P66",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 15.429347999270945,
+              "time_delta_ms": 206547,
+              "analysis_path": "photos/066_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-efeb600a-8b14-4c3e-a249-f39eda1c4a5e",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 131.30617436852648,
+              "time_delta_ms": 176280412,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-f8d561d4-d5b6-4922-b9d4-fbb6b379db13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 131.498566773979,
+              "time_delta_ms": 176284567,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-45189d49-d58d-4d77-811c-24ee237215f5",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 132.3891158736135,
+              "time_delta_ms": 176244440,
+              "audio_path": "voice-notes/007_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09212527069516,
+          30.48963317697606
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-88a90e5a-f9a7-41a7-828e-e8e0d9e64c03",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-07",
+        "timestamp": "2026-08-07T14:14:48.493Z",
+        "gps_accuracy_m": 12.352322339672678,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-f57211fe-3405-47f9-bc77-97f4fc61484c",
+          "feature_id": "WATER-004",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "ft",
+          "length": "8",
+          "width": "5",
+          "depth": "4",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        },
+        "attachments": {
+          "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+              "photo_number": "P65",
+              "relationship": "direct",
+              "distance_m": 0.6821088482705393,
+              "time_delta_ms": 14405,
+              "analysis_path": "photos/065_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+              "photo_number": "P66",
+              "relationship": "direct",
+              "distance_m": 7.788259229654042,
+              "time_delta_ms": 50720,
+              "analysis_path": "photos/066_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+              "photo_number": "P64",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 7.4545195835630516,
+              "time_delta_ms": 50191,
+              "analysis_path": "photos/064_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-efeb600a-8b14-4c3e-a249-f39eda1c4a5e",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 139.35925322836914,
+              "time_delta_ms": 176436239,
+              "audio_path": "voice-notes/006_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-f8d561d4-d5b6-4922-b9d4-fbb6b379db13",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 139.5556149651404,
+              "time_delta_ms": 176440394,
+              "audio_path": "voice-notes/005_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-45189d49-d58d-4d77-811c-24ee237215f5",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 140.4438080236983,
+              "time_delta_ms": 176400267,
+              "audio_path": "voice-notes/007_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09227984410532,
+          30.48878047210245
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-b44f810a-af07-4b77-a69a-60ec4b3e7daf",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-07",
+        "timestamp": "2026-08-07T14:46:53.817Z",
+        "gps_accuracy_m": 16.088107510631037,
+        "note": "I’m starting to see more water here",
+        "attributes": {
+          "simple_session_id": "simple-session-e641c44d-ef13-4820-935e-ff006b52a0f8",
+          "feature_id": "WATER-005",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "ft",
+          "length": "8",
+          "width": "6",
+          "depth": "4",
+          "note": "I’m starting to see more water here",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        },
+        "attachments": {
+          "photo_id": "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+              "photo_number": "P71",
+              "relationship": "direct",
+              "distance_m": 0.6957209055900447,
+              "time_delta_ms": 7272,
+              "analysis_path": "photos/071_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+              "photo_number": "P72",
+              "relationship": "direct",
+              "distance_m": 1.3413008627174836,
+              "time_delta_ms": 17710,
+              "analysis_path": "photos/072_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+              "photo_number": "P73",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 7.9043286441921,
+              "time_delta_ms": 89960,
+              "analysis_path": "photos/073_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e4d2ff42-7ec6-48f6-9f57-129dfe818880",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 73.38616326587308,
+              "time_delta_ms": 178877660,
+              "audio_path": "voice-notes/004_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-54d4e7f4-1a94-4cd4-99f4-456044d524ec",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 73.40830876095558,
+              "time_delta_ms": 178882307,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-76f72d5e-b956-4890-88ce-14a1207c90c4",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 75.08726388728516,
+              "time_delta_ms": 179137397,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0923049078745,
+          30.48871025272134
+        ]
+      },
+      "properties": {
+        "record_type": "field_finding",
+        "record_id": "event-64b04824-ba70-408e-acd4-4671c493884a",
+        "observation_type": "field.wet",
+        "label": "Wet",
+        "display_class": "WATER",
+        "inspection_date": "2026-08-07",
+        "timestamp": "2026-08-07T14:48:16.253Z",
+        "gps_accuracy_m": 16.078800066293212,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-9acafa9a-1f68-46b4-9e9a-e574bf803615",
+          "feature_id": "WATER-006",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "in",
+          "length": "",
+          "width": "",
+          "depth": "",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        },
+        "attachments": {
+          "photo_id": "photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f",
+          "voice_note_id": null,
+          "nearest_photographs": [
+            {
+              "photo_id": "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+              "photo_number": "P73",
+              "relationship": "direct",
+              "distance_m": 0.4091239799815473,
+              "time_delta_ms": 7524,
+              "analysis_path": "photos/073_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-1abf3541-39b5-4d42-b661-da2f68281b42",
+              "photo_number": "P76",
+              "relationship": "direct",
+              "distance_m": 2.3821978968503443,
+              "time_delta_ms": 89806,
+              "analysis_path": "photos/076_analysis.jpg"
+            },
+            {
+              "photo_id": "photo-be406434-72fd-4c09-9fff-2c7035edb7d8",
+              "photo_number": "P74",
+              "relationship": "direct",
+              "distance_m": 2.645746219276333,
+              "time_delta_ms": 75728,
+              "analysis_path": "photos/074_analysis.jpg"
+            }
+          ],
+          "nearest_voice_notes": [
+            {
+              "voice_note_id": "voice-e4d2ff42-7ec6-48f6-9f57-129dfe818880",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 66.77644956787267,
+              "time_delta_ms": 178960096,
+              "audio_path": "voice-notes/004_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-54d4e7f4-1a94-4cd4-99f4-456044d524ec",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 66.80359108109799,
+              "time_delta_ms": 178964743,
+              "audio_path": "voice-notes/003_voice-note.m4a"
+            },
+            {
+              "voice_note_id": "voice-76f72d5e-b956-4890-88ce-14a1207c90c4",
+              "relationship": "nearest_by_location_unconfirmed",
+              "distance_m": 67.75461272320888,
+              "time_delta_ms": 179219833,
+              "audio_path": "voice-notes/002_voice-note.m4a"
+            }
+          ]
+        },
+        "evidence_classification": "Observed",
+        "evidence_scope": "SUBJECT_PARCEL",
+        "source_family": "AUGUST_7_CUMULATIVE_FIELD",
+        "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+        "source_files": [
+          "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json"
+        ],
+        "parcel_part": "LARGE_PARCEL",
+        "original_evidence_modified": false
+      }
+    }
+  ]
+}

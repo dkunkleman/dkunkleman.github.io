@@ -9,6 +9,9 @@
   const WORK_TYPES = ["CLEAR / REVEAL", "SELECTIVE BRUSH REMOVAL", "PRESERVE MATURE TREES", "OPEN VIEW CORRIDOR", "ACCESS IMPROVEMENT", "CULVERT / CROSSING", "DRAINAGE WORK", "TRAIL", "HOMESITE REVEAL", "PASTURE / OPEN AREA", "OTHER"];
   const PROPOSAL_V02_TITLE = "WESTERN FRONTAGE, ENTRANCE & WATER-FEATURE REVEAL";
   const PROPOSAL_V01_TITLE = PROPOSAL_V02_TITLE;
+  const HIGH_RESOLUTION_MAX_ZOOM = 22;
+  const USGS_NATIVE_MAX_ZOOM = 16;
+  const IMPORTANT_FINDING_CLASSES = new Set(["WATER","CULVERT","CULVERT_NEEDED","NO_CULVERT_NEEDED","DITCH_SWALE","ROAD_ENTRANCE","BLOCKED","PINE","HARDWOOD","MAGNOLIA","TREE","BRUSH","OPEN_AREA"]);
   const PROPOSAL_V01_PHOTOS = [
     "photo-9b78c354-2488-421a-802a-7e3c3927e035", "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
     "photo-3788b8fd-8c39-469e-90db-680cf23b7928", "photo-067b4916-83f7-4bd7-bae7-05bafda11031",
@@ -20,23 +23,28 @@
     [-87.09202,30.48966],[-87.09216,30.48977],[-87.09270,30.48961],[-87.09270,30.48857]
   ]];
   const files = {
-    parcel: "data/AUG7_SUBJECT_PARCEL.geojson",
+    parcel: "data/PEARSON_LARGE_SMALL_PARCELS.geojson",
     gps: "data/ALL_GPS_POINTS.geojson",
     routes: "data/ALL_ROUTE_SEGMENTS.geojson",
     displayWalks: "data/DISPLAY_WALKS_CLEAN.geojson",
     photos: "data/ALL_PHOTO_POINTS.geojson",
+    waterPhotos: "data/ALL_WATER_PHOTO_REVIEW.geojson",
     findings: "data/ALL_FIELD_FINDINGS.geojson",
+    waterFindings: "data/ALL_SUBJECT_WATER_FINDINGS.geojson",
     sections: "data/ALL_MAPPED_SECTIONS.geojson",
+    waterSections: "data/ALL_WET_DRY_SECTION_LINES.geojson",
     interpretation: "data/ALL_INSPECTOR_INTERPRETATIONS.geojson",
+    wetDryInterpretation: "data/AUG7_INSPECTOR_WET_DRY_INTERPRETATION.geojson",
     aug7Transect: "data/AUG7_MAPPED_SECTIONS_FILTERED.geojson",
     summary: "data/ALL_INCURSIONS_SUMMARY.json"
   };
   const state = {
     model: loadModel(), source: {}, map: null, groups: {}, photoMarkers: new Map(), selectedPhotoId: null,
-    selectedProposalId: null, mode: "EVIDENCE", filter: "ALL", activeDates: new Set(Object.keys(DAY_COLORS)),
+    selectedProposalId: null, mode: "EVIDENCE", filter: "WATER", activeDates: new Set(Object.keys(DAY_COLORS)), photoPulseMarker: null,
     draw: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
     currentPhotoSet: [], currentPhotoIndex: -1, currentPhotoCollectionLabel: "ALL VISIBLE PHOTOS", touchStartX: null
   };
+  let statusTimer = null;
 
   function loadModel() {
     try {
@@ -45,13 +53,31 @@
     } catch (_) { return Core.createModel(PROPERTY_ID); }
   }
   function saveModel() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.model)); }
-  function applyPresentationProfile(profile){state.model.presentation.profile=profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile;saveModel();if(state.map)renderAll();setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
+  function applyPresentationProfile(profile){state.model.presentation.profile=profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile;document.getElementById("customerViewToggle").textContent=state.model.presentation.profile==="CUSTOMER_REVIEW"?"DAVID VIEW":"CUSTOMER VIEW";closeControlPanel();saveModel();if(state.map)renderAll();setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
+  function closeControlPanel(){document.body.removeAttribute("data-open-panel");document.getElementById("controlDrawer").setAttribute("aria-hidden","true");document.querySelectorAll("[data-open-panel]").forEach(button=>button.classList.remove("active"));}
+  function openControlPanel(panel){
+    if(document.body.dataset.openPanel===panel)return closeControlPanel();
+    if(panel==="proposal"){
+      if(state.mode!=="PROPOSAL")document.querySelector('[data-mode="PROPOSAL"]').click();
+      const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];
+      if(zone)state.map.fitBounds(L.geoJSON(zone).getBounds().pad(.35));
+    }
+    document.body.dataset.openPanel=panel;
+    document.getElementById("controlDrawer").setAttribute("aria-hidden","false");
+    document.getElementById("drawerTitle").textContent=({layers:"LAYERS",visits:"VISITS",photos:"PHOTOS",proposal:"EDIT PROPOSAL",more:"MORE"})[panel]||"MAP OPTIONS";
+    document.querySelectorAll("[data-open-panel]").forEach(button=>button.classList.toggle("active",button.dataset.openPanel===panel));
+    setTimeout(()=>state.map&&state.map.invalidateSize(),0);
+  }
   function deepFreeze(object) {
     if (!object || typeof object !== "object" || Object.isFrozen(object)) return object;
     Object.freeze(object); Object.values(object).forEach(deepFreeze); return object;
   }
   async function getJson(url) { const response = await fetch(url); if (!response.ok) throw new Error(`${url}: ${response.status}`); return response.json(); }
-  function status(message) { document.getElementById("mapStatus").textContent = message; }
+  function status(message) {
+    const bar=document.getElementById("mapStatus");
+    bar.textContent=message;bar.classList.add("show");
+    clearTimeout(statusTimer);statusTimer=setTimeout(()=>bar.classList.remove("show"),4200);
+  }
   function p(feature) { return feature && feature.properties || {}; }
   function dateOf(feature, fallback) { return p(feature).inspection_date || p(feature).inspection_date_local || fallback || "2026-08-07"; }
   function photoPath(photo) {
@@ -157,26 +183,46 @@
 
   function initializeMap() {
     if (!window.L) throw new Error("Development map library did not load. Connect this computer to the internet and reopen the prototype.");
-    state.map = L.map("map", { zoomControl: true, preferCanvas: true }).setView([30.4896, -87.0893], 16);
-    document.getElementById("presentationProfile").value=state.model.presentation.profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile||"INTERNAL_EDITABLE";
     const config = window.PROPERTY_MAP_CONFIG || {};
-    const imagery = config.developmentImageryUrl || "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}";
-    state.baseLayer = L.tileLayer(imagery, { maxZoom: 20, attribution: "USGS The National Map imagery" }).addTo(state.map);
-    state.topoLayer = L.tileLayer(config.usgsTopoUrl || "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}", { maxZoom: 16, opacity: .76, attribution: "USGS Topo" });
+    const authorizedImagery = config.authorizedImageryUrl || "";
+    const imagery = authorizedImagery || config.developmentImageryUrl || "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    const imageryNativeMaxZoom = authorizedImagery ? Number(config.authorizedImageryNativeMaxZoom || HIGH_RESOLUTION_MAX_ZOOM) : Number(config.developmentImageryNativeMaxZoom || 19);
+    const applicationMaxZoom = Number(config.applicationMaxZoom || HIGH_RESOLUTION_MAX_ZOOM);
+    state.map = L.map("map", { zoomControl: true, preferCanvas: true, maxZoom: applicationMaxZoom }).setView([30.4896, -87.0893], 16);
+    document.getElementById("presentationProfile").value=state.model.presentation.profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile||"INTERNAL_EDITABLE";document.getElementById("customerViewToggle").textContent=document.body.dataset.profile==="CUSTOMER_REVIEW"?"DAVID VIEW":"CUSTOMER VIEW";
+    state.baseLayer = L.tileLayer(imagery, {
+      maxNativeZoom: imageryNativeMaxZoom,
+      maxZoom: applicationMaxZoom,
+      keepBuffer: 4,
+      attribution: authorizedImagery ? (config.authorizedImageryAttribution || "Authorized imagery provider") : (config.developmentImageryAttribution || "Esri World Imagery")
+    }).addTo(state.map);
+    state.topoLayer = L.tileLayer(config.usgsTopoUrl || "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}", {
+      maxNativeZoom: USGS_NATIVE_MAX_ZOOM,
+      maxZoom: applicationMaxZoom,
+      keepBuffer: 4,
+      opacity: .76,
+      attribution: "USGS Topo"
+    });
     state.contourLayer = null;
-    ["parcel","walks","gps","photos","findings","sections","transect","interpretation","proposal","assets"].forEach((name) => { state.groups[name] = L.layerGroup().addTo(state.map); });
+    ["parcel","walks","gps","photos","waterPhotos","findings","waterFindings","sections","waterSections","transect","interpretation","wetDryInterpretation","proposal","assets"].forEach((name) => { state.groups[name] = L.layerGroup().addTo(state.map); });
     state.map.on("mousemove", (event) => updateFilmstrip([event.latlng.lng, event.latlng.lat]));
     state.map.on("click", handleMapClick);
     renderAll();
     const bounds = L.geoJSON(state.source.parcel).getBounds();
     state.contourLayer = config.contourTileTemplate
-      ? L.tileLayer(config.contourTileTemplate, { maxZoom: 20, opacity: .72 })
+      ? L.tileLayer(config.contourTileTemplate, { maxZoom: applicationMaxZoom, opacity: .72 })
       : L.imageOverlay("data/usgs-contours-2ft.png", bounds, { opacity: .72, interactive: false });
     state.map.fitBounds(bounds.pad(.08));
-    const providerMessage = config.mapkitToken ? "Apple MapKit token is configured; provider adapter is ready for the next prototype." : "USGS development imagery shown. Apple MapKit Hybrid becomes available when its token is configured.";
+    const providerMessage = authorizedImagery
+      ? "An authorized higher-resolution imagery layer is active."
+      : config.mapkitToken
+      ? "High-resolution aerial imagery is active. An Apple MapKit token is configured for a future authorized provider adapter, but Apple Maps is not active in this revision."
+      : "Esri World Imagery is active for close aerial review. Apple Maps is not active because no authorized MapKit token is configured.";
     const counts = state.source.summary.counts;
+    const waterCounts=state.source.waterPhotos.features.reduce((result,feature)=>{const key=waterReviewClass(feature);result[key]=(result[key]||0)+1;return result;},{});
     document.getElementById("evidenceTotals").innerHTML = `<h2>Evidence inventory</h2><p><strong>${counts.gps_points.toLocaleString()}</strong> GPS points<br><strong>${counts.photo_points.toLocaleString()}</strong> photograph points<br><strong>${counts.field_findings.toLocaleString()}</strong> field findings<br><strong>${counts.mapped_section_features.toLocaleString()}</strong> section/source features</p><p>August 3–7. Outside-large-parcel evidence is preserved separately.</p>`;
     status(`Loaded every available August 3–7 GPS, photograph, tree, water, culvert, ditch, entrance, brush, and section record. ${providerMessage}`);
+    document.getElementById("evidenceTotals").innerHTML = `<h2>Evidence inventory</h2><p><strong>${counts.gps_points.toLocaleString()}</strong> GPS points<br><strong>${counts.photo_points.toLocaleString()}</strong> photograph points<br><strong>${state.source.waterFindings.features.length}</strong> recorded water findings near/on the parcel<br><strong>${waterCounts.RECORDED_WATER||0}</strong> photographs recorded as water<br><strong>${waterCounts.VISIBLE_WATER_IN_PHOTO||0}</strong> additional photographs visibly showing water<br><strong>${waterCounts.POSSIBLE_WATER_IN_PHOTO||0}</strong> possible-water photographs needing review<br><strong>${state.source.waterSections.features.length}</strong> displayed wet/dry section lines</p><p>Both county parcel components are shown. Original evidence remains unchanged.</p>`;
   }
 
   function clearGroups() { Object.values(state.groups).forEach((group) => group.clearLayers()); state.photoMarkers.clear(); }
@@ -184,7 +230,10 @@
   function visibleDate(date) { return state.activeDates.has(date); }
   function renderAll() {
     clearGroups();
-    if (layerVisible("parcel")) L.geoJSON(state.source.parcel, { style: { color: "#f4d03f", weight: 5, fillColor: "#f4d03f", fillOpacity: .04 } }).addTo(state.groups.parcel);
+    if (layerVisible("parcel")) L.geoJSON(state.source.parcel, {
+      style: (feature) => ({ color: p(feature).display_name === "SMALL PARCEL" ? "#fff27a" : "#f4d03f", weight: 5, fillColor: "#f4d03f", fillOpacity: .035 }),
+      onEachFeature: (feature, layer) => layer.bindTooltip(p(feature).display_name || "SUBJECT PARCEL", { permanent:true, direction:"center", className:"parcel-label" })
+    }).addTo(state.groups.parcel);
     if (layerVisible("walks")) {
       const customerProfile = ["CUSTOMER_REVIEW", "PRINT_REPORT"].includes(state.model.presentation.profile);
       const useDisplayWalks = state.mode === "PROPOSAL" || customerProfile;
@@ -198,6 +247,10 @@
       }).addTo(state.groups.walks);
     }
     if (layerVisible("gps")) renderGpsPoints();
+    if (layerVisible("waterSections")) renderWaterSections();
+    if (layerVisible("waterFindings")) renderWaterFindings();
+    if (layerVisible("wetDryInterpretation") && visibleDate("2026-08-07")) renderWetDryInterpretation();
+    if (layerVisible("waterPhotos")) renderWaterPhotos();
     if (layerVisible("sections")) { renderSections(); if(visibleDate("2026-08-07")) renderAug7Transect(); }
     if (layerVisible("findings")) renderFindings();
     if (layerVisible("interpretation") && visibleDate("2026-08-07")) renderInterpretation();
@@ -210,7 +263,13 @@
     renderInternalPricing();
   }
   function layerVisible(name) { const box = document.querySelector(`[data-layer="${name}"]`); return !box || box.checked; }
-  function scopeVisible(feature) { return p(feature).evidence_scope === "SUBJECT_PARCEL" || document.getElementById("outsideEvidenceToggle").checked; }
+  function pointFallsInsideSubjectParcel(feature) {
+    if (feature.geometry?.type !== "Point") return false;
+    return state.source.parcel.features.some((parcelPart) => pointInRing(feature.geometry.coordinates, parcelPart.geometry.coordinates[0]));
+  }
+  function scopeVisible(feature) {
+    return pointFallsInsideSubjectParcel(feature) || p(feature).evidence_scope === "SUBJECT_PARCEL" || document.getElementById("outsideEvidenceToggle").checked;
+  }
   function evidenceVisible(feature) { return visibleDate(dateOf(feature)) && scopeVisible(feature); }
   function safe(value) { return String(value === null || value === undefined ? "" : value).replace(/[&<>"']/g, (character) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[character])); }
 
@@ -246,11 +305,75 @@
   }
 
   function renderFindings() {
-    state.source.findings.features.filter(evidenceVisible).forEach((feature)=>{
+    const showEveryRecord=document.getElementById("allFindingsToggle").checked;
+    state.source.findings.features.filter(evidenceVisible).filter((feature)=>showEveryRecord||IMPORTANT_FINDING_CLASSES.has(String(p(feature).display_class||"").toUpperCase())).forEach((feature)=>{
       const props=p(feature),appearance=findingAppearance(props.display_class);
       const marker=L.marker([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],{icon:L.divIcon({className:`finding-marker ${appearance.css}`,html:appearance.label,iconSize:[22,22]}),title:props.label}).addTo(state.groups.findings);
       marker.bindPopup(`<b>${safe(props.display_class)}</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} — ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.evidence_scope)}; original wording preserved.</i>`);
     });
+  }
+
+  function waterReviewClass(photo) {
+    return p(photo).water_review_class || (p(photo).is_recorded_water_category ? "RECORDED_WATER" : "");
+  }
+
+  function renderWaterPhotos() {
+    const collection = state.source.waterPhotos.features.filter((photo) => visibleDate(dateOf(photo)));
+    collection.forEach((photo) => {
+      const reviewClass = waterReviewClass(photo);
+      const possible = reviewClass === "POSSIBLE_WATER_IN_PHOTO";
+      const recorded = reviewClass === "RECORDED_WATER";
+      const icon = L.divIcon({
+        className:`photo-marker water-review-photo ${recorded ? "recorded" : possible ? "possible" : "visible"}`,
+        html: possible ? "?" : "W",
+        iconSize:[recorded ? 28 : 24, recorded ? 28 : 24]
+      });
+      const marker = L.marker([photo.geometry.coordinates[1],photo.geometry.coordinates[0]], { icon, title:`${p(photo).photo_number} ${reviewClass}` }).addTo(state.groups.waterPhotos);
+      marker.on("click", () => openPhoto(photo, { photos:collection, label:"WATER PHOTOGRAPHS" }));
+      marker.on("mouseover", () => {
+        state.selectedPhotoId=p(photo).photo_id;
+        highlightPhoto(p(photo).photo_id);
+        updateFilmstrip(photo.geometry.coordinates);
+      });
+      state.photoMarkers.set(p(photo).photo_id, marker);
+    });
+  }
+
+  function renderWaterFindings() {
+    state.source.waterFindings.features.filter((feature) => visibleDate(dateOf(feature))).forEach((feature) => {
+      const props=p(feature);
+      const marker=L.marker([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],{
+        icon:L.divIcon({className:"finding-marker water recorded-water-finding",html:"W",iconSize:[26,26]}),
+        title:`Recorded ${props.label || "Water"}`
+      }).addTo(state.groups.waterFindings);
+      marker.bindPopup(`<b>RECORDED WATER FINDING</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} — ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.parcel_part)}; original evidence unchanged.</i>`);
+    });
+  }
+
+  function renderWaterSections() {
+    const features=state.source.waterSections.features.filter((feature)=>visibleDate(dateOf(feature)));
+    L.geoJSON({type:"FeatureCollection",features},{
+      style:(feature)=>({
+        color:p(feature).interpretation_role === "AUGUST_7_WET_DRY_TRANSITION_WALK" ? "#00d7ff" : "#ffe34f",
+        weight:p(feature).interpretation_role === "AUGUST_7_WET_DRY_TRANSITION_WALK" ? 7 : 5,
+        opacity:.95,
+        dashArray:p(feature).interpretation_role === "AUGUST_7_WET_DRY_TRANSITION_WALK" ? "12 7" : "7 6"
+      }),
+      onEachFeature:(feature,layer)=>layer.bindTooltip(p(feature).interpretation_role === "AUGUST_7_WET_DRY_TRANSITION_WALK" ? "AUG 7 WET / DRY TRANSITION WALK" : `MAPPED SECTION ${p(feature).section_id}`,{sticky:true}).bindPopup(`<b>${safe(p(feature).interpretation_role)}</b><br>Section: ${safe(p(feature).section_id)}<br>${safe(p(feature).inspection_date)}<br>${safe(p(feature).limitation)}<br><i>Original section geometry remains unchanged.</i>`)
+    }).addTo(state.groups.waterSections);
+  }
+
+  function renderWetDryInterpretation() {
+    const features=state.source.wetDryInterpretation.features.filter((feature)=>String(p(feature).interpretation_class || "").startsWith("INSPECTOR_CONFIRMED_"));
+    L.geoJSON({type:"FeatureCollection",features},{
+      style:(feature)=>{
+        const dry=p(feature).interpretation_class.includes("DRY_SIDE");
+        return dry
+          ? {color:"#ffe34f",weight:11,opacity:.75,dashArray:"18 12"}
+          : {color:"#007ac2",weight:6,opacity:.92,dashArray:"18 12",dashOffset:"15"};
+      },
+      onEachFeature:(feature,layer)=>layer.bindPopup(`<b>${safe(p(feature).interpretation_class)}</b><br>${safe(p(feature).statement)}<br><i>Inspector interpretation of the observed sides of the walked transition—not a surveyed wet-area boundary.</i>`)
+    }).addTo(state.groups.wetDryInterpretation);
   }
 
   function renderSections() {
@@ -319,10 +442,19 @@
   function isFavorite(id) { return state.model.presentation.customer_favorites.some((item) => item.photo_id === id && (item.viewer_or_session_id === VIEWER_ID || item.viewer_or_session_id === "prototype-customer")); }
   function centerCoordinate() { const c=state.map.getCenter(); return [c.lng,c.lat]; }
   function filteredPhotos() {
+    if(state.filter==="WATER") return state.source.waterPhotos.features.filter((photo)=>visibleDate(dateOf(photo)));
     const all=state.source.photos.features.filter(evidenceVisible);
     if(state.filter==="FEATURED") return all.filter((photo)=>photoMeta(p(photo).photo_id).featured);
     if(state.filter==="FAVORITES") return all.filter((photo)=>isFavorite(p(photo).photo_id));
     return all;
+  }
+  function setPhotoFilter(filter) {
+    state.filter=filter;
+    document.getElementById("waterReviewFilter").classList.toggle("active",filter==="WATER");
+    document.getElementById("allPhotoFilter").classList.toggle("active",filter==="ALL");
+    document.getElementById("featuredFilter").classList.toggle("active",filter==="FEATURED");
+    document.getElementById("favoritesFilter").classList.toggle("active",filter==="FAVORITES");
+    updateFilmstrip(centerCoordinate());
   }
   function pointInRing(point, ring) {
     let inside=false;
@@ -347,20 +479,22 @@
       const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId);
       if(zonePhotos.some((item)=>p(item).photo_id===p(photo).photo_id))return{photos:zonePhotos,label:`${p(zone).name} PHOTOS`};
     }
-    const label=state.filter==="FEATURED"?"DAVID'S FEATURED PHOTOS":state.filter==="FAVORITES"?"MY FAVORITES":`${[...state.activeDates].sort().join(", ")} VISIBLE PHOTOS`;
+    const label=state.filter==="WATER"?"WATER PHOTOGRAPHS":state.filter==="FEATURED"?"DAVID'S FEATURED PHOTOS":state.filter==="FAVORITES"?"MY FAVORITES":`${[...state.activeDates].sort().join(", ")} VISIBLE PHOTOS`;
     return{photos:filteredPhotos(),label};
   }
   function updateFilmstrip(coordinate) {
     const ranked=Core.rankPhotos(filteredPhotos(),coordinate,state.model.presentation.photo_metadata,state.model.presentation.customer_favorites,8);
     state.currentPhotoSet=ranked.map((entry)=>entry.photo);
-    state.currentPhotoCollectionLabel=state.filter==="FEATURED"?"DAVID'S FEATURED PHOTOS":state.filter==="FAVORITES"?"MY FAVORITES":"NEARBY PHOTOS AT CURRENT MAP LOCATION";
+    state.currentPhotoCollectionLabel=state.filter==="WATER"?"NEARBY WATER PHOTOGRAPHS":state.filter==="FEATURED"?"DAVID'S FEATURED PHOTOS":state.filter==="FAVORITES"?"MY FAVORITES":"NEARBY PHOTOS AT CURRENT MAP LOCATION";
     const strip=document.getElementById("photoFilmstrip"); strip.innerHTML="";
     ranked.forEach((entry,index)=>{
       const photo=entry.photo,id=p(photo).photo_id,card=document.createElement("button");
       const size=entry.featured&&index<2?"hero":index<2?"large":index<5?"medium":"faded";
       card.className=`photo-card ${size}`; card.dataset.photoId=id; card.draggable=entry.featured;
       const category=p(photo).recorded_category || p(photo).category || "PHOTO";
-      card.innerHTML=`<img loading="lazy" src="${photoPath(photo)}" alt="${p(photo).photo_number} ${category}"><span>${entry.featured?'<b class="star">★</b>':''}${isFavorite(id)?'♡ ':''}${p(photo).is_recorded_water_category?'WATER — ':''}${p(photo).photo_number} — ${category}</span>`;
+      const reviewClass=waterReviewClass(photo);
+      const waterLabel=reviewClass==="RECORDED_WATER"?"RECORDED WATER — ":reviewClass==="VISIBLE_WATER_IN_PHOTO"?"VISIBLE WATER — ":reviewClass==="POSSIBLE_WATER_IN_PHOTO"?"POSSIBLE WATER — ":"";
+      card.innerHTML=`<img loading="lazy" src="${photoPath(photo)}" alt="${p(photo).photo_number} ${category}"><span>${entry.featured?'<b class="star">★</b>':''}${isFavorite(id)?'♡ ':''}${waterLabel}${p(photo).photo_number} — ${category}</span>`;
       card.addEventListener("mouseenter",()=>highlightPhoto(id)); card.addEventListener("click",()=>openPhoto(photo,{photos:state.currentPhotoSet,label:state.currentPhotoCollectionLabel}));
       card.addEventListener("dragstart",(event)=>event.dataTransfer.setData("text/photo-id",id)); card.addEventListener("dragover",(event)=>event.preventDefault()); card.addEventListener("drop",(event)=>reorderFeatured(event,id));
       strip.appendChild(card);
@@ -370,6 +504,13 @@
     state.photoMarkers.forEach((marker,key)=>marker.getElement()&&marker.getElement().classList.toggle("selected",key===id));
     document.querySelectorAll(".photo-card").forEach((card)=>card.classList.toggle("selected",card.dataset.photoId===id));
     const card=document.querySelector(`.photo-card[data-photo-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+    const photo=state.source.waterPhotos.features.find((item)=>p(item).photo_id===id)||state.source.photos.features.find((item)=>p(item).photo_id===id);if(photo)showTemporaryPhotoLocation(photo);
+  }
+  function showTemporaryPhotoLocation(photo){
+    if(state.photoPulseMarker){state.map.removeLayer(state.photoPulseMarker);state.photoPulseMarker=null;}
+    const latlng=L.latLng(photo.geometry.coordinates[1],photo.geometry.coordinates[0]);
+    state.photoPulseMarker=L.circleMarker(latlng,{radius:13,color:"#fff",weight:4,fillColor:waterReviewClass(photo)?"#0a75c2":"#f5cf27",fillOpacity:.95,className:"temporary-photo-location"}).addTo(state.map);
+    setTimeout(()=>{if(state.photoPulseMarker){state.map.removeLayer(state.photoPulseMarker);state.photoPulseMarker=null;}},900);
   }
   function pulsePhoto(photo) {
     const id=p(photo).photo_id;state.selectedPhotoId=id;highlightPhoto(id);
@@ -387,7 +528,14 @@
     const photo=state.currentPhotoSet[state.currentPhotoIndex];if(!photo)return;
     const id=p(photo).photo_id,meta=photoMeta(id),favorite=isFavorite(id),dialog=document.getElementById("photoDialog");
     const category=p(photo).recorded_category || p(photo).category || "PHOTO";
-    const waterStatement=p(photo).is_recorded_water_category ? "<b>Map classification: WATER — explicitly recorded by the app.</b>" : `<b>Map classification:</b> ${safe(p(photo).display_class || category)}<br><i>Image appearance has not been silently reclassified.</i>`;
+    const reviewClass=waterReviewClass(photo);
+    const waterStatement=reviewClass==="RECORDED_WATER"
+      ? "<b>Map classification: RECORDED WATER — explicitly recorded by the field app.</b>"
+      : reviewClass==="VISIBLE_WATER_IN_PHOTO"
+      ? "<b>Map classification: WATER VISIBLY PRESENT IN PHOTOGRAPH.</b><br><i>Separate visual-review interpretation; the original field category is unchanged.</i>"
+      : reviewClass==="POSSIBLE_WATER_IN_PHOTO"
+      ? "<b>Map classification: POSSIBLE WATER — INSPECTOR REVIEW NEEDED.</b><br><i>The original field category is unchanged.</i>"
+      : `<b>Map classification:</b> ${safe(p(photo).display_class || category)}<br><i>Image appearance has not been silently reclassified.</i>`;
     document.getElementById("photoCounter").textContent=`${state.currentPhotoIndex+1} OF ${state.currentPhotoSet.length}`;
     document.getElementById("photoCollectionLabel").textContent=state.currentPhotoCollectionLabel;
     document.getElementById("previousPhoto").disabled=state.currentPhotoSet.length<2;
@@ -423,6 +571,7 @@
     const zones=state.model.proposals.features,zone=zones.find((feature)=>feature.id===state.selectedProposalId)||zones[0];if(!zone)return;
     const props=p(zone),total=Core.proposalTotal(zones);
     document.getElementById("proposalTotal").textContent=total.complete?`TOTAL: ${formatMoney(total.priced_total)}`:"TOTAL: UNKNOWN";
+    document.getElementById("mapProposalSummary").innerHTML=`<article class="simple-zone-card"><span class="eyebrow">SELECTED WORK AREA</span><h3>${safe(props.name)}</h3><p><strong>${safe(props.acreage)} acres</strong></p><p>${safe(props.finish_level||"REVEAL FINISH")}</p><p class="simple-zone-price">${formatMoney(props.price)}</p><span class="editing-label">EDIT WITH THE SIMPLE CONTROLS AT LEFT</span></article>`;
     const next=["Candidate homesite / view reveal — NOT INCLUDED IN CURRENT PRICE","Creek / water-walk extension — NOT INCLUDED IN CURRENT PRICE","Eastern open-area / pasture-potential reveal — NOT INCLUDED IN CURRENT PRICE"];
     document.getElementById("starterReveal").innerHTML=`<article class="starter-zone"><div><span class="eyebrow">RECOMMENDED FIRST PROJECT</span><h3>${safe(props.name)}</h3><p><b>${safe(props.acreage)} acres</b> &middot; approximately ${safe(props.approx_length_ft)} x ${safe(props.approx_width_ft)} feet &middot; ${safe(props.perimeter_ft)}-foot perimeter</p><p><small>${safe(props.geometry_measurement_basis)}</small></p><p><b>Base finish:</b> ${safe(props.finish_level||"REVEAL FINISH")}</p><p><b>Optional upgrade:</b> ${safe(props.optional_upgrade||"UNKNOWN")}</p>${props.geometry_status?`<p class="status-warn">${safe(props.geometry_status)}</p>`:""}<p><b>Existing condition:</b> ${safe(props.current_condition||props.existing_condition||"UNKNOWN")}</p><p><b>Primary objective:</b> ${safe(props.primary_objective||"UNKNOWN")}</p><b>Work included</b>${listHtml(props.included_scope)}<b>What is preserved</b>${listHtml(props.preserve)}<b>Not included</b>${listHtml(props.exclusions)}<p><b>Expected customer / marketing benefit:</b> ${safe(props.expected_benefit||"UNKNOWN")}</p><p><b>Expected visible result:</b> ${safe(props.expected_visible_result||"UNKNOWN")}</p><p><b>Target start:</b> ${safe(props.target_start||"UNKNOWN")}<br><b>Target completion:</b> ${safe(props.target_completion||"UNKNOWN")}</p><p><b>Fixed proposed price:</b> ${formatMoney(props.price)} ${props.price_status!=="VALIDATED"?'<span class="status-warn">NEEDS PRODUCTION TEST / NOT YET VALIDATED</span>':''}</p></div><div><h3>Featured before photographs (${new Set(props.before_photo_ids||[]).size})</h3><p>Click any photo, then use Previous / Next within this proposal only.</p><div class="proposal-photo-row">${proposalPhotoButtons(zone)}</div><div class="next-opportunities"><b>OPTIONAL NEXT OPPORTUNITIES</b>${listHtml(next)}</div></div></article>`;
     document.querySelectorAll("[data-proposal-photo]").forEach((button)=>button.onclick=()=>{const photo=state.source.photos.features.find((item)=>p(item).photo_id===button.dataset.proposalPhoto);if(photo)openPhoto(photo,{photos:photosForProposal(zone.id),label:`${props.name} PHOTOS`});});
@@ -439,7 +588,7 @@
   function captureCustomerMessage(kind){const message=prompt(kind==="QUESTION"?"What is your question?":"What would you like changed?","");if(!message)return;const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];Core.addCustomerMessage(state.model,kind,message,"PEARSON-STARTER-REVEAL",p(zone).proposal_zone_id,VIEWER_ID);saveModel();document.getElementById("acceptanceStatus").textContent=kind==="QUESTION"?"Question saved for David.":"Change request saved for David.";}
   function acceptCurrentProposal(){try{const result=Core.acceptProposal(state.model,"Prototype customer",VIEWER_ID);saveModel();renderProposalSheet();status(`Proposal accepted and frozen. Work order ${result.work_order.work_order_id} created; no payment was activated.`);}catch(error){document.getElementById("acceptanceStatus").innerHTML=`<span class="status-warn">NOT ACCEPTED: ${safe(error.message)}</span>`;}}
   function handleMapClick(event){
-    if(!state.draw)return;
+    if(!state.draw){updateFilmstrip([event.latlng.lng,event.latlng.lat]);return;}
     state.draw.points.push([event.latlng.lng,event.latlng.lat]);
     if(state.draw.preview)state.draw.preview.remove();
     state.draw.preview=L.polyline(state.draw.points.map(x=>[x[1],x[0]]),{color:"#f29f05",weight:4,dashArray:"6 5"}).addTo(state.map);
@@ -473,16 +622,21 @@
   function exportData(){const payload=Core.clone(state.model);payload.source_evidence.embedded_feature_collections=state.source;download(`PROPERTY_MAP_${PROPERTY_ID}_v${Math.max(state.model.proposals.current_version||0,state.model.presentation.current_version||0)}.json`,new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));}
   function projectExport(point,bounds,width,height){const x=(point[0]-bounds.minX)/(bounds.maxX-bounds.minX)*width,y=height-(point[1]-bounds.minY)/(bounds.maxY-bounds.minY)*height;return[x,y];}
   function exportImage(){
-    const all=[];function walk(coords){if(typeof coords[0]==="number")all.push(coords);else coords.forEach(walk);}walk(state.source.parcel.features[0].geometry.coordinates);const bounds={minX:Math.min(...all.map(x=>x[0])),maxX:Math.max(...all.map(x=>x[0])),minY:Math.min(...all.map(x=>x[1])),maxY:Math.max(...all.map(x=>x[1]))};const W=1800,H=1200,pad=70,inner={minX:bounds.minX-(bounds.maxX-bounds.minX)*.04,maxX:bounds.maxX+(bounds.maxX-bounds.minX)*.04,minY:bounds.minY-(bounds.maxY-bounds.minY)*.04,maxY:bounds.maxY+(bounds.maxY-bounds.minY)*.04};
-    const path=(coords)=>coords.map((pt,i)=>`${i?"L":"M"}${projectExport(pt,inner,W,H).join(" ")}`).join(" ");let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#e8eee9"/><text x="${pad}" y="48" font-family="Arial" font-size="32" font-weight="bold">PEARSON ROAD — PROPERTY IMPROVEMENT PROPOSAL</text>`;
-    const rings=state.source.parcel.features[0].geometry.coordinates;svg+=rings.map(r=>`<path d="${path(r)}Z" fill="#f4d03f18" stroke="#9c7d00" stroke-width="7"/>`).join("");
-    state.source.routes.features.forEach((feature)=>{if(feature.geometry.type==="LineString"&&visibleDate(dateOf(feature)))svg+=`<path d="${path(feature.geometry.coordinates)}" fill="none" stroke="${DAY_COLORS[dateOf(feature)]||'#555'}" stroke-width="5"/>`;});
+    const all=[];function walk(coords){if(typeof coords[0]==="number")all.push(coords);else coords.forEach(walk);}state.source.parcel.features.forEach(feature=>walk(feature.geometry.coordinates));const bounds={minX:Math.min(...all.map(x=>x[0])),maxX:Math.max(...all.map(x=>x[0])),minY:Math.min(...all.map(x=>x[1])),maxY:Math.max(...all.map(x=>x[1]))};const W=1800,H=1200,pad=70,inner={minX:bounds.minX-(bounds.maxX-bounds.minX)*.04,maxX:bounds.maxX+(bounds.maxX-bounds.minX)*.04,minY:bounds.minY-(bounds.maxY-bounds.minY)*.04,maxY:bounds.maxY+(bounds.maxY-bounds.minY)*.04};
+    const path=(coords)=>coords.map((pt,i)=>`${i?"L":"M"}${projectExport(pt,inner,W,H).join(" ")}`).join(" ");let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#e8eee9"/><text x="${pad}" y="48" font-family="Arial" font-size="32" font-weight="bold">PEARSON ROAD — WATER &amp; CLEARING REVIEW</text>`;
+    const rings=state.source.parcel.features.flatMap(feature=>feature.geometry.coordinates);svg+=rings.map(r=>`<path d="${path(r)}Z" fill="#f4d03f18" stroke="#9c7d00" stroke-width="7"/>`).join("");
+    state.source.waterSections.features.filter((feature)=>visibleDate(dateOf(feature))).forEach((feature)=>{const kind=String(p(feature).condition||p(feature).section_type||"").toUpperCase();const color=kind.includes("DRY")&&!kind.includes("WET")?"#e0a400":"#00a5cf";svg+=`<path d="${path(feature.geometry.coordinates)}" fill="none" stroke="#ffffff" stroke-width="11"/><path d="${path(feature.geometry.coordinates)}" fill="none" stroke="${color}" stroke-width="6"/>`;});
     state.model.proposals.features.forEach((f,index)=>{const color=p(f).color||"#f29f05";svg+=`<path d="${path(f.geometry.coordinates[0])}Z" fill="${color}55" stroke="${color}" stroke-width="8"/><text x="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[0]}" y="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[1]}" font-family="Arial" font-size="28" font-weight="bold">${String.fromCharCode(65+index)} — ${p(f).name} (${p(f).acreage} ac)</text>`;});
-    state.source.photos.features.filter((feature)=>evidenceVisible(feature)).forEach(f=>{const q=projectExport(f.geometry.coordinates,inner,W,H);const water=p(f).is_recorded_water_category;svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="7" fill="${water?'#0a75c2':'#f5cf27'}" stroke="#111" stroke-width="2"/>`;});svg+=`<g font-family="Arial" font-size="22"><text x="${pad}" y="${H-90}">Aug 3 orange · Aug 4 purple · Aug 5 green · Aug 6 rose · Aug 7 blue · Blue W: recorded water</text><text x="${pad}" y="${H-50}" font-weight="bold">APPROXIMATE PHONE GPS AND COUNTY PARCEL — NOT A SURVEY</text></g></svg>`;
-    const image=new Image(),url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"}));image.onload=()=>{const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;canvas.getContext("2d").drawImage(image,0,0);URL.revokeObjectURL(url);canvas.toBlob(blob=>download("PEARSON_ROAD_PROPERTY_IMPROVEMENT_PROPOSAL.png",blob),"image/png");};image.src=url;
+    state.source.waterPhotos.features.filter((feature)=>visibleDate(dateOf(feature))).forEach(f=>{const q=projectExport(f.geometry.coordinates,inner,W,H);const kind=waterReviewClass(f);const fill=kind==="RECORDED_WATER"?"#0756a3":kind==="VISIBLE_WATER_IN_PHOTO"?"#00b8d9":"#ffffff";const label=kind==="POSSIBLE_WATER_IN_PHOTO"?"?":"W";svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="10" fill="${fill}" stroke="#063e66" stroke-width="3"/><text x="${q[0]}" y="${q[1]+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${kind==="POSSIBLE_WATER_IN_PHOTO"?'#063e66':'#ffffff'}">${label}</text>`;});svg+=`<g font-family="Arial" font-size="22"><text x="${pad}" y="${H-90}">Dark blue W: recorded water · Cyan W: water visible in photo · White ?: possible water</text><text x="${pad}" y="${H-50}" font-weight="bold">APPROXIMATE PHONE GPS AND COUNTY PARCEL — NOT A SURVEY</text></g></svg>`;
+    const image=new Image(),url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"}));image.onload=()=>{const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;canvas.getContext("2d").drawImage(image,0,0);URL.revokeObjectURL(url);canvas.toBlob(blob=>download("PEARSON_ROAD_WATER_CLEARING_REVIEW.png",blob),"image/png");};image.src=url;
   }
 
   function bindUi(){
+    document.querySelectorAll("[data-open-panel]").forEach(button=>button.addEventListener("click",()=>openControlPanel(button.dataset.openPanel)));
+    document.getElementById("closeControlDrawer").addEventListener("click",closeControlPanel);
+    document.getElementById("doneProposalEdit").addEventListener("click",closeControlPanel);
+    document.getElementById("customerViewToggle").addEventListener("click",()=>applyPresentationProfile(document.body.dataset.profile==="CUSTOMER_REVIEW"?"INTERNAL_EDITABLE":"CUSTOMER_REVIEW"));
+    document.getElementById("allFindingsToggle").addEventListener("change",renderAll);
     document.querySelectorAll("[data-layer]").forEach(box=>box.addEventListener("change",renderAll));
     document.querySelectorAll("[data-date]").forEach(box=>box.addEventListener("change",()=>{box.checked?state.activeDates.add(box.dataset.date):state.activeDates.delete(box.dataset.date);renderAll();}));
     document.getElementById("allDays").addEventListener("click",()=>{document.querySelectorAll("[data-date]").forEach(box=>{box.checked=true;state.activeDates.add(box.dataset.date);});renderAll();});
@@ -503,15 +657,17 @@
     }));
     document.querySelectorAll("[data-edit]").forEach(button=>button.addEventListener("click",()=>editProposal(button.dataset.edit)));
     document.getElementById("undoEdit").addEventListener("click",()=>{Core.undo(state.model);saveModel();renderAll();});
-    document.getElementById("featuredFilter").addEventListener("click",()=>{state.filter=state.filter==="FEATURED"?"ALL":"FEATURED";document.getElementById("featuredFilter").classList.toggle("active",state.filter==="FEATURED");updateFilmstrip(centerCoordinate());});
-    document.getElementById("favoritesFilter").addEventListener("click",()=>{state.filter=state.filter==="FAVORITES"?"ALL":"FAVORITES";document.getElementById("favoritesFilter").classList.toggle("active",state.filter==="FAVORITES");updateFilmstrip(centerCoordinate());});
+    document.getElementById("waterReviewFilter").addEventListener("click",()=>setPhotoFilter("WATER"));
+    document.getElementById("allPhotoFilter").addEventListener("click",()=>setPhotoFilter("ALL"));
+    document.getElementById("featuredFilter").addEventListener("click",()=>setPhotoFilter("FEATURED"));
+    document.getElementById("favoritesFilter").addEventListener("click",()=>setPhotoFilter("FAVORITES"));
     document.getElementById("showFavoritesMap").addEventListener("change",renderAll);
     document.getElementById("topographyToggle").addEventListener("change",event=>event.target.checked?state.topoLayer.addTo(state.map):state.map.removeLayer(state.topoLayer));
     document.getElementById("contoursToggle").addEventListener("change",event=>event.target.checked?state.contourLayer.addTo(state.map):state.map.removeLayer(state.contourLayer));
     document.getElementById("exportMap").addEventListener("click",exportData);document.getElementById("exportImage").addEventListener("click",exportImage);document.getElementById("printMap").addEventListener("click",()=>window.print());
     document.getElementById("closePhoto").addEventListener("click",()=>document.getElementById("photoDialog").close());
     document.getElementById("previousPhoto").addEventListener("click",()=>movePhoto(-1));document.getElementById("nextPhoto").addEventListener("click",()=>movePhoto(1));
-    document.addEventListener("keydown",(event)=>{const dialog=document.getElementById("photoDialog");if(!dialog.open)return;if(event.key==="ArrowLeft"){event.preventDefault();movePhoto(-1);}if(event.key==="ArrowRight"){event.preventDefault();movePhoto(1);}});
+    document.addEventListener("keydown",(event)=>{const dialog=document.getElementById("photoDialog");if(event.key==="Escape"&&!dialog.open){closeControlPanel();return;}if(!dialog.open)return;if(event.key==="ArrowLeft"){event.preventDefault();movePhoto(-1);}if(event.key==="ArrowRight"){event.preventDefault();movePhoto(1);}});
     const dialog=document.getElementById("photoDialog");dialog.addEventListener("touchstart",(event)=>{state.touchStartX=event.changedTouches[0]?.clientX??null;},{passive:true});dialog.addEventListener("touchend",(event)=>{if(state.touchStartX===null)return;const delta=(event.changedTouches[0]?.clientX??state.touchStartX)-state.touchStartX;state.touchStartX=null;if(Math.abs(delta)>55)movePhoto(delta<0?1:-1);},{passive:true});
     document.getElementById("fullPropertyView").addEventListener("click",()=>{state.map.fitBounds(L.geoJSON(state.source.parcel).getBounds().pad(.08));document.getElementById("fullPropertyView").classList.add("active");document.getElementById("zoneDetailView").classList.remove("active");});
     document.getElementById("zoneDetailView").addEventListener("click",()=>{const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];if(!zone)return status("Select a proposal zone first.");state.map.fitBounds(L.geoJSON(zone).getBounds().pad(.35));document.getElementById("zoneDetailView").classList.add("active");document.getElementById("fullPropertyView").classList.remove("active");updateFilmstrip(zone.geometry.coordinates[0][0]);});

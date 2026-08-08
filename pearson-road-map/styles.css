@@ -49,9 +49,16 @@ aside button,aside select{width:100%;margin:3px 0}
 .leaflet-marker-icon.photo-marker.selected{transform:scale(1.5);box-shadow:0 0 0 5px rgba(245,207,39,.4)}
 .leaflet-marker-icon.photo-marker.favorite{border-color:#e12569}
 .leaflet-marker-icon.photo-marker.water-photo{background:#0a75c2;color:#fff;border-color:#fff;box-shadow:0 0 0 2px #0a75c2}
+.leaflet-marker-icon.photo-marker.water-review-photo{display:grid;place-items:center;border-radius:50%;font-weight:900;color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 4px #075a8f}
+.leaflet-marker-icon.photo-marker.water-review-photo.recorded{background:#075a8f;border:3px solid #fff}
+.leaflet-marker-icon.photo-marker.water-review-photo.visible{background:#19aee6;border:2px solid #fff}
+.leaflet-marker-icon.photo-marker.water-review-photo.possible{background:#fff;color:#075a8f;border:3px dashed #19aee6}
+.leaflet-marker-icon.recorded-water-finding{box-shadow:0 0 0 3px #fff,0 0 0 6px #075a8f}
 .leaflet-marker-icon.finding-marker{border:2px solid #fff;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;box-shadow:0 0 0 2px #26342b}
 .leaflet-marker-icon.finding-marker.water{background:#0a75c2}.leaflet-marker-icon.finding-marker.tree{background:#2d6a35}.leaflet-marker-icon.finding-marker.culvert{background:#444}.leaflet-marker-icon.finding-marker.brush{background:#8b6b34}.leaflet-marker-icon.finding-marker.road{background:#d05d20}.leaflet-marker-icon.finding-marker.dry{background:#c8a900;color:#111}.leaflet-marker-icon.finding-marker.other{background:#66736b}
 .finding-key{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;color:#fff;font-weight:900}.water-key{background:#0a75c2}.tree-key{background:#2d6a35}.culvert-key{background:#444}.brush-key{background:#8b6b34}
+.visible-water-key{background:#19aee6}.possible-water-key{background:#fff;color:#075a8f;border:2px dashed #19aee6}.section-key{display:inline-block;width:28px;border-top:5px dashed #00d7ff}
+.parcel-label{background:rgba(17,44,29,.84);border:1px solid #fff;color:#fff;font-weight:900;letter-spacing:.08em;padding:3px 7px;border-radius:6px;box-shadow:0 2px 8px #0006}
 .gps-point{pointer-events:none}
 #evidenceTotals p{margin:3px 0;font-size:12px}#evidenceTotals strong{font-size:16px}
 .proposal-label{background:#fff8d6;border:2px solid #7c5500;border-radius:5px;padding:2px 5px;font-weight:900}
@@ -86,27 +93,94 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
 .finish-grid blockquote{margin:12px 0 6px;padding:8px 10px;border-left:5px solid var(--green);background:#fff;font-weight:800}
 .product-ladder ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;list-style-position:inside;padding:0}
 .product-ladder li{padding:10px;border-radius:8px;background:#edf3ee;border:1px solid #bdc9bf}
-body[data-profile="CUSTOMER_REVIEW"] main{grid-template-columns:1fr;height:auto}
-body[data-profile="CUSTOMER_REVIEW"] aside,body[data-profile="CUSTOMER_REVIEW"] nav,body[data-profile="CUSTOMER_REVIEW"] .header-actions{display:none}
-body[data-profile="CUSTOMER_REVIEW"] .map-wrap{height:68vh}
-body[data-profile="CUSTOMER_REVIEW"] .map-column{min-height:100vh}
-body[data-profile="CUSTOMER_REVIEW"] #mapStatus{font-size:12px}
 #assetTimeline{font-size:12px}
 #assetTimeline article{border-left:4px solid var(--water);padding:4px 6px;margin:5px 0;background:#eef8ff}
-@media(max-width:780px){header{align-items:flex-start;flex-direction:column}
-.header-actions{width:100%}
-.header-actions>*{flex:1}
-main{grid-template-columns:1fr;height:auto}
-aside{border-right:0;max-height:none}
-.map-wrap{height:65vh}
-.map-column{min-height:70vh}
-#photoFilmstrip{height:125px}
-.legend b{width:100%}
-.starter-zone,.finish-grid,.experience-grid,.product-ladder ol{grid-template-columns:1fr}.proposal-sheet-heading{flex-direction:column}.road-label{display:none}
+
+/* Human-first map shell: ordinary exploration shows the property, not the machinery. */
+html,body{width:100%;height:100%;overflow:hidden;background:#0c1710}
+body{position:relative}
+#mapTitleBar{position:fixed;z-index:1100;left:14px;top:12px;min-height:0;padding:9px 13px;border:1px solid #fff7;border-radius:12px;background:rgba(16,50,32,.9);box-shadow:0 4px 16px #0005;pointer-events:none}
+#mapTitleBar strong{font-size:15px;letter-spacing:.08em}
+#mapTitleBar span{font-size:11px;opacity:.86}
+#modeTabs{display:none}
+main{display:block;width:100%;height:100vh}
+.map-column{display:block;width:100%;height:100vh;min-width:0}
+.map-wrap{position:absolute;inset:0;min-height:0;height:100vh}
+#map{position:absolute;inset:0;width:100%;height:100%;background:#d6ddd8}
+.view-switch,.legend{display:none}
+#mapStatus{position:fixed;z-index:930;left:50%;bottom:166px;transform:translate(-50%,8px);max-width:min(720px,calc(100vw - 36px));padding:7px 12px;border:1px solid #fff9;border-radius:999px;background:rgba(255,248,207,.92);box-shadow:0 2px 10px #0004;font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;opacity:0;transition:opacity .18s ease,transform .18s ease}
+#mapStatus.show{opacity:1;transform:translate(-50%,0)}
+.floating-map-controls{position:absolute;z-index:850;left:14px;top:78px;display:grid;gap:7px}
+.floating-map-controls button,.customer-view-toggle{min-height:40px;padding:8px 11px;border:1px solid #fff9;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 3px 12px #0004;color:#11251a;font-size:12px;letter-spacing:.04em}
+.floating-map-controls button.active{background:var(--green);color:#fff}
+.customer-view-toggle{position:absolute;z-index:850;right:68px;top:14px}
+.map-orientation{right:14px;top:14px}
+.road-label{top:22px}
+.map-disclaimer{position:absolute;z-index:650;right:12px;bottom:156px;padding:3px 7px;border-radius:5px;background:rgba(255,255,255,.84);font-size:10px;font-weight:800;pointer-events:none}
+
+#controlDrawer{position:fixed;z-index:1200;left:14px;top:76px;bottom:18px;width:min(350px,calc(100vw - 28px));padding:10px 13px;overflow:auto;border:1px solid #fff9;border-radius:14px;background:rgba(255,255,255,.97);box-shadow:0 10px 34px #0007;transform:translateX(calc(-100% - 28px));transition:transform .18s ease;pointer-events:none}
+body[data-open-panel] #controlDrawer{transform:translateX(0);pointer-events:auto}
+.drawer-heading{position:sticky;z-index:4;top:-10px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-10px -13px 6px;padding:11px 13px;background:#f5f7f4;border-bottom:1px solid #c8d0ca}
+.drawer-heading button{min-height:34px;padding:5px 9px}
+#controlDrawer section{display:none;padding:8px 0;border-bottom:0}
+body[data-open-panel="layers"] #controlDrawer [data-control-panel="layers"],
+body[data-open-panel="visits"] #controlDrawer [data-control-panel="visits"],
+body[data-open-panel="photos"] #controlDrawer [data-control-panel="photos"],
+body[data-open-panel="proposal"] #controlDrawer [data-control-panel="proposal"],
+body[data-open-panel="more"] #controlDrawer [data-control-panel="more"]{display:block}
+#controlDrawer h2{font-size:18px;margin-bottom:10px}
+#controlDrawer label{padding:7px 5px;border-radius:7px}
+#controlDrawer label:has(input[type="checkbox"]){display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:8px}
+#controlDrawer input[type="checkbox"]{width:22px;min-height:22px;height:22px;margin:0;accent-color:var(--green)}
+#controlDrawer label:hover{background:#eef2ee}
+#controlDrawer details{margin:8px 0;padding:8px;border:1px solid #cbd3cd;border-radius:8px}
+#controlDrawer summary{cursor:pointer;font-weight:900}
+.header-actions{display:grid;grid-template-columns:1fr;gap:5px}
+
+#photoFilmstrip{left:50%;right:auto;bottom:14px;width:min(820px,calc(100vw - 92px));height:136px;transform:translateX(-50%);background:rgba(18,34,24,.82);backdrop-filter:blur(8px);box-shadow:0 4px 18px #0007}
+.photo-card{opacity:.72}
+.photo-card.medium{opacity:.9}
+.photo-card.large,.photo-card.hero{opacity:1}
+
+#customerProposal{display:none}
+body[data-open-panel="proposal"] #customerProposal{display:block;position:fixed;z-index:1150;right:14px;top:76px;bottom:18px;width:min(420px,calc(100vw - 390px));min-width:320px;overflow:auto;border:1px solid #fff9;border-radius:14px;box-shadow:0 10px 34px #0007;padding:14px;background:rgba(255,255,255,.98)}
+body[data-open-panel="proposal"] #customerProposal>.proposal-explanation,
+body[data-open-panel="proposal"] #customerProposal>.finish-comparison,
+body[data-open-panel="proposal"] #customerProposal>.buyer-experience,
+body[data-open-panel="proposal"] #customerProposal>.product-ladder,
+body[data-open-panel="proposal"] #customerProposal>.proposal-actions,
+body[data-open-panel="proposal"] #customerProposal>#acceptanceStatus{display:none}
+body[data-open-panel="proposal"] #starterReveal{display:none}
+#mapProposalSummary{display:none}
+body[data-open-panel="proposal"] #mapProposalSummary{display:block}
+.simple-zone-card{padding:14px;border:1px solid #bac6bd;border-radius:12px;background:#f6f8f5}
+.simple-zone-card h3{margin:5px 0;font-size:22px}.simple-zone-card p{margin:6px 0}.simple-zone-price{font-size:24px;font-weight:900}.editing-label{display:block;margin-top:10px;padding:8px;border-radius:7px;background:var(--green);color:#fff;text-align:center;font-size:11px;font-weight:900}
+
+body[data-profile="CUSTOMER_REVIEW"] #controlDrawer,
+body[data-profile="CUSTOMER_REVIEW"] #mapStatus,
+body[data-profile="CUSTOMER_REVIEW"] [data-open-panel="layers"],
+body[data-profile="CUSTOMER_REVIEW"] [data-open-panel="proposal"]{display:none}
+body[data-profile="CUSTOMER_REVIEW"] #mapTitleBar{background:rgba(16,50,32,.82)}
+body[data-profile="CUSTOMER_REVIEW"] .customer-view-toggle{background:var(--green);color:#fff}
+
+@media(max-width:780px){
+#mapTitleBar{left:9px;top:max(8px,env(safe-area-inset-top));padding:7px 10px}
+.floating-map-controls{left:8px;right:8px;top:auto;bottom:145px;display:flex;justify-content:center;gap:5px}
+.floating-map-controls button{flex:1;max-width:110px;padding:7px 5px;font-size:11px}
+.customer-view-toggle{right:8px;top:max(8px,env(safe-area-inset-top));font-size:10px;padding:6px 8px}
+.map-orientation{display:none}.road-label{display:none}.map-disclaimer{right:8px;bottom:190px;max-width:190px;text-align:right;font-size:8px}
+#controlDrawer{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:68vh;border-radius:18px;transform:translateY(calc(100% + 20px))}
+body[data-open-panel] #controlDrawer{transform:translateY(0)}
+#photoFilmstrip{left:8px;right:8px;bottom:8px;width:auto;height:126px;transform:none;border-radius:16px}
+#mapStatus{bottom:282px;font-size:10px}
+body[data-open-panel] #photoFilmstrip{opacity:.2;pointer-events:none}
+body[data-open-panel="proposal"] #customerProposal{display:none}
+.starter-zone,.finish-grid,.experience-grid,.product-ladder ol{grid-template-columns:1fr}.proposal-sheet-heading{flex-direction:column}
 #photoDetails{padding-left:48px;padding-right:48px}.photo-nav{width:42px;height:82px;min-height:82px}.photo-nav span{font-size:50px}.photo-nav small{font-size:8px}.photo-nav-previous{left:3px}.photo-nav-next{right:3px}
 }
-@media print{header,nav,aside,#photoFilmstrip,#mapStatus{display:none!important}
-main,.map-column,.map-wrap{display:block;height:auto}
-#map{height:9in}
-.legend{border-top:1px solid #333}
+@media print{#mapTitleBar,#modeTabs,#controlDrawer,#photoFilmstrip,#mapStatus,.floating-map-controls,.customer-view-toggle{display:none!important}
+html,body,main,.map-column,.map-wrap{position:static;display:block;height:auto;overflow:visible}
+#map{position:relative;height:9in}
+.legend{display:flex;border-top:1px solid #333}
+#customerProposal{display:block;position:static;width:auto}
 }
