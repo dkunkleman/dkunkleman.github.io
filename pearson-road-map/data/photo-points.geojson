@@ -1,0 +1,2602 @@
+{
+  "type": "FeatureCollection",
+  "name": "Inspection photograph points",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6c8e9032-a374-4131-8f33-b88790d97fbc",
+        "photo_number": "P1",
+        "simple_photo_id": "PHOTO-001",
+        "active_feature_id": "ROAD-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:49:23.386Z",
+        "compass_heading_deg": 275.76239013671875,
+        "analysis_path": "photos/001_analysis.jpg",
+        "original_path": "photos/001_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0893350231159,
+          30.47354889252185
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ef2291d5-6366-4236-b6f1-9cc9d46f468a",
+        "photo_number": "P2",
+        "simple_photo_id": "PHOTO-002",
+        "active_feature_id": "BRUSH-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:50:54.389Z",
+        "compass_heading_deg": 13.788982391357422,
+        "analysis_path": "photos/002_analysis.jpg",
+        "original_path": "photos/002_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08938957200114,
+          30.47363797671211
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-60848057-30ff-4cb3-b9b7-920ce483e8fb",
+        "photo_number": "P3",
+        "simple_photo_id": "PHOTO-003",
+        "active_feature_id": "OPEN-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:51:32.841Z",
+        "compass_heading_deg": 58.24296188354492,
+        "analysis_path": "photos/003_analysis.jpg",
+        "original_path": "photos/003_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08945989616875,
+          30.473717311425574
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-24fae67e-4a4d-4701-b25c-26788b613d21",
+        "photo_number": "P4",
+        "simple_photo_id": "PHOTO-004",
+        "active_feature_id": "TREE-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:52:26.061Z",
+        "compass_heading_deg": 279.0038146972656,
+        "analysis_path": "photos/004_analysis.jpg",
+        "original_path": "photos/004_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08945506323703,
+          30.47367620073345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-45a1a23b-92fa-4dd9-9bf2-6ea50c4bd5bb",
+        "photo_number": "P5",
+        "simple_photo_id": "PHOTO-005",
+        "active_feature_id": "TREE-001",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T22:52:40.891Z",
+        "compass_heading_deg": 339.75994873046875,
+        "analysis_path": "photos/005_analysis.jpg",
+        "original_path": "photos/005_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08952063863153,
+          30.473697172401
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d68bc96c-a4f6-48ef-a465-1d494e9db5b7",
+        "photo_number": "P6",
+        "simple_photo_id": "PHOTO-006",
+        "active_feature_id": "TREE-001",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T22:52:58.166Z",
+        "compass_heading_deg": 124.26593780517578,
+        "analysis_path": "photos/006_analysis.jpg",
+        "original_path": "photos/006_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08948400655831,
+          30.47370667373399
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-dae5268f-6c91-4ce5-9383-559376cf8f5b",
+        "photo_number": "P7",
+        "simple_photo_id": "PHOTO-007",
+        "active_feature_id": "TREE-001",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T22:53:09.900Z",
+        "compass_heading_deg": 127.42717742919922,
+        "analysis_path": "photos/007_analysis.jpg",
+        "original_path": "photos/007_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08948344710008,
+          30.473695859977926
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-1441a9c6-92ef-431d-9bfa-f340c07137b0",
+        "photo_number": "P8",
+        "simple_photo_id": "PHOTO-010",
+        "active_feature_id": "TREE-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:54:53.907Z",
+        "compass_heading_deg": 83.54890441894531,
+        "analysis_path": "photos/008_analysis.jpg",
+        "original_path": "photos/008_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08942134441406,
+          30.473624966149142
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-b9c8840f-1346-4714-a8ea-21c1deefd979",
+        "photo_number": "P9",
+        "simple_photo_id": "PHOTO-011",
+        "active_feature_id": "TREE-002",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T22:55:14.324Z",
+        "compass_heading_deg": 346.18548583984375,
+        "analysis_path": "photos/009_analysis.jpg",
+        "original_path": "photos/009_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08939296608507,
+          30.473597350974114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-1ad704c9-0c00-488e-b304-28dfc4924c48",
+        "photo_number": "P10",
+        "simple_photo_id": "PHOTO-012",
+        "active_feature_id": "TREE-002",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T22:55:26.955Z",
+        "compass_heading_deg": 120.88349151611328,
+        "analysis_path": "photos/010_analysis.jpg",
+        "original_path": "photos/010_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08939988277807,
+          30.473608479764334
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7873e800-dff2-4cef-a6a5-90f96fccea15",
+        "photo_number": "P11",
+        "simple_photo_id": "PHOTO-013",
+        "active_feature_id": "TREE-002",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T22:55:47.381Z",
+        "compass_heading_deg": 245.19732666015625,
+        "analysis_path": "photos/011_analysis.jpg",
+        "original_path": "photos/011_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08943785097027,
+          30.473566693482308
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-b6b1012e-c2fe-469f-b75a-d1e8209050ff",
+        "photo_number": "P12",
+        "simple_photo_id": "PHOTO-014",
+        "active_feature_id": "TREE-003",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:56:11.568Z",
+        "compass_heading_deg": 230.1227264404297,
+        "analysis_path": "photos/012_analysis.jpg",
+        "original_path": "photos/012_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08945332219216,
+          30.473555914951138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-37561c39-19fa-4626-a95a-051e1ee00831",
+        "photo_number": "P13",
+        "simple_photo_id": "PHOTO-015",
+        "active_feature_id": "TREE-003",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T22:56:38.630Z",
+        "compass_heading_deg": 198.55950927734375,
+        "analysis_path": "photos/013_analysis.jpg",
+        "original_path": "photos/013_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0895257088257,
+          30.473509594378836
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-b84301fb-7ee0-4a15-9545-598268f13592",
+        "photo_number": "P14",
+        "simple_photo_id": "PHOTO-016",
+        "active_feature_id": "TREE-003",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T22:56:49.882Z",
+        "compass_heading_deg": 216.27613830566406,
+        "analysis_path": "photos/014_analysis.jpg",
+        "original_path": "photos/014_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0895217182664,
+          30.47351133460971
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-25530c7e-f9fd-435f-9756-07ad67cf3350",
+        "photo_number": "P15",
+        "simple_photo_id": "PHOTO-017",
+        "active_feature_id": "TREE-003",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T22:57:10.296Z",
+        "compass_heading_deg": 42.65932083129883,
+        "analysis_path": "photos/015_analysis.jpg",
+        "original_path": "photos/015_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08952304809162,
+          30.473508476125396
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-fc88e078-e702-437e-b434-42cdcc3df1a1",
+        "photo_number": "P16",
+        "simple_photo_id": "PHOTO-018",
+        "active_feature_id": "TREE-003",
+        "sequence_within_feature": 5,
+        "recorded_at": "2026-08-04T22:57:18.313Z",
+        "compass_heading_deg": 209.9404754638672,
+        "analysis_path": "photos/016_analysis.jpg",
+        "original_path": "photos/016_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08952835088093,
+          30.473496502821614
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-80077005-43b1-45dd-8775-d323d430d86c",
+        "photo_number": "P17",
+        "simple_photo_id": "PHOTO-019",
+        "active_feature_id": "TREE-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T22:57:39.708Z",
+        "compass_heading_deg": 153.04400634765625,
+        "analysis_path": "photos/017_analysis.jpg",
+        "original_path": "photos/017_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08964410075663,
+          30.473482910430587
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d94f15e5-616b-48f9-91c8-c05a5098e975",
+        "photo_number": "P18",
+        "simple_photo_id": "PHOTO-020",
+        "active_feature_id": "TREE-004",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T22:57:48.686Z",
+        "compass_heading_deg": 172.7987518310547,
+        "analysis_path": "photos/018_analysis.jpg",
+        "original_path": "photos/018_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08962148914061,
+          30.473469783760727
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-005a0e36-75fd-4297-8953-a2a246aceac5",
+        "photo_number": "P19",
+        "simple_photo_id": "PHOTO-021",
+        "active_feature_id": "TREE-004",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T22:57:56.084Z",
+        "compass_heading_deg": 171.05209350585938,
+        "analysis_path": "photos/019_analysis.jpg",
+        "original_path": "photos/019_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08962142082274,
+          30.473472216024007
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-94a3f3bb-837c-47c4-8bf3-ba6c1215f0ef",
+        "photo_number": "P20",
+        "simple_photo_id": "PHOTO-022",
+        "active_feature_id": "TREE-004",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T22:59:01.003Z",
+        "compass_heading_deg": 231.72412109375,
+        "analysis_path": "photos/020_analysis.jpg",
+        "original_path": "photos/020_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0896598436517,
+          30.47339007590187
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-798c8ca3-31d6-466d-a711-071ac997c43e",
+        "photo_number": "P21",
+        "simple_photo_id": "PHOTO-024",
+        "active_feature_id": "ROAD-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:00:19.418Z",
+        "compass_heading_deg": 196.4830780029297,
+        "analysis_path": "photos/021_analysis.jpg",
+        "original_path": "photos/021_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0897378954996,
+          30.473337984469
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-41d58658-b974-4cee-88a8-18f9f18ae9b6",
+        "photo_number": "P22",
+        "simple_photo_id": "PHOTO-025",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:00:53.187Z",
+        "compass_heading_deg": 262.80743408203125,
+        "analysis_path": "photos/022_analysis.jpg",
+        "original_path": "photos/022_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0897931143644,
+          30.47330881632353
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-25e8ad85-582e-4f22-ba50-994909fb55b8",
+        "photo_number": "P23",
+        "simple_photo_id": "PHOTO-026",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T23:01:02.265Z",
+        "compass_heading_deg": 250.7952423095703,
+        "analysis_path": "photos/023_analysis.jpg",
+        "original_path": "photos/023_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978570987485,
+          30.4733061221114
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-aff82b7c-b4d6-409a-842e-89f1ad690b32",
+        "photo_number": "P24",
+        "simple_photo_id": "PHOTO-027",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T23:01:12.928Z",
+        "compass_heading_deg": 277.09051513671875,
+        "analysis_path": "photos/024_analysis.jpg",
+        "original_path": "photos/024_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08980062118037,
+          30.473298133646207
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-c34386e1-1e57-4415-b124-0b54a621bc48",
+        "photo_number": "P25",
+        "simple_photo_id": "PHOTO-028",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T23:01:30.818Z",
+        "compass_heading_deg": 267.0155944824219,
+        "analysis_path": "photos/025_analysis.jpg",
+        "original_path": "photos/025_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979701164593,
+          30.473297304691386
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-83167dd7-0d1d-4c02-812b-631eea4af9e5",
+        "photo_number": "P26",
+        "simple_photo_id": "PHOTO-029",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 5,
+        "recorded_at": "2026-08-04T23:01:43.851Z",
+        "compass_heading_deg": 264.0135498046875,
+        "analysis_path": "photos/026_analysis.jpg",
+        "original_path": "photos/026_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08977773903509,
+          30.473277708856227
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2a3be360-a862-49c6-8f50-eee4652ff1d9",
+        "photo_number": "P27",
+        "simple_photo_id": "PHOTO-030",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 6,
+        "recorded_at": "2026-08-04T23:01:56.206Z",
+        "compass_heading_deg": 244.72828674316406,
+        "analysis_path": "photos/027_analysis.jpg",
+        "original_path": "photos/027_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978963375122,
+          30.47327061386129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6dcb18e8-b571-492c-a315-a4943f174768",
+        "photo_number": "P28",
+        "simple_photo_id": "PHOTO-031",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 7,
+        "recorded_at": "2026-08-04T23:02:02.973Z",
+        "compass_heading_deg": 264.0686340332031,
+        "analysis_path": "photos/028_analysis.jpg",
+        "original_path": "photos/028_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979448733237,
+          30.47326354457797
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-c8d89451-c9cc-47dd-8d77-2b0d9770f7f7",
+        "photo_number": "P29",
+        "simple_photo_id": "PHOTO-032",
+        "active_feature_id": "BRUSH-002",
+        "sequence_within_feature": 8,
+        "recorded_at": "2026-08-04T23:02:11.837Z",
+        "compass_heading_deg": 280.0885009765625,
+        "analysis_path": "photos/029_analysis.jpg",
+        "original_path": "photos/029_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978416040445,
+          30.473257475322768
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9db62e87-5526-4ce2-8f65-8e9aa26e6980",
+        "photo_number": "P30",
+        "simple_photo_id": "PHOTO-033",
+        "active_feature_id": "TREE-005",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:02:29.694Z",
+        "compass_heading_deg": 263.45513916015625,
+        "analysis_path": "photos/030_analysis.jpg",
+        "original_path": "photos/030_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979435786917,
+          30.473275674641783
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-fde49add-9dce-4ed4-8167-70d4870d83b8",
+        "photo_number": "P31",
+        "simple_photo_id": "PHOTO-034",
+        "active_feature_id": "TREE-005",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T23:02:38.210Z",
+        "compass_heading_deg": 291.53192138671875,
+        "analysis_path": "photos/031_analysis.jpg",
+        "original_path": "photos/031_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978808404945,
+          30.47327471681526
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e7a16adb-0163-48d9-a817-25817d376f89",
+        "photo_number": "P32",
+        "simple_photo_id": "PHOTO-035",
+        "active_feature_id": "TREE-005",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T23:02:47.461Z",
+        "compass_heading_deg": 283.74005126953125,
+        "analysis_path": "photos/032_analysis.jpg",
+        "original_path": "photos/032_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979899462412,
+          30.473276077584483
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-86e66b34-0a24-44a8-8429-4bc35c98de6b",
+        "photo_number": "P33",
+        "simple_photo_id": "PHOTO-036",
+        "active_feature_id": "BRUSH-003",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:03:14.818Z",
+        "compass_heading_deg": 5.597574234008789,
+        "analysis_path": "photos/033_analysis.jpg",
+        "original_path": "photos/033_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08977351924909,
+          30.473261411818278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-be596afd-8639-4cc4-b91b-44eff07cff1f",
+        "photo_number": "P34",
+        "simple_photo_id": "PHOTO-037",
+        "active_feature_id": "BRUSH-003",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T23:03:27.013Z",
+        "compass_heading_deg": 302.1379699707031,
+        "analysis_path": "photos/034_analysis.jpg",
+        "original_path": "photos/034_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978435928086,
+          30.473260338060168
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-02444c14-776b-4df9-90c0-9a321ae69a6a",
+        "photo_number": "P35",
+        "simple_photo_id": "PHOTO-038",
+        "active_feature_id": "BRUSH-003",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T23:03:39.949Z",
+        "compass_heading_deg": 260.591552734375,
+        "analysis_path": "photos/035_analysis.jpg",
+        "original_path": "photos/035_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08977610347173,
+          30.473240699175967
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5c700b36-fc98-4367-8618-77be57c732f4",
+        "photo_number": "P36",
+        "simple_photo_id": "PHOTO-039",
+        "active_feature_id": "BRUSH-003",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T23:03:50.330Z",
+        "compass_heading_deg": 219.48939514160156,
+        "analysis_path": "photos/036_analysis.jpg",
+        "original_path": "photos/036_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978444438179,
+          30.473233676778428
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-fb342d20-43e4-46a4-8a76-9e626b124156",
+        "photo_number": "P37",
+        "simple_photo_id": "PHOTO-040",
+        "active_feature_id": "TREE-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:04:16.964Z",
+        "compass_heading_deg": 294.6094970703125,
+        "analysis_path": "photos/037_analysis.jpg",
+        "original_path": "photos/037_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08977721454069,
+          30.47320892146673
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-1dfe6987-ad2b-46ee-8cda-50bfb1dd33b0",
+        "photo_number": "P38",
+        "simple_photo_id": "PHOTO-041",
+        "active_feature_id": "TREE-006",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T23:04:22.778Z",
+        "compass_heading_deg": 295.0160217285156,
+        "analysis_path": "photos/038_analysis.jpg",
+        "original_path": "photos/038_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978872607159,
+          30.47321553249896
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-029bf135-0f12-4bf6-bf76-ada2ff5769be",
+        "photo_number": "P39",
+        "simple_photo_id": "PHOTO-042",
+        "active_feature_id": "TREE-006",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-04T23:04:32.054Z",
+        "compass_heading_deg": 298.2572937011719,
+        "analysis_path": "photos/039_analysis.jpg",
+        "original_path": "photos/039_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979768957701,
+          30.473224241554078
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f66d0ca0-5dab-4737-be9a-7c5543c35a4b",
+        "photo_number": "P40",
+        "simple_photo_id": "PHOTO-043",
+        "active_feature_id": "TREE-006",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-04T23:04:42.086Z",
+        "compass_heading_deg": 264.0018615722656,
+        "analysis_path": "photos/040_analysis.jpg",
+        "original_path": "photos/040_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979133658391,
+          30.473217046391333
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-07656319-ca82-4c99-bd0e-e2a6dfe6c4ce",
+        "photo_number": "P41",
+        "simple_photo_id": "PHOTO-044",
+        "active_feature_id": "BRUSH-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-04T23:05:09.011Z",
+        "compass_heading_deg": 273.05535888671875,
+        "analysis_path": "photos/041_analysis.jpg",
+        "original_path": "photos/041_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08980053111196,
+          30.473173154920815
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-c5171d34-9935-456e-8082-8a996c072c8b",
+        "photo_number": "P42",
+        "simple_photo_id": "PHOTO-045",
+        "active_feature_id": "BRUSH-004",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-04T23:05:18.833Z",
+        "compass_heading_deg": 35.42949295043945,
+        "analysis_path": "photos/042_analysis.jpg",
+        "original_path": "photos/042_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979331998432,
+          30.473175560263165
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-492bb5da-cfba-4590-b269-04684379f9aa",
+        "photo_number": "P43",
+        "simple_photo_id": "PHOTO-046",
+        "active_feature_id": "FRONTAGE-END-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T12:02:49.481Z",
+        "compass_heading_deg": 98.15866088867188,
+        "analysis_path": "photos/043_analysis.jpg",
+        "original_path": "photos/043_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08923423630975,
+          30.473469615453222
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-4ecb5ec6-b083-4647-a4da-d26abd92ed96",
+        "photo_number": "P47",
+        "simple_photo_id": "PHOTO-052",
+        "active_feature_id": "VEHICLE-CROSSING-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:02:19.813Z",
+        "compass_heading_deg": 9.497827529907227,
+        "analysis_path": "photos/044_analysis.jpg",
+        "original_path": "photos/044_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09281321114044,
+          30.488279122511443
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-83461960-de82-4fff-94a3-5abe2060211a",
+        "photo_number": "P48",
+        "simple_photo_id": "PHOTO-053",
+        "active_feature_id": "FRONTAGE-WET-SOFT-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:03:49.663Z",
+        "compass_heading_deg": 79.49044799804688,
+        "analysis_path": "photos/045_analysis.jpg",
+        "original_path": "photos/045_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09280668822281,
+          30.488193102211568
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-140317f5-3425-4848-899d-d4f251ee7ce6",
+        "photo_number": "P49",
+        "simple_photo_id": "PHOTO-054",
+        "active_feature_id": "VEHICLE-CROSSING-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:06:49.431Z",
+        "compass_heading_deg": 102.53462982177734,
+        "analysis_path": "photos/046_analysis.jpg",
+        "original_path": "photos/046_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09282111238566,
+          30.488755002734884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3ce116b7-b9fc-431c-a68a-b17070b30b73",
+        "photo_number": "P50",
+        "simple_photo_id": "PHOTO-055",
+        "active_feature_id": "DITCH-CHANGE-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:10:30.294Z",
+        "compass_heading_deg": 175.9073028564453,
+        "analysis_path": "photos/047_analysis.jpg",
+        "original_path": "photos/047_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09259770576936,
+          30.489555529774087
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7df9424b-594b-42d9-962b-45c1fb3543d5",
+        "photo_number": "P51",
+        "simple_photo_id": "PHOTO-056",
+        "active_feature_id": "DITCH-CHANGE-001",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:10:43.932Z",
+        "compass_heading_deg": 156.22276306152344,
+        "analysis_path": "photos/048_analysis.jpg",
+        "original_path": "photos/048_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09261199761534,
+          30.48955753274756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-da56ec86-c572-4010-8a4b-212a56b48b3c",
+        "photo_number": "P52",
+        "simple_photo_id": "PHOTO-057",
+        "active_feature_id": "DITCH-CHANGE-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:13:31.090Z",
+        "compass_heading_deg": 173.6611328125,
+        "analysis_path": "photos/049_analysis.jpg",
+        "original_path": "photos/049_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09095136563424,
+          30.490396342009518
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-a068c5be-313a-4001-8172-34381ebb9f5b",
+        "photo_number": "P53",
+        "simple_photo_id": "PHOTO-058",
+        "active_feature_id": "DITCH-CHANGE-002",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:15:15.443Z",
+        "compass_heading_deg": 128.72088623046875,
+        "analysis_path": "photos/050_analysis.jpg",
+        "original_path": "photos/050_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09089871663778,
+          30.490440953965077
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-0f1f73c3-a870-44eb-b143-7f13684a7309",
+        "photo_number": "P54",
+        "simple_photo_id": "PHOTO-059",
+        "active_feature_id": "FRONTAGE-PHOTO-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:17:33.154Z",
+        "compass_heading_deg": 97.21632385253906,
+        "analysis_path": "photos/051_analysis.jpg",
+        "original_path": "photos/051_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09061947123593,
+          30.491324008338992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d0157d2e-2787-484a-abfe-f75f7e5ac87a",
+        "photo_number": "P55",
+        "simple_photo_id": "PHOTO-060",
+        "active_feature_id": "FRONTAGE-PHOTO-001",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:18:12.305Z",
+        "compass_heading_deg": 64.10517120361328,
+        "analysis_path": "photos/052_analysis.jpg",
+        "original_path": "photos/052_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09058222978678,
+          30.49129629729947
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ea344b31-823e-4261-a210-4e164d717d5e",
+        "photo_number": "P56",
+        "simple_photo_id": "PHOTO-061",
+        "active_feature_id": "VEHICLE-CROSSING-003",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:20:27.281Z",
+        "compass_heading_deg": 282.3078308105469,
+        "analysis_path": "photos/053_analysis.jpg",
+        "original_path": "photos/053_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0907067807302,
+          30.491445778582083
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2e02c247-9298-41ce-a1f0-4778d1aa7837",
+        "photo_number": "P57",
+        "simple_photo_id": "PHOTO-062",
+        "active_feature_id": "VEHICLE-CROSSING-003",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:20:46.680Z",
+        "compass_heading_deg": 191.0048828125,
+        "analysis_path": "photos/054_analysis.jpg",
+        "original_path": "photos/054_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09067690610674,
+          30.49146954197754
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-507548f8-1967-42fc-b90f-d27e9a5a71b3",
+        "photo_number": "P58",
+        "simple_photo_id": "PHOTO-063",
+        "active_feature_id": "FRONTAGE-PHOTO-002",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:23:40.665Z",
+        "compass_heading_deg": 313.6163024902344,
+        "analysis_path": "photos/055_analysis.jpg",
+        "original_path": "photos/055_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09094677936974,
+          30.490501436022026
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-efec9a30-852b-4812-8cd2-19356509bef9",
+        "photo_number": "P59",
+        "simple_photo_id": "PHOTO-064",
+        "active_feature_id": "FRONTAGE-PHOTO-002",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:23:49.036Z",
+        "compass_heading_deg": 259.7872009277344,
+        "analysis_path": "photos/056_analysis.jpg",
+        "original_path": "photos/056_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09094302301926,
+          30.490518703452814
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-917fabd4-8e9e-4ec0-8471-734ed31fbd13",
+        "photo_number": "P60",
+        "simple_photo_id": "PHOTO-065",
+        "active_feature_id": "FRONTAGE-PHOTO-003",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:26:32.236Z",
+        "compass_heading_deg": 6.795988082885742,
+        "analysis_path": "photos/057_analysis.jpg",
+        "original_path": "photos/057_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09279678352758,
+          30.48956491801431
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-35202deb-e47c-4201-8dd2-428edf9c54f9",
+        "photo_number": "P61",
+        "simple_photo_id": "PHOTO-066",
+        "active_feature_id": "FRONTAGE-PHOTO-003",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:26:39.757Z",
+        "compass_heading_deg": 355.2200927734375,
+        "analysis_path": "photos/058_analysis.jpg",
+        "original_path": "photos/058_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09279775563122,
+          30.489562322495896
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d0e06b25-19d2-44a6-9573-b1e6e9f77983",
+        "photo_number": "P62",
+        "simple_photo_id": "PHOTO-067",
+        "active_feature_id": "FRONTAGE-PHOTO-003",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-05T13:26:51.033Z",
+        "compass_heading_deg": 7.532052040100098,
+        "analysis_path": "photos/059_analysis.jpg",
+        "original_path": "photos/059_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09284509805333,
+          30.48958187821574
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f49074e7-c355-4cf0-8f49-6e4e909ba55e",
+        "photo_number": "P63",
+        "simple_photo_id": "PHOTO-068",
+        "active_feature_id": "VEHICLE-CROSSING-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:28:35.155Z",
+        "compass_heading_deg": 25.14728355407715,
+        "analysis_path": "photos/060_analysis.jpg",
+        "original_path": "photos/060_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09283521689075,
+          30.48964157170451
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e90a1f6a-d7e4-4e2b-bc3b-e4af91585d33",
+        "photo_number": "P64",
+        "simple_photo_id": "PHOTO-069",
+        "active_feature_id": "FRONTAGE-PHOTO-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-05T13:30:07.983Z",
+        "compass_heading_deg": 93.69377136230469,
+        "analysis_path": "photos/061_analysis.jpg",
+        "original_path": "photos/061_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09276123249384,
+          30.490386498172885
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-801d20d9-26af-46a5-9804-4f935dd916b5",
+        "photo_number": "P65",
+        "simple_photo_id": "PHOTO-070",
+        "active_feature_id": "FRONTAGE-PHOTO-004",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-05T13:30:57.755Z",
+        "compass_heading_deg": 233.10243225097656,
+        "analysis_path": "photos/062_analysis.jpg",
+        "original_path": "photos/062_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09282873270617,
+          30.490137679695927
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6ae4444d-a687-49ee-820a-3f022b583b48",
+        "photo_number": "P66",
+        "simple_photo_id": "PHOTO-071",
+        "active_feature_id": "FRONTAGE-PHOTO-004",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-05T13:31:05.939Z",
+        "compass_heading_deg": 107.56129455566406,
+        "analysis_path": "photos/063_analysis.jpg",
+        "original_path": "photos/063_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09286050063162,
+          30.49011822532125
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+        "photo_number": "P64",
+        "simple_photo_id": "PHOTO-100",
+        "active_feature_id": "WATER-003",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:13:58.302Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/064_analysis.jpg",
+        "original_path": "photos/064_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0920692219877,
+          30.489679670486368
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+        "photo_number": "P65",
+        "simple_photo_id": "PHOTO-101",
+        "active_feature_id": "WATER-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:15:02.898Z",
+        "compass_heading_deg": 51.87675453517118,
+        "analysis_path": "photos/065_analysis.jpg",
+        "original_path": "photos/065_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09212728178065,
+          30.489639061447793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+        "photo_number": "P66",
+        "simple_photo_id": "PHOTO-102",
+        "active_feature_id": "WATER-004",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:15:39.213Z",
+        "compass_heading_deg": 44.16932515018434,
+        "analysis_path": "photos/066_analysis.jpg",
+        "original_path": "photos/066_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0921695688854,
+          30.48957445170828
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-067b4916-83f7-4bd7-bae7-05bafda11031",
+        "photo_number": "P67",
+        "simple_photo_id": "PHOTO-103",
+        "active_feature_id": "TREE-014",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:33:58.799Z",
+        "compass_heading_deg": 0.5069316441587997,
+        "analysis_path": "photos/067_analysis.jpg",
+        "original_path": "photos/067_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09245295213356,
+          30.488898802551002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e9ce9edf-7df1-4ecb-afba-efa6bc4ee866",
+        "photo_number": "P68",
+        "simple_photo_id": "PHOTO-104",
+        "active_feature_id": "TREE-014",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:34:10.202Z",
+        "compass_heading_deg": 59.5308875202346,
+        "analysis_path": "photos/068_analysis.jpg",
+        "original_path": "photos/068_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09242347928436,
+          30.488907276039733
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f53f07cb-1bb2-4e8f-8a67-7fc72e0340e7",
+        "photo_number": "P69",
+        "simple_photo_id": "PHOTO-105",
+        "active_feature_id": "TREE-014",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:34:18.107Z",
+        "compass_heading_deg": 72.90409957264792,
+        "analysis_path": "photos/069_analysis.jpg",
+        "original_path": "photos/069_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09246391511122,
+          30.48889633225953
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ade931ab-463f-4188-af5f-46a587eb8083",
+        "photo_number": "P70",
+        "simple_photo_id": "PHOTO-107",
+        "active_feature_id": "PHOTO-106",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:43:17.630Z",
+        "compass_heading_deg": 134.98111334082216,
+        "analysis_path": "photos/070_analysis.jpg",
+        "original_path": "photos/070_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0924453680208,
+          30.48898912753069
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+        "photo_number": "P71",
+        "simple_photo_id": "PHOTO-108",
+        "active_feature_id": "WATER-005",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:47:01.089Z",
+        "compass_heading_deg": 198.05075497877806,
+        "analysis_path": "photos/071_analysis.jpg",
+        "original_path": "photos/071_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228191805425,
+          30.488774476009134
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+        "photo_number": "P72",
+        "simple_photo_id": "PHOTO-109",
+        "active_feature_id": "WATER-005",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:47:11.527Z",
+        "compass_heading_deg": 198.0507534696084,
+        "analysis_path": "photos/072_analysis.jpg",
+        "original_path": "photos/072_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228263828494,
+          30.488768652250325
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+        "photo_number": "P73",
+        "simple_photo_id": "PHOTO-110",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:48:23.777Z",
+        "compass_heading_deg": 162.38946492713225,
+        "analysis_path": "photos/073_analysis.jpg",
+        "original_path": "photos/073_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0923010171493,
+          30.48871176817641
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-be406434-72fd-4c09-9fff-2c7035edb7d8",
+        "photo_number": "P74",
+        "simple_photo_id": "PHOTO-111",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:49:31.981Z",
+        "compass_heading_deg": 124.22545418749311,
+        "analysis_path": "photos/074_analysis.jpg",
+        "original_path": "photos/074_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228286048152,
+          30.48869592841245
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f345fc1c-628f-4a67-92ce-e8c6333c0df7",
+        "photo_number": "P75",
+        "simple_photo_id": "PHOTO-112",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:49:40.791Z",
+        "compass_heading_deg": 124.22547296992202,
+        "analysis_path": "photos/075_analysis.jpg",
+        "original_path": "photos/075_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09225549045358,
+          30.48869601994706
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-1abf3541-39b5-4d42-b661-da2f68281b42",
+        "photo_number": "P76",
+        "simple_photo_id": "PHOTO-113",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:49:46.059Z",
+        "compass_heading_deg": 124.22545351143023,
+        "analysis_path": "photos/076_analysis.jpg",
+        "original_path": "photos/076_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228467655143,
+          30.48869780162199
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4",
+        "photo_number": "P77",
+        "simple_photo_id": "PHOTO-115",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:49:58.750Z",
+        "compass_heading_deg": 151.90199738599983,
+        "analysis_path": "photos/077_analysis.jpg",
+        "original_path": "photos/077_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228113898178,
+          30.488673943774298
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f",
+        "photo_number": "P78",
+        "simple_photo_id": "PHOTO-116",
+        "active_feature_id": "WATER-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T14:50:36.417Z",
+        "compass_heading_deg": 224.75435440228017,
+        "analysis_path": "photos/078_analysis.jpg",
+        "original_path": "photos/078_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09220816032125,
+          30.488711866386122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5571a117-58cb-4326-b025-be95dfc7df14",
+        "photo_number": "P79",
+        "simple_photo_id": "PHOTO-118",
+        "active_feature_id": "OTHER-001",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T15:12:36.305Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/079_analysis.jpg",
+        "original_path": "photos/079_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09194431596822,
+          30.48938919562397
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-eb9beb9a-c0aa-433c-8557-e7987f3c4928",
+        "photo_number": "P80",
+        "simple_photo_id": "PHOTO-119",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T15:22:46.064Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/080_analysis.jpg",
+        "original_path": "photos/080_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09183676914077,
+          30.489250238198647
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-4bfc1746-6d20-4ddb-ba4d-8086913f2309",
+        "photo_number": "P81",
+        "simple_photo_id": "PHOTO-120",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-07T15:26:26.660Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/081_analysis.jpg",
+        "original_path": "photos/081_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09168009621504,
+          30.489149392230964
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7e4d5e2e-db65-4a0b-90ef-14ffc8522fed",
+        "photo_number": "P82",
+        "simple_photo_id": "PHOTO-121",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-07T15:26:35.680Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/082_analysis.jpg",
+        "original_path": "photos/082_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09169073747583,
+          30.48915212776278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7f79c306-1d90-4711-9069-589acca98155",
+        "photo_number": "P83",
+        "simple_photo_id": "PHOTO-122",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-07T15:26:43.839Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/083_analysis.jpg",
+        "original_path": "photos/083_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09168411799435,
+          30.489150406821203
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8dafff9f-500d-40a2-9540-afcf59185c7c",
+        "photo_number": "P84",
+        "simple_photo_id": "PHOTO-123",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 5,
+        "recorded_at": "2026-08-07T15:28:17.655Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/084_analysis.jpg",
+        "original_path": "photos/084_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0915537587798,
+          30.489017872594705
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e7e4cac3-2a4e-456a-b539-a41dc619a517",
+        "photo_number": "P85",
+        "simple_photo_id": "PHOTO-124",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 6,
+        "recorded_at": "2026-08-07T15:28:24.149Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/085_analysis.jpg",
+        "original_path": "photos/085_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09155173703792,
+          30.489008578152504
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2285ed1d-87a5-48a5-8463-1e174cc9fe8a",
+        "photo_number": "P86",
+        "simple_photo_id": "PHOTO-125",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 7,
+        "recorded_at": "2026-08-07T15:31:29.550Z",
+        "compass_heading_deg": 128.18230696220002,
+        "analysis_path": "photos/086_analysis.jpg",
+        "original_path": "photos/086_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09132900326178,
+          30.488857688929347
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e5a07f21-bb96-4e83-aeb2-03528350796f",
+        "photo_number": "P87",
+        "simple_photo_id": "PHOTO-126",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 8,
+        "recorded_at": "2026-08-07T15:31:36.002Z",
+        "compass_heading_deg": 128.18230693483437,
+        "analysis_path": "photos/087_analysis.jpg",
+        "original_path": "photos/087_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09132858067892,
+          30.48885822962998
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5ecd805d-b92f-4a04-81de-ca073041be43",
+        "photo_number": "P88",
+        "simple_photo_id": "PHOTO-127",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 9,
+        "recorded_at": "2026-08-07T15:31:52.360Z",
+        "compass_heading_deg": 128.18230693655858,
+        "analysis_path": "photos/088_analysis.jpg",
+        "original_path": "photos/088_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09133960372966,
+          30.4888465615326
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8b3f47f7-f092-4dc2-90b1-a409a52f8b62",
+        "photo_number": "P89",
+        "simple_photo_id": "PHOTO-128",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 10,
+        "recorded_at": "2026-08-07T15:32:29.449Z",
+        "compass_heading_deg": 174.38927435857573,
+        "analysis_path": "photos/089_analysis.jpg",
+        "original_path": "photos/089_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09134400314849,
+          30.488812249869092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-419c612e-b396-44bd-bbe9-bdc645b2f859",
+        "photo_number": "P90",
+        "simple_photo_id": "PHOTO-129",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 11,
+        "recorded_at": "2026-08-07T15:32:35.850Z",
+        "compass_heading_deg": 174.38927290762285,
+        "analysis_path": "photos/090_analysis.jpg",
+        "original_path": "photos/090_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09134901351696,
+          30.488816360211437
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3c9e121e-2a95-4d40-8b87-4c7122b53f23",
+        "photo_number": "P91",
+        "simple_photo_id": "PHOTO-131",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 12,
+        "recorded_at": "2026-08-07T15:34:03.743Z",
+        "compass_heading_deg": 106.71469824919232,
+        "analysis_path": "photos/091_analysis.jpg",
+        "original_path": "photos/091_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09127401928146,
+          30.488750119886664
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-4da89938-90e1-4e78-81f3-5117cc38a04a",
+        "photo_number": "P92",
+        "simple_photo_id": "PHOTO-132",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 13,
+        "recorded_at": "2026-08-07T15:34:13.316Z",
+        "compass_heading_deg": 126.1728212086623,
+        "analysis_path": "photos/092_analysis.jpg",
+        "original_path": "photos/092_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0912601138914,
+          30.48874113432766
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3baaf83b-5943-438d-9d1b-002034b7d081",
+        "photo_number": "P93",
+        "simple_photo_id": "PHOTO-133",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 14,
+        "recorded_at": "2026-08-07T15:35:53.248Z",
+        "compass_heading_deg": 2.515373373694064,
+        "analysis_path": "photos/093_analysis.jpg",
+        "original_path": "photos/093_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09116067795577,
+          30.488932183160728
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8ebe5497-dd95-4509-9233-32f81114dfa7",
+        "photo_number": "P94",
+        "simple_photo_id": "PHOTO-134",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 15,
+        "recorded_at": "2026-08-07T15:35:59.737Z",
+        "compass_heading_deg": 357.4539308900804,
+        "analysis_path": "photos/094_analysis.jpg",
+        "original_path": "photos/094_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09114926941957,
+          30.488928726001607
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ed9439ac-aad0-475c-a3f3-489891bce25f",
+        "photo_number": "P95",
+        "simple_photo_id": "PHOTO-135",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 16,
+        "recorded_at": "2026-08-07T15:37:58.379Z",
+        "compass_heading_deg": 348.4529097291425,
+        "analysis_path": "photos/095_analysis.jpg",
+        "original_path": "photos/095_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09106814299248,
+          30.4890732652665
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9ea7612e-6288-4c66-bf0f-f0cb95e62123",
+        "photo_number": "P96",
+        "simple_photo_id": "PHOTO-136",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 17,
+        "recorded_at": "2026-08-07T15:38:04.670Z",
+        "compass_heading_deg": 348.4529081195885,
+        "analysis_path": "photos/096_analysis.jpg",
+        "original_path": "photos/096_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09107151945136,
+          30.48907276934088
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-b5c2ba97-401d-4a73-a9c8-a46c2a6cd48f",
+        "photo_number": "P97",
+        "simple_photo_id": "PHOTO-137",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 18,
+        "recorded_at": "2026-08-07T15:38:10.627Z",
+        "compass_heading_deg": 335.1974486309217,
+        "analysis_path": "photos/097_analysis.jpg",
+        "original_path": "photos/097_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09106925607432,
+          30.489081261984527
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-0f923a0b-10af-48d8-922a-6a9e9644736e",
+        "photo_number": "P98",
+        "simple_photo_id": "PHOTO-138",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 19,
+        "recorded_at": "2026-08-07T15:38:18.574Z",
+        "compass_heading_deg": 335.19745321219136,
+        "analysis_path": "photos/098_analysis.jpg",
+        "original_path": "photos/098_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.091055820574,
+          30.48908313399236
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-263c0c57-9eaf-41dc-a2a4-641629311834",
+        "photo_number": "P99",
+        "simple_photo_id": "PHOTO-139",
+        "active_feature_id": "SECTION-005",
+        "sequence_within_feature": 20,
+        "recorded_at": "2026-08-07T15:41:16.556Z",
+        "compass_heading_deg": 200.4928269072169,
+        "analysis_path": "photos/099_analysis.jpg",
+        "original_path": "photos/099_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09118681645204,
+          30.489149068856484
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5938c66a-17ea-4cb3-9c00-2c557196e919",
+        "photo_number": "P100",
+        "simple_photo_id": "PHOTO-141",
+        "active_feature_id": "SECTION-006",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T15:44:30.792Z",
+        "compass_heading_deg": 252.421875,
+        "analysis_path": "photos/100_analysis.jpg",
+        "original_path": "photos/100_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09125882089388,
+          30.48923627358122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d98a0703-266c-41e0-b2d9-b49103f6eb15",
+        "photo_number": "P101",
+        "simple_photo_id": "PHOTO-142",
+        "active_feature_id": "SECTION-006",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-07T15:44:48.175Z",
+        "compass_heading_deg": 35.15625133890246,
+        "analysis_path": "photos/101_analysis.jpg",
+        "original_path": "photos/101_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.091261964869,
+          30.489264376723824
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e7b02eac-5432-4bec-9f05-ad7377c10c48",
+        "photo_number": "P102",
+        "simple_photo_id": "PHOTO-143",
+        "active_feature_id": "SECTION-006",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-07T15:45:44.779Z",
+        "compass_heading_deg": 280.130525767806,
+        "analysis_path": "photos/102_analysis.jpg",
+        "original_path": "photos/102_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09146521612092,
+          30.489335384924587
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-15e2382f-d86e-4446-97bd-8cecc8283d5d",
+        "photo_number": "P103",
+        "simple_photo_id": "PHOTO-145",
+        "active_feature_id": "PHOTO-144",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T15:55:09.961Z",
+        "compass_heading_deg": 119.86029442648314,
+        "analysis_path": "photos/103_analysis.jpg",
+        "original_path": "photos/103_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09140978903939,
+          30.489328293825814
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9a1a2a2d-c778-4a45-90d3-286ee88232d6",
+        "photo_number": "P104",
+        "simple_photo_id": "PHOTO-146",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 1,
+        "recorded_at": "2026-08-07T16:01:52.978Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/104_analysis.jpg",
+        "original_path": "photos/104_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7e1641eb-8060-4028-af1b-230a56128c39",
+        "photo_number": "P105",
+        "simple_photo_id": "PHOTO-147",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 2,
+        "recorded_at": "2026-08-07T16:01:58.654Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/105_analysis.jpg",
+        "original_path": "photos/105_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f902ce0b-357d-4c9c-a8d2-2b93cc70799a",
+        "photo_number": "P106",
+        "simple_photo_id": "PHOTO-148",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 3,
+        "recorded_at": "2026-08-07T16:02:17.147Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/106_analysis.jpg",
+        "original_path": "photos/106_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-38f1ef97-cea3-4736-8edb-1b2c81d34ea6",
+        "photo_number": "P107",
+        "simple_photo_id": "PHOTO-149",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 4,
+        "recorded_at": "2026-08-07T16:10:09.085Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/107_analysis.jpg",
+        "original_path": "photos/107_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09166039720837,
+          30.4894305300252
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e53998d1-1063-4d9c-bd3e-39cd279e5d1b",
+        "photo_number": "P108",
+        "simple_photo_id": "PHOTO-151",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 5,
+        "recorded_at": "2026-08-07T16:13:59.498Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/108_analysis.jpg",
+        "original_path": "photos/108_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09194001749817,
+          30.489788102014447
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5685b8e9-a8ae-4411-b7cc-fa3793a12149",
+        "photo_number": "P109",
+        "simple_photo_id": "PHOTO-152",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 6,
+        "recorded_at": "2026-08-07T16:14:12.325Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/109_analysis.jpg",
+        "original_path": "photos/109_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09192584656375,
+          30.48981085617921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-0b0bbcbe-fb51-414a-8c47-f8da0ce78689",
+        "photo_number": "P110",
+        "simple_photo_id": "PHOTO-153",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 7,
+        "recorded_at": "2026-08-07T16:16:30.934Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/110_analysis.jpg",
+        "original_path": "photos/110_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09182602515453,
+          30.489778386241777
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2eaf281d-54e8-491b-a652-417e64373658",
+        "photo_number": "P111",
+        "simple_photo_id": "PHOTO-155",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 8,
+        "recorded_at": "2026-08-07T16:19:31.295Z",
+        "compass_heading_deg": 161.56770714812293,
+        "analysis_path": "photos/111_analysis.jpg",
+        "original_path": "photos/111_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09183107074968,
+          30.48978876868224
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6d7da03d-78ca-4369-8e3f-372665f78e7f",
+        "photo_number": "P112",
+        "simple_photo_id": "PHOTO-156",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 9,
+        "recorded_at": "2026-08-07T16:20:38.700Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/112_analysis.jpg",
+        "original_path": "photos/112_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160701280669,
+          30.489792715028358
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-aeeb09d9-37da-4295-b29a-13008596d960",
+        "photo_number": "P113",
+        "simple_photo_id": "PHOTO-157",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 10,
+        "recorded_at": "2026-08-07T16:20:46.709Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/113_analysis.jpg",
+        "original_path": "photos/113_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160520627594,
+          30.489775496907804
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-320b9055-c78e-499c-8eb6-9e969ecc8d48",
+        "photo_number": "P114",
+        "simple_photo_id": "PHOTO-158",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 11,
+        "recorded_at": "2026-08-07T16:21:06.883Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/114_analysis.jpg",
+        "original_path": "photos/114_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09161031701603,
+          30.4897771390579
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-13e38e2e-a771-4da2-b9fe-a00e1b3e16a0",
+        "photo_number": "P115",
+        "simple_photo_id": "PHOTO-159",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 12,
+        "recorded_at": "2026-08-07T16:22:58.681Z",
+        "compass_heading_deg": 309.0727178695282,
+        "analysis_path": "photos/115_analysis.jpg",
+        "original_path": "photos/115_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09170625833913,
+          30.48985647534327
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6226316c-23f8-4715-a663-87d0eb255a52",
+        "photo_number": "P116",
+        "simple_photo_id": "PHOTO-160",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 13,
+        "recorded_at": "2026-08-07T16:23:09.532Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/116_analysis.jpg",
+        "original_path": "photos/116_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09173966185875,
+          30.489830531699614
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ee82a9b9-afc1-4310-a47b-80e4337e5114",
+        "photo_number": "P117",
+        "simple_photo_id": "PHOTO-161",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 14,
+        "recorded_at": "2026-08-07T16:23:20.383Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/117_analysis.jpg",
+        "original_path": "photos/117_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09170415225533,
+          30.489863230144177
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-78d02915-9131-474a-ac3c-df6af76a6368",
+        "photo_number": "P118",
+        "simple_photo_id": "PHOTO-162",
+        "active_feature_id": "SECTION-007",
+        "sequence_within_feature": 15,
+        "recorded_at": "2026-08-07T16:23:50.179Z",
+        "compass_heading_deg": null,
+        "analysis_path": "photos/118_analysis.jpg",
+        "original_path": "photos/118_original.jpg"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09177386863452,
+          30.48982590984741
+        ]
+      }
+    }
+  ]
+}

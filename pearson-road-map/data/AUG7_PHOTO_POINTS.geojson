@@ -1,0 +1,1387 @@
+{
+  "type": "FeatureCollection",
+  "name": "AUG7 photo points",
+  "properties": {
+    "source_file": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\03_PHOTO_INDEX.json",
+    "photo_count": 55,
+    "recorded_water_category_count": 11,
+    "all_august_7_photos_included": true
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0920692219877,
+          30.489679670486368
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+        "photo_number": "P64",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:13:58.302Z",
+        "gps_accuracy_m": 15.400153201829937,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-39411ae1-c699-468a-bed2-2a8b6247b571",
+          "event-ae382095-76a3-43c9-8190-93b0d087e042"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09212728178065,
+          30.489639061447793
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+        "photo_number": "P65",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:15:02.898Z",
+        "gps_accuracy_m": 13.175702476986068,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-d9a4c420-4f58-4f87-98b0-c0670852430d",
+          "event-88a90e5a-f9a7-41a7-828e-e8e0d9e64c03"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0921695688854,
+          30.48957445170828
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+        "photo_number": "P66",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:15:39.213Z",
+        "gps_accuracy_m": 15.221452087446618,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-610efca3-e334-4949-b4b5-ab58e0850b81",
+          "event-88a90e5a-f9a7-41a7-828e-e8e0d9e64c03"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09245295213356,
+          30.488898802551002
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-067b4916-83f7-4bd7-bae7-05bafda11031",
+        "photo_number": "P67",
+        "category": "TREE",
+        "timestamp": "2026-08-07T14:33:58.799Z",
+        "gps_accuracy_m": 16.554319888657535,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-505d7be4-00e0-42b2-81a7-b8463c1cd9cd",
+          "event-5ef90c44-4aee-4d1f-accb-dc5186e14bf2"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09242347928436,
+          30.488907276039733
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e9ce9edf-7df1-4ecb-afba-efa6bc4ee866",
+        "photo_number": "P68",
+        "category": "TREE",
+        "timestamp": "2026-08-07T14:34:10.202Z",
+        "gps_accuracy_m": 17.887256135967952,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-e4393bee-88c8-4235-b261-7b15606de546",
+          "event-5ef90c44-4aee-4d1f-accb-dc5186e14bf2"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09246391511122,
+          30.48889633225953
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f53f07cb-1bb2-4e8f-8a67-7fc72e0340e7",
+        "photo_number": "P69",
+        "category": "TREE",
+        "timestamp": "2026-08-07T14:34:18.107Z",
+        "gps_accuracy_m": 17.64323045325436,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-dcce6cc0-6c0a-459c-9d5a-fce25d60bc84",
+          "event-5ef90c44-4aee-4d1f-accb-dc5186e14bf2"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0924453680208,
+          30.48898912753069
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ade931ab-463f-4188-af5f-46a587eb8083",
+        "photo_number": "P70",
+        "category": "PHOTO",
+        "timestamp": "2026-08-07T14:43:17.630Z",
+        "gps_accuracy_m": 18.804241071304382,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-a8f0b3c1-5b25-44c8-a8e7-99beea9ab535",
+          "event-f7bd4002-e9cc-4cc3-a5bd-3877cbd25436"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228191805425,
+          30.488774476009134
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+        "photo_number": "P71",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:47:01.089Z",
+        "gps_accuracy_m": 16.218949984986413,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-4d10a995-23ee-4fdd-9bbb-1248293dabbf",
+          "event-b44f810a-af07-4b77-a69a-60ec4b3e7daf"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228263828494,
+          30.488768652250325
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+        "photo_number": "P72",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:47:11.527Z",
+        "gps_accuracy_m": 16.030050912685926,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-fe79d7d1-06f3-4dd4-874f-37a1d7e043e4",
+          "event-b44f810a-af07-4b77-a69a-60ec4b3e7daf"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0923010171493,
+          30.48871176817641
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+        "photo_number": "P73",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:48:23.777Z",
+        "gps_accuracy_m": 16.415948403497516,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-e47c780d-e9e3-43dd-bece-cbe3b3a432cd",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228286048152,
+          30.48869592841245
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-be406434-72fd-4c09-9fff-2c7035edb7d8",
+        "photo_number": "P74",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:49:31.981Z",
+        "gps_accuracy_m": 13.98050587970326,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-d312bb94-6a6c-446d-a681-8ad6a03140f8",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09225549045358,
+          30.48869601994706
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f345fc1c-628f-4a67-92ce-e8c6333c0df7",
+        "photo_number": "P75",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:49:40.791Z",
+        "gps_accuracy_m": 15.614554898622762,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-70ef63f8-565a-4ca3-b148-4a51adc67ce3",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228467655143,
+          30.48869780162199
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-1abf3541-39b5-4d42-b661-da2f68281b42",
+        "photo_number": "P76",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:49:46.059Z",
+        "gps_accuracy_m": 17.389135497676158,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-1cfeaef2-2169-4846-aa5c-cc88c8486b53",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09228113898178,
+          30.488673943774298
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4",
+        "photo_number": "P77",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:49:58.750Z",
+        "gps_accuracy_m": 17.18121981151778,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-b734952a-238a-4740-b2be-746d88388008",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09220816032125,
+          30.488711866386122
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f",
+        "photo_number": "P78",
+        "category": "WATER",
+        "timestamp": "2026-08-07T14:50:36.417Z",
+        "gps_accuracy_m": 15.749190154507017,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-adba6f84-2e35-414d-871f-f20cb4c7a0b9",
+          "event-64b04824-ba70-408e-acd4-4671c493884a"
+        ],
+        "is_recorded_water_category": true,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09194431596822,
+          30.48938919562397
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5571a117-58cb-4326-b025-be95dfc7df14",
+        "photo_number": "P79",
+        "category": "OTHER",
+        "timestamp": "2026-08-07T15:12:36.305Z",
+        "gps_accuracy_m": 20.94916950827859,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-488bd560-9f72-4b6c-b4d6-879bab32a3ec",
+          "event-b02caa2b-55f6-4f1d-b721-7d7caaae0d0f"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09183676914077,
+          30.489250238198647
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-eb9beb9a-c0aa-433c-8557-e7987f3c4928",
+        "photo_number": "P80",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:22:46.064Z",
+        "gps_accuracy_m": 3.8012217320862636,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-147315d8-2a5d-4d4f-8206-aee1e3b6f513",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09168009621504,
+          30.489149392230964
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-4bfc1746-6d20-4ddb-ba4d-8086913f2309",
+        "photo_number": "P81",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:26:26.660Z",
+        "gps_accuracy_m": 4.677304657456805,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-398400a5-c82e-44ec-a973-397ca4f00bc1",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09169073747583,
+          30.48915212776278
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7e4d5e2e-db65-4a0b-90ef-14ffc8522fed",
+        "photo_number": "P82",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:26:35.680Z",
+        "gps_accuracy_m": 4.733774683565274,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-eebe7a6b-c996-49f8-ab44-2496f8deefe8",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09168411799435,
+          30.489150406821203
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7f79c306-1d90-4711-9069-589acca98155",
+        "photo_number": "P83",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:26:43.839Z",
+        "gps_accuracy_m": 4.748651530191761,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-26745602-d192-49e7-a17a-2e9a4d6c2247",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0915537587798,
+          30.489017872594705
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8dafff9f-500d-40a2-9540-afcf59185c7c",
+        "photo_number": "P84",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:28:17.655Z",
+        "gps_accuracy_m": 7.233965102713448,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-38fd35f8-782a-46fd-8f08-4ffd003b56be",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09155173703792,
+          30.489008578152504
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e7e4cac3-2a4e-456a-b539-a41dc619a517",
+        "photo_number": "P85",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:28:24.149Z",
+        "gps_accuracy_m": 6.643266885548672,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-3d3b5d19-7fc2-4744-9a89-9ac1aaeada00",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09132900326178,
+          30.488857688929347
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2285ed1d-87a5-48a5-8463-1e174cc9fe8a",
+        "photo_number": "P86",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:31:29.550Z",
+        "gps_accuracy_m": 9.884100915895567,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-36cc85d3-f2f0-4356-9186-12749fa3ef70",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09132858067892,
+          30.48885822962998
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e5a07f21-bb96-4e83-aeb2-03528350796f",
+        "photo_number": "P87",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:31:36.002Z",
+        "gps_accuracy_m": 10.263153479608999,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-6041a591-e55a-46c5-bc1f-ece796504731",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09133960372966,
+          30.4888465615326
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5ecd805d-b92f-4a04-81de-ca073041be43",
+        "photo_number": "P88",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:31:52.360Z",
+        "gps_accuracy_m": 12.46724768562975,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-175db16f-24b1-40c1-b5ae-2d4e813a438c",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09134400314849,
+          30.488812249869092
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8b3f47f7-f092-4dc2-90b1-a409a52f8b62",
+        "photo_number": "P89",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:32:29.449Z",
+        "gps_accuracy_m": 8.843276949239048,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-0815dd91-609b-4f05-8c20-653c10436d73",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09134901351696,
+          30.488816360211437
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-419c612e-b396-44bd-bbe9-bdc645b2f859",
+        "photo_number": "P90",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:32:35.850Z",
+        "gps_accuracy_m": 8.091727819231886,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-4720c9c9-2160-483f-8a75-9db3020dc736",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09127401928146,
+          30.488750119886664
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3c9e121e-2a95-4d40-8b87-4c7122b53f23",
+        "photo_number": "P91",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:34:03.743Z",
+        "gps_accuracy_m": 7.487955758879955,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-2a5fd9d5-b5a6-48ba-9fa0-580f4ec1358f",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0912601138914,
+          30.48874113432766
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-4da89938-90e1-4e78-81f3-5117cc38a04a",
+        "photo_number": "P92",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:34:13.316Z",
+        "gps_accuracy_m": 9.00409707880962,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-ee77ed5b-e6f2-42ac-a1a6-5c8089e4cccb",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09116067795577,
+          30.488932183160728
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-3baaf83b-5943-438d-9d1b-002034b7d081",
+        "photo_number": "P93",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:35:53.248Z",
+        "gps_accuracy_m": 10.525307530432938,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-b0065bea-219f-4aa1-9fbc-86f710744d3b",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09114926941957,
+          30.488928726001607
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-8ebe5497-dd95-4509-9233-32f81114dfa7",
+        "photo_number": "P94",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:35:59.737Z",
+        "gps_accuracy_m": 10.845050592654092,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-5c760456-681c-4581-b371-63f7327cb864",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09106814299248,
+          30.4890732652665
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ed9439ac-aad0-475c-a3f3-489891bce25f",
+        "photo_number": "P95",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:37:58.379Z",
+        "gps_accuracy_m": 6.830156185468297,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-1c90aed2-0af6-484b-ad2e-a1a3c4c07770",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09107151945136,
+          30.48907276934088
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9ea7612e-6288-4c66-bf0f-f0cb95e62123",
+        "photo_number": "P96",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:38:04.670Z",
+        "gps_accuracy_m": 6.426669029300357,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-01574c49-6dce-465c-be76-dfb37cd4ab30",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09106925607432,
+          30.489081261984527
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-b5c2ba97-401d-4a73-a9c8-a46c2a6cd48f",
+        "photo_number": "P97",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:38:10.627Z",
+        "gps_accuracy_m": 6.349372512515114,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-ed584782-c3da-4738-831f-6341f8a3fba6",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.091055820574,
+          30.48908313399236
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-0f923a0b-10af-48d8-922a-6a9e9644736e",
+        "photo_number": "P98",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:38:18.574Z",
+        "gps_accuracy_m": 6.7575248669578105,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-813d7965-c60f-4bde-989b-cb577ba55cda",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09118681645204,
+          30.489149068856484
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-263c0c57-9eaf-41dc-a2a4-641629311834",
+        "photo_number": "P99",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:41:16.556Z",
+        "gps_accuracy_m": 8.019078088327813,
+        "section_id": "SECTION-005",
+        "associated_record_ids": [
+          "event-f8d9d4e6-1e84-4a19-90b9-590f6cd5639f",
+          "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09125882089388,
+          30.48923627358122
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5938c66a-17ea-4cb3-9c00-2c557196e919",
+        "photo_number": "P100",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:44:30.792Z",
+        "gps_accuracy_m": 3.5353928982525455,
+        "section_id": "SECTION-006",
+        "associated_record_ids": [
+          "event-c94e07d7-abbb-49b1-aa8a-9d5e7053a6cd",
+          "event-cc06188d-4a8a-4f3a-9fbe-c3efa77cc1fe"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.091261964869,
+          30.489264376723824
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-d98a0703-266c-41e0-b2d9-b49103f6eb15",
+        "photo_number": "P101",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:44:48.175Z",
+        "gps_accuracy_m": 4.748651530191764,
+        "section_id": "SECTION-006",
+        "associated_record_ids": [
+          "event-b074a237-38fd-44c9-97a2-1a716efd4cdb",
+          "event-cc06188d-4a8a-4f3a-9fbe-c3efa77cc1fe"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09146521612092,
+          30.489335384924587
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e7b02eac-5432-4bec-9f05-ad7377c10c48",
+        "photo_number": "P102",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T15:45:44.779Z",
+        "gps_accuracy_m": 5.2797109703842855,
+        "section_id": "SECTION-006",
+        "associated_record_ids": [
+          "event-63d6daff-b327-4220-9600-6ebc34e64f7a",
+          "event-cc06188d-4a8a-4f3a-9fbe-c3efa77cc1fe"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09140978903939,
+          30.489328293825814
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-15e2382f-d86e-4446-97bd-8cecc8283d5d",
+        "photo_number": "P103",
+        "category": "PHOTO",
+        "timestamp": "2026-08-07T15:55:09.961Z",
+        "gps_accuracy_m": 15.272780491950668,
+        "section_id": null,
+        "associated_record_ids": [
+          "event-61c72bc9-06a5-487e-8391-358a1a1e55cb",
+          "event-9192c33c-35ed-4462-b196-bc9ff9f767c1"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-9a1a2a2d-c778-4a45-90d3-286ee88232d6",
+        "photo_number": "P104",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:01:52.978Z",
+        "gps_accuracy_m": 15.395014000000002,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-043eb67f-8e99-4a6d-af88-ca8d16d2c774",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-7e1641eb-8060-4028-af1b-230a56128c39",
+        "photo_number": "P105",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:01:58.654Z",
+        "gps_accuracy_m": 15.395014000000002,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-969a7c4f-4db1-4dc0-a909-af977b2d588f",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139521806689,
+          30.489328306861914
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-f902ce0b-357d-4c9c-a8d2-2b93cc70799a",
+        "photo_number": "P106",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:02:17.147Z",
+        "gps_accuracy_m": 15.395014000000002,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-3e95b7e1-9600-4fcc-8d32-fd01445e04bf",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09166039720837,
+          30.4894305300252
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-38f1ef97-cea3-4736-8edb-1b2c81d34ea6",
+        "photo_number": "P107",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:10:09.085Z",
+        "gps_accuracy_m": 4.748651530191761,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-2286ab90-7a48-4ce5-813d-3eded50feaab",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09194001749817,
+          30.489788102014447
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-e53998d1-1063-4d9c-bd3e-39cd279e5d1b",
+        "photo_number": "P108",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:13:59.498Z",
+        "gps_accuracy_m": 7.862366461910542,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-cecff349-e393-4347-8672-9d2fc651d8cb",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09192584656375,
+          30.48981085617921
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-5685b8e9-a8ae-4411-b7cc-fa3793a12149",
+        "photo_number": "P109",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:14:12.325Z",
+        "gps_accuracy_m": 4.7476608669728275,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-55eff031-858c-4da0-ae91-19e04354e004",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09182602515453,
+          30.489778386241777
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-0b0bbcbe-fb51-414a-8c47-f8da0ce78689",
+        "photo_number": "P110",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:16:30.934Z",
+        "gps_accuracy_m": 13.423013296638686,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-79fee596-e5c5-4767-9a05-11c1743f86da",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09183107074968,
+          30.48978876868224
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-2eaf281d-54e8-491b-a652-417e64373658",
+        "photo_number": "P111",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:19:31.295Z",
+        "gps_accuracy_m": 14.005202108593513,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-397cc3d4-a1d4-453d-a049-d494a6909dfa",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160701280669,
+          30.489792715028358
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6d7da03d-78ca-4369-8e3f-372665f78e7f",
+        "photo_number": "P112",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:20:38.700Z",
+        "gps_accuracy_m": 15.23724855683303,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-2653dc06-043f-493c-a27a-4798240d3026",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09160520627594,
+          30.489775496907804
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-aeeb09d9-37da-4295-b29a-13008596d960",
+        "photo_number": "P113",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:20:46.709Z",
+        "gps_accuracy_m": 15.602611349498506,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-09955938-3e26-47d8-8307-8dff65bb3302",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09161031701603,
+          30.4897771390579
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-320b9055-c78e-499c-8eb6-9e969ecc8d48",
+        "photo_number": "P114",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:21:06.883Z",
+        "gps_accuracy_m": 13.2874240141282,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-cf58c85a-73ea-4ee1-8f28-9c92c47cee04",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09170625833913,
+          30.48985647534327
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-13e38e2e-a771-4da2-b9fe-a00e1b3e16a0",
+        "photo_number": "P115",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:22:58.681Z",
+        "gps_accuracy_m": 7.173080016069173,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-5ddea442-75f6-4604-adaf-650a5c50756d",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09173966185875,
+          30.489830531699614
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-6226316c-23f8-4715-a663-87d0eb255a52",
+        "photo_number": "P116",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:23:09.532Z",
+        "gps_accuracy_m": 7.354069786194858,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-218f6b19-c137-475b-b8b4-eadfb79c8ef2",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09170415225533,
+          30.489863230144177
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-ee82a9b9-afc1-4310-a47b-80e4337e5114",
+        "photo_number": "P117",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:23:20.383Z",
+        "gps_accuracy_m": 9.137694992203233,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-5eb87092-7163-445f-beea-06e596078057",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09177386863452,
+          30.48982590984741
+        ]
+      },
+      "properties": {
+        "record_type": "photograph",
+        "photo_id": "photo-78d02915-9131-474a-ac3c-df6af76a6368",
+        "photo_number": "P118",
+        "category": "MAP THIS SECTION",
+        "timestamp": "2026-08-07T16:23:50.179Z",
+        "gps_accuracy_m": 10.443335272461397,
+        "section_id": "SECTION-007",
+        "associated_record_ids": [
+          "event-f8391afe-5898-41a8-aa06-dcddffc1bfe5",
+          "event-a89e1953-4827-4a20-aede-a77d40e6e540"
+        ],
+        "is_recorded_water_category": false,
+        "information_class": "SOURCE_PHOTOGRAPH_LOCATION"
+      }
+    }
+  ]
+}

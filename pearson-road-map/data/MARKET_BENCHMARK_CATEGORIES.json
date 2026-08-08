@@ -1,0 +1,17 @@
+{
+  "schema_name": "property-intelligence-market-benchmark-categories",
+  "schema_version": "1.0",
+  "status": "STRUCTURE ONLY - NO VERIFIED PRICES ENTERED",
+  "customer_proposal_visibility": "INTERNAL ONLY",
+  "pricing_rule": "A benchmark may inform review but must never automatically set or reduce David's proposed sell price.",
+  "categories": [
+    "BUSH HOGGING",
+    "LIGHT BRUSH CLEARING",
+    "FORESTRY MULCHING",
+    "LAND CLEARING",
+    "DEBRIS REMOVAL",
+    "REAL ESTATE PHOTOGRAPHY",
+    "VACANT-LAND DRONE PHOTOGRAPHY",
+    "PROPERTY / LISTING MEDIA"
+  ]
+}

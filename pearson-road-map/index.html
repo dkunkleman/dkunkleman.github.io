@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Pearson Road Interactive Property Experience Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./styles.css?v=3">
+  <script src="./config.local.js" onerror="this.remove()"></script>
+</head>
+<body>
+  <header>
+    <div><strong>INTERACTIVE PROPERTY EXPERIENCE MAP</strong><span>PEARSON ROAD &mdash; EVIDENCE, REVEAL PROPOSAL, AND VISUAL PROPERTY STORY</span></div>
+    <div class="header-actions">
+      <label class="folder-button">LOAD PROPERTY FOLDER<input id="folderInput" type="file" webkitdirectory multiple></label>
+      <button id="exportImage" type="button">SAVE MAP IMAGE</button>
+    </div>
+  </header>
+  <nav id="modeTabs" aria-label="Map mode">
+    <button data-mode="EVIDENCE" class="active">EVIDENCE</button>
+    <button data-mode="INTERPRETATION">INTERPRETATION</button>
+    <button data-mode="PROPOSAL">PROPOSAL</button>
+    <button data-mode="RESULTS">RESULTS</button>
+  </nav>
+  <main>
+    <aside aria-label="Map layers and editing">
+      <section>
+        <h2>Field days</h2>
+        <button id="allDays" class="active">ALL DAYS</button>
+        <label><input data-date="2026-08-03" type="checkbox" checked><i class="day aug3"></i> AUG 3</label>
+        <label><input data-date="2026-08-04" type="checkbox" checked><i class="day aug4"></i> AUG 4</label>
+        <label><input data-date="2026-08-05" type="checkbox" checked><i class="day aug5"></i> AUG 5</label>
+        <label><input data-date="2026-08-06" type="checkbox" checked><i class="day aug6"></i> AUG 6</label>
+        <label><input data-date="2026-08-07" type="checkbox" checked><i class="day aug7"></i> AUG 7</label>
+        <label><input id="coverageToggle" type="checkbox" checked> Cumulative coverage</label>
+        <button id="fitParcel" type="button">FIT LARGE PARCEL</button>
+        <button id="fitAllEvidence" type="button">SHOW ALL EVIDENCE LOCATIONS</button>
+        <button id="fitAug7Transition" type="button">FIT AUG 7 TRANSITION WALK</button>
+      </section>
+      <section>
+        <h2>Layers</h2>
+        <label><input data-layer="parcel" type="checkbox" checked> Exact app parcel boundary</label>
+        <label><input data-layer="walks" type="checkbox" checked> Walks (clean display in customer view)</label>
+        <label><input data-layer="gps" type="checkbox"> Every immutable raw GPS point</label>
+        <label><input data-layer="photos" type="checkbox" checked> Photograph locations</label>
+        <label><input data-layer="findings" type="checkbox" checked> Trees / water / field findings</label>
+        <label><input data-layer="sections" type="checkbox" checked> Mapped sections</label>
+        <label><input data-layer="interpretation" type="checkbox" checked> Wet / drained interpretation</label>
+        <label><input data-layer="proposal" type="checkbox"> Proposal zones</label>
+        <label><input id="topographyToggle" type="checkbox"> USGS topography</label>
+        <label><input id="contoursToggle" type="checkbox"> 2-foot contours (when configured)</label>
+        <label><input id="outsideEvidenceToggle" type="checkbox" checked> Evidence outside the large parcel</label>
+      </section>
+      <section>
+        <h2>Photos</h2>
+        <button id="featuredFilter" type="button">DAVID'S FEATURED PHOTOS</button>
+        <button id="favoritesFilter" type="button">MY FAVORITES</button>
+        <label><input id="showFavoritesMap" type="checkbox"> Show favorites on map</label>
+      </section>
+      <section id="proposalTools" hidden>
+        <h2>Edit proposal</h2>
+        <button data-edit="DRAW_AREA" type="button">DRAW WORK AREA</button>
+        <button data-edit="RENAME" type="button">RENAME</button>
+        <button data-edit="CHANGE_TYPE" type="button">CHANGE TYPE</button>
+        <button data-edit="CHANGE_COLOR" type="button">CHANGE COLOR</button>
+        <button data-edit="ADD_NOTE" type="button">ADD NOTE</button>
+        <button data-edit="ADD_PRICE" type="button">ADD PRICE</button>
+        <button data-edit="ADD_BENEFIT" type="button">ADD BENEFIT</button>
+        <button data-edit="ATTACH_PHOTO" type="button">ADD PHOTOS</button>
+        <button data-edit="RESHAPE" type="button">RESHAPE AREA</button>
+        <button data-edit="SPLIT" type="button">SPLIT AREA</button>
+        <button data-edit="MERGE" type="button">MERGE AREAS</button>
+        <button id="undoEdit" type="button">UNDO</button>
+      </section>
+      <section id="internalPricing" hidden>
+        <h2>Internal pricing &mdash; never shown to customer</h2>
+        <div id="pricingStatus">Select a proposal zone.</div>
+        <label>David's proposed sell price
+          <input id="sellPrice" inputmode="decimal" placeholder="UNKNOWN">
+        </label>
+        <label><input id="validatePrice" type="checkbox"> David has validated this price</label>
+        <label>Target start
+          <input id="targetStart" type="date">
+        </label>
+        <label>Target completion
+          <input id="targetCompletion" type="date">
+        </label>
+        <button id="saveSellPrice" type="button">SAVE INTERNAL PRICE</button>
+        <div id="marketReference"></div>
+      </section>
+      <section>
+        <h2>Output</h2>
+        <select id="presentationProfile" aria-label="Presentation profile">
+          <option value="INTERNAL_EDITABLE">Internal editable</option>
+          <option value="CUSTOMER_REVIEW">Customer review</option>
+          <option value="PRINT_REPORT">Printable report</option>
+          <option value="DATA_EXPORT">GeoJSON / data export</option>
+        </select>
+        <button id="exportMap" type="button">EXPORT MAP DATA</button>
+        <button id="printMap" type="button">PRINT / SAVE PDF</button>
+      </section>
+      <section id="assetPanel">
+        <h2>Repeat water monitoring</h2>
+        <select id="assetSelect" aria-label="Property asset"></select>
+        <button id="addCulvertObservation" type="button">ADD CULVERT WATER LEVEL</button>
+        <div id="assetTimeline"></div>
+      </section>
+      <section id="evidenceTotals" aria-live="polite"><h2>Evidence inventory</h2><p>Loading every preserved source point...</p></section>
+      <section id="selection" aria-live="polite"><h2>Selected</h2><p>Move over the map to see nearby photographs. Tap any symbol for its source record.</p></section>
+    </aside>
+    <section class="map-column">
+      <div id="mapStatus" role="status">Loading immutable Pearson Road evidence...</div>
+      <div class="view-switch" aria-label="Map scale">
+        <button id="fullPropertyView" class="active" type="button">FULL PROPERTY</button>
+        <button id="zoneDetailView" type="button">SELECTED ZONE DETAIL</button>
+      </div>
+      <div class="map-wrap">
+        <div id="map" aria-label="Interactive Pearson Road property map"></div>
+        <div class="map-orientation" aria-hidden="true"><span>N</span><b>&uarr;</b></div>
+        <div class="road-label">PEARSON ROAD</div>
+        <div id="photoFilmstrip" aria-label="Geographically nearby photographs"></div>
+      </div>
+      <div class="legend"><b>PHONE GPS / COUNTY PARCEL &mdash; APPROXIMATE, NOT A SURVEY</b><span class="swatch aug3"></span>Aug 3 <span class="swatch aug4"></span>Aug 4 <span class="swatch aug5"></span>Aug 5 <span class="swatch aug6"></span>Aug 6 <span class="swatch aug7"></span>Aug 7 <span class="finding-key water-key">W</span>Recorded water <span class="finding-key tree-key">T</span>Tree <span class="finding-key culvert-key">C</span>Culvert <span class="finding-key brush-key">B</span>Brush</div>
+      <section id="customerProposal" class="proposal-sheet" aria-live="polite">
+        <div class="proposal-sheet-heading">
+          <div><span class="eyebrow">PEARSON ROAD PROPOSAL V0.2</span><h2>Recommended First Project</h2><p>One bounded first project. Every optional next opportunity is excluded from this price.</p></div>
+          <div id="proposalTotal" class="proposal-total">TOTAL: UNKNOWN</div>
+        </div>
+        <div id="starterReveal"></div>
+        <section class="proposal-explanation">
+          <h2>Why this first project</h2>
+          <p>Dense roadside and interior vegetation makes it difficult for a buyer to understand what lies beyond the frontage. This selective first reveal opens enough of the western portion to show the entrance experience, walkable interior ground, mature trees, and relationship to the nearby water feature.</p>
+          <p>The objective is not to clear everything. It is to reveal enough for better decisions. Completed work will be documented in the <strong>Interactive Property Experience Map</strong>.</p>
+        </section>
+        <section id="finishComparison" class="finish-comparison">
+          <h2>Choose the finish</h2>
+          <div class="finish-grid">
+            <article><span class="eyebrow">BASE PROJECT</span><h3>Reveal Finish</h3><p>Discover and expose the property's useful features economically: walkability, important sight lines, water relationships, mature trees, and meaningful photographs.</p><p>The result is a recently cleared natural area. Consolidated cut material, minor irregularities, and low stubble may remain.</p><blockquote>“Now I can finally see what is here.”</blockquote></article>
+            <article><span class="eyebrow">OPTIONAL UPGRADE</span><h3>Clean Staging Finish</h3><p>Reveal Finish plus deliberate edges, additional cleanup, blown and inspected trails, practical recutting of protruding stems, refined entrance and view presentation, and final matched photographs.</p><blockquote>“Now this looks intentionally prepared for sale.”</blockquote><strong>Not included in the current price.</strong></article>
+          </div>
+        </section>
+        <section id="buyerExperience" class="buyer-experience">
+          <h2>The buyer experience after the reveal</h2>
+          <div class="experience-grid">
+            <p><b>From the road</b><br>“There is clearly something here worth exploring.”</p>
+            <p><b>At the entrance</b><br>“I can see how I would enter and move into this property.”</p>
+            <p><b>Inside the reveal</b><br>“Now I understand the trees, water, terrain, and scale.”</p>
+            <p><b>On the map</b><br>“Now I know exactly where those photographs and features are located.”</p>
+          </div>
+        </section>
+        <section id="productLadder" class="product-ladder">
+          <h2>Property reveal path</h2>
+          <ol><li><b>Property Reveal / Intelligence Assessment</b></li><li><b>Starter Reveal — Reveal Finish</b></li><li><b>Interactive Property Experience Map</b></li><li><b>Clean Staging Finish</b></li><li><b>Additional Reveals</b></li><li><b>Listing Support</b></li></ol>
+        </section>
+        <div class="proposal-actions">
+          <button id="askQuestion" type="button">ASK A QUESTION</button>
+          <button id="requestChange" type="button">REQUEST CHANGE</button>
+          <button id="acceptProposal" class="primary-action" type="button">ACCEPT PROPOSAL</button>
+        </div>
+        <div id="acceptanceStatus" role="status"></div>
+      </section>
+    </section>
+  </main>
+  <dialog id="photoDialog">
+    <div class="photo-viewer-bar">
+      <strong id="photoCounter">1 OF 1</strong>
+      <button id="closePhoto" type="button">CLOSE</button>
+    </div>
+    <div id="photoCollectionLabel"></div>
+    <button id="previousPhoto" class="photo-nav photo-nav-previous" type="button" aria-label="Previous photograph"><span aria-hidden="true">&#8249;</span><small>PREVIOUS</small></button>
+    <button id="nextPhoto" class="photo-nav photo-nav-next" type="button" aria-label="Next photograph"><span aria-hidden="true">&#8250;</span><small>NEXT</small></button>
+    <div id="photoDetails"></div>
+  </dialog>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./property-map-core.js?v=4"></script>
+  <script src="./app.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{
+  "proposal_id": "PEARSON-ROAD-PROPOSAL-V0.1",
+  "proposal_version": "V0.1",
+  "property_id": "221S280000001010000",
+  "status": "DRAFT_REQUIRES_DAVID_REVIEW",
+  "customer_facing_title": "WESTERN FRONTAGE, ENTRANCE & WATER-FEATURE REVEAL",
+  "recommended_first_project": {
+    "proposal_zone_id": "PROPOSAL-ZONE-001",
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-87.0927, 30.48857],
+        [-87.09218, 30.48857],
+        [-87.09205, 30.48872],
+        [-87.09194, 30.4894],
+        [-87.09202, 30.48966],
+        [-87.09216, 30.48977],
+        [-87.0927, 30.48961],
+        [-87.0927, 30.48857]
+      ]]
+    },
+    "geometry_status": "EVIDENCE-GROUNDED DRAFT - DAVID MUST APPROVE OR RESHAPE BEFORE CUSTOMER USE",
+    "geometry_measurement_basis": "APPROXIMATE FROM DRAFT MAP GEOMETRY - NOT A SURVEY",
+    "acreage": 2.05,
+    "approx_length_ft": 438,
+    "approx_width_ft": 239,
+    "perimeter_ft": 1200,
+    "base_finish": "REVEAL FINISH",
+    "optional_upgrade": "UPGRADE TO CLEAN STAGING FINISH - NOT INCLUDED IN CURRENT PRICE",
+    "current_condition": "Dense smaller vegetation and documented standing-water locations obscure the western frontage, candidate entrance, and water-feature relationship.",
+    "primary_objective": "Make the proposed western approach and nearby water feature visible and understandable from the frontage while retaining the mature wooded character.",
+    "included_scope": [
+      "Selectively cut designated smaller brush within the approved work polygon",
+      "Open a visible and walkable relationship between the western frontage, candidate entrance, and nearby water feature",
+      "Remove cut material from the staged zone and consolidate it onsite only at a David/customer-approved screened location",
+      "Complete a final walk-through and matched after-photo record"
+    ],
+    "preserve": [
+      "Mature pines and hardwoods unless separately approved",
+      "The documented water/drainage feature and natural ground contours",
+      "Vegetation outside the approved work polygon"
+    ],
+    "not_included": [
+      "No grading, excavation, stump grubbing, drainage engineering, or build-ready claim",
+      "Clean Staging Finish is an optional upgrade, not included in the base Reveal Finish"
+    ],
+    "expected_customer_marketing_benefit": "Help a buyer understand the western approach, see the water feature as part of the property story, and recognize the mature-tree setting.",
+    "expected_visible_result": "A legible western entrance-and-water-feature reveal, not a finished driveway, engineered drainage project, or build-ready site.",
+    "target_start": "UNKNOWN",
+    "target_completion": "UNKNOWN",
+    "proposed_price": "UNKNOWN",
+    "price_status": "NEEDS_PRODUCTION_TEST",
+    "pricing_crew_model": "David + 1 helper",
+    "featured_before_photo_ids": [
+      "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+      "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+      "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+      "photo-067b4916-83f7-4bd7-bae7-05bafda11031",
+      "photo-ade931ab-463f-4188-af5f-46a587eb8083",
+      "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+      "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+      "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4"
+    ]
+  },
+  "optional_next_opportunities": [
+    "Candidate homesite / view reveal - NOT INCLUDED IN CURRENT PRICE",
+    "Creek / water-walk extension - NOT INCLUDED IN CURRENT PRICE",
+    "Eastern open-area / pasture-potential reveal - NOT INCLUDED IN CURRENT PRICE"
+  ],
+  "customer_actions": [
+    "ASK A QUESTION",
+    "REQUEST A CHANGE",
+    "ACCEPT PROPOSAL"
+  ],
+  "acceptance_rule": "Acceptance is blocked until David enters and validates a price. Acceptance freezes the proposal version and creates an unstarted Work Order. Payment processing is not activated.",
+  "source_evidence_modified": false,
+  "deployed": false
+}

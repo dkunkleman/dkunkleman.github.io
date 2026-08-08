@@ -1,0 +1,71 @@
+{
+  "proposal_id": "PEARSON-ROAD-PROPOSAL-V0.2",
+  "proposal_version": "V0.2",
+  "product_name": "Interactive Property Experience Map",
+  "property_id": "221S280000001010000",
+  "status": "DRAFT_REQUIRES_DAVID_REVIEW",
+  "customer_facing_title": "WESTERN FRONTAGE, ENTRANCE & WATER-FEATURE REVEAL",
+  "recommended_first_project": {
+    "proposal_zone_id": "PROPOSAL-ZONE-001",
+    "geometry_source": "PEARSON_ROAD_PROPOSAL_V0_1.json",
+    "geometry_status": "EVIDENCE-GROUNDED DRAFT - DAVID MUST APPROVE OR RESHAPE BEFORE CUSTOMER USE",
+    "acreage": 2.05,
+    "approx_length_ft": 438,
+    "approx_width_ft": 239,
+    "perimeter_ft": 1200,
+    "why_this_first_project": "Dense roadside and interior vegetation makes it difficult for a buyer to understand what lies beyond the frontage. Selectively reveal enough of the western portion to show the entrance experience, walkable interior ground, mature trees, and relationship to the nearby water feature. The objective is not to clear everything; it is to reveal enough for better decisions.",
+    "base_finish": {
+      "name": "REVEAL FINISH",
+      "definition": "Discover and expose useful property features economically. The completed area remains a recently cleared natural area; consolidated cut material, minor irregularities, and low stubble may remain.",
+      "customer_result": "Now I can finally see what is here."
+    },
+    "optional_upgrade": {
+      "name": "CLEAN STAGING FINISH",
+      "included_in_current_price": false,
+      "definition": "Reveal Finish plus deliberate edges, additional cleanup, blown and inspected trails, practical recutting of protruding stems, refined entrance and view presentation, and final matched photographs.",
+      "customer_result": "Now this looks intentionally prepared for sale."
+    },
+    "proposed_price": "UNKNOWN",
+    "price_status": "NEEDS_PRODUCTION_TEST",
+    "pricing_crew_model": "David + 1 helper",
+    "featured_before_photo_ids": [
+      "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+      "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+      "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+      "photo-067b4916-83f7-4bd7-bae7-05bafda11031",
+      "photo-ade931ab-463f-4188-af5f-46a587eb8083",
+      "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+      "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+      "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4"
+    ]
+  },
+  "customer_experience": {
+    "from_road": "There is clearly something here worth exploring.",
+    "at_entrance": "I can see how I would enter and move into this property.",
+    "inside_reveal": "Now I understand the trees, water, terrain, and scale.",
+    "on_map": "Now I know exactly where those photographs and features are located."
+  },
+  "product_ladder": [
+    "Property Reveal / Intelligence Assessment",
+    "Starter Reveal - Reveal Finish",
+    "Interactive Property Experience Map",
+    "Clean Staging Finish",
+    "Additional Reveals",
+    "Listing Support"
+  ],
+  "display_walks": {
+    "file": "DISPLAY_WALKS_CLEAN.geojson",
+    "presentation_only": true,
+    "raw_gps_file": "ALL_GPS_POINTS.geojson",
+    "raw_gps_preserved": true,
+    "no_artificial_relocation_connectors": true
+  },
+  "optional_next_opportunities": [
+    "Candidate homesite / view reveal - NOT INCLUDED IN CURRENT PRICE",
+    "Creek / water-walk extension - NOT INCLUDED IN CURRENT PRICE",
+    "Eastern open-area / pasture-potential reveal - NOT INCLUDED IN CURRENT PRICE"
+  ],
+  "acceptance_rule": "Acceptance is blocked until David enters and validates a price. Acceptance freezes the proposal version and creates an unstarted Work Order. Payment processing is not activated.",
+  "source_evidence_modified": false,
+  "deployed": false
+}

@@ -1,0 +1,107 @@
+{
+  "schema_name": "pearson-road-all-incursions-map-summary",
+  "generated_at": "2026-08-07T23:12:22.936Z",
+  "property_id": "221S280000001010000",
+  "counts": {
+    "gps_points": 22535,
+    "route_segments": 11,
+    "photo_points": 374,
+    "field_findings": 482,
+    "mapped_section_features": 1176
+  },
+  "by_day": {
+    "gps_points": {
+      "2026-08-03": 5229,
+      "2026-08-04": 5832,
+      "2026-08-05": 4629,
+      "2026-08-06": 1292,
+      "2026-08-07": 5553
+    },
+    "photo_points": {
+      "2026-08-03": 196,
+      "2026-08-04": 51,
+      "2026-08-05": 71,
+      "2026-08-06": 1,
+      "2026-08-07": 55
+    },
+    "field_findings": {
+      "2026-08-03": 259,
+      "2026-08-04": 79,
+      "2026-08-05": 65,
+      "2026-08-06": 6,
+      "2026-08-07": 73
+    }
+  },
+  "finding_classes": {
+    "OTHER": 55,
+    "BLOCKED": 3,
+    "DRY": 2,
+    "WATER": 43,
+    "PHOTO": 326,
+    "TREE": 23,
+    "CULVERT": 2,
+    "ROAD_ENTRANCE": 9,
+    "BRUSH": 4,
+    "OPEN_AREA": 2,
+    "DITCH_SWALE": 4,
+    "HARDWOOD": 4,
+    "MAGNOLIA": 2,
+    "PINE": 3
+  },
+  "photo_classes": {
+    "OTHER": 292,
+    "ROAD_ENTRANCE": 18,
+    "BRUSH": 15,
+    "OPEN_AREA": 1,
+    "TREE": 27,
+    "WATER": 13,
+    "DITCH_SWALE": 4,
+    "PHOTO": 4
+  },
+  "recorded_water_photos": [
+    "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+    "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+    "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+    "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+    "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+    "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+    "photo-be406434-72fd-4c09-9fff-2c7035edb7d8",
+    "photo-f345fc1c-628f-4a67-92ce-e8c6333c0df7",
+    "photo-1abf3541-39b5-4d42-b661-da2f68281b42",
+    "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4",
+    "photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f"
+  ],
+  "evidence_scope": {
+    "gps_points": {
+      "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED": 15711,
+      "SUBJECT_PARCEL": 6824
+    },
+    "photo_points": {
+      "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED": 312,
+      "SUBJECT_PARCEL": 62
+    },
+    "field_findings": {
+      "OFF_PROPERTY_OR_TEST_REVIEW_REQUIRED": 401,
+      "SUBJECT_PARCEL": 81
+    }
+  },
+  "rules": [
+    "Every normalized feature retains its source file and stable source identifier when available.",
+    "Original evidence records are read-only and are not rewritten.",
+    "Photographs explicitly recorded with category WATER display as WATER.",
+    "Other photographs are not silently classified from image appearance; they remain NOT_REVIEWED_FROM_IMAGE until confirmed.",
+    "Off-property or test evidence is preserved and labeled separately.",
+    "Route display starts a new segment across time gaps or impossible relocation jumps; all raw points remain available."
+  ],
+  "source_files": {
+    "aug34Archive": "C:/Users/Admin/iCloudDrive/Downloads/Pearson_Road_Inspection_AI_ANALYSIS_REPORT_PACKAGE_2026-08-04_151016_633_export_report_2026_08_04_151016_633_b7b522724099.zip",
+    "aug56Archive": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\August 6 GPT Handoff\\SEND_THIS_TO_GPT_AUGUST_6.zip",
+    "aug5Sections": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\Pearson Road August 5 Correct Archive Maps\\mapped-sections.geojson",
+    "aug7Inspection": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\01_INSPECTION_FULL.json",
+    "aug7Gps": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\04_GPS_COMPLETE.json",
+    "aug7SectionsRaw": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\AUG7_MAPPED_SECTIONS_RAW.geojson",
+    "aug7SectionsFiltered": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\AUG7_MAPPED_SECTIONS_FILTERED.geojson",
+    "aug7Interpretation": "C:\\Users\\Admin\\Documents\\Codex\\Property Intelligence Packages\\CHATGPT_REVIEW_2026-08-07\\AUG7_INSPECTOR_WET_DRY_INTERPRETATION.geojson",
+    "parcel": "C:\\Users\\Admin\\Documents\\Codex\\field-v5-findings-overlay-isolated\\property-map-prototype\\data\\AUG7_SUBJECT_PARCEL.geojson"
+  }
+}

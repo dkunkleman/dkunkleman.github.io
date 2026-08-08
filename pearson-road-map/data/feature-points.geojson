@@ -1,0 +1,2032 @@
+{
+  "type": "FeatureCollection",
+  "name": "Inspection feature points",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-c1a2d384-c275-4703-a85b-a72c85aa84ab",
+        "feature_id": "WATER-001",
+        "simple_session_id": "simple-session-789d6c84-ca76-4d61-b88a-03f49e1d15e2",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-04T22:47:24.297Z",
+        "gps_accuracy_m": 10.08018434281551,
+        "compass_heading_deg": 281.0115966796875,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-789d6c84-ca76-4d61-b88a-03f49e1d15e2",
+          "feature_id": "WATER-001",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "ft",
+          "length": "",
+          "width": "",
+          "depth": "",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08932283679164,
+          30.473455086688578
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-6d6dbcfc-5b26-4527-96d0-8a96b0589c08",
+        "feature_id": "ROAD-001",
+        "simple_session_id": "simple-session-e0e22127-e0a7-4cf8-9068-bfe117b2ab37",
+        "feature_type": "entrance",
+        "label": "Road or Entrance",
+        "recorded_at": "2026-08-04T22:49:06.151Z",
+        "gps_accuracy_m": 6.129381365455207,
+        "compass_heading_deg": 357.9070129394531,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-e0e22127-e0a7-4cf8-9068-bfe117b2ab37",
+          "feature_id": "ROAD-001",
+          "simple_feature_type": "entrance",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "ROAD / ENTRANCE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08934895856656,
+          30.473535388468015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-be7e545b-ac96-46c4-9e3c-faaa759d44ad",
+        "feature_id": "BRUSH-001",
+        "simple_session_id": "simple-session-aac59c1b-6a28-4771-aeb3-1fd5eb656956",
+        "feature_type": "brush",
+        "label": "Thick Brush",
+        "recorded_at": "2026-08-04T22:50:01.374Z",
+        "gps_accuracy_m": 4.650775524009436,
+        "compass_heading_deg": 11.829683303833008,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-aac59c1b-6a28-4771-aeb3-1fd5eb656956",
+          "feature_id": "BRUSH-001",
+          "simple_feature_type": "brush",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "severity": "Heavy",
+          "approximate_extent": "8x8 ft",
+          "dominant_obstruction": "",
+          "note": "",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "BRUSH"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08937293131801,
+          30.473652233024033
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-9231bb93-dc45-4ca3-a2f0-894909c766c1",
+        "feature_id": "BLOCKED-001",
+        "simple_session_id": "simple-session-5f5d12a7-2861-4a6b-afbd-d4638ba48553",
+        "feature_type": "blocked",
+        "label": "Blocked Access",
+        "recorded_at": "2026-08-04T22:51:09.008Z",
+        "gps_accuracy_m": 4.748651530191761,
+        "compass_heading_deg": 7.739176273345947,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-5f5d12a7-2861-4a6b-afbd-d4638ba48553",
+          "feature_id": "BLOCKED-001",
+          "simple_feature_type": "blocked",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0893878956205,
+          30.473648705548168
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-8f44aad3-ee6f-4582-a33b-f60dd7ae459d",
+        "feature_id": "OPEN-001",
+        "simple_session_id": "simple-session-fac2b83e-8a85-4533-9172-e2994747d545",
+        "feature_type": "open",
+        "label": "Open Area",
+        "recorded_at": "2026-08-04T22:51:25.684Z",
+        "gps_accuracy_m": 4.05703330508919,
+        "compass_heading_deg": 45.68190002441406,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-fac2b83e-8a85-4533-9172-e2994747d545",
+          "feature_id": "OPEN-001",
+          "simple_feature_type": "open",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "OPEN AREA"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08944732331399,
+          30.47373001000888
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-e539dafd-4413-4956-8d51-bf6c44406c55",
+        "feature_id": "TREE-001",
+        "simple_session_id": "simple-session-7eec5422-c6e9-47b6-b6a2-906e2c8b4e7b",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T22:52:06.858Z",
+        "gps_accuracy_m": 17.176952074338605,
+        "compass_heading_deg": 323.529296875,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-7eec5422-c6e9-47b6-b6a2-906e2c8b4e7b",
+          "feature_id": "TREE-001",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 4,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08947050712358,
+          30.47370981285281
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-b121123b-70cb-4ec3-9126-30bc09d4ba6e",
+        "feature_id": "GROUND-001",
+        "simple_session_id": "simple-session-ff99e4db-c14c-4985-ae91-9e6ac29f2c1b",
+        "feature_type": "highlow",
+        "label": "High Ground",
+        "recorded_at": "2026-08-04T22:53:39.407Z",
+        "gps_accuracy_m": 6.889378668788992,
+        "compass_heading_deg": 158.94619750976562,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-ff99e4db-c14c-4985-ae91-9e6ac29f2c1b",
+          "feature_id": "GROUND-001",
+          "simple_feature_type": "highlow",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "ground_position": "Unknown",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08927138102028,
+          30.473670488493347
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-f4c2c6e0-1da0-4818-816b-89eca2d17ae7",
+        "feature_id": "GROUND-002",
+        "simple_session_id": "simple-session-051ea07a-9e0a-49e6-876c-29a39f17c5b5",
+        "feature_type": "highlow",
+        "label": "High Ground",
+        "recorded_at": "2026-08-04T22:53:56.882Z",
+        "gps_accuracy_m": 4.660907514563143,
+        "compass_heading_deg": 32.01853561401367,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-051ea07a-9e0a-49e6-876c-29a39f17c5b5",
+          "feature_id": "GROUND-002",
+          "simple_feature_type": "highlow",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "ground_position": "Unknown",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08928802096712,
+          30.47374841622269
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-997ed88c-d306-400e-b27e-2c2c1a7a240a",
+        "feature_id": "TREE-002",
+        "simple_session_id": "simple-session-1f1832cf-373f-4b15-8cf3-5898e9b35b57",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T22:54:24.146Z",
+        "gps_accuracy_m": 3.577818592097622,
+        "compass_heading_deg": 228.39939880371094,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-1f1832cf-373f-4b15-8cf3-5898e9b35b57",
+          "feature_id": "TREE-002",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 4,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08942798187702,
+          30.473668658518474
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-11051b12-9ff4-40e5-ba1f-d059fe353f56",
+        "feature_id": "TREE-003",
+        "simple_session_id": "simple-session-9200f8ac-3f2f-4e75-8106-7ef91ae24518",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T22:55:58.180Z",
+        "gps_accuracy_m": 7.417064928008146,
+        "compass_heading_deg": 232.71107482910156,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-9200f8ac-3f2f-4e75-8106-7ef91ae24518",
+          "feature_id": "TREE-003",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 5,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08945501266022,
+          30.473555716650353
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-bf81158c-9dd9-4446-a689-b510ab37dec6",
+        "feature_id": "TREE-004",
+        "simple_session_id": "simple-session-39a9314e-cb69-4ab1-9ecf-36d0e5899539",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T22:57:24.866Z",
+        "gps_accuracy_m": 9.705428687641252,
+        "compass_heading_deg": 247.14279174804688,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-39a9314e-cb69-4ab1-9ecf-36d0e5899539",
+          "feature_id": "TREE-004",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 4,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08956823539053,
+          30.473466156173266
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-11f66a3c-46b7-445a-a992-cadf4b09d68f",
+        "feature_id": "DITCH-001",
+        "simple_session_id": "simple-session-6be6c1fa-061d-4211-a03b-8b8e2fbe5823",
+        "feature_type": "ditch",
+        "label": "Ditch",
+        "recorded_at": "2026-08-04T22:59:06.370Z",
+        "gps_accuracy_m": 14.85664396106079,
+        "compass_heading_deg": 242.67529296875,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-6be6c1fa-061d-4211-a03b-8b8e2fbe5823",
+          "feature_id": "DITCH-001",
+          "simple_feature_type": "ditch",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "width": "20",
+          "depth": "1",
+          "visible_length": "8",
+          "water_present": "No",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.089657503193,
+          30.47338862461263
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-a903d62d-8d9f-4291-a279-dbcb0baf08e6",
+        "feature_id": "ROAD-002",
+        "simple_session_id": "simple-session-14fd3717-b4ef-42b8-8169-35e42357d34e",
+        "feature_type": "entrance",
+        "label": "Road or Entrance",
+        "recorded_at": "2026-08-04T23:00:07.489Z",
+        "gps_accuracy_m": 11.727489330157427,
+        "compass_heading_deg": 348.58740234375,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-14fd3717-b4ef-42b8-8169-35e42357d34e",
+          "feature_id": "ROAD-002",
+          "simple_feature_type": "entrance",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "ROAD / ENTRANCE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08970769227697,
+          30.473371071439992
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-419c658b-2716-400c-8fd3-833087da5059",
+        "feature_id": "BRUSH-002",
+        "simple_session_id": "simple-session-c7a41080-a90f-45c0-b885-a7f5bb8fee1b",
+        "feature_type": "brush",
+        "label": "Thick Brush",
+        "recorded_at": "2026-08-04T23:00:42.168Z",
+        "gps_accuracy_m": 9.22251894760319,
+        "compass_heading_deg": 297.064697265625,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-c7a41080-a90f-45c0-b885-a7f5bb8fee1b",
+          "feature_id": "BRUSH-002",
+          "simple_feature_type": "brush",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "severity": "Unknown",
+          "approximate_extent": "",
+          "dominant_obstruction": "",
+          "note": "",
+          "photo_count": 8,
+          "voice_note_count": 0,
+          "category": "BRUSH"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08977054481007,
+          30.47330193516253
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-9a7a9cbd-ab20-4e70-a2f2-1e76277f408c",
+        "feature_id": "TREE-005",
+        "simple_session_id": "simple-session-1890b0f0-ec8b-4ee1-b837-41cfc6ebca92",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T23:02:17.489Z",
+        "gps_accuracy_m": 12.490811188933481,
+        "compass_heading_deg": 273.5562744140625,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-1890b0f0-ec8b-4ee1-b837-41cfc6ebca92",
+          "feature_id": "TREE-005",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 3,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08979235258803,
+          30.473267611673847
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-142ef2f3-2ad2-4eab-a9b4-12cc421e46df",
+        "feature_id": "BRUSH-003",
+        "simple_session_id": "simple-session-81a0c876-2419-4c50-84f9-8d0dd1681697",
+        "feature_type": "brush",
+        "label": "Thick Brush",
+        "recorded_at": "2026-08-04T23:03:01.817Z",
+        "gps_accuracy_m": 10.396563449760896,
+        "compass_heading_deg": 280.699462890625,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-81a0c876-2419-4c50-84f9-8d0dd1681697",
+          "feature_id": "BRUSH-003",
+          "simple_feature_type": "brush",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "severity": "Unknown",
+          "approximate_extent": "",
+          "dominant_obstruction": "",
+          "note": "",
+          "photo_count": 4,
+          "voice_note_count": 0,
+          "category": "BRUSH"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0897750758069,
+          30.47325312635539
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-ef84b0da-28f7-4746-9d69-aea147623c24",
+        "feature_id": "TREE-006",
+        "simple_session_id": "simple-session-1900d156-22ec-4c9f-95e4-c0e68e6c869d",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-04T23:03:57.828Z",
+        "gps_accuracy_m": 10.159900941192014,
+        "compass_heading_deg": 277.84442138671875,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-1900d156-22ec-4c9f-95e4-c0e68e6c869d",
+          "feature_id": "TREE-006",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 4,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08978135428208,
+          30.473210593453345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-85cb2583-28a0-497d-9217-ac0552f52c84",
+        "feature_id": "BRUSH-004",
+        "simple_session_id": "simple-session-1ec03a2b-1282-4ee9-b958-0a4e5ccc5ec6",
+        "feature_type": "brush",
+        "label": "Thick Brush",
+        "recorded_at": "2026-08-04T23:04:57.474Z",
+        "gps_accuracy_m": 9.266544511889657,
+        "compass_heading_deg": 263.6697998046875,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-1ec03a2b-1282-4ee9-b958-0a4e5ccc5ec6",
+          "feature_id": "BRUSH-004",
+          "simple_feature_type": "brush",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "severity": "Unknown",
+          "approximate_extent": "",
+          "dominant_obstruction": "",
+          "note": "",
+          "photo_count": 2,
+          "voice_note_count": 0,
+          "category": "BRUSH"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08980039632208,
+          30.47319187495442
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-da04b2ec-14e1-49ed-ba90-1136521a39b1",
+        "feature_id": "FRONTAGE-END-001",
+        "simple_session_id": "simple-session-e15d9c56-b591-4fa9-9d5f-215e25f01781",
+        "feature_type": "frontage_end",
+        "label": "frontage_end",
+        "recorded_at": "2026-08-05T12:02:38.480Z",
+        "gps_accuracy_m": 2.895939423212897,
+        "compass_heading_deg": 68.17105865478516,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "FRONTAGE-END-001",
+          "frontage_record_type": "frontage_end",
+          "boundary_confidence": "APPROXIMATE_END_MARKED",
+          "surveyed_boundary_claim": false,
+          "simple_session_id": "simple-session-e15d9c56-b591-4fa9-9d5f-215e25f01781",
+          "feature_id": "FRONTAGE-END-001",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "FRONTAGE END"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08923886785483,
+          30.473474644690818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-6d5c91e3-10b0-4d1d-8663-5935ac17020d",
+        "feature_id": "TREE-007",
+        "simple_session_id": "simple-session-b7c5542a-b792-4c55-9b75-29f9bba6a3b4",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T12:03:17.866Z",
+        "gps_accuracy_m": 2,
+        "compass_heading_deg": 74.54876708984375,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-b7c5542a-b792-4c55-9b75-29f9bba6a3b4",
+          "feature_id": "TREE-007",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Sweetgum",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "32",
+          "note": "",
+          "calculated_dbh_in": 10.19,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08922255744153,
+          30.47345697033769
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-93376abf-5fea-47c3-8c32-c9ed23be38c0",
+        "feature_id": "WATER-002",
+        "simple_session_id": "simple-session-daf91303-3239-476b-b8df-f102e0a3836a",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-05T12:04:06.028Z",
+        "gps_accuracy_m": 3.90975271226815,
+        "compass_heading_deg": 79.7776870727539,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-daf91303-3239-476b-b8df-f102e0a3836a",
+          "feature_id": "WATER-002",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "in",
+          "length": "66",
+          "width": "35",
+          "depth": "2",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0892164333715,
+          30.473451370804792
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-bd122064-ab4f-4847-a656-a3c60f6261b3",
+        "feature_id": "DITCH-002",
+        "simple_session_id": "simple-session-62e223c9-fb79-46c0-9d83-4824c55c362f",
+        "feature_type": "ditch",
+        "label": "Ditch",
+        "recorded_at": "2026-08-05T12:59:19.474Z",
+        "gps_accuracy_m": 4.793046681358738,
+        "compass_heading_deg": 25.36144256591797,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-62e223c9-fb79-46c0-9d83-4824c55c362f",
+          "feature_id": "DITCH-002",
+          "simple_feature_type": "ditch",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "width": "48",
+          "depth": "4",
+          "visible_length": "",
+          "water_present": "Yes",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 2
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0928749236344,
+          30.48826083989223
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-80d10a7c-ee9b-4b85-940e-295477a1e3bf",
+        "feature_id": "VEHICLE-CROSSING-001",
+        "simple_session_id": "simple-session-d3b5759e-4add-4f8d-aae7-a368bf2defae",
+        "feature_type": "vehicle_crossing",
+        "label": "vehicle_crossing",
+        "recorded_at": "2026-08-05T13:01:59.191Z",
+        "gps_accuracy_m": 13.907819983525872,
+        "compass_heading_deg": 13.103870391845703,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "VEHICLE-CROSSING-001",
+          "frontage_record_type": "vehicle_crossing",
+          "crossing_work_class": "CULVERT_APPARENTLY_NEEDED",
+          "permission_established": false,
+          "engineered": false,
+          "legally_approved": false,
+          "construction_ready": false,
+          "simple_session_id": "simple-session-d3b5759e-4add-4f8d-aae7-a368bf2defae",
+          "feature_id": "VEHICLE-CROSSING-001",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "culvert_sequence_step": "DONE",
+          "culvert_questions": {
+            "water_visible_in_ditch": {
+              "fact_id": "FACT-1785934944741-f47c0474c6b4a",
+              "field": "water_visible_in_ditch",
+              "value": "YES",
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:02:24.741Z",
+              "gps": {
+                "latitude": 30.48828764167241,
+                "longitude": -87.09280098387674,
+                "accuracy_m": 13.907819983525872,
+                "position_at": "2026-08-05T13:01:58.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-001",
+              "limitation": null
+            },
+            "ditch_top_width": {
+              "fact_id": "FACT-1785934958807-b93537885ccc88",
+              "field": "ditch_top_width",
+              "value": 48,
+              "unit": "in",
+              "information_class": "MEASURED_ON_SITE",
+              "recorded_at": "2026-08-05T13:02:38.807Z",
+              "gps": {
+                "latitude": 30.48828764167241,
+                "longitude": -87.09280098387674,
+                "accuracy_m": 13.907819983525872,
+                "position_at": "2026-08-05T13:01:58.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-001",
+              "limitation": null
+            },
+            "ditch_depth_from_road_side_top_edge": {
+              "fact_id": "FACT-1785934960466-8e9f29d9b3d01",
+              "field": "ditch_depth_from_road_side_top_edge",
+              "value": 0,
+              "unit": "in",
+              "information_class": "MEASURED_ON_SITE",
+              "recorded_at": "2026-08-05T13:02:40.466Z",
+              "gps": {
+                "latitude": 30.48828764167241,
+                "longitude": -87.09280098387674,
+                "accuracy_m": 13.907819983525872,
+                "position_at": "2026-08-05T13:01:58.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-001",
+              "limitation": null
+            },
+            "ground_behind_ditch_reasonably_passable": {
+              "fact_id": "FACT-1785934986006-8df7d2d8d2e78",
+              "field": "ground_behind_ditch_reasonably_passable",
+              "value": "NO",
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:03:06.007Z",
+              "gps": {
+                "latitude": 30.48828764167241,
+                "longitude": -87.09280098387674,
+                "accuracy_m": 13.907819983525872,
+                "position_at": "2026-08-05T13:01:58.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-001",
+              "limitation": null
+            },
+            "visible_work_factors": {
+              "fact_id": "FACT-1785934995851-f17f97150e125",
+              "field": "visible_work_factors",
+              "value": [
+                "WET / SOFT"
+              ],
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:03:15.851Z",
+              "gps": {
+                "latitude": 30.48828764167241,
+                "longitude": -87.09280098387674,
+                "accuracy_m": 13.907819983525872,
+                "position_at": "2026-08-05T13:01:58.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-001",
+              "limitation": null
+            }
+          },
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "VEHICLE CROSSING OPTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09280098387674,
+          30.48828764167241
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-9e6f75cf-6212-4435-8c79-00f47e0c3146",
+        "feature_id": "FRONTAGE-WET-SOFT-001",
+        "simple_session_id": "simple-session-bb358090-db73-4dab-ba03-a1329af7757c",
+        "feature_type": "wet",
+        "label": "Wet",
+        "recorded_at": "2026-08-05T13:03:32.607Z",
+        "gps_accuracy_m": 12.362705369290392,
+        "compass_heading_deg": 106.31800079345703,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "FRONTAGE-WET-SOFT-001",
+          "frontage_record_type": "frontage_wet_soft",
+          "ground_firmness": "Unknown",
+          "note": "",
+          "simple_session_id": "simple-session-bb358090-db73-4dab-ba03-a1329af7757c",
+          "feature_id": "FRONTAGE-WET-SOFT-001",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "WET / SOFT"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09283516431618,
+          30.488278979433268
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-f9271f45-20a7-48ee-a49d-144b945d7bba",
+        "feature_id": "VEHICLE-CROSSING-002",
+        "simple_session_id": "simple-session-d086417b-7d30-41ca-9dd1-029b32ae6f47",
+        "feature_type": "vehicle_crossing",
+        "label": "vehicle_crossing",
+        "recorded_at": "2026-08-05T13:06:00.644Z",
+        "gps_accuracy_m": 6.3182906507581915,
+        "compass_heading_deg": 25.125438690185547,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "VEHICLE-CROSSING-002",
+          "frontage_record_type": "vehicle_crossing",
+          "crossing_work_class": "CULVERT_APPARENTLY_NEEDED",
+          "permission_established": false,
+          "engineered": false,
+          "legally_approved": false,
+          "construction_ready": false,
+          "simple_session_id": "simple-session-d086417b-7d30-41ca-9dd1-029b32ae6f47",
+          "feature_id": "VEHICLE-CROSSING-002",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "culvert_sequence_step": "DONE",
+          "culvert_questions": {
+            "water_visible_in_ditch": {
+              "fact_id": "FACT-1785935214357-d04d0bd1f79a5",
+              "field": "water_visible_in_ditch",
+              "value": "YES",
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:06:54.357Z",
+              "gps": {
+                "latitude": 30.4884558891029,
+                "longitude": -87.09282400050238,
+                "accuracy_m": 6.3182906507581915,
+                "position_at": "2026-08-05T13:05:59.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-002",
+              "limitation": null
+            },
+            "ditch_top_width": {
+              "fact_id": "FACT-1785935273907-6f4246e54d593",
+              "field": "ditch_top_width",
+              "value": 10,
+              "unit": "ft",
+              "information_class": "MEASURED_ON_SITE",
+              "recorded_at": "2026-08-05T13:07:53.907Z",
+              "gps": {
+                "latitude": 30.4884558891029,
+                "longitude": -87.09282400050238,
+                "accuracy_m": 6.3182906507581915,
+                "position_at": "2026-08-05T13:05:59.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-002",
+              "limitation": null
+            },
+            "ditch_depth_from_road_side_top_edge": {
+              "fact_id": "FACT-1785935282582-94819e2ec1022",
+              "field": "ditch_depth_from_road_side_top_edge",
+              "value": 8,
+              "unit": "in",
+              "information_class": "MEASURED_ON_SITE",
+              "recorded_at": "2026-08-05T13:08:02.582Z",
+              "gps": {
+                "latitude": 30.4884558891029,
+                "longitude": -87.09282400050238,
+                "accuracy_m": 6.3182906507581915,
+                "position_at": "2026-08-05T13:05:59.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-002",
+              "limitation": null
+            },
+            "ground_behind_ditch_reasonably_passable": {
+              "fact_id": "FACT-1785935290056-97e47e1faa3f48",
+              "field": "ground_behind_ditch_reasonably_passable",
+              "value": "YES",
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:08:10.056Z",
+              "gps": {
+                "latitude": 30.4884558891029,
+                "longitude": -87.09282400050238,
+                "accuracy_m": 6.3182906507581915,
+                "position_at": "2026-08-05T13:05:59.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-002",
+              "limitation": null
+            },
+            "visible_work_factors": {
+              "fact_id": "FACT-1785935297234-184ef3ee51f4",
+              "field": "visible_work_factors",
+              "value": [
+                "BRUSH"
+              ],
+              "unit": null,
+              "information_class": "OBSERVED_ON_SITE",
+              "recorded_at": "2026-08-05T13:08:17.234Z",
+              "gps": {
+                "latitude": 30.4884558891029,
+                "longitude": -87.09282400050238,
+                "accuracy_m": 6.3182906507581915,
+                "position_at": "2026-08-05T13:05:59.999Z"
+              },
+              "source_record_id": "VEHICLE-CROSSING-002",
+              "limitation": null
+            }
+          },
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "VEHICLE CROSSING OPTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09282400050238,
+          30.4884558891029
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-c3393a0f-df0b-4d2c-a6f8-f597a8a66493",
+        "feature_id": "DITCH-CHANGE-001",
+        "simple_session_id": "simple-session-904ec647-1de5-466a-bf9a-4d39c284b392",
+        "feature_type": "ditch",
+        "label": "Ditch",
+        "recorded_at": "2026-08-05T13:09:52.172Z",
+        "gps_accuracy_m": 4.613565709718042,
+        "compass_heading_deg": 149.07363891601562,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "DITCH-CHANGE-001",
+          "frontage_record_type": "ditch_change",
+          "width": "24",
+          "depth": "4",
+          "water_present": "Yes",
+          "measurement_unit": "in",
+          "note": "",
+          "simple_session_id": "simple-session-904ec647-1de5-466a-bf9a-4d39c284b392",
+          "feature_id": "DITCH-CHANGE-001",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 2,
+          "voice_note_count": 0,
+          "category": "DITCH CHANGE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09260600177143,
+          30.489563663306964
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-04bbf51e-e135-4a9d-bbc5-5722f2671673",
+        "feature_id": "DITCH-CHANGE-002",
+        "simple_session_id": "simple-session-9ab1c8be-a724-4135-adfc-10e5dea60053",
+        "feature_type": "ditch",
+        "label": "Ditch",
+        "recorded_at": "2026-08-05T13:13:20.161Z",
+        "gps_accuracy_m": 4.124018793136911,
+        "compass_heading_deg": 155.23483276367188,
+        "note": "You’ll notice that to the west of me the water is still running, but east of me in the next picture the water is stagnant",
+        "attributes": {
+          "frontage_record_id": "DITCH-CHANGE-002",
+          "frontage_record_type": "ditch_change",
+          "width": "48",
+          "depth": "4",
+          "water_present": "Yes",
+          "measurement_unit": "in",
+          "note": "You’ll notice that to the west of me the water is still running, but east of me in the next picture the water is stagnant",
+          "simple_session_id": "simple-session-9ab1c8be-a724-4135-adfc-10e5dea60053",
+          "feature_id": "DITCH-CHANGE-002",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 2,
+          "voice_note_count": 2,
+          "category": "DITCH CHANGE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09095144601757,
+          30.490407107997456
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-72dd89e9-322d-4c60-9c00-b8ec7c4dabe2",
+        "feature_id": "VEHICLE-CROSSING-003",
+        "simple_session_id": "simple-session-4a2b3141-54ab-414e-96d3-1eaf1da21b78",
+        "feature_type": "vehicle_crossing",
+        "label": "vehicle_crossing",
+        "recorded_at": "2026-08-05T13:19:27.145Z",
+        "gps_accuracy_m": 6.501004634415992,
+        "compass_heading_deg": 275.7356872558594,
+        "note": "From the edge of the road to the flag",
+        "attributes": {
+          "frontage_record_id": "VEHICLE-CROSSING-003",
+          "frontage_record_type": "vehicle_crossing",
+          "crossing_work_class": "NO_CULVERT_APPARENTLY_NEEDED",
+          "permission_established": false,
+          "engineered": false,
+          "legally_approved": false,
+          "construction_ready": false,
+          "ditch_width": "18",
+          "ditch_depth": "",
+          "clear_crossing_width": "",
+          "measurement_unit": "ft",
+          "note": "From the edge of the road to the flag",
+          "simple_session_id": "simple-session-4a2b3141-54ab-414e-96d3-1eaf1da21b78",
+          "feature_id": "VEHICLE-CROSSING-003",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 2,
+          "voice_note_count": 0,
+          "category": "VEHICLE CROSSING OPTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0906957398422,
+          30.491476459160996
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-3c99af9f-680e-406a-b395-6ba1b53161a0",
+        "feature_id": "VEHICLE-CROSSING-004",
+        "simple_session_id": "simple-session-918f41da-7734-4ee8-9131-00f906f9c9cf",
+        "feature_type": "vehicle_crossing",
+        "label": "vehicle_crossing",
+        "recorded_at": "2026-08-05T13:27:03.432Z",
+        "gps_accuracy_m": 5.5791033952083495,
+        "compass_heading_deg": 23.556285858154297,
+        "note": "",
+        "attributes": {
+          "frontage_record_id": "VEHICLE-CROSSING-004",
+          "frontage_record_type": "vehicle_crossing",
+          "crossing_work_class": "NO_CULVERT_APPARENTLY_NEEDED",
+          "permission_established": false,
+          "engineered": false,
+          "legally_approved": false,
+          "construction_ready": false,
+          "ditch_width": "22",
+          "ditch_depth": "",
+          "clear_crossing_width": "",
+          "measurement_unit": "ft",
+          "note": "",
+          "simple_session_id": "simple-session-918f41da-7734-4ee8-9131-00f906f9c9cf",
+          "feature_id": "VEHICLE-CROSSING-004",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 1,
+          "voice_note_count": 0,
+          "category": "VEHICLE CROSSING OPTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09285869623346,
+          30.489678512545304
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-504e8741-fd6e-4628-b3c5-24d7f73f7f98",
+        "feature_id": "CULVERT-001",
+        "simple_session_id": "simple-session-5110e210-4e17-49a6-bfbd-cc204a18734a",
+        "feature_type": "culvert",
+        "label": "Culvert",
+        "recorded_at": "2026-08-05T13:31:51.277Z",
+        "gps_accuracy_m": 9.667863728013415,
+        "compass_heading_deg": 106.32978057861328,
+        "note": "This is the culvert that goes underneath the north and S. Pearson Rd. it looks like it’s maybe a 36 inch Collert I put the yard stick up against it.",
+        "attributes": {
+          "simple_session_id": "simple-session-5110e210-4e17-49a6-bfbd-cc204a18734a",
+          "feature_id": "CULVERT-001",
+          "simple_feature_type": "culvert",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "barrel_count": "",
+          "barrel_size": "",
+          "crossing_width": "",
+          "blockage_percent": "",
+          "water_present": "Unknown",
+          "note": "This is the culvert that goes underneath the north and S. Pearson Rd. it looks like it’s maybe a 36 inch Collert I put the yard stick up against it.",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09277804773329,
+          30.490128923144496
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-7379d112-d529-4261-8d06-c4e53b8c9dfd",
+        "feature_id": "TREE-008",
+        "simple_session_id": "simple-session-712e6ea0-b4e8-41d8-810e-7a9ba6fa310f",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:35:49.808Z",
+        "gps_accuracy_m": 9.611856334524067,
+        "compass_heading_deg": 144.48324584960938,
+        "note": "Hardwood",
+        "attributes": {
+          "simple_session_id": "simple-session-712e6ea0-b4e8-41d8-810e-7a9ba6fa310f",
+          "feature_id": "TREE-008",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "59",
+          "note": "Hardwood",
+          "calculated_dbh_in": 18.78,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09267711950429,
+          30.48966913239858
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-38af77da-f2fd-4d49-ab92-85ca7ceb0365",
+        "feature_id": "TREE-009",
+        "simple_session_id": "simple-session-4c7a55ac-e582-461b-99a9-0750ec401e79",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:38:45.913Z",
+        "gps_accuracy_m": 10.082118797170468,
+        "compass_heading_deg": 159.42242431640625,
+        "note": "Hardwood beside the bigger nicer hardwood, and this one’s leaning and going up through the bigger nicer hard",
+        "attributes": {
+          "simple_session_id": "simple-session-4c7a55ac-e582-461b-99a9-0750ec401e79",
+          "feature_id": "TREE-009",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "29",
+          "note": "Hardwood beside the bigger nicer hardwood, and this one’s leaning and going up through the bigger nicer hard",
+          "calculated_dbh_in": 9.23,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09266215329882,
+          30.489668128102867
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-0239058e-038a-44e9-8e73-6d3723b8509a",
+        "feature_id": "TREE-010",
+        "simple_session_id": "simple-session-9e3a53b7-69f7-4d3f-8a3a-6c6ed19f4cde",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:42:02.399Z",
+        "gps_accuracy_m": 11.902962011058436,
+        "compass_heading_deg": 153.5697784423828,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-9e3a53b7-69f7-4d3f-8a3a-6c6ed19f4cde",
+          "feature_id": "TREE-010",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "22",
+          "note": "",
+          "calculated_dbh_in": 7,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09265020956431,
+          30.489737450866198
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-68bcd63c-7c31-4a91-bf09-436bfe18bc87",
+        "feature_id": "TREE-011",
+        "simple_session_id": "simple-session-b51e728d-d624-46ae-a0e2-acfe99bd1ffc",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:43:46.046Z",
+        "gps_accuracy_m": 11.124221557764127,
+        "compass_heading_deg": 76.62950134277344,
+        "note": "Hardwood",
+        "attributes": {
+          "simple_session_id": "simple-session-b51e728d-d624-46ae-a0e2-acfe99bd1ffc",
+          "feature_id": "TREE-011",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "34",
+          "note": "Hardwood",
+          "calculated_dbh_in": 10.82,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09268856331178,
+          30.489807367193983
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-60b29910-5e65-44ea-85f8-f48e1f83953b",
+        "feature_id": "TREE-012",
+        "simple_session_id": "simple-session-ccd58984-fcc6-4368-b6e3-1120c7f3b4e5",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:46:03.362Z",
+        "gps_accuracy_m": 11.660030431497526,
+        "compass_heading_deg": 88.08826446533203,
+        "note": "Magnolia",
+        "attributes": {
+          "simple_session_id": "simple-session-ccd58984-fcc6-4368-b6e3-1120c7f3b4e5",
+          "feature_id": "TREE-012",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "26",
+          "note": "Magnolia",
+          "calculated_dbh_in": 8.28,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09270650833292,
+          30.48981018859317
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-aebd46f4-ce1d-4504-bac1-822ac2582324",
+        "feature_id": "TREE-013",
+        "simple_session_id": "simple-session-a3018d62-ef68-4fbc-9f3d-0570143fda3a",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-05T13:50:39.267Z",
+        "gps_accuracy_m": 11.185070598424458,
+        "compass_heading_deg": 18.289905548095703,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-a3018d62-ef68-4fbc-9f3d-0570143fda3a",
+          "feature_id": "TREE-013",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "tree_kind": "Unknown",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "",
+          "note": "",
+          "calculated_dbh_in": null,
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09269775902101,
+          30.490023675722686
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-fe47b6cb-1b2a-4605-8159-3fc53eda4670",
+        "feature_id": "SECTION-001",
+        "simple_session_id": "simple-session-42066bd8-88ba-4ec6-bff7-6792576a500f",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T05:40:29.316Z",
+        "gps_accuracy_m": 8.64814952361854,
+        "compass_heading_deg": null,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-001",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [],
+          "simple_session_id": "simple-session-42066bd8-88ba-4ec6-bff7-6792576a500f",
+          "feature_id": "SECTION-001",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08923131777988,
+          30.47347978017041
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-cafea4b9-16c6-4ae6-a97e-4caf98a175cc",
+        "feature_id": "SECTION-002",
+        "simple_session_id": "simple-session-5b283de5-1484-4420-b13b-b93b09cc1066",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T06:58:05.989Z",
+        "gps_accuracy_m": 2.688274947137299,
+        "compass_heading_deg": null,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-002",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [],
+          "simple_session_id": "simple-session-5b283de5-1484-4420-b13b-b93b09cc1066",
+          "feature_id": "SECTION-002",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08923040454691,
+          30.473461529127704
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-f0174f1c-09ad-47ad-88ba-667bee6bb6d0",
+        "feature_id": "SECTION-003",
+        "simple_session_id": "simple-session-4a1687e4-296a-4001-a46f-05d845913028",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T13:04:32.612Z",
+        "gps_accuracy_m": 2.204936790535228,
+        "compass_heading_deg": null,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-003",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [],
+          "simple_session_id": "simple-session-4a1687e4-296a-4001-a46f-05d845913028",
+          "feature_id": "SECTION-003",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.08922463966067,
+          30.473445718749044
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-ae382095-76a3-43c9-8190-93b0d087e042",
+        "feature_id": "WATER-003",
+        "simple_session_id": "simple-session-f7fa9209-39f3-4cbd-a8e3-a9774a0ca30b",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-07T14:12:12.666Z",
+        "gps_accuracy_m": 3.519030217160577,
+        "compass_heading_deg": null,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-f7fa9209-39f3-4cbd-a8e3-a9774a0ca30b",
+          "feature_id": "WATER-003",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "in",
+          "length": "8",
+          "width": "6",
+          "depth": "4.5",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0920477332789,
+          30.48966518010549
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-88a90e5a-f9a7-41a7-828e-e8e0d9e64c03",
+        "feature_id": "WATER-004",
+        "simple_session_id": "simple-session-f57211fe-3405-47f9-bc77-97f4fc61484c",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-07T14:14:48.493Z",
+        "gps_accuracy_m": 12.352322339672678,
+        "compass_heading_deg": 62.115916734842756,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-f57211fe-3405-47f9-bc77-97f4fc61484c",
+          "feature_id": "WATER-004",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "ft",
+          "length": "8",
+          "width": "5",
+          "depth": "4",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09212527069516,
+          30.48963317697606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-5ef90c44-4aee-4d1f-accb-dc5186e14bf2",
+        "feature_id": "TREE-014",
+        "simple_session_id": "simple-session-33e7e4c1-adf8-43c5-9d97-150918ee6869",
+        "feature_type": "tree",
+        "label": "Tree",
+        "recorded_at": "2026-08-07T14:33:15.319Z",
+        "gps_accuracy_m": 18.151566984151973,
+        "compass_heading_deg": 311.2557412076653,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-33e7e4c1-adf8-43c5-9d97-150918ee6869",
+          "feature_id": "TREE-014",
+          "simple_feature_type": "tree",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "tree_kind": "Magnolia",
+          "measurement_tool": "Flexible hospital/baby tape",
+          "measurement_height_in": 54,
+          "ground_basis": "Uphill side",
+          "circumference_in": "10",
+          "note": "",
+          "calculated_dbh_in": 3.18,
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "TREE"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09243417422651,
+          30.48888820379328
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-c68c0a13-c379-462f-9161-3342d8eb10da",
+        "feature_id": "SOUND-001",
+        "simple_session_id": "simple-session-d9c95837-eab5-463c-96ad-47c35cfa7e37",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T14:37:05.060Z",
+        "gps_accuracy_m": 13.4061039607589,
+        "compass_heading_deg": 117.19779038656976,
+        "note": "Site sound / experience",
+        "attributes": {
+          "sound_id": "SOUND-001",
+          "location_context": "interior_or_current_location",
+          "site_sound_record_id": "SOUND-001",
+          "simple_session_id": "simple-session-d9c95837-eab5-463c-96ad-47c35cfa7e37",
+          "feature_id": "SOUND-001",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09254007655291,
+          30.488901132960866
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-eba3cf1d-676b-46d0-99a0-43328d671e12",
+        "feature_id": "SOUND-002",
+        "simple_session_id": "simple-session-6e5082b9-5566-4a7a-9dcd-7df26a0a4a02",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T14:43:34.657Z",
+        "gps_accuracy_m": 17.64441411448706,
+        "compass_heading_deg": 134.981122469257,
+        "note": "Site sound / experience",
+        "attributes": {
+          "sound_id": "SOUND-002",
+          "location_context": "interior_or_current_location",
+          "site_sound_record_id": "SOUND-002",
+          "simple_session_id": "simple-session-6e5082b9-5566-4a7a-9dcd-7df26a0a4a02",
+          "feature_id": "SOUND-002",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09244572939234,
+          30.488965574794616
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-8786dd2e-0ac6-4cca-9de8-89aa89749890",
+        "feature_id": "OPEN-002",
+        "simple_session_id": "simple-session-089ace6d-90e1-43af-acb9-5b8c01ebf223",
+        "feature_type": "open",
+        "label": "Open Area",
+        "recorded_at": "2026-08-07T14:45:02.249Z",
+        "gps_accuracy_m": 12.616304375841276,
+        "compass_heading_deg": 55.46120811621226,
+        "note": "Further back open area",
+        "attributes": {
+          "simple_session_id": "simple-session-089ace6d-90e1-43af-acb9-5b8c01ebf223",
+          "feature_id": "OPEN-002",
+          "simple_feature_type": "open",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "Further back open area",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09225456373943,
+          30.488971278868256
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-b44f810a-af07-4b77-a69a-60ec4b3e7daf",
+        "feature_id": "WATER-005",
+        "simple_session_id": "simple-session-e641c44d-ef13-4820-935e-ff006b52a0f8",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-07T14:46:53.817Z",
+        "gps_accuracy_m": 16.088107510631037,
+        "compass_heading_deg": 198.05075618052146,
+        "note": "I’m starting to see more water here",
+        "attributes": {
+          "simple_session_id": "simple-session-e641c44d-ef13-4820-935e-ff006b52a0f8",
+          "feature_id": "WATER-005",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "ft",
+          "length": "8",
+          "width": "6",
+          "depth": "4",
+          "note": "I’m starting to see more water here",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09227984410532,
+          30.48878047210245
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-64b04824-ba70-408e-acd4-4671c493884a",
+        "feature_id": "WATER-006",
+        "simple_session_id": "simple-session-9acafa9a-1f68-46b4-9e9a-e574bf803615",
+        "feature_type": "water",
+        "label": "Wet",
+        "recorded_at": "2026-08-07T14:48:16.253Z",
+        "gps_accuracy_m": 16.078800066293212,
+        "compass_heading_deg": 162.38946271010275,
+        "note": "",
+        "attributes": {
+          "simple_session_id": "simple-session-9acafa9a-1f68-46b4-9e9a-e574bf803615",
+          "feature_id": "WATER-006",
+          "simple_feature_type": "water",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "depth_tool": "Yardstick",
+          "surface_unit": "in",
+          "length": "",
+          "width": "",
+          "depth": "",
+          "note": "",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "WATER"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0923049078745,
+          30.48871025272134
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-e5457940-d266-4b1f-80f1-8ca639516747",
+        "feature_id": "SECTION-004",
+        "simple_session_id": "simple-session-d75a6a14-d39c-4b1e-a867-2c29c70a7bd6",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T14:51:59.754Z",
+        "gps_accuracy_m": 18.14563055814782,
+        "compass_heading_deg": 231.96480992893544,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-004",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [
+            "SCATTERED LARGE TREES",
+            "DENSE 1–2-INCH BRUSH",
+            "MODERATELY DIFFICULT",
+            "SOFT WITHOUT VISIBLE WATER"
+          ],
+          "simple_session_id": "simple-session-d75a6a14-d39c-4b1e-a867-2c29c70a7bd6",
+          "feature_id": "SECTION-004",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 0,
+          "voice_note_count": 0
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.0922078519752,
+          30.48870712476228
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-b02caa2b-55f6-4f1d-b721-7d7caaae0d0f",
+        "feature_id": "OTHER-001",
+        "simple_session_id": "simple-session-33881600-197f-4b1d-b97b-fca4c0ff7082",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T15:01:13.417Z",
+        "gps_accuracy_m": 8.844901249299538,
+        "compass_heading_deg": null,
+        "note": "There is a clearing to my south east from here about 15 feet south north west corner of the clearing",
+        "attributes": {
+          "simple_session_id": "simple-session-33881600-197f-4b1d-b97b-fca4c0ff7082",
+          "feature_id": "OTHER-001",
+          "simple_feature_type": "other",
+          "completion_status": "BASIC_RECORD_SAVED",
+          "note": "There is a clearing to my south east from here about 15 feet south north west corner of the clearing",
+          "photo_count": 0,
+          "voice_note_count": 0,
+          "category": "OTHER"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09210525401623,
+          30.48923195572576
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-bd82ab96-9826-4e4c-873a-2fd6efcc5c3d",
+        "feature_id": "SECTION-005",
+        "simple_session_id": "simple-session-45f00fd9-49bb-4d50-9f01-18e4489157d5",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T15:13:16.680Z",
+        "gps_accuracy_m": 21.14110351795355,
+        "compass_heading_deg": null,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-005",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [
+            "SCATTERED LARGE TREES",
+            "DENSE 1–2-INCH BRUSH",
+            "VERY DIFFICULT",
+            "SOFT WITHOUT VISIBLE WATER"
+          ],
+          "simple_session_id": "simple-session-45f00fd9-49bb-4d50-9f01-18e4489157d5",
+          "feature_id": "SECTION-005",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 20,
+          "voice_note_count": 0,
+          "category": "MAP THIS SECTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09195852388817,
+          30.489386593296008
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-cc06188d-4a8a-4f3a-9fbe-c3efa77cc1fe",
+        "feature_id": "SECTION-006",
+        "simple_session_id": "simple-session-af2eb96c-ae82-4dd2-943c-18e80d742a88",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T15:42:37.440Z",
+        "gps_accuracy_m": 17.278411252578223,
+        "compass_heading_deg": 200.4928082741033,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-006",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [
+            "SCATTERED LARGE TREES",
+            "DENSE 2–3-INCH TANGLED BRUSH",
+            "VERY DIFFICULT",
+            "SOFT WITHOUT VISIBLE WATER"
+          ],
+          "simple_session_id": "simple-session-af2eb96c-ae82-4dd2-943c-18e80d742a88",
+          "feature_id": "SECTION-006",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 3,
+          "voice_note_count": 0,
+          "category": "MAP THIS SECTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09123252564804,
+          30.489145449965854
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "record_type": "field_feature",
+        "event_id": "event-a89e1953-4827-4a20-aede-a77d40e6e540",
+        "feature_id": "SECTION-007",
+        "simple_session_id": "simple-session-379e4053-3625-4610-bbc5-c3dbc1eaf2c0",
+        "feature_type": "other",
+        "label": "Other",
+        "recorded_at": "2026-08-07T15:56:09.412Z",
+        "gps_accuracy_m": 14.611776166899121,
+        "compass_heading_deg": 123.69919069921194,
+        "note": "Mapped land section",
+        "attributes": {
+          "section_id": "SECTION-007",
+          "section_method": "WALK_WHOLE_EDGE",
+          "descriptions": [
+            "SCATTERED LARGE TREES",
+            "DENSE 1–2-INCH BRUSH",
+            "VERY DIFFICULT",
+            "SOFT WITHOUT VISIBLE WATER"
+          ],
+          "simple_session_id": "simple-session-379e4053-3625-4610-bbc5-c3dbc1eaf2c0",
+          "feature_id": "SECTION-007",
+          "completion_status": "BASIC_RECORD_SAVED_DETAILS_INCOMPLETE",
+          "photo_count": 15,
+          "voice_note_count": 0,
+          "category": "MAP THIS SECTION"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.09139303055255,
+          30.489324568898887
+        ]
+      }
+    }
+  ]
+}
