@@ -3,28 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Pearson Road Interactive Property Experience Map</title>
+  <title>Pearson Road Water &amp; Clearing Review Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=3">
+  <link rel="stylesheet" href="./styles.css?v=4">
   <script src="./config.local.js" onerror="this.remove()"></script>
 </head>
 <body>
-  <header>
-    <div><strong>INTERACTIVE PROPERTY EXPERIENCE MAP</strong><span>PEARSON ROAD &mdash; EVIDENCE, REVEAL PROPOSAL, AND VISUAL PROPERTY STORY</span></div>
-    <div class="header-actions">
-      <label class="folder-button">LOAD PROPERTY FOLDER<input id="folderInput" type="file" webkitdirectory multiple></label>
-      <button id="exportImage" type="button">SAVE MAP IMAGE</button>
-    </div>
+  <header id="mapTitleBar">
+    <div><strong>PEARSON ROAD</strong><span>Water &amp; Clearing Review Map</span></div>
   </header>
-  <nav id="modeTabs" aria-label="Map mode">
+  <nav id="modeTabs" aria-label="Advanced map mode">
     <button data-mode="EVIDENCE" class="active">EVIDENCE</button>
     <button data-mode="INTERPRETATION">INTERPRETATION</button>
     <button data-mode="PROPOSAL">PROPOSAL</button>
     <button data-mode="RESULTS">RESULTS</button>
   </nav>
   <main>
-    <aside aria-label="Map layers and editing">
-      <section>
+    <aside id="controlDrawer" aria-label="Map choices" aria-hidden="true">
+      <div class="drawer-heading"><strong id="drawerTitle">MAP OPTIONS</strong><button id="closeControlDrawer" type="button" aria-label="Close map options">CLOSE</button></div>
+      <section data-control-panel="visits">
         <h2>Field days</h2>
         <button id="allDays" class="active">ALL DAYS</button>
         <label><input data-date="2026-08-03" type="checkbox" checked><i class="day aug3"></i> AUG 3</label>
@@ -33,46 +30,56 @@
         <label><input data-date="2026-08-06" type="checkbox" checked><i class="day aug6"></i> AUG 6</label>
         <label><input data-date="2026-08-07" type="checkbox" checked><i class="day aug7"></i> AUG 7</label>
         <label><input id="coverageToggle" type="checkbox" checked> Cumulative coverage</label>
-        <button id="fitParcel" type="button">FIT LARGE PARCEL</button>
+        <button id="fitParcel" type="button">FIT BOTH PARCELS</button>
         <button id="fitAllEvidence" type="button">SHOW ALL EVIDENCE LOCATIONS</button>
         <button id="fitAug7Transition" type="button">FIT AUG 7 TRANSITION WALK</button>
       </section>
-      <section>
+      <section data-control-panel="layers">
         <h2>Layers</h2>
-        <label><input data-layer="parcel" type="checkbox" checked> Exact app parcel boundary</label>
-        <label><input data-layer="walks" type="checkbox" checked> Walks (clean display in customer view)</label>
+        <label><input data-layer="parcel" type="checkbox" checked> Large and small parcel boundaries</label>
+        <label><input data-layer="waterPhotos" type="checkbox" checked> Water visible in photographs</label>
+        <label><input data-layer="waterFindings" type="checkbox" checked> Recorded Wet / Water findings</label>
+        <label><input data-layer="waterSections" type="checkbox" checked> Wet / dry section lines</label>
+        <label><input data-layer="wetDryInterpretation" type="checkbox" checked> Confirmed wet / dry directions</label>
+        <label><input data-layer="walks" type="checkbox"> Other walked routes</label>
         <label><input data-layer="gps" type="checkbox"> Every immutable raw GPS point</label>
-        <label><input data-layer="photos" type="checkbox" checked> Photograph locations</label>
-        <label><input data-layer="findings" type="checkbox" checked> Trees / water / field findings</label>
-        <label><input data-layer="sections" type="checkbox" checked> Mapped sections</label>
-        <label><input data-layer="interpretation" type="checkbox" checked> Wet / drained interpretation</label>
+        <label><input data-layer="photos" type="checkbox"> Photograph locations</label>
+        <label><input data-layer="findings" type="checkbox"> Other important property features</label>
+        <label><input data-layer="sections" type="checkbox"> Mapped sections</label>
+        <label><input data-layer="interpretation" type="checkbox"> Other interpretations</label>
         <label><input data-layer="proposal" type="checkbox"> Proposal zones</label>
         <label><input id="topographyToggle" type="checkbox"> USGS topography</label>
         <label><input id="contoursToggle" type="checkbox"> 2-foot contours (when configured)</label>
-        <label><input id="outsideEvidenceToggle" type="checkbox" checked> Evidence outside the large parcel</label>
+        <label><input id="outsideEvidenceToggle" type="checkbox"> Evidence outside the large parcel</label>
+        <button type="button" data-open-panel="more">MORE...</button>
       </section>
-      <section>
+      <section data-control-panel="photos">
         <h2>Photos</h2>
+        <button id="waterReviewFilter" class="active" type="button">WATER PHOTOS</button>
+        <button id="allPhotoFilter" type="button">ALL PHOTOS</button>
         <button id="featuredFilter" type="button">DAVID'S FEATURED PHOTOS</button>
         <button id="favoritesFilter" type="button">MY FAVORITES</button>
         <label><input id="showFavoritesMap" type="checkbox"> Show favorites on map</label>
       </section>
-      <section id="proposalTools" hidden>
+      <section id="proposalTools" data-control-panel="proposal" hidden>
         <h2>Edit proposal</h2>
-        <button data-edit="DRAW_AREA" type="button">DRAW WORK AREA</button>
-        <button data-edit="RENAME" type="button">RENAME</button>
-        <button data-edit="CHANGE_TYPE" type="button">CHANGE TYPE</button>
-        <button data-edit="CHANGE_COLOR" type="button">CHANGE COLOR</button>
-        <button data-edit="ADD_NOTE" type="button">ADD NOTE</button>
-        <button data-edit="ADD_PRICE" type="button">ADD PRICE</button>
-        <button data-edit="ADD_BENEFIT" type="button">ADD BENEFIT</button>
-        <button data-edit="ATTACH_PHOTO" type="button">ADD PHOTOS</button>
-        <button data-edit="RESHAPE" type="button">RESHAPE AREA</button>
-        <button data-edit="SPLIT" type="button">SPLIT AREA</button>
-        <button data-edit="MERGE" type="button">MERGE AREAS</button>
+        <button data-edit="DRAW_AREA" type="button">DRAW AREA</button>
+        <button data-edit="RESHAPE" type="button">MOVE EDGE</button>
+        <button data-edit="RENAME" type="button">NAME</button>
+        <button data-edit="ADD_PRICE" type="button">PRICE</button>
+        <details><summary>MORE DETAILS</summary>
+          <button data-edit="CHANGE_TYPE" type="button">CHANGE TYPE</button>
+          <button data-edit="CHANGE_COLOR" type="button">CHANGE COLOR</button>
+          <button data-edit="ADD_NOTE" type="button">ADD NOTE</button>
+          <button data-edit="ADD_BENEFIT" type="button">ADD BENEFIT</button>
+          <button data-edit="ATTACH_PHOTO" type="button">ADD PHOTOS</button>
+          <button data-edit="SPLIT" type="button">SPLIT AREA</button>
+          <button data-edit="MERGE" type="button">MERGE AREAS</button>
+        </details>
         <button id="undoEdit" type="button">UNDO</button>
+        <button id="doneProposalEdit" class="primary-action" type="button">DONE</button>
       </section>
-      <section id="internalPricing" hidden>
+      <section id="internalPricing" data-control-panel="proposal" hidden>
         <h2>Internal pricing &mdash; never shown to customer</h2>
         <div id="pricingStatus">Select a proposal zone.</div>
         <label>David's proposed sell price
@@ -88,8 +95,13 @@
         <button id="saveSellPrice" type="button">SAVE INTERNAL PRICE</button>
         <div id="marketReference"></div>
       </section>
-      <section>
+      <section data-control-panel="more">
         <h2>Output</h2>
+        <label><input id="allFindingsToggle" type="checkbox"> Show every field-record marker</label>
+        <div class="header-actions">
+          <label class="folder-button">LOAD PROPERTY FOLDER<input id="folderInput" type="file" webkitdirectory multiple></label>
+          <button id="exportImage" type="button">SAVE MAP IMAGE</button>
+        </div>
         <select id="presentationProfile" aria-label="Presentation profile">
           <option value="INTERNAL_EDITABLE">Internal editable</option>
           <option value="CUSTOMER_REVIEW">Customer review</option>
@@ -99,14 +111,14 @@
         <button id="exportMap" type="button">EXPORT MAP DATA</button>
         <button id="printMap" type="button">PRINT / SAVE PDF</button>
       </section>
-      <section id="assetPanel">
+      <section id="assetPanel" data-control-panel="more">
         <h2>Repeat water monitoring</h2>
         <select id="assetSelect" aria-label="Property asset"></select>
         <button id="addCulvertObservation" type="button">ADD CULVERT WATER LEVEL</button>
         <div id="assetTimeline"></div>
       </section>
-      <section id="evidenceTotals" aria-live="polite"><h2>Evidence inventory</h2><p>Loading every preserved source point...</p></section>
-      <section id="selection" aria-live="polite"><h2>Selected</h2><p>Move over the map to see nearby photographs. Tap any symbol for its source record.</p></section>
+      <section id="evidenceTotals" data-control-panel="more" aria-live="polite"><h2>Evidence inventory</h2><p>Loading every preserved source point...</p></section>
+      <section id="selection" data-control-panel="more" aria-live="polite"><h2>Selected</h2><p>Move over the map to see nearby photographs. Tap any symbol for its source record.</p></section>
     </aside>
     <section class="map-column">
       <div id="mapStatus" role="status">Loading immutable Pearson Road evidence...</div>
@@ -116,16 +128,25 @@
       </div>
       <div class="map-wrap">
         <div id="map" aria-label="Interactive Pearson Road property map"></div>
+        <div class="floating-map-controls" aria-label="Map choices">
+          <button type="button" data-open-panel="layers">LAYERS</button>
+          <button type="button" data-open-panel="visits">VISITS</button>
+          <button type="button" data-open-panel="photos">WATER / PHOTOS</button>
+          <button type="button" data-open-panel="proposal">PROPOSAL</button>
+        </div>
+        <button id="customerViewToggle" class="customer-view-toggle" type="button">CUSTOMER VIEW</button>
         <div class="map-orientation" aria-hidden="true"><span>N</span><b>&uarr;</b></div>
         <div class="road-label">PEARSON ROAD</div>
         <div id="photoFilmstrip" aria-label="Geographically nearby photographs"></div>
+        <div class="map-disclaimer">APPROXIMATE PHONE GPS / COUNTY PARCEL &mdash; NOT A SURVEY</div>
       </div>
-      <div class="legend"><b>PHONE GPS / COUNTY PARCEL &mdash; APPROXIMATE, NOT A SURVEY</b><span class="swatch aug3"></span>Aug 3 <span class="swatch aug4"></span>Aug 4 <span class="swatch aug5"></span>Aug 5 <span class="swatch aug6"></span>Aug 6 <span class="swatch aug7"></span>Aug 7 <span class="finding-key water-key">W</span>Recorded water <span class="finding-key tree-key">T</span>Tree <span class="finding-key culvert-key">C</span>Culvert <span class="finding-key brush-key">B</span>Brush</div>
+      <div class="legend"><b>PHONE GPS / COUNTY PARCEL &mdash; APPROXIMATE, NOT A SURVEY</b><span class="finding-key water-key">W</span>Recorded water <span class="finding-key visible-water-key">W</span>Visible in photo <span class="finding-key possible-water-key">?</span>Possible water <span class="section-key"></span>Wet/dry section</div>
       <section id="customerProposal" class="proposal-sheet" aria-live="polite">
         <div class="proposal-sheet-heading">
           <div><span class="eyebrow">PEARSON ROAD PROPOSAL V0.2</span><h2>Recommended First Project</h2><p>One bounded first project. Every optional next opportunity is excluded from this price.</p></div>
           <div id="proposalTotal" class="proposal-total">TOTAL: UNKNOWN</div>
         </div>
+        <div id="mapProposalSummary"></div>
         <div id="starterReveal"></div>
         <section class="proposal-explanation">
           <h2>Why this first project</h2>
@@ -173,6 +194,6 @@
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./property-map-core.js?v=4"></script>
-  <script src="./app.js?v=8"></script>
+  <script src="./app.js?v=9"></script>
 </body>
 </html>

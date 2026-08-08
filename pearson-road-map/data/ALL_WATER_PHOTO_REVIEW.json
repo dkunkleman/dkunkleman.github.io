@@ -1,0 +1,1363 @@
+{
+  "schema_name": "pearson-water-photo-visual-review",
+  "generated_at": "2026-08-08",
+  "property_id": "221S280000001010000",
+  "original_evidence_modified": false,
+  "counts": {
+    "VISIBLE_WATER_IN_PHOTO": 114,
+    "POSSIBLE_WATER_IN_PHOTO": 9,
+    "RECORDED_WATER": 12
+  },
+  "photographs": [
+    {
+      "photo_id": "photo-f01320f6-cc0f-4e50-bd09-0873f935d44a",
+      "photo_number": "P13",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f01320f6-cc0f-4e50-bd09-0873f935d44a.jpg"
+    },
+    {
+      "photo_id": "photo-e850770e-a9bc-45a4-a322-e6025136224d",
+      "photo_number": "P14",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-e850770e-a9bc-45a4-a322-e6025136224d.jpg"
+    },
+    {
+      "photo_id": "photo-6c67b8df-6b2a-4012-8101-257492a25493",
+      "photo_number": "P15",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-6c67b8df-6b2a-4012-8101-257492a25493.jpg"
+    },
+    {
+      "photo_id": "photo-1ba987a3-7b54-41d0-88ca-d041bff2d8b7",
+      "photo_number": "P16",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-1ba987a3-7b54-41d0-88ca-d041bff2d8b7.jpg"
+    },
+    {
+      "photo_id": "photo-104fb842-8975-4578-9d1d-041adcc48d04",
+      "photo_number": "P17",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-104fb842-8975-4578-9d1d-041adcc48d04.jpg"
+    },
+    {
+      "photo_id": "photo-4820d2c9-a8d1-4576-8408-4eecf2b3b672",
+      "photo_number": "P18",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-4820d2c9-a8d1-4576-8408-4eecf2b3b672.jpg"
+    },
+    {
+      "photo_id": "photo-d43776db-6c4e-435d-bfbe-750e4de4629f",
+      "photo_number": "P19",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-d43776db-6c4e-435d-bfbe-750e4de4629f.jpg"
+    },
+    {
+      "photo_id": "photo-8b7ff2a2-eb57-4185-9474-de845bd0c3a1",
+      "photo_number": "P20",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-8b7ff2a2-eb57-4185-9474-de845bd0c3a1.jpg"
+    },
+    {
+      "photo_id": "photo-73ceee63-b519-4954-9a7e-ecff352e1a34",
+      "photo_number": "P21",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-73ceee63-b519-4954-9a7e-ecff352e1a34.jpg"
+    },
+    {
+      "photo_id": "photo-0ab71d6d-8f39-412a-95f3-004392da511d",
+      "photo_number": "P22",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-0ab71d6d-8f39-412a-95f3-004392da511d.jpg"
+    },
+    {
+      "photo_id": "photo-19d294ea-d56c-40bb-be46-35d6d3d2c269",
+      "photo_number": "P23",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-19d294ea-d56c-40bb-be46-35d6d3d2c269.jpg"
+    },
+    {
+      "photo_id": "photo-f3600fb1-e9ca-4f90-ba03-38463fa6f67f",
+      "photo_number": "P24",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f3600fb1-e9ca-4f90-ba03-38463fa6f67f.jpg"
+    },
+    {
+      "photo_id": "photo-68ca164c-ce76-4c20-a387-689f3d6bb254",
+      "photo_number": "P25",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-68ca164c-ce76-4c20-a387-689f3d6bb254.jpg"
+    },
+    {
+      "photo_id": "photo-1150aae5-b1f4-48b8-96c9-096637b92082",
+      "photo_number": "P26",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-1150aae5-b1f4-48b8-96c9-096637b92082.jpg"
+    },
+    {
+      "photo_id": "photo-6def6007-1607-403d-8d44-682a6486ab48",
+      "photo_number": "P31",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-6def6007-1607-403d-8d44-682a6486ab48.jpg"
+    },
+    {
+      "photo_id": "photo-e1f5387e-b0ff-4bab-8009-ca80c5306902",
+      "photo_number": "P32",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-e1f5387e-b0ff-4bab-8009-ca80c5306902.jpg"
+    },
+    {
+      "photo_id": "photo-96f8a6fb-fc51-45ca-bb78-58bb1449ccf8",
+      "photo_number": "P33",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-96f8a6fb-fc51-45ca-bb78-58bb1449ccf8.jpg"
+    },
+    {
+      "photo_id": "photo-578b1651-1185-425a-b875-ae2f0daa0f90",
+      "photo_number": "P34",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-578b1651-1185-425a-b875-ae2f0daa0f90.jpg"
+    },
+    {
+      "photo_id": "photo-688e60e3-cce3-45ab-9f6a-a690019da5f6",
+      "photo_number": "P35",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-688e60e3-cce3-45ab-9f6a-a690019da5f6.jpg"
+    },
+    {
+      "photo_id": "photo-97c70f90-b2bd-4c5b-ae14-225f8cfb418c",
+      "photo_number": "P36",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-97c70f90-b2bd-4c5b-ae14-225f8cfb418c.jpg"
+    },
+    {
+      "photo_id": "photo-7c857909-9999-4261-9012-8df76257bb7f",
+      "photo_number": "P37",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-7c857909-9999-4261-9012-8df76257bb7f.jpg"
+    },
+    {
+      "photo_id": "photo-5e063436-3606-498c-b0ad-77708cc183a0",
+      "photo_number": "P38",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-5e063436-3606-498c-b0ad-77708cc183a0.jpg"
+    },
+    {
+      "photo_id": "photo-359e5a79-016b-48db-96fc-67df1746057e",
+      "photo_number": "P39",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-359e5a79-016b-48db-96fc-67df1746057e.jpg"
+    },
+    {
+      "photo_id": "photo-571d0b18-19a8-41d4-9c3d-cac9388414c9",
+      "photo_number": "P40",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-571d0b18-19a8-41d4-9c3d-cac9388414c9.jpg"
+    },
+    {
+      "photo_id": "photo-69ca9226-1854-45a1-9515-b38757b4359c",
+      "photo_number": "P41",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-69ca9226-1854-45a1-9515-b38757b4359c.jpg"
+    },
+    {
+      "photo_id": "photo-47584afb-7bc9-4446-a78e-5c14a33d2d47",
+      "photo_number": "P42",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-47584afb-7bc9-4446-a78e-5c14a33d2d47.jpg"
+    },
+    {
+      "photo_id": "photo-58f9f9e1-f46b-4f72-ac63-7594c6d6c3cf",
+      "photo_number": "P43",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-58f9f9e1-f46b-4f72-ac63-7594c6d6c3cf.jpg"
+    },
+    {
+      "photo_id": "photo-86b8c9de-a932-4c1c-9ac2-4f98f0dd2376",
+      "photo_number": "P44",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-86b8c9de-a932-4c1c-9ac2-4f98f0dd2376.jpg"
+    },
+    {
+      "photo_id": "photo-1d9e651b-2839-438a-a04a-19b71ab6d245",
+      "photo_number": "P45",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-1d9e651b-2839-438a-a04a-19b71ab6d245.jpg"
+    },
+    {
+      "photo_id": "photo-50729f40-3642-4949-8c76-a10d72915988",
+      "photo_number": "P46",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-50729f40-3642-4949-8c76-a10d72915988.jpg"
+    },
+    {
+      "photo_id": "photo-523a4fd6-49d6-4f68-b989-864cf2887aad",
+      "photo_number": "P68",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-523a4fd6-49d6-4f68-b989-864cf2887aad.jpg"
+    },
+    {
+      "photo_id": "photo-b0012967-3a5d-4a9f-9164-a5404067f354",
+      "photo_number": "P69",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-b0012967-3a5d-4a9f-9164-a5404067f354.jpg"
+    },
+    {
+      "photo_id": "photo-9cd7493d-01b4-4fe6-8f7b-8ee32ae66149",
+      "photo_number": "P70",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-9cd7493d-01b4-4fe6-8f7b-8ee32ae66149.jpg"
+    },
+    {
+      "photo_id": "photo-115d5d89-5b2f-4844-82a7-b6cbf465ca0f",
+      "photo_number": "P71",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-115d5d89-5b2f-4844-82a7-b6cbf465ca0f.jpg"
+    },
+    {
+      "photo_id": "photo-535018da-564e-428f-9a2d-7c7e18941ae5",
+      "photo_number": "P72",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-535018da-564e-428f-9a2d-7c7e18941ae5.jpg"
+    },
+    {
+      "photo_id": "photo-0706f007-6711-4e91-a540-347292002265",
+      "photo_number": "P107",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-0706f007-6711-4e91-a540-347292002265.jpg"
+    },
+    {
+      "photo_id": "photo-3fca7f16-fa7f-44ed-afd8-0c9bdf144f58",
+      "photo_number": "P108",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3fca7f16-fa7f-44ed-afd8-0c9bdf144f58.jpg"
+    },
+    {
+      "photo_id": "photo-e2c6b0a8-5978-43c0-80b4-512683897378",
+      "photo_number": "P109",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-e2c6b0a8-5978-43c0-80b4-512683897378.jpg"
+    },
+    {
+      "photo_id": "photo-f48ccd42-760d-4057-bebc-99abd1d1c5f5",
+      "photo_number": "P110",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f48ccd42-760d-4057-bebc-99abd1d1c5f5.jpg"
+    },
+    {
+      "photo_id": "photo-f9601e23-834d-48c4-a562-9eb1769657f1",
+      "photo_number": "P111",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f9601e23-834d-48c4-a562-9eb1769657f1.jpg"
+    },
+    {
+      "photo_id": "photo-7d6330a8-61bc-493a-a24f-fbb83166e007",
+      "photo_number": "P112",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-7d6330a8-61bc-493a-a24f-fbb83166e007.jpg"
+    },
+    {
+      "photo_id": "photo-263283cd-25b2-4c92-ae3a-bbb7986ecc24",
+      "photo_number": "P113",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-263283cd-25b2-4c92-ae3a-bbb7986ecc24.jpg"
+    },
+    {
+      "photo_id": "photo-e6daaa8f-8ed6-4fb8-b49f-ded4d028ed49",
+      "photo_number": "P114",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-e6daaa8f-8ed6-4fb8-b49f-ded4d028ed49.jpg"
+    },
+    {
+      "photo_id": "photo-ac0655a6-7ee1-4a62-b149-fd11d907370e",
+      "photo_number": "P115",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-ac0655a6-7ee1-4a62-b149-fd11d907370e.jpg"
+    },
+    {
+      "photo_id": "photo-05c78626-27ad-449d-87bd-c1c22c57a88d",
+      "photo_number": "P116",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-05c78626-27ad-449d-87bd-c1c22c57a88d.jpg"
+    },
+    {
+      "photo_id": "photo-a613f8f2-40cd-4209-845c-986e02b9a1b2",
+      "photo_number": "P117",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-a613f8f2-40cd-4209-845c-986e02b9a1b2.jpg"
+    },
+    {
+      "photo_id": "photo-8928b401-bb50-4836-9ac8-cbebacd107cd",
+      "photo_number": "P118",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-8928b401-bb50-4836-9ac8-cbebacd107cd.jpg"
+    },
+    {
+      "photo_id": "photo-c3b401a9-4882-482c-b56b-6ea29ecc6075",
+      "photo_number": "P121",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-c3b401a9-4882-482c-b56b-6ea29ecc6075.jpg"
+    },
+    {
+      "photo_id": "photo-1b4fa369-7e40-4a98-a458-86195ce43589",
+      "photo_number": "P122",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-1b4fa369-7e40-4a98-a458-86195ce43589.jpg"
+    },
+    {
+      "photo_id": "photo-63f7a4a2-41aa-4356-924d-450b0e6f7d24",
+      "photo_number": "P123",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-63f7a4a2-41aa-4356-924d-450b0e6f7d24.jpg"
+    },
+    {
+      "photo_id": "photo-c34cd7f6-78bb-4168-bee9-898a300e2a5a",
+      "photo_number": "P125",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-c34cd7f6-78bb-4168-bee9-898a300e2a5a.jpg"
+    },
+    {
+      "photo_id": "photo-c9ecb317-3370-44a2-8356-af1e214d863b",
+      "photo_number": "P127",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-c9ecb317-3370-44a2-8356-af1e214d863b.jpg"
+    },
+    {
+      "photo_id": "photo-d6755a64-c507-47cb-b7a7-517bb1042889",
+      "photo_number": "P132",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-d6755a64-c507-47cb-b7a7-517bb1042889.jpg"
+    },
+    {
+      "photo_id": "photo-3e626c60-252b-4798-8a64-7fc736ab6e8a",
+      "photo_number": "P133",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3e626c60-252b-4798-8a64-7fc736ab6e8a.jpg"
+    },
+    {
+      "photo_id": "photo-b5998b21-c088-4d84-bdc3-eca76d5770c1",
+      "photo_number": "P134",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-b5998b21-c088-4d84-bdc3-eca76d5770c1.jpg"
+    },
+    {
+      "photo_id": "photo-55358686-b248-497e-aa87-387bf1154fbb",
+      "photo_number": "P135",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-55358686-b248-497e-aa87-387bf1154fbb.jpg"
+    },
+    {
+      "photo_id": "photo-9c3305c3-2d40-441b-8990-ca7cc914ffd4",
+      "photo_number": "P136",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-9c3305c3-2d40-441b-8990-ca7cc914ffd4.jpg"
+    },
+    {
+      "photo_id": "photo-f9d4e54f-a8aa-43fb-82a7-72ffa1236119",
+      "photo_number": "P143",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f9d4e54f-a8aa-43fb-82a7-72ffa1236119.jpg"
+    },
+    {
+      "photo_id": "photo-13a58c4d-a5e3-4376-8b52-5aef572ee99b",
+      "photo_number": "P144",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-13a58c4d-a5e3-4376-8b52-5aef572ee99b.jpg"
+    },
+    {
+      "photo_id": "photo-ed9ef24c-7fe1-4263-a78a-3b0388a52921",
+      "photo_number": "P145",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-ed9ef24c-7fe1-4263-a78a-3b0388a52921.jpg"
+    },
+    {
+      "photo_id": "photo-280b757d-e17b-41db-a794-9ec2bb143e4a",
+      "photo_number": "P157",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-280b757d-e17b-41db-a794-9ec2bb143e4a.jpg"
+    },
+    {
+      "photo_id": "photo-ac6ada32-2b56-4ce2-89a7-1196baaf37d5",
+      "photo_number": "P158",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-ac6ada32-2b56-4ce2-89a7-1196baaf37d5.jpg"
+    },
+    {
+      "photo_id": "photo-9da16950-34db-4dee-876d-57dd12536436",
+      "photo_number": "P159",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-9da16950-34db-4dee-876d-57dd12536436.jpg"
+    },
+    {
+      "photo_id": "photo-3454ba9f-0109-40d8-ba91-068dcdcb2312",
+      "photo_number": "P162",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3454ba9f-0109-40d8-ba91-068dcdcb2312.jpg"
+    },
+    {
+      "photo_id": "photo-79749fa1-a67b-4e5a-a22e-e2593fe1e8ec",
+      "photo_number": "P163",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-79749fa1-a67b-4e5a-a22e-e2593fe1e8ec.jpg"
+    },
+    {
+      "photo_id": "photo-cfe3462a-ab2f-4680-b15b-d3b738f4bf90",
+      "photo_number": "P165",
+      "inspection_date": "2026-08-03",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Other",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-cfe3462a-ab2f-4680-b15b-d3b738f4bf90.jpg"
+    },
+    {
+      "photo_id": "photo-efe65cc5-244a-4535-bb01-25fcad05bdf1",
+      "photo_number": "P10",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-efe65cc5-244a-4535-bb01-25fcad05bdf1.jpg"
+    },
+    {
+      "photo_id": "photo-85dffe75-6035-4bcf-9633-c4195633e463",
+      "photo_number": "P11",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-85dffe75-6035-4bcf-9633-c4195633e463.jpg"
+    },
+    {
+      "photo_id": "photo-01a23fac-38e0-411d-888a-894ae9815088",
+      "photo_number": "P12",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-01a23fac-38e0-411d-888a-894ae9815088.jpg"
+    },
+    {
+      "photo_id": "photo-41f2b9ba-ec5c-4363-9e0d-d04efaa1cf7e",
+      "photo_number": "P13",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-41f2b9ba-ec5c-4363-9e0d-d04efaa1cf7e.jpg"
+    },
+    {
+      "photo_id": "photo-c8d2d24b-fcdb-4181-9a79-dddd719775fc",
+      "photo_number": "P14",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-c8d2d24b-fcdb-4181-9a79-dddd719775fc.jpg"
+    },
+    {
+      "photo_id": "photo-30130c0f-ad53-42d4-859d-9142bd9b3adc",
+      "photo_number": "P15",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-30130c0f-ad53-42d4-859d-9142bd9b3adc.jpg"
+    },
+    {
+      "photo_id": "photo-7dcb1f5a-78c6-4c59-9e25-c15d744691de",
+      "photo_number": "P16",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-7dcb1f5a-78c6-4c59-9e25-c15d744691de.jpg"
+    },
+    {
+      "photo_id": "photo-37716774-cdf0-4b50-9895-c43ee5badb62",
+      "photo_number": "P17",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-37716774-cdf0-4b50-9895-c43ee5badb62.jpg"
+    },
+    {
+      "photo_id": "photo-4fba63e4-380d-4775-ac2a-9b6f5ed1ea1d",
+      "photo_number": "P18",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-4fba63e4-380d-4775-ac2a-9b6f5ed1ea1d.jpg"
+    },
+    {
+      "photo_id": "photo-c378f645-9b90-4ca0-81fb-c3d0e3b40450",
+      "photo_number": "P19",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-c378f645-9b90-4ca0-81fb-c3d0e3b40450.jpg"
+    },
+    {
+      "photo_id": "photo-fb28c9fe-53a2-4166-9099-cff20748d1d8",
+      "photo_number": "P20",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-fb28c9fe-53a2-4166-9099-cff20748d1d8.jpg"
+    },
+    {
+      "photo_id": "photo-d0db0dc4-44f6-423e-97aa-b7f517f7d961",
+      "photo_number": "P21",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-d0db0dc4-44f6-423e-97aa-b7f517f7d961.jpg"
+    },
+    {
+      "photo_id": "photo-2a917b22-c80c-4094-a5d1-20c7d6ae7fe8",
+      "photo_number": "P22",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-2a917b22-c80c-4094-a5d1-20c7d6ae7fe8.jpg"
+    },
+    {
+      "photo_id": "photo-981437f0-9a59-4c75-b0d5-ac4cd605c844",
+      "photo_number": "P23",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-981437f0-9a59-4c75-b0d5-ac4cd605c844.jpg"
+    },
+    {
+      "photo_id": "photo-ecbe8264-7b03-4e0f-ac01-4446aa412dc1",
+      "photo_number": "P24",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-ecbe8264-7b03-4e0f-ac01-4446aa412dc1.jpg"
+    },
+    {
+      "photo_id": "photo-f443e358-b92b-474d-aac8-4d3794efc1ab",
+      "photo_number": "P25",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f443e358-b92b-474d-aac8-4d3794efc1ab.jpg"
+    },
+    {
+      "photo_id": "photo-3507475f-eeda-4a79-8307-32db509ef762",
+      "photo_number": "P26",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3507475f-eeda-4a79-8307-32db509ef762.jpg"
+    },
+    {
+      "photo_id": "photo-7dfea87f-2d56-4c6d-b4d0-08e3b81725f1",
+      "photo_number": "P27",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-7dfea87f-2d56-4c6d-b4d0-08e3b81725f1.jpg"
+    },
+    {
+      "photo_id": "photo-b862290a-5f36-4f0d-89e0-c3e77354e419",
+      "photo_number": "P28",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-b862290a-5f36-4f0d-89e0-c3e77354e419.jpg"
+    },
+    {
+      "photo_id": "photo-94633f66-ec97-49c2-987f-e9d8131cfb8a",
+      "photo_number": "P29",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-94633f66-ec97-49c2-987f-e9d8131cfb8a.jpg"
+    },
+    {
+      "photo_id": "photo-4e3fd1bc-e05e-4b84-afec-47563804c129",
+      "photo_number": "P30",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-4e3fd1bc-e05e-4b84-afec-47563804c129.jpg"
+    },
+    {
+      "photo_id": "photo-3e604d1c-0440-410d-95ed-5d8b140f8a78",
+      "photo_number": "P31",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3e604d1c-0440-410d-95ed-5d8b140f8a78.jpg"
+    },
+    {
+      "photo_id": "photo-a52621ea-b671-4887-9d3e-94a04ddf903a",
+      "photo_number": "P32",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-a52621ea-b671-4887-9d3e-94a04ddf903a.jpg"
+    },
+    {
+      "photo_id": "photo-799ecf7f-c299-4319-9626-263db861b879",
+      "photo_number": "P33",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-799ecf7f-c299-4319-9626-263db861b879.jpg"
+    },
+    {
+      "photo_id": "photo-cf6031fb-c32a-4b10-b586-be69575719b4",
+      "photo_number": "P34",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-cf6031fb-c32a-4b10-b586-be69575719b4.jpg"
+    },
+    {
+      "photo_id": "photo-0e94305f-dd1f-443e-acf3-d3653aa86864",
+      "photo_number": "P35",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-0e94305f-dd1f-443e-acf3-d3653aa86864.jpg"
+    },
+    {
+      "photo_id": "photo-5b4452db-c161-4895-bdad-bb73abf7a925",
+      "photo_number": "P36",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-5b4452db-c161-4895-bdad-bb73abf7a925.jpg"
+    },
+    {
+      "photo_id": "photo-0125d0bf-d9de-4caf-ab2c-e4ef0e9c1ead",
+      "photo_number": "P37",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-0125d0bf-d9de-4caf-ab2c-e4ef0e9c1ead.jpg"
+    },
+    {
+      "photo_id": "photo-2dbf5363-84f5-499e-99cc-36a40c4b43ae",
+      "photo_number": "P38",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-2dbf5363-84f5-499e-99cc-36a40c4b43ae.jpg"
+    },
+    {
+      "photo_id": "photo-3b634504-a10a-475e-9345-d1da972d638c",
+      "photo_number": "P39",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3b634504-a10a-475e-9345-d1da972d638c.jpg"
+    },
+    {
+      "photo_id": "photo-10ee4676-e22e-4e6d-9b9f-74c11598b901",
+      "photo_number": "P40",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-10ee4676-e22e-4e6d-9b9f-74c11598b901.jpg"
+    },
+    {
+      "photo_id": "photo-f2c0a959-60c6-4368-a8c2-a1b37f9d6eb3",
+      "photo_number": "P41",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f2c0a959-60c6-4368-a8c2-a1b37f9d6eb3.jpg"
+    },
+    {
+      "photo_id": "photo-2765a4e3-9d25-477a-8b34-8e26414ffb00",
+      "photo_number": "P42",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-2765a4e3-9d25-477a-8b34-8e26414ffb00.jpg"
+    },
+    {
+      "photo_id": "photo-79bcfa31-5859-4e4b-85b5-f737f6634847",
+      "photo_number": "P43",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-79bcfa31-5859-4e4b-85b5-f737f6634847.jpg"
+    },
+    {
+      "photo_id": "photo-9a795055-f881-4b61-8bef-877918c47e89",
+      "photo_number": "P44",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "Water Measurement",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-9a795055-f881-4b61-8bef-877918c47e89.jpg"
+    },
+    {
+      "photo_id": "photo-a49f48a7-194f-4b58-9bf5-6c4a764576c4",
+      "photo_number": "P45",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-a49f48a7-194f-4b58-9bf5-6c4a764576c4.jpg"
+    },
+    {
+      "photo_id": "photo-ed280ef2-f857-4544-bf7e-9e0869c59fac",
+      "photo_number": "P46",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-ed280ef2-f857-4544-bf7e-9e0869c59fac.jpg"
+    },
+    {
+      "photo_id": "photo-3ca26215-20e7-415a-9160-a9fbe5e1f8ee",
+      "photo_number": "P47",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3ca26215-20e7-415a-9160-a9fbe5e1f8ee.jpg"
+    },
+    {
+      "photo_id": "photo-6a5876c9-c76d-47b5-b1e8-ea457da8d90d",
+      "photo_number": "P48",
+      "inspection_date": "2026-08-05",
+      "parcel_part": "SMALL_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-6a5876c9-c76d-47b5-b1e8-ea457da8d90d.jpg"
+    },
+    {
+      "photo_id": "photo-9b78c354-2488-421a-802a-7e3c3927e035",
+      "photo_number": "P64",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-9b78c354-2488-421a-802a-7e3c3927e035.jpg"
+    },
+    {
+      "photo_id": "photo-3806255a-744e-47b3-80bf-48d0bd7e41dc",
+      "photo_number": "P65",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-3806255a-744e-47b3-80bf-48d0bd7e41dc.jpg"
+    },
+    {
+      "photo_id": "photo-3788b8fd-8c39-469e-90db-680cf23b7928",
+      "photo_number": "P66",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-3788b8fd-8c39-469e-90db-680cf23b7928.jpg"
+    },
+    {
+      "photo_id": "photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e",
+      "photo_number": "P71",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-04c4b4fe-1c30-4a42-beb7-10adada56b6e.jpg"
+    },
+    {
+      "photo_id": "photo-cba3616b-0434-4772-88c2-039a120e82b1",
+      "photo_number": "P72",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-cba3616b-0434-4772-88c2-039a120e82b1.jpg"
+    },
+    {
+      "photo_id": "photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff",
+      "photo_number": "P73",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-2c777f8f-ffc6-4b3e-9c7c-07112ac9f9ff.jpg"
+    },
+    {
+      "photo_id": "photo-be406434-72fd-4c09-9fff-2c7035edb7d8",
+      "photo_number": "P74",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-be406434-72fd-4c09-9fff-2c7035edb7d8.jpg"
+    },
+    {
+      "photo_id": "photo-f345fc1c-628f-4a67-92ce-e8c6333c0df7",
+      "photo_number": "P75",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-f345fc1c-628f-4a67-92ce-e8c6333c0df7.jpg"
+    },
+    {
+      "photo_id": "photo-1abf3541-39b5-4d42-b661-da2f68281b42",
+      "photo_number": "P76",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-1abf3541-39b5-4d42-b661-da2f68281b42.jpg"
+    },
+    {
+      "photo_id": "photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4",
+      "photo_number": "P77",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-2a55f93f-197b-4cb9-adf3-294ce1d22ef4.jpg"
+    },
+    {
+      "photo_id": "photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f",
+      "photo_number": "P78",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "WATER",
+      "water_review_class": "RECORDED_WATER",
+      "water_review_confidence": "SOURCE_RECORDED",
+      "thumbnail_path": "data/photos/all/photo-5ae0d64c-c210-44a7-a6bc-5a322cef6a0f.jpg"
+    },
+    {
+      "photo_id": "photo-419c612e-b396-44bd-bbe9-bdc645b2f859",
+      "photo_number": "P90",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-419c612e-b396-44bd-bbe9-bdc645b2f859.jpg"
+    },
+    {
+      "photo_id": "photo-3c9e121e-2a95-4d40-8b87-4c7122b53f23",
+      "photo_number": "P91",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-3c9e121e-2a95-4d40-8b87-4c7122b53f23.jpg"
+    },
+    {
+      "photo_id": "photo-4da89938-90e1-4e78-81f3-5117cc38a04a",
+      "photo_number": "P92",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-4da89938-90e1-4e78-81f3-5117cc38a04a.jpg"
+    },
+    {
+      "photo_id": "photo-3baaf83b-5943-438d-9d1b-002034b7d081",
+      "photo_number": "P93",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "POSSIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "LOW_REVIEW_REQUIRED",
+      "thumbnail_path": "data/photos/all/photo-3baaf83b-5943-438d-9d1b-002034b7d081.jpg"
+    },
+    {
+      "photo_id": "photo-8ebe5497-dd95-4509-9233-32f81114dfa7",
+      "photo_number": "P94",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-8ebe5497-dd95-4509-9233-32f81114dfa7.jpg"
+    },
+    {
+      "photo_id": "photo-9ea7612e-6288-4c66-bf0f-f0cb95e62123",
+      "photo_number": "P96",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-9ea7612e-6288-4c66-bf0f-f0cb95e62123.jpg"
+    },
+    {
+      "photo_id": "photo-b5c2ba97-401d-4a73-a9c8-a46c2a6cd48f",
+      "photo_number": "P97",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-b5c2ba97-401d-4a73-a9c8-a46c2a6cd48f.jpg"
+    },
+    {
+      "photo_id": "photo-0f923a0b-10af-48d8-922a-6a9e9644736e",
+      "photo_number": "P98",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-0f923a0b-10af-48d8-922a-6a9e9644736e.jpg"
+    },
+    {
+      "photo_id": "photo-263c0c57-9eaf-41dc-a2a4-641629311834",
+      "photo_number": "P99",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-263c0c57-9eaf-41dc-a2a4-641629311834.jpg"
+    },
+    {
+      "photo_id": "photo-9a1a2a2d-c778-4a45-90d3-286ee88232d6",
+      "photo_number": "P104",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-9a1a2a2d-c778-4a45-90d3-286ee88232d6.jpg"
+    },
+    {
+      "photo_id": "photo-7e1641eb-8060-4028-af1b-230a56128c39",
+      "photo_number": "P105",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-7e1641eb-8060-4028-af1b-230a56128c39.jpg"
+    },
+    {
+      "photo_id": "photo-f902ce0b-357d-4c9c-a8d2-2b93cc70799a",
+      "photo_number": "P106",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-f902ce0b-357d-4c9c-a8d2-2b93cc70799a.jpg"
+    },
+    {
+      "photo_id": "photo-38f1ef97-cea3-4736-8edb-1b2c81d34ea6",
+      "photo_number": "P107",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-38f1ef97-cea3-4736-8edb-1b2c81d34ea6.jpg"
+    },
+    {
+      "photo_id": "photo-e53998d1-1063-4d9c-bd3e-39cd279e5d1b",
+      "photo_number": "P108",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-e53998d1-1063-4d9c-bd3e-39cd279e5d1b.jpg"
+    },
+    {
+      "photo_id": "photo-5685b8e9-a8ae-4411-b7cc-fa3793a12149",
+      "photo_number": "P109",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-5685b8e9-a8ae-4411-b7cc-fa3793a12149.jpg"
+    },
+    {
+      "photo_id": "photo-2eaf281d-54e8-491b-a652-417e64373658",
+      "photo_number": "P111",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-2eaf281d-54e8-491b-a652-417e64373658.jpg"
+    },
+    {
+      "photo_id": "photo-6d7da03d-78ca-4369-8e3f-372665f78e7f",
+      "photo_number": "P112",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-6d7da03d-78ca-4369-8e3f-372665f78e7f.jpg"
+    },
+    {
+      "photo_id": "photo-aeeb09d9-37da-4295-b29a-13008596d960",
+      "photo_number": "P113",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-aeeb09d9-37da-4295-b29a-13008596d960.jpg"
+    },
+    {
+      "photo_id": "photo-320b9055-c78e-499c-8eb6-9e969ecc8d48",
+      "photo_number": "P114",
+      "inspection_date": "2026-08-07",
+      "parcel_part": "LARGE_PARCEL",
+      "original_recorded_category": "MAP THIS SECTION",
+      "water_review_class": "VISIBLE_WATER_IN_PHOTO",
+      "water_review_confidence": "HIGH_OR_MODERATE",
+      "thumbnail_path": "data/photos/all/photo-320b9055-c78e-499c-8eb6-9e969ecc8d48.jpg"
+    }
+  ]
+}
