@@ -70,6 +70,13 @@ aside button,aside select{width:100%;margin:3px 0}
 .rectangle-resize-handle{background:#fff;border:3px solid #9b6300;border-radius:4px}
 .rectangle-move-handle{background:#123f2a;color:#fff;border:2px solid #fff;border-radius:15px;font-size:10px;font-weight:900;letter-spacing:.04em}
 .rectangle-handle:active{cursor:grabbing}
+.creek-path-handle{display:grid;place-items:center;width:28px!important;height:28px!important;border:3px solid #fff;border-radius:50%;background:#f29f05;color:#171100;font-size:11px;font-weight:900;box-shadow:0 2px 8px #0009;cursor:grab}
+.creek-path-handle:active{cursor:grabbing}
+.path-width-controls{display:flex;justify-content:center;align-items:center;gap:5px;flex-wrap:wrap;margin:8px 0;padding:8px;border:2px solid #8b6700;border-radius:10px;background:#fff8d6}
+.path-width-controls[hidden]{display:none}
+.path-width-controls strong{width:100%;font-size:13px}
+.path-width-controls button.active{background:#174c31;color:#fff;border-color:#0c2e1d}
+.creek-line-label{border:2px solid #087cca;background:#eef9ff;color:#064e80;font-weight:900}
 .draw-coach{position:absolute;z-index:1250;left:50%;top:76px;transform:translateX(-50%);width:min(620px,calc(100% - 32px));padding:14px 16px;border:4px solid #122d1e;border-radius:16px;background:#ffe15a;box-shadow:0 8px 26px #0008;text-align:center;color:#122219}
 .draw-coach[hidden]{display:none}
 .draw-coach strong{display:block;font-size:22px;line-height:1.15}
@@ -206,4 +213,3 @@ html,body,main,.map-column,.map-wrap{position:static;display:block;height:auto;o
 .legend{display:flex;border-top:1px solid #333}
 #customerProposal{display:block;position:static;width:auto}
 }
-
