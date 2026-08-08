@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Pearson Road Water &amp; Clearing Review Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="./styles.css?v=4">
+  <link rel="stylesheet" href="./styles.css?v=5">
   <script src="./config.local.js" onerror="this.remove()"></script>
 </head>
 <body>
@@ -63,11 +63,18 @@
       </section>
       <section id="proposalTools" data-control-panel="proposal" hidden>
         <h2>Edit proposal</h2>
-        <button data-edit="DRAW_AREA" type="button">DRAW AREA</button>
-        <button data-edit="RESHAPE" type="button">MOVE EDGE</button>
+        <p class="tool-help">Place a simple work box, then drag its corners, sides, or center. Nothing changes until you save it.</p>
+        <button data-edit="DRAW_RECTANGLE" type="button">DRAW RECTANGLE</button>
+        <button data-edit="RESIZE_RECTANGLE" type="button">MOVE / RESIZE RECTANGLE</button>
+        <div id="rectangleActions" class="rectangle-actions" hidden>
+          <button id="saveRectangle" class="primary-action" type="button">SAVE RECTANGLE</button>
+          <button id="cancelRectangle" type="button">CANCEL</button>
+        </div>
         <button data-edit="RENAME" type="button">NAME</button>
         <button data-edit="ADD_PRICE" type="button">PRICE</button>
         <details><summary>MORE DETAILS</summary>
+          <button data-edit="DRAW_AREA" type="button">DRAW CUSTOM AREA</button>
+          <button data-edit="RESHAPE" type="button">REDRAW CUSTOM AREA</button>
           <button data-edit="CHANGE_TYPE" type="button">CHANGE TYPE</button>
           <button data-edit="CHANGE_COLOR" type="button">CHANGE COLOR</button>
           <button data-edit="ADD_NOTE" type="button">ADD NOTE</button>
@@ -193,7 +200,7 @@
     <div id="photoDetails"></div>
   </dialog>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./property-map-core.js?v=4"></script>
-  <script src="./app.js?v=9"></script>
+  <script src="./property-map-core.js?v=5"></script>
+  <script src="./app.js?v=10"></script>
 </body>
 </html>

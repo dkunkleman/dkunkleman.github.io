@@ -82,6 +82,17 @@
     return feature;
   }
 
+  function replaceFeatureGeometry(model, layer, featureId, geometry, propertiesPatch, action) {
+    if (layer !== "interpretation" && layer !== "proposals") throw new Error("Only editable layers may change.");
+    const before = clone(model[layer].features);
+    const feature = model[layer].features.find((item) => item.id === featureId);
+    if (!feature) throw new Error(`Feature not found: ${featureId}`);
+    feature.geometry = clone(geometry);
+    Object.assign(feature.properties || (feature.properties = {}), clone(propertiesPatch || {}));
+    recordEdit(model, action || "RESHAPE", layer, before, model[layer].features, { feature_id: featureId });
+    return feature;
+  }
+
   function undo(model) {
     const prior = [...model.edit_history].reverse().find((event) => event.action !== "UNDO" && !event.undone_by);
     if (!prior) return null;
@@ -182,6 +193,41 @@
       approx_width_ft: Math.round(spansFeet[1]),
       basis: "APPROXIMATE FROM DRAFT MAP GEOMETRY - NOT A SURVEY"
     };
+  }
+
+  function rectangleBoundsFromCorners(first, second) {
+    if (!first || !second || first.length < 2 || second.length < 2) return null;
+    const west = Math.min(Number(first[0]), Number(second[0]));
+    const east = Math.max(Number(first[0]), Number(second[0]));
+    const south = Math.min(Number(first[1]), Number(second[1]));
+    const north = Math.max(Number(first[1]), Number(second[1]));
+    if (![west, east, south, north].every(Number.isFinite) || west === east || south === north) return null;
+    return { west, east, south, north };
+  }
+
+  function rectangleRing(bounds) {
+    if (!bounds) return null;
+    return [[
+      [bounds.west, bounds.south],
+      [bounds.west, bounds.north],
+      [bounds.east, bounds.north],
+      [bounds.east, bounds.south],
+      [bounds.west, bounds.south]
+    ]];
+  }
+
+  function rectangleBoundsFromGeometry(geometry) {
+    const ring = geometry && geometry.type === "Polygon" && geometry.coordinates && geometry.coordinates[0];
+    if (!ring || ring.length < 4) return null;
+    const xs = ring.map((point) => Number(point[0]));
+    const ys = ring.map((point) => Number(point[1]));
+    if (![...xs, ...ys].every(Number.isFinite)) return null;
+    const bounds = { west: Math.min(...xs), east: Math.max(...xs), south: Math.min(...ys), north: Math.max(...ys) };
+    const expected = rectangleRing(bounds)[0];
+    const unique = new Set(ring.slice(0, -1).map((point) => `${point[0]}:${point[1]}`));
+    const expectedSet = new Set(expected.slice(0, -1).map((point) => `${point[0]}:${point[1]}`));
+    if (unique.size !== 4 || [...unique].some((point) => !expectedSet.has(point))) return null;
+    return bounds;
   }
 
   function money(value) {
@@ -363,5 +409,5 @@
     return saved;
   }
 
-  return { clone, createModel, recordEdit, addFeature, replaceFeature, undo, setFeatured, reorderFeatured, toggleFavorite, haversineMeters, rankPhotos, polygonAreaAcres, polygonMetrics, money, estimateZone, createPricingCrewModel, addMarketBenchmark, proposalTotal, setZoneSelection, addCustomerMessage, acceptProposal, createRecurringOpportunity, createAsset, addAssetObservation };
+  return { clone, createModel, recordEdit, addFeature, replaceFeature, replaceFeatureGeometry, undo, setFeatured, reorderFeatured, toggleFavorite, haversineMeters, rankPhotos, polygonAreaAcres, polygonMetrics, rectangleBoundsFromCorners, rectangleBoundsFromGeometry, rectangleRing, money, estimateZone, createPricingCrewModel, addMarketBenchmark, proposalTotal, setZoneSelection, addCustomerMessage, acceptProposal, createRecurringOpportunity, createAsset, addAssetObservation };
 });

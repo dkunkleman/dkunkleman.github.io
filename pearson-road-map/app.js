@@ -41,7 +41,7 @@
   const state = {
     model: loadModel(), source: {}, map: null, groups: {}, photoMarkers: new Map(), selectedPhotoId: null,
     selectedProposalId: null, mode: "EVIDENCE", filter: "WATER", activeDates: new Set(Object.keys(DAY_COLORS)), photoPulseMarker: null,
-    draw: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
+    draw: null, rectangleEditor: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
     currentPhotoSet: [], currentPhotoIndex: -1, currentPhotoCollectionLabel: "ALL VISIBLE PHOTOS", touchStartX: null
   };
   let statusTimer = null;
@@ -587,7 +587,117 @@
   }
   function captureCustomerMessage(kind){const message=prompt(kind==="QUESTION"?"What is your question?":"What would you like changed?","");if(!message)return;const zone=state.model.proposals.features.find((feature)=>feature.id===state.selectedProposalId)||state.model.proposals.features[0];Core.addCustomerMessage(state.model,kind,message,"PEARSON-STARTER-REVEAL",p(zone).proposal_zone_id,VIEWER_ID);saveModel();document.getElementById("acceptanceStatus").textContent=kind==="QUESTION"?"Question saved for David.":"Change request saved for David.";}
   function acceptCurrentProposal(){try{const result=Core.acceptProposal(state.model,"Prototype customer",VIEWER_ID);saveModel();renderProposalSheet();status(`Proposal accepted and frozen. Work order ${result.work_order.work_order_id} created; no payment was activated.`);}catch(error){document.getElementById("acceptanceStatus").innerHTML=`<span class="status-warn">NOT ACCEPTED: ${safe(error.message)}</span>`;}}
+
+  function rectangleHandlePositions(bounds){
+    const middleLat=(bounds.south+bounds.north)/2,middleLng=(bounds.west+bounds.east)/2;
+    return {
+      nw:[bounds.north,bounds.west],n:[bounds.north,middleLng],ne:[bounds.north,bounds.east],
+      e:[middleLat,bounds.east],se:[bounds.south,bounds.east],s:[bounds.south,middleLng],
+      sw:[bounds.south,bounds.west],w:[middleLat,bounds.west],center:[middleLat,middleLng]
+    };
+  }
+  function normalizedRectangleBounds(bounds){
+    return {west:Math.min(bounds.west,bounds.east),east:Math.max(bounds.west,bounds.east),south:Math.min(bounds.south,bounds.north),north:Math.max(bounds.south,bounds.north)};
+  }
+  function rectangleHandleIcon(name){
+    const center=name==="center";
+    return L.divIcon({className:`rectangle-handle ${center?"rectangle-move-handle":"rectangle-resize-handle"}`,html:center?"MOVE":"",iconSize:center?[48,28]:[22,22],iconAnchor:center?[24,14]:[11,11]});
+  }
+  function updateRectangleFromHandle(name,latlng){
+    const editor=state.rectangleEditor;if(!editor)return;
+    let bounds={...editor.bounds};
+    if(name==="center"){
+      const center=rectangleHandlePositions(bounds).center;
+      const dLat=latlng.lat-center[0],dLng=latlng.lng-center[1];
+      bounds={west:bounds.west+dLng,east:bounds.east+dLng,south:bounds.south+dLat,north:bounds.north+dLat};
+    }else{
+      if(name.includes("w"))bounds.west=latlng.lng;
+      if(name.includes("e"))bounds.east=latlng.lng;
+      if(name.includes("n"))bounds.north=latlng.lat;
+      if(name.includes("s"))bounds.south=latlng.lat;
+    }
+    editor.bounds=normalizedRectangleBounds(bounds);
+    editor.layer.setBounds([[editor.bounds.south,editor.bounds.west],[editor.bounds.north,editor.bounds.east]]);
+    const positions=rectangleHandlePositions(editor.bounds);
+    Object.entries(editor.handles).forEach(([handleName,marker])=>{if(handleName!==name)marker.setLatLng(positions[handleName]);});
+    const metrics=Core.polygonMetrics(Core.rectangleRing(editor.bounds));
+    status(`Rectangle draft: about ${metrics.acreage} acres. Press SAVE RECTANGLE when it is right.`);
+  }
+  function removeRectangleEditor(){
+    const editor=state.rectangleEditor;
+    if(editor){editor.layer.remove();Object.values(editor.handles).forEach((marker)=>marker.remove());}
+    state.rectangleEditor=null;
+    if(state.draw?.anchorMarker)state.draw.anchorMarker.remove();
+    state.draw=null;
+    const actions=document.getElementById("rectangleActions");if(actions)actions.hidden=true;
+  }
+  function showRectangleEditor(bounds,targetFeatureId){
+    removeRectangleEditor();
+    const normalized=normalizedRectangleBounds(bounds);
+    const layer=L.rectangle([[normalized.south,normalized.west],[normalized.north,normalized.east]],{color:"#f29f05",fillColor:"#f29f05",fillOpacity:.22,weight:5,dashArray:"8 6"}).addTo(state.map);
+    const editor={bounds:normalized,targetFeatureId:targetFeatureId||null,layer,handles:{}};
+    state.rectangleEditor=editor;
+    Object.entries(rectangleHandlePositions(normalized)).forEach(([name,latlng])=>{
+      const marker=L.marker(latlng,{icon:rectangleHandleIcon(name),draggable:true,zIndexOffset:2000,keyboard:true,title:name==="center"?"Move rectangle":"Resize rectangle"}).addTo(state.map);
+      marker.on("drag",(event)=>updateRectangleFromHandle(name,event.target.getLatLng()));
+      marker.on("dragend",()=>{
+        const current=state.rectangleEditor;if(!current)return;
+        const positions=rectangleHandlePositions(current.bounds);
+        Object.entries(current.handles).forEach(([handleName,item])=>item.setLatLng(positions[handleName]));
+      });
+      editor.handles[name]=marker;
+    });
+    document.getElementById("rectangleActions").hidden=false;
+    const metrics=Core.polygonMetrics(Core.rectangleRing(normalized));
+    status(`Rectangle ready: about ${metrics.acreage} acres. Drag the squares or MOVE handle, then press SAVE RECTANGLE.`);
+  }
+  function beginRectangle(){
+    removeRectangleEditor();
+    state.draw={mode:"RECTANGLE",points:[],targetFeatureId:state.selectedProposalId,anchorMarker:null};
+    document.getElementById("rectangleActions").hidden=false;
+    document.getElementById("saveRectangle").disabled=true;
+    status("Tap one corner of the work area, then tap the opposite corner.");
+  }
+  function beginRectangleResize(){
+    const feature=state.model.proposals.features.find((item)=>item.id===state.selectedProposalId);
+    if(!feature)return status("Select a proposal area first.");
+    const bounds=Core.rectangleBoundsFromGeometry(feature.geometry);
+    if(!bounds)return status("This outline is not a rectangle. Press DRAW RECTANGLE to replace it with a simple box.");
+    showRectangleEditor(bounds,feature.id);
+    document.getElementById("saveRectangle").disabled=false;
+  }
+  function saveRectangle(){
+    const editor=state.rectangleEditor;if(!editor)return status("Place the rectangle first.");
+    const ring=Core.rectangleRing(editor.bounds),metrics=Core.polygonMetrics(ring);
+    const geometry={type:"Polygon",coordinates:ring};
+    const geometryPatch={acreage:metrics.acreage,quantity:metrics.acreage,perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:metrics.approx_width_ft,geometry_measurement_basis:metrics.basis,geometry_shape:"RECTANGLE",geometry_status:"DAVID-DRAWN RECTANGLE - REVIEW BEFORE CUSTOMER USE"};
+    if(editor.targetFeatureId){
+      Core.replaceFeatureGeometry(state.model,"proposals",editor.targetFeatureId,geometry,geometryPatch,"DRAW_OR_RESIZE_RECTANGLE");
+    }else{
+      const id=`PROPOSAL-ZONE-${String(state.model.proposals.features.length+1).padStart(3,"0")}`;
+      Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry,properties:{proposal_zone_id:id,name:`Zone ${state.model.proposals.features.length+1}`,work_type:"CLEAR / REVEAL",service_type:"STARTER REVEAL",finish_level:"REVEAL FINISH",current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:"UNKNOWN",proposed_intervention:"CLEAR / REVEAL",included_scope:[],preserve:[],remove:[],expected_benefit:"UNKNOWN",expected_visible_result:"UNKNOWN",target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,unit:"acre",before_photo_ids:[],linked_before_photo_ids:[],evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK",...geometryPatch}},"DRAW_RECTANGLE");
+      state.selectedProposalId=id;
+    }
+    removeRectangleEditor();saveModel();renderAll();
+    status("Rectangle saved as a new proposal-map version. Photos, GPS, and field evidence were not changed.");
+  }
+  function cancelRectangle(){removeRectangleEditor();status("Rectangle change canceled. Nothing was changed.");}
+
   function handleMapClick(event){
+    if(state.draw?.mode==="RECTANGLE"){
+      state.draw.points.push([event.latlng.lng,event.latlng.lat]);
+      if(state.draw.points.length===1){
+        state.draw.anchorMarker=L.circleMarker(event.latlng,{radius:8,color:"#fff",weight:3,fillColor:"#f29f05",fillOpacity:1}).addTo(state.map);
+        status("First corner saved. Tap the opposite corner.");
+        return;
+      }
+      const bounds=Core.rectangleBoundsFromCorners(state.draw.points[0],state.draw.points[1]);
+      const targetFeatureId=state.draw.targetFeatureId;
+      if(!bounds){state.draw.points.pop();return status("Choose an opposite corner farther away.");}
+      showRectangleEditor(bounds,targetFeatureId);
+      document.getElementById("saveRectangle").disabled=false;
+      return;
+    }
     if(!state.draw){updateFilmstrip([event.latlng.lng,event.latlng.lat]);return;}
     state.draw.points.push([event.latlng.lng,event.latlng.lat]);
     if(state.draw.preview)state.draw.preview.remove();
@@ -598,6 +708,8 @@
   function finishArea(){if(!state.draw||state.draw.points.length<3){status("Add at least three map points before finishing the area.");return;}const coords=[...state.draw.points,state.draw.points[0]];const ring=[coords],metrics=Core.polygonMetrics(ring);if(state.draw.mode==="RESHAPE"&&state.draw.featureId){const before=Core.clone(state.model.proposals.features);const feature=state.model.proposals.features.find(f=>f.id===state.draw.featureId);feature.geometry.coordinates=ring;Object.assign(feature.properties,{acreage:metrics.acreage,quantity:metrics.acreage,perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:metrics.approx_width_ft,geometry_measurement_basis:metrics.basis,geometry_status:"DAVID-DRAWN DRAFT - REVIEW BEFORE CUSTOMER USE"});Core.recordEdit(state.model,"RESHAPE","proposals",before,state.model.proposals.features,{feature_id:feature.id});}else{const id=`PROPOSAL-ZONE-${String(state.model.proposals.features.length+1).padStart(3,"0")}`;const type=prompt(`Work type:\n${WORK_TYPES.join("\n")}`,"CLEAR / REVEAL")||"OTHER";Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry:{type:"Polygon",coordinates:ring},properties:{proposal_zone_id:id,name:prompt("Name this work area",`Zone ${state.model.proposals.features.length+1}`)||id,work_type:type,service_type:type,finish_level:"REVEAL FINISH",current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:"UNKNOWN",proposed_intervention:type,included_scope:[],preserve:[],remove:[],expected_benefit:"UNKNOWN",expected_visible_result:"UNKNOWN",target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,quantity:metrics.acreage,unit:"acre",acreage:metrics.acreage,perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:metrics.approx_width_ft,geometry_measurement_basis:metrics.basis,color:"#f29f05",before_photo_ids:[],linked_before_photo_ids:[],geometry_status:"DAVID-DRAWN DRAFT - REVIEW BEFORE CUSTOMER USE",evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK"}},"DRAW_AREA");}if(state.draw.preview)state.draw.preview.remove();state.draw=null;const button=document.querySelector('[data-edit="DRAW_AREA"]');button.textContent="DRAW WORK AREA";delete button.dataset.finishing;saveModel();renderAll();status("Proposal area saved as a new map version. Original evidence was not changed.");}
   function editProposal(action){
     const feature=state.model.proposals.features.find(f=>f.id===state.selectedProposalId);
+    if(action==="DRAW_RECTANGLE")return beginRectangle();
+    if(action==="RESIZE_RECTANGLE")return beginRectangleResize();
     if(action==="DRAW_AREA"){const button=document.querySelector('[data-edit="DRAW_AREA"]');if(button.dataset.finishing)return finishArea();return beginArea("DRAW_AREA");}
     if(action==="RESHAPE"){if(!feature)return status("Select a proposal area first.");return beginArea("RESHAPE");}
     if(!feature)return status("Select a proposal area first.");
@@ -656,6 +768,8 @@
       saveModel();renderAll();
     }));
     document.querySelectorAll("[data-edit]").forEach(button=>button.addEventListener("click",()=>editProposal(button.dataset.edit)));
+    document.getElementById("saveRectangle").addEventListener("click",saveRectangle);
+    document.getElementById("cancelRectangle").addEventListener("click",cancelRectangle);
     document.getElementById("undoEdit").addEventListener("click",()=>{Core.undo(state.model);saveModel();renderAll();});
     document.getElementById("waterReviewFilter").addEventListener("click",()=>setPhotoFilter("WATER"));
     document.getElementById("allPhotoFilter").addEventListener("click",()=>setPhotoFilter("ALL"));
