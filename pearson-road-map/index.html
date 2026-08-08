@@ -62,10 +62,13 @@
         <label><input id="showFavoritesMap" type="checkbox"> Show favorites on map</label>
       </section>
       <section id="proposalTools" data-control-panel="proposal" hidden>
-        <h2>Edit proposal</h2>
-        <p class="tool-help">Place a simple work box, then drag its corners, sides, or center. Nothing changes until you save it.</p>
-        <button data-edit="DRAW_RECTANGLE" type="button">DRAW RECTANGLE</button>
-        <button data-edit="RESIZE_RECTANGLE" type="button">MOVE / RESIZE RECTANGLE</button>
+        <h2>What do you want to mark?</h2>
+        <p class="tool-help">Choose one. The map will zoom to the right parcel and tell you where to tap.</p>
+        <button class="proposal-template-button" data-proposal-template="SMALL_CREEK_PATH" type="button">SMALL PARCEL — CREEK-SIDE PATH</button>
+        <button class="proposal-template-button" data-proposal-template="SMALL_CLEARING_PATHS" type="button">SMALL PARCEL — CLEARING &amp; TWO PATHS</button>
+        <button class="proposal-template-button" data-proposal-template="LARGE_CLEARING" type="button">LARGE PARCEL — CLEARED AREA</button>
+        <button data-edit="DRAW_RECTANGLE" type="button">ADD ANOTHER BOX</button>
+        <button data-edit="RESIZE_RECTANGLE" type="button">MOVE / RESIZE SELECTED BOX</button>
         <div id="rectangleActions" class="rectangle-actions" hidden>
           <button id="saveRectangle" class="primary-action" type="button">SAVE RECTANGLE</button>
           <button id="cancelRectangle" type="button">CANCEL</button>
@@ -144,6 +147,15 @@
         <button id="customerViewToggle" class="customer-view-toggle" type="button">CUSTOMER VIEW</button>
         <div class="map-orientation" aria-hidden="true"><span>N</span><b>&uarr;</b></div>
         <div class="road-label">PEARSON ROAD</div>
+        <section id="drawCoach" class="draw-coach" hidden aria-live="assertive">
+          <strong id="drawCoachTitle">TAP WHERE THE BOX STARTS</strong>
+          <p id="drawCoachText">Tap once on the map.</p>
+          <div id="drawCoachActions" hidden>
+            <button id="keepRectangle" class="primary-action" type="button">KEEP THIS BOX</button>
+            <button id="restartRectangle" type="button">START OVER</button>
+          </div>
+          <button id="cancelRectangleMap" type="button">CANCEL</button>
+        </section>
         <div id="photoFilmstrip" aria-label="Geographically nearby photographs"></div>
         <div class="map-disclaimer">APPROXIMATE PHONE GPS / COUNTY PARCEL &mdash; NOT A SURVEY</div>
       </div>

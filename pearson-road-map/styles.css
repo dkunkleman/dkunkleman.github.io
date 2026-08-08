@@ -63,12 +63,19 @@ aside button,aside select{width:100%;margin:3px 0}
 #evidenceTotals p{margin:3px 0;font-size:12px}#evidenceTotals strong{font-size:16px}
 .proposal-label{background:#fff8d6;border:2px solid #7c5500;border-radius:5px;padding:2px 5px;font-weight:900}
 .tool-help{margin:0 0 9px;font-size:13px;line-height:1.35;color:#33443a}
+.proposal-template-button{min-height:58px!important;margin:6px 0!important;padding:10px 12px!important;background:#174c31!important;color:#fff!important;border:3px solid #0c2e1d!important;font-size:14px!important;line-height:1.2!important;text-align:left!important}
 .rectangle-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;padding:9px;border:2px solid #f29f05;border-radius:9px;background:#fff8d6}
 .rectangle-actions[hidden]{display:none}
 .rectangle-handle{display:flex;align-items:center;justify-content:center;box-sizing:border-box;box-shadow:0 1px 7px #0008;cursor:grab}
 .rectangle-resize-handle{background:#fff;border:3px solid #9b6300;border-radius:4px}
 .rectangle-move-handle{background:#123f2a;color:#fff;border:2px solid #fff;border-radius:15px;font-size:10px;font-weight:900;letter-spacing:.04em}
 .rectangle-handle:active{cursor:grabbing}
+.draw-coach{position:absolute;z-index:1250;left:50%;top:76px;transform:translateX(-50%);width:min(620px,calc(100% - 32px));padding:14px 16px;border:4px solid #122d1e;border-radius:16px;background:#ffe15a;box-shadow:0 8px 26px #0008;text-align:center;color:#122219}
+.draw-coach[hidden]{display:none}
+.draw-coach strong{display:block;font-size:22px;line-height:1.15}
+.draw-coach p{margin:7px 0 10px;font-size:16px;font-weight:700}
+.draw-coach button{min-height:50px;margin:4px;padding:8px 14px;font-size:14px;font-weight:900}
+#drawCoachActions:not([hidden]){display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 dialog{width:min(980px,96vw);height:min(900px,94vh);max-height:94vh;border:3px solid var(--green);border-radius:12px;padding:12px;overflow:hidden;position:relative}
 dialog[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr)}
 dialog::backdrop{background:rgba(0,0,0,.65)}
@@ -184,6 +191,7 @@ body[data-open-panel] #photoFilmstrip{opacity:.2;pointer-events:none}
 body[data-open-panel="proposal"] #customerProposal{display:none}
 .starter-zone,.finish-grid,.experience-grid,.product-ladder ol{grid-template-columns:1fr}.proposal-sheet-heading{flex-direction:column}
 #photoDetails{padding-left:48px;padding-right:48px}.photo-nav{width:42px;height:82px;min-height:82px}.photo-nav span{font-size:50px}.photo-nav small{font-size:8px}.photo-nav-previous{left:3px}.photo-nav-next{right:3px}
+.draw-coach{top:max(64px,calc(env(safe-area-inset-top) + 54px));width:calc(100% - 16px);padding:12px 9px}.draw-coach strong{font-size:18px}.draw-coach p{font-size:14px}.draw-coach button{width:100%;margin:4px 0}
 }
 @media print{#mapTitleBar,#modeTabs,#controlDrawer,#photoFilmstrip,#mapStatus,.floating-map-controls,.customer-view-toggle{display:none!important}
 html,body,main,.map-column,.map-wrap{position:static;display:block;height:auto;overflow:visible}

@@ -9,13 +9,25 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "pearson-road-map", "index.html"), "utf8");
 const app = fs.readFileSync(path.join(root, "pearson-road-map", "app.js"), "utf8");
 
-assert.match(html, /data-edit="DRAW_RECTANGLE"[^>]*>DRAW RECTANGLE</, "simple rectangle button is missing");
-assert.match(html, /data-edit="RESIZE_RECTANGLE"[^>]*>MOVE \/ RESIZE RECTANGLE</, "rectangle resize button is missing");
+assert.match(html, /data-proposal-template="SMALL_CREEK_PATH"[^>]*>SMALL PARCEL [^<]*CREEK-SIDE PATH</, "small-parcel creek-side path choice is missing");
+assert.match(html, /data-proposal-template="SMALL_CLEARING_PATHS"[^>]*>SMALL PARCEL [^<]*CLEARING &amp; TWO PATHS</, "small-parcel clearing and path choice is missing");
+assert.match(html, /data-proposal-template="LARGE_CLEARING"[^>]*>LARGE PARCEL [^<]*CLEARED AREA</, "large-parcel clearing choice is missing");
+assert.match(html, /data-edit="DRAW_RECTANGLE"[^>]*>ADD ANOTHER BOX</, "generic add-box button is missing");
+assert.match(html, /data-edit="RESIZE_RECTANGLE"[^>]*>MOVE \/ RESIZE SELECTED BOX</, "rectangle resize button is missing");
 assert.match(html, /id="saveRectangle"[^>]*>SAVE RECTANGLE</, "rectangle save control is missing");
 assert.match(html, /id="cancelRectangle"[^>]*>CANCEL</, "rectangle cancel control is missing");
+assert.match(html, /id="drawCoach"/, "plain-language map drawing coach is missing");
+assert.match(html, /id="keepRectangle"[^>]*>KEEP THIS BOX</, "map-level keep button is missing");
+assert.match(html, /id="restartRectangle"[^>]*>START OVER</, "map-level restart button is missing");
 assert.match(app, /rectangleHandlePositions/, "corner, side, and center handles are not implemented");
 assert.match(app, /rectangle-move-handle/, "rectangle center-move handle is missing");
 assert.match(app, /Core\.replaceFeatureGeometry\(state\.model,"proposals"/, "saved rectangle does not update only the editable proposal layer");
+assert.match(app, /property-intelligence-experience-map-v0\.3/, "proposal reset must use a new presentation-storage version without altering older saved map edits");
+assert.match(app, /const SEED_OLD_PROPOSAL = false/, "old western proposal must not seed into the new map");
+assert.match(app, /if \(SEED_OLD_PROPOSAL &&/, "the old proposal seed must remain explicitly gated off");
+assert.match(app, /SOUTHEAST CREEK-SIDE PATH/, "creek-side proposal metadata is missing");
+assert.match(app, /SMALL-PARCEL CLEARING & TWO APPROACH PATHS/, "two-approach clearing metadata is missing");
+assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
 
 const bounds = Core.rectangleBoundsFromCorners([-87.1, 30.4], [-87.09, 30.41]);
 assert.deepEqual(bounds, { west: -87.1, east: -87.09, south: 30.4, north: 30.41 });
