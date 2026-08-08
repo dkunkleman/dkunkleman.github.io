@@ -114,7 +114,7 @@
     } catch (_) { return Core.createModel(PROPERTY_ID); }
   }
   function saveModel() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.model)); }
-  function visibleProposals(){return state.model.proposals.features.filter((feature)=>p(feature).proposal_template!=="LARGE_WESTERN_HOMESITE");}
+  function visibleProposals(){return state.model.proposals.features.filter((feature)=>feature.id!=="PROPOSAL-ZONE-001");}
   function applyPresentationProfile(profile){state.model.presentation.profile=profile||"INTERNAL_EDITABLE";document.body.dataset.profile=state.model.presentation.profile;document.getElementById("customerViewToggle").textContent=state.model.presentation.profile==="CUSTOMER_REVIEW"?"DAVID VIEW":"CUSTOMER VIEW";closeControlPanel();saveModel();if(state.map)renderAll();setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
   function closeControlPanel(){document.body.removeAttribute("data-open-panel");document.getElementById("controlDrawer").setAttribute("aria-hidden","true");document.querySelectorAll("[data-open-panel]").forEach(button=>button.classList.remove("active"));setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
   function closeMapDetails(){document.body.removeAttribute("data-map-details-open");document.getElementById("mapDetailsPanel").setAttribute("aria-hidden","true");setTimeout(()=>state.map&&state.map.invalidateSize(),0);}
@@ -543,6 +543,11 @@
         templateKey:"SMALL_EASTERN_HOMESITE",
         label:"EASTERN HOMESITE",
         geometry:{type:"Polygon",coordinates:[closedRing(EASTERN_HOMESITE_SHAPE)]}
+      },
+      {
+        templateKey:"LARGE_WESTERN_HOMESITE",
+        label:"LARGE-PARCEL HOMESITE",
+        geometry:{type:"Polygon",coordinates:[closedRing(LARGE_WESTERN_HOMESITE_SHAPE)]}
       },
     ].filter((guide)=>!savedTemplates.has(guide.templateKey));
   }

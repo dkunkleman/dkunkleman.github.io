@@ -12,7 +12,7 @@ const app = fs.readFileSync(path.join(root, "pearson-road-map", "app.js"), "utf8
 assert.match(html, /data-proposal-template="SMALL_CREEK_PATH"[^>]*>SMALL PARCEL [^<]*CREEK-SIDE PATH</, "small-parcel creek-side path choice is missing");
 assert.match(html, /data-proposal-template="SMALL_CLEARING_PATHS"[^>]*>SMALL PARCEL [^<]*CLEARING &amp; TWO PATHS</, "small-parcel clearing and path choice is missing");
 assert.match(html, /data-proposal-template="SMALL_EASTERN_HOMESITE"[^>]*>SMALL PARCEL [^<]*EASTERN HOMESITE AREA</, "small-parcel eastern homesite choice is missing");
-assert.doesNotMatch(html, /data-proposal-template="LARGE_WESTERN_HOMESITE"/, "the removed large-parcel western frontage/homesite choice is still visible");
+assert.match(html, /data-proposal-template="LARGE_WESTERN_HOMESITE"[^>]*>LARGE PARCEL [^<]*HOMESITE &amp; ACCESS</, "the large-parcel homesite and access choice is missing");
 assert.match(html, /id="showHomesiteCorners"[^>]*>SHOW MY 4 HOMESITE CORNERS</, "four-corner homesite guidance button is missing");
 assert.match(html, /data-proposal-template="LARGE_CLEARING"[^>]*>LARGE PARCEL [^<]*CLEARED AREA</, "large-parcel clearing choice is missing");
 assert.match(html, /data-edit="DRAW_RECTANGLE"[^>]*>ADD ANOTHER BOX</, "generic add-box button is missing");
@@ -56,9 +56,8 @@ assert.match(app, /WESTERN CANDIDATE HOMESITE CLEARING & TWO APPROACHES/, "two-a
 assert.match(app, /LARGE-PARCEL PROPOSED CLEARED AREA/, "large-parcel clearing metadata is missing");
 assert.match(app, /LARGE-PARCEL WESTERN HOMESITE & ACCESS CONCEPT/, "large-parcel homesite proposal metadata is missing");
 assert.match(app, /function proposalDraftGuides\(\)/, "the map does not assemble all unsaved proposal drafts for simultaneous display");
-assert.match(app, /CREEK-SIDE PATH[\s\S]*WESTERN HOMESITE[\s\S]*EASTERN HOMESITE/, "the three current proposal drafts are not assembled together");
-assert.doesNotMatch(app.match(/function proposalDraftGuides\(\)[\s\S]*?function fitAllVisibleProposals/)?.[0]||"", /templateKey:"LARGE_WESTERN_HOMESITE"/, "the removed large-parcel western frontage proposal is still rendered as a draft");
-assert.match(app, /function visibleProposals\(\).*proposal_template!=="LARGE_WESTERN_HOMESITE"/, "saved copies of the removed large-parcel western proposal are not hidden from presentation");
+assert.match(app, /CREEK-SIDE PATH[\s\S]*WESTERN HOMESITE[\s\S]*EASTERN HOMESITE[\s\S]*LARGE-PARCEL HOMESITE/, "all four current proposal drafts are not assembled together");
+assert.match(app, /function visibleProposals\(\).*feature\.id!=="PROPOSAL-ZONE-001"/, "the old Western Frontage, Entrance & Water-Feature Reveal proposal is not hidden from presentation");
 assert.match(app, /!savedTemplates\.has\(guide\.templateKey\)/, "a saved proposal can be duplicated by its unsaved draft guide");
 assert.match(app, /guide\.templateKey==="SMALL_CREEK_PATH"\?beginCreekPathEditor\(\):beginProposalShapeEditor\(guide\.templateKey\)/, "clicking a visible proposal draft does not open its correct editor");
 assert.match(app, /function fitAllVisibleProposals\(\)/, "opening Proposal does not fit every visible proposal into the map");
