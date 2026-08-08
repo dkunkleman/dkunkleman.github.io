@@ -30,6 +30,17 @@
       expected_benefit:"Create one understandable test area that shows what additional large-parcel reveal work may accomplish without committing to clearing the entire tract."
     }
   };
+  const CREEK_PATH_DEFAULT_WIDTH_FT = 5;
+  const CREEK_WATER_CENTERLINE = [
+    [-87.09269,30.49008],[-87.09255,30.49014],[-87.09239,30.49031],[-87.09242,30.49057],
+    [-87.09232,30.49062],[-87.09220,30.49070],[-87.09226,30.49077],[-87.09224,30.49089],
+    [-87.09213,30.49097],[-87.09203,30.49103],[-87.09194,30.49115],[-87.09186,30.49112]
+  ];
+  const CREEK_PATH_CENTERLINE = [
+    [-87.09269,30.49008],[-87.09253,30.49014],[-87.09236,30.49030],[-87.09237,30.49055],
+    [-87.09229,30.49063],[-87.09216,30.49071],[-87.09220,30.49078],[-87.09218,30.49088],
+    [-87.09210,30.49096],[-87.09199,30.49103],[-87.09191,30.49112],[-87.09186,30.49117]
+  ];
   const HIGH_RESOLUTION_MAX_ZOOM = 22;
   const USGS_NATIVE_MAX_ZOOM = 16;
   const IMPORTANT_FINDING_CLASSES = new Set(["WATER","CULVERT","CULVERT_NEEDED","NO_CULVERT_NEEDED","DITCH_SWALE","ROAD_ENTRANCE","BLOCKED","PINE","HARDWOOD","MAGNOLIA","TREE","BRUSH","OPEN_AREA"]);
@@ -62,7 +73,7 @@
   const state = {
     model: loadModel(), source: {}, map: null, groups: {}, photoMarkers: new Map(), selectedPhotoId: null,
     selectedProposalId: null, mode: "EVIDENCE", filter: "WATER", activeDates: new Set(Object.keys(DAY_COLORS)), photoPulseMarker: null,
-    draw: null, rectangleEditor: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
+    draw: null, rectangleEditor: null, pathEditor: null, baseLayer: null, topoLayer: null, contourLayer: null, folderImages: new Map(),
     currentPhotoSet: [], currentPhotoIndex: -1, currentPhotoCollectionLabel: "ALL VISIBLE PHOTOS", touchStartX: null
   };
   let statusTimer = null;
@@ -456,6 +467,13 @@
   function renderProposals() {
     state.model.proposals.features.forEach((feature) => {
       const primary=p(feature).recommended_first_project===true;
+      const creekLine=p(feature).presentation_creek_centerline;
+      if(Array.isArray(creekLine)&&creekLine.length>1){
+        const latlngs=creekLine.map(([lng,lat])=>[lat,lng]);
+        L.polyline(latlngs,{color:"#fff",weight:10,opacity:.95,interactive:false}).addTo(state.groups.proposal);
+        L.polyline(latlngs,{color:"#087cca",weight:6,opacity:1}).addTo(state.groups.proposal)
+          .bindTooltip("APPROXIMATE CREEK / STREAM<br>Based on photographed water locations and phone GPS — not surveyed",{sticky:true,className:"creek-line-label"});
+      }
       const layer = L.geoJSON(feature, { style: { color:p(feature).color || "#f29f05",fillColor:p(feature).color || "#f29f05",fillOpacity:primary?.30:.10,weight:primary?5:3,dashArray:primary?null:"8 7" } }).addTo(state.groups.proposal);
       layer.eachLayer((part) => {
         part.bindTooltip(`${safe(p(feature).name)}<br>${p(feature).acreage || "?"} acres${primary?"<br>RECOMMENDED FIRST PROJECT":"<br>OPTIONAL - NOT INCLUDED"}${p(feature).geometry_status?`<br>${safe(p(feature).geometry_status)}`:""}`, { permanent:true,direction:"center",className:"proposal-label" });
@@ -675,6 +693,9 @@
     const editor=state.rectangleEditor;
     if(editor){editor.layer.remove();Object.values(editor.handles).forEach((marker)=>marker.remove());}
     state.rectangleEditor=null;
+    const pathEditor=state.pathEditor;
+    if(pathEditor){pathEditor.corridorLayer.remove();pathEditor.centerlineLayer.remove();if(pathEditor.waterLineLayer)pathEditor.waterLineLayer.remove();pathEditor.handles.forEach((marker)=>marker.remove());}
+    state.pathEditor=null;
     if(state.draw?.anchorMarker)state.draw.anchorMarker.remove();
     if(state.draw?.preview)state.draw.preview.remove();
     (state.draw?.pointMarkers||[]).forEach((marker)=>marker.remove());
@@ -683,10 +704,10 @@
     const coach=document.getElementById("drawCoach");if(coach)coach.hidden=true;
   }
   function setDrawCoach(step){
-    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap"),keep=document.getElementById("keepRectangle"),undoPoint=document.getElementById("undoDrawPoint"),restart=document.getElementById("restartRectangle");
+    const coach=document.getElementById("drawCoach"),title=document.getElementById("drawCoachTitle"),text=document.getElementById("drawCoachText"),actions=document.getElementById("drawCoachActions"),savedActions=document.getElementById("drawCoachSavedActions"),cancel=document.getElementById("cancelRectangleMap"),keep=document.getElementById("keepRectangle"),undoPoint=document.getElementById("undoDrawPoint"),restart=document.getElementById("restartRectangle"),pathWidths=document.getElementById("pathWidthControls");
     if(!coach)return;
     coach.hidden=false;
-    keep.textContent="KEEP THIS BOX";keep.disabled=false;undoPoint.hidden=true;restart.textContent="START OVER";
+    keep.textContent="KEEP THIS BOX";keep.disabled=false;undoPoint.hidden=true;restart.textContent="START OVER";pathWidths.hidden=true;
     if(step==="FIRST"){
       title.textContent="1 OF 2 — TAP WHERE THE BOX STARTS";
       text.textContent="Tap one corner of the area you want to mark.";
@@ -715,6 +736,16 @@
       keep.textContent="FINISH SHAPE";
       keep.disabled=count<3;
       undoPoint.hidden=count===0;
+    }else if(step==="PATH_EDIT"){
+      title.textContent="I DREW THE CREEK-SIDE PATH";
+      text.textContent="I started it at 5 feet so two people can walk side by side. Drag an orange dot to adjust the route, or choose a different width below.";
+      actions.hidden=false;
+      savedActions.hidden=true;
+      cancel.hidden=false;
+      keep.textContent="KEEP THIS PATH";
+      restart.textContent="RESET PATH";
+      pathWidths.hidden=false;
+      document.querySelectorAll("[data-path-width]").forEach((button)=>button.classList.toggle("active",Number(button.dataset.pathWidth)===state.pathEditor?.widthFt));
     }else{
       title.textContent="MAKE THE BOX FIT";
       text.textContent="Drag a white square to resize it. Drag MOVE to move the whole box.";
@@ -749,7 +780,7 @@
     status(`Box ready: about ${metrics.acreage} acres. Drag it if needed, then press KEEP THIS BOX.`);
   }
   function beginRectangle(templateKey){
-    if(templateKey==="SMALL_CREEK_PATH")return beginTemplateArea(templateKey);
+    if(templateKey==="SMALL_CREEK_PATH")return beginCreekPathEditor();
     removeRectangleEditor();
     const template=PROPOSAL_TEMPLATES[templateKey]||null;
     state.draw={mode:"RECTANGLE",points:[],targetFeatureId:null,templateKey:templateKey||null,template,anchorMarker:null};
@@ -759,6 +790,72 @@
     if(template)fitProposalTemplate(template);
     setDrawCoach("FIRST");
     status("Tap one corner of the area you want to mark.");
+  }
+  function bufferedPathRing(centerline,widthFt){
+    const latitude=centerline.reduce((sum,point)=>sum+point[1],0)/centerline.length;
+    const lonMeters=111320*Math.cos(latitude*Math.PI/180),latMeters=110540,origin=centerline[0];
+    const points=centerline.map(([lng,lat])=>({x:(lng-origin[0])*lonMeters,y:(lat-origin[1])*latMeters}));
+    const half=widthFt*.3048/2,normals=points.map((point,index)=>{
+      const before=points[Math.max(0,index-1)],after=points[Math.min(points.length-1,index+1)];
+      const dx=after.x-before.x,dy=after.y-before.y,length=Math.hypot(dx,dy)||1;
+      return {x:-dy/length,y:dx/length};
+    });
+    const toLngLat=(point)=>[origin[0]+point.x/lonMeters,origin[1]+point.y/latMeters];
+    const left=points.map((point,index)=>toLngLat({x:point.x+normals[index].x*half,y:point.y+normals[index].y*half}));
+    const right=points.map((point,index)=>toLngLat({x:point.x-normals[index].x*half,y:point.y-normals[index].y*half})).reverse();
+    const ring=[...left,...right,left[0]];
+    return [ring];
+  }
+  function creekPathHandleIcon(index){
+    return L.divIcon({className:"creek-path-handle",html:String(index+1),iconSize:[28,28],iconAnchor:[14,14]});
+  }
+  function updateCreekPathEditor(){
+    const editor=state.pathEditor;if(!editor)return;
+    const corridor=bufferedPathRing(editor.centerline,editor.widthFt);
+    editor.corridorLayer.setLatLngs(corridor[0].map(([lng,lat])=>[lat,lng]));
+    editor.centerlineLayer.setLatLngs(editor.centerline.map(([lng,lat])=>[lat,lng]));
+    const metrics=Core.polygonMetrics(corridor);
+    status(`${editor.widthFt}-foot creek path — approximately ${metrics.approx_length_ft} feet long. Drag orange dots to adjust it.`);
+    setDrawCoach("PATH_EDIT");
+  }
+  function beginCreekPathEditor(){
+    removeRectangleEditor();
+    const template=PROPOSAL_TEMPLATES.SMALL_CREEK_PATH;
+    fitProposalTemplate(template);
+    const centerline=Core.clone(CREEK_PATH_CENTERLINE),widthFt=CREEK_PATH_DEFAULT_WIDTH_FT,corridor=bufferedPathRing(centerline,widthFt);
+    const waterLineLayer=L.polyline(CREEK_WATER_CENTERLINE.map(([lng,lat])=>[lat,lng]),{color:"#087cca",weight:6,opacity:1,interactive:false}).addTo(state.map);
+    const corridorLayer=L.polygon(corridor[0].map(([lng,lat])=>[lat,lng]),{color:"#f29f05",fillColor:"#f8d24a",fillOpacity:.4,weight:4,interactive:false}).addTo(state.map);
+    const centerlineLayer=L.polyline(centerline.map(([lng,lat])=>[lat,lng]),{color:"#513400",weight:3,dashArray:"7 5",interactive:false}).addTo(state.map);
+    const editor={templateKey:"SMALL_CREEK_PATH",centerline,widthFt,corridorLayer,centerlineLayer,waterLineLayer,handles:[]};
+    state.pathEditor=editor;
+    centerline.forEach(([lng,lat],index)=>{
+      const marker=L.marker([lat,lng],{icon:creekPathHandleIcon(index),draggable:true,zIndexOffset:2100,title:`Move creek-path point ${index+1}`}).addTo(state.map);
+      marker.on("drag",(event)=>{const point=event.target.getLatLng();editor.centerline[index]=[point.lng,point.lat];updateCreekPathEditor();});
+      editor.handles.push(marker);
+    });
+    closeControlPanel();
+    setDrawCoach("PATH_EDIT");
+    updateCreekPathEditor();
+  }
+  function setCreekPathWidth(widthFt){
+    if(!state.pathEditor)return;
+    state.pathEditor.widthFt=Math.max(3,Math.min(5,Number(widthFt)||CREEK_PATH_DEFAULT_WIDTH_FT));
+    updateCreekPathEditor();
+  }
+  function saveCreekPath(){
+    const editor=state.pathEditor;if(!editor)return status("Open the creek-side path first.");
+    const template=PROPOSAL_TEMPLATES.SMALL_CREEK_PATH,ring=bufferedPathRing(editor.centerline,editor.widthFt),metrics=Core.polygonMetrics(ring);
+    const id=`PROPOSAL-ZONE-${String(state.model.proposals.features.length+1).padStart(3,"0")}`;
+    Core.addFeature(state.model,"proposals",{type:"Feature",id,geometry:{type:"Polygon",coordinates:ring},properties:{proposal_zone_id:id,proposal_template:"SMALL_CREEK_PATH",parcel:template.parcel,name:template.name,work_type:"TRAIL",service_type:"CREEK WALK AND ROADSIDE WATER REVEAL",finish_level:"REVEAL FINISH",optional_upgrade:"UPGRADE TO CLEAN STAGING FINISH - NOT INCLUDED IN CURRENT PRICE",current_condition:"UNKNOWN",existing_condition:"UNKNOWN",primary_objective:template.primary_objective,proposed_intervention:`APPROXIMATELY ${editor.widthFt}-FOOT-WIDE NATURAL CREEK-SIDE WALKING CORRIDOR`,included_scope:template.included_scope,preserve:["Mature trees, shade, tree roots, creek banks, and desirable natural vegetation","Original field evidence and GPS records"],remove:[],exclusions:["No dredging, creek excavation, culvert alteration, water redirection, grading, or surveyed-boundary claim","Clean Staging Finish is not included unless separately selected"],expected_benefit:template.expected_benefit,expected_visible_result:"A natural creek-side walking and viewing experience; not an engineered or paved trail.",target_start:"UNKNOWN",target_completion:"UNKNOWN",completion_target:"NEEDS PRODUCTION TEST",price:null,price_status:"DRAFT",market_alternative_reference:"UNKNOWN",customer_selected:false,recommended_first_project:false,unit:"linear foot",corridor_width_ft:editor.widthFt,corridor_width_basis:"PROPOSAL SPECIFIES APPROXIMATELY 3–5 FEET; DAVID MAY ADJUST",editable_centerline:Core.clone(editor.centerline),before_photo_ids:[],linked_before_photo_ids:[],evidence_status:"CONCEPTUAL PROPOSAL - NOT COMPLETED WORK",acreage:metrics.acreage,quantity:metrics.approx_length_ft,perimeter_ft:metrics.perimeter_ft,approx_length_ft:metrics.approx_length_ft,approx_width_ft:editor.widthFt,geometry_measurement_basis:metrics.basis,geometry_shape:"BUFFERED EDITABLE CENTERLINE",geometry_status:"CODEX-DRAWN FROM FIELD ROUTE AND WATER-PHOTO CONTEXT - DAVID MUST REVIEW AND ADJUST"}},"DRAW_CREEK_PATH_CORRIDOR");
+    const saved=state.model.proposals.features.find((feature)=>feature.id===id);
+    saved.properties.corridor_width_basis="PROPOSAL SPECIFIES APPROXIMATELY 3–5 FEET; DEFAULT IS 5 FEET FOR TWO PEOPLE SIDE BY SIDE; DAVID MAY ADJUST";
+    saved.properties.presentation_creek_centerline=Core.clone(CREEK_WATER_CENTERLINE);
+    saved.properties.creek_line_status="APPROXIMATE INTERPRETATION FROM PHOTOGRAPHED WATER LOCATIONS AND PHONE GPS - NOT A SURVEYED STREAM CENTERLINE";
+    state.selectedProposalId=id;
+    const waterPhotosToggle=document.querySelector('[data-layer="waterPhotos"]');if(waterPhotosToggle)waterPhotosToggle.checked=false;
+    const waterFindingsToggle=document.querySelector('[data-layer="waterFindings"]');if(waterFindingsToggle)waterFindingsToggle.checked=false;
+    removeRectangleEditor();saveModel();renderAll();setDrawCoach("SAVED");
+    status("Creek-side path saved. Water markers are now summarized by the blue creek line; the original evidence remains unchanged.");
   }
   function beginTemplateArea(templateKey){
     removeRectangleEditor();
@@ -806,10 +903,12 @@
     status("Custom path boundary saved. Photos, GPS, and field evidence were not changed.");
   }
   function finishCurrentDrawing(){
+    if(state.pathEditor)return saveCreekPath();
     if(state.draw?.mode==="TEMPLATE_AREA")return finishTemplateArea();
     return saveRectangle();
   }
   function restartCurrentDrawing(){
+    if(state.pathEditor)return beginCreekPathEditor();
     if(state.draw?.mode==="TEMPLATE_AREA")return beginTemplateArea(state.draw.templateKey);
     return restartRectangle();
   }
@@ -972,6 +1071,8 @@
     document.getElementById("keepRectangle").addEventListener("click",finishCurrentDrawing);
     document.getElementById("undoDrawPoint").addEventListener("click",undoTemplateAreaPoint);
     document.getElementById("restartRectangle").addEventListener("click",restartCurrentDrawing);
+    document.querySelectorAll("[data-path-width]").forEach((button)=>button.addEventListener("click",()=>setCreekPathWidth(button.dataset.pathWidth)));
+    document.getElementById("drawPathMyself").addEventListener("click",()=>beginTemplateArea("SMALL_CREEK_PATH"));
     document.getElementById("cancelRectangleMap").addEventListener("click",cancelRectangle);
     document.getElementById("savePictureAfterBox").addEventListener("click",captureCurrentMapPicture);
     document.getElementById("doneAfterBox").addEventListener("click",()=>document.getElementById("drawCoach").hidden=true);
