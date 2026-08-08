@@ -171,7 +171,7 @@
       };
       if (upgradeToProposalV02) Object.assign(props, defaults);
       else Object.entries(defaults).forEach(([key,value]) => { if (props[key] === undefined) props[key] = value; });
-      if (upgradeToProposalV02 || props.geometry_status === "CONCEPTUAL PLACEHOLDER - RESHAPE BEFORE CUSTOMER USE" || props.name === "A - WESTERN REVEAL" || props.name === "A â€” Western wet/dry reveal") {
+      if (upgradeToProposalV02 || props.geometry_status === "CONCEPTUAL PLACEHOLDER - RESHAPE BEFORE CUSTOMER USE" || props.name === "A - WESTERN REVEAL" || props.name === "A — Western wet/dry reveal") {
         starter.geometry.coordinates = Core.clone(PROPOSAL_V01_GEOMETRY);
         Object.assign(props, { name:PROPOSAL_V02_TITLE, geometry_status:"EVIDENCE-GROUNDED DRAFT - DAVID MUST APPROVE OR RESHAPE BEFORE CUSTOMER USE", before_photo_ids:Core.clone(PROPOSAL_V01_PHOTOS), linked_before_photo_ids:Core.clone(PROPOSAL_V01_PHOTOS) });
       }
@@ -187,16 +187,16 @@
         context_id: "CONTEXT-BAY-CULVERT-OVERTOPPING-001",
         information_class: "INSPECTOR_OR_USER_SUPPLIED_CONTEXT",
         statement: "The recent inspection context followed Tropical Storm Bertha and included reported roadway overtopping near three large bay-drainage culverts.",
-        scope: "NEARBY BAY-DRAINAGE CULVERTS â€” NOT AUTOMATICALLY THE SAME AS THE TWO APPROXIMATELY 36-INCH CULVERTS BENEATH PEARSON ROAD",
+        scope: "NEARBY BAY-DRAINAGE CULVERTS — NOT AUTOMATICALLY THE SAME AS THE TWO APPROXIMATELY 36-INCH CULVERTS BENEATH PEARSON ROAD",
         official_hydrologic_finding: false,
         field_evidence_modified: false,
         professional_confirmation_needed: true
       });
     }
     if (!state.model.property_assets.some((asset) => asset.asset_id === "ASSET-CULVERT-PEARSON-001")) {
-      state.model.property_assets.push({ asset_id: "ASSET-CULVERT-PEARSON-001", property_id: PROPERTY_ID, asset_type: "CULVERT", name: "Pearson Road creek crossing â€” two approximately 36-inch culverts", source_location: null, display_location: [-87.09266,30.48945], location_status: "APPROXIMATE DISPLAY LOCATION â€” FIELD LOCATION NOT ESTABLISHED IN THIS PROTOTYPE", pipe_count: 2, pipe_diameter_in: 36, material: "UNKNOWN", linked_photo_ids: [], notes: "David controlling correction: two approximately 36-inch culverts beneath Pearson Road where the creek crosses.", observations: [
+      state.model.property_assets.push({ asset_id: "ASSET-CULVERT-PEARSON-001", property_id: PROPERTY_ID, asset_type: "CULVERT", name: "Pearson Road creek crossing — two approximately 36-inch culverts", source_location: null, display_location: [-87.09266,30.48945], location_status: "APPROXIMATE DISPLAY LOCATION — FIELD LOCATION NOT ESTABLISHED IN THIS PROTOTYPE", pipe_count: 2, pipe_diameter_in: 36, material: "UNKNOWN", linked_photo_ids: [], notes: "David controlling correction: two approximately 36-inch culverts beneath Pearson Road where the creek crosses.", observations: [
         { observation_id: "CULVERT-OBS-CONTEXT-001", recorded_at: "2026-08-07T18:10:00.000Z", date_time: "2026-08-03", water_to_top_in: null, water_to_invert_in: null, tide_condition: "UNKNOWN", recent_rainfall: "See separately sourced weather record", information_class: "CONTEXT_ONLY", note: "Repeat water-to-culvert-top measurement not recorded; ready for future visit." },
-        { observation_id: "CULVERT-OBS-CONTEXT-002", recorded_at: "2026-08-07T18:10:00.000Z", date_time: "2026-08-07", water_to_top_in: null, water_to_invert_in: null, tide_condition: "UNKNOWN", recent_rainfall: "Stage IV last measurable rainfall ended approximately 91â€“92 hours before August 7 parcel observations", information_class: "ANALYSIS_CONTEXT", note: "No culvert water-level measurement was captured on August 7." }
+        { observation_id: "CULVERT-OBS-CONTEXT-002", recorded_at: "2026-08-07T18:10:00.000Z", date_time: "2026-08-07", water_to_top_in: null, water_to_invert_in: null, tide_condition: "UNKNOWN", recent_rainfall: "Stage IV last measurable rainfall ended approximately 91–92 hours before August 7 parcel observations", information_class: "ANALYSIS_CONTEXT", note: "No culvert water-level measurement was captured on August 7." }
       ] });
     }
     saveModel();
@@ -251,8 +251,8 @@
       : "Esri World Imagery is active for close aerial review. Apple Maps is not active because no authorized MapKit token is configured.";
     const counts = state.source.summary.counts;
     const waterCounts=state.source.waterPhotos.features.reduce((result,feature)=>{const key=waterReviewClass(feature);result[key]=(result[key]||0)+1;return result;},{});
-    document.getElementById("evidenceTotals").innerHTML = `<h2>Evidence inventory</h2><p><strong>${counts.gps_points.toLocaleString()}</strong> GPS points<br><strong>${counts.photo_points.toLocaleString()}</strong> photograph points<br><strong>${counts.field_findings.toLocaleString()}</strong> field findings<br><strong>${counts.mapped_section_features.toLocaleString()}</strong> section/source features</p><p>August 3â€“7. Outside-large-parcel evidence is preserved separately.</p>`;
-    status(`Loaded every available August 3â€“7 GPS, photograph, tree, water, culvert, ditch, entrance, brush, and section record. ${providerMessage}`);
+    document.getElementById("evidenceTotals").innerHTML = `<h2>Evidence inventory</h2><p><strong>${counts.gps_points.toLocaleString()}</strong> GPS points<br><strong>${counts.photo_points.toLocaleString()}</strong> photograph points<br><strong>${counts.field_findings.toLocaleString()}</strong> field findings<br><strong>${counts.mapped_section_features.toLocaleString()}</strong> section/source features</p><p>August 3–7. Outside-large-parcel evidence is preserved separately.</p>`;
+    status(`Loaded every available August 3–7 GPS, photograph, tree, water, culvert, ditch, entrance, brush, and section record. ${providerMessage}`);
     document.getElementById("evidenceTotals").innerHTML = `<h2>Evidence inventory</h2><p><strong>${counts.gps_points.toLocaleString()}</strong> GPS points<br><strong>${counts.photo_points.toLocaleString()}</strong> photograph points<br><strong>${state.source.waterFindings.features.length}</strong> recorded water findings near/on the parcel<br><strong>${waterCounts.RECORDED_WATER||0}</strong> photographs recorded as water<br><strong>${waterCounts.VISIBLE_WATER_IN_PHOTO||0}</strong> additional photographs visibly showing water<br><strong>${waterCounts.POSSIBLE_WATER_IN_PHOTO||0}</strong> possible-water photographs needing review<br><strong>${state.source.waterSections.features.length}</strong> displayed wet/dry section lines</p><p>Both county parcel components are shown. Original evidence remains unchanged.</p>`;
   }
 
@@ -273,8 +273,8 @@
       L.geoJSON({ type:"FeatureCollection", features:routes }, {
         style:(feature)=>lineStyle(dateOf(feature),5),
         onEachFeature:(feature,layer)=>layer.bindPopup(useDisplayWalks
-          ? `<b>${dateOf(feature)} customer display walk</b><br>${p(feature).display_point_count} retained display points from ${p(feature).source_point_count} raw points.<br>Presentation-only cleanup. Every raw GPS point remains preserved.<br>No artificial relocation connectors.<br>Phone GPS â€” not a survey.`
-          : `<b>${dateOf(feature)} raw walked route</b><br>${p(feature).point_count} preserved GPS points<br>${p(feature).start_time}<br>No artificial relocation connectors.<br>Phone GPS â€” not a survey.`)
+          ? `<b>${dateOf(feature)} customer display walk</b><br>${p(feature).display_point_count} retained display points from ${p(feature).source_point_count} raw points.<br>Presentation-only cleanup. Every raw GPS point remains preserved.<br>No artificial relocation connectors.<br>Phone GPS — not a survey.`
+          : `<b>${dateOf(feature)} raw walked route</b><br>${p(feature).point_count} preserved GPS points<br>${p(feature).start_time}<br>No artificial relocation connectors.<br>Phone GPS — not a survey.`)
       }).addTo(state.groups.walks);
     }
     if (layerVisible("gps")) renderGpsPoints();
@@ -332,7 +332,7 @@
     if(kind==="MAGNOLIA")return{label:"M",css:"tree"};
     if(kind==="TREE")return{label:"T",css:"tree"};
     if(kind==="BRUSH")return{label:"B",css:"brush"};
-    return{label:"â€¢",css:"other"};
+    return{label:"•",css:"other"};
   }
 
   function renderFindings() {
@@ -340,7 +340,7 @@
     state.source.findings.features.filter(evidenceVisible).filter((feature)=>showEveryRecord||IMPORTANT_FINDING_CLASSES.has(String(p(feature).display_class||"").toUpperCase())).forEach((feature)=>{
       const props=p(feature),appearance=findingAppearance(props.display_class);
       const marker=L.marker([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],{icon:L.divIcon({className:`finding-marker ${appearance.css}`,html:appearance.label,iconSize:[22,22]}),title:props.label}).addTo(state.groups.findings);
-      marker.bindPopup(`<b>${safe(props.display_class)}</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} â€” ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.evidence_scope)}; original wording preserved.</i>`);
+      marker.bindPopup(`<b>${safe(props.display_class)}</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} — ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.evidence_scope)}; original wording preserved.</i>`);
     });
   }
 
@@ -377,7 +377,7 @@
         icon:L.divIcon({className:"finding-marker water recorded-water-finding",html:"W",iconSize:[26,26]}),
         title:`Recorded ${props.label || "Water"}`
       }).addTo(state.groups.waterFindings);
-      marker.bindPopup(`<b>RECORDED WATER FINDING</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} â€” ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.parcel_part)}; original evidence unchanged.</i>`);
+      marker.bindPopup(`<b>RECORDED WATER FINDING</b><br>${safe(props.label)}<br>${safe(props.inspection_date)} — ${safe(props.timestamp)}<br>Record: ${safe(props.record_id || "source record without ID")}<br>Accuracy: ${safe(props.gps_accuracy_m)} m<br>${safe(props.note)}<br><i>${safe(props.parcel_part)}; original evidence unchanged.</i>`);
     });
   }
 
@@ -403,7 +403,7 @@
           ? {color:"#ffe34f",weight:11,opacity:.75,dashArray:"18 12"}
           : {color:"#007ac2",weight:6,opacity:.92,dashArray:"18 12",dashOffset:"15"};
       },
-      onEachFeature:(feature,layer)=>layer.bindPopup(`<b>${safe(p(feature).interpretation_class)}</b><br>${safe(p(feature).statement)}<br><i>Inspector interpretation of the observed sides of the walked transitionâ€”not a surveyed wet-area boundary.</i>`)
+      onEachFeature:(feature,layer)=>layer.bindPopup(`<b>${safe(p(feature).interpretation_class)}</b><br>${safe(p(feature).statement)}<br><i>Inspector interpretation of the observed sides of the walked transition—not a surveyed wet-area boundary.</i>`)
     }).addTo(state.groups.wetDryInterpretation);
   }
 
@@ -446,7 +446,7 @@
     state.source.photos.features.filter(evidenceVisible).filter((photo) => !visibleIds || visibleIds.has(p(photo).photo_id)).forEach((photo) => {
       const id = p(photo).photo_id; const favorite = isFavorite(id); const featured = photoMeta(id).featured;
       const recordedWater = p(photo).is_recorded_water_category === true;
-      const icon = L.divIcon({ className:`photo-marker${favorite ? " favorite" : ""}${recordedWater ? " water-photo" : ""}`, html: recordedWater ? "W" : (featured ? "â˜…" : String(p(photo).photo_number || "P").replace("P","")), iconSize:[featured||recordedWater?24:19,featured||recordedWater?24:19] });
+      const icon = L.divIcon({ className:`photo-marker${favorite ? " favorite" : ""}${recordedWater ? " water-photo" : ""}`, html: recordedWater ? "W" : (featured ? "★" : String(p(photo).photo_number || "P").replace("P","")), iconSize:[featured||recordedWater?24:19,featured||recordedWater?24:19] });
       const marker = L.marker([photo.geometry.coordinates[1],photo.geometry.coordinates[0]], { icon, title:p(photo).photo_number }).addTo(state.groups.photos);
       marker.on("click", () => openPhoto(photo, collectionForPhoto(photo))); marker.on("mouseover", () => { state.selectedPhotoId=id; highlightPhoto(id); updateFilmstrip(photo.geometry.coordinates); });
       state.photoMarkers.set(id, marker);
@@ -524,8 +524,8 @@
       card.className=`photo-card ${size}`; card.dataset.photoId=id; card.draggable=entry.featured;
       const category=p(photo).recorded_category || p(photo).category || "PHOTO";
       const reviewClass=waterReviewClass(photo);
-      const waterLabel=reviewClass==="RECORDED_WATER"?"RECORDED WATER â€” ":reviewClass==="VISIBLE_WATER_IN_PHOTO"?"VISIBLE WATER â€” ":reviewClass==="POSSIBLE_WATER_IN_PHOTO"?"POSSIBLE WATER â€” ":"";
-      card.innerHTML=`<img loading="lazy" src="${photoPath(photo)}" alt="${p(photo).photo_number} ${category}"><span>${entry.featured?'<b class="star">â˜…</b>':''}${isFavorite(id)?'â™¡ ':''}${waterLabel}${p(photo).photo_number} â€” ${category}</span>`;
+      const waterLabel=reviewClass==="RECORDED_WATER"?"RECORDED WATER — ":reviewClass==="VISIBLE_WATER_IN_PHOTO"?"VISIBLE WATER — ":reviewClass==="POSSIBLE_WATER_IN_PHOTO"?"POSSIBLE WATER — ":"";
+      card.innerHTML=`<img loading="lazy" src="${photoPath(photo)}" alt="${p(photo).photo_number} ${category}"><span>${entry.featured?'<b class="star">★</b>':''}${isFavorite(id)?'♡ ':''}${waterLabel}${p(photo).photo_number} — ${category}</span>`;
       card.addEventListener("mouseenter",()=>highlightPhoto(id)); card.addEventListener("click",()=>openPhoto(photo,{photos:state.currentPhotoSet,label:state.currentPhotoCollectionLabel}));
       card.addEventListener("dragstart",(event)=>event.dataTransfer.setData("text/photo-id",id)); card.addEventListener("dragover",(event)=>event.preventDefault()); card.addEventListener("drop",(event)=>reorderFeatured(event,id));
       strip.appendChild(card);
@@ -561,11 +561,11 @@
     const category=p(photo).recorded_category || p(photo).category || "PHOTO";
     const reviewClass=waterReviewClass(photo);
     const waterStatement=reviewClass==="RECORDED_WATER"
-      ? "<b>Map classification: RECORDED WATER â€” explicitly recorded by the field app.</b>"
+      ? "<b>Map classification: RECORDED WATER — explicitly recorded by the field app.</b>"
       : reviewClass==="VISIBLE_WATER_IN_PHOTO"
       ? "<b>Map classification: WATER VISIBLY PRESENT IN PHOTOGRAPH.</b><br><i>Separate visual-review interpretation; the original field category is unchanged.</i>"
       : reviewClass==="POSSIBLE_WATER_IN_PHOTO"
-      ? "<b>Map classification: POSSIBLE WATER â€” INSPECTOR REVIEW NEEDED.</b><br><i>The original field category is unchanged.</i>"
+      ? "<b>Map classification: POSSIBLE WATER — INSPECTOR REVIEW NEEDED.</b><br><i>The original field category is unchanged.</i>"
       : `<b>Map classification:</b> ${safe(p(photo).display_class || category)}<br><i>Image appearance has not been silently reclassified.</i>`;
     document.getElementById("photoCounter").textContent=`${state.currentPhotoIndex+1} OF ${state.currentPhotoSet.length}`;
     document.getElementById("photoCollectionLabel").textContent=state.currentPhotoCollectionLabel;
@@ -619,7 +619,7 @@
     const props=p(zone),total=Core.proposalTotal(zones);
     document.getElementById("proposalTotal").textContent=total.complete?`TOTAL: ${formatMoney(total.priced_total)}`:"TOTAL: UNKNOWN";
     document.getElementById("mapProposalSummary").innerHTML=`<article class="simple-zone-card"><span class="eyebrow">SELECTED WORK AREA</span><h3>${safe(props.name)}</h3><p><strong>${safe(props.acreage)} acres</strong></p><p>${safe(props.finish_level||"REVEAL FINISH")}</p><p class="simple-zone-price">${formatMoney(props.price)}</p><span class="editing-label">EDIT WITH THE SIMPLE CONTROLS AT LEFT</span></article>`;
-    const next=["Candidate homesite / view reveal â€” NOT INCLUDED IN CURRENT PRICE","Creek / water-walk extension â€” NOT INCLUDED IN CURRENT PRICE","Eastern open-area / pasture-potential reveal â€” NOT INCLUDED IN CURRENT PRICE"];
+    const next=["Candidate homesite / view reveal — NOT INCLUDED IN CURRENT PRICE","Creek / water-walk extension — NOT INCLUDED IN CURRENT PRICE","Eastern open-area / pasture-potential reveal — NOT INCLUDED IN CURRENT PRICE"];
     document.getElementById("starterReveal").innerHTML=`<article class="starter-zone"><div><span class="eyebrow">RECOMMENDED FIRST PROJECT</span><h3>${safe(props.name)}</h3><p><b>${safe(props.acreage)} acres</b> &middot; approximately ${safe(props.approx_length_ft)} x ${safe(props.approx_width_ft)} feet &middot; ${safe(props.perimeter_ft)}-foot perimeter</p><p><small>${safe(props.geometry_measurement_basis)}</small></p><p><b>Base finish:</b> ${safe(props.finish_level||"REVEAL FINISH")}</p><p><b>Optional upgrade:</b> ${safe(props.optional_upgrade||"UNKNOWN")}</p>${props.geometry_status?`<p class="status-warn">${safe(props.geometry_status)}</p>`:""}<p><b>Existing condition:</b> ${safe(props.current_condition||props.existing_condition||"UNKNOWN")}</p><p><b>Primary objective:</b> ${safe(props.primary_objective||"UNKNOWN")}</p><b>Work included</b>${listHtml(props.included_scope)}<b>What is preserved</b>${listHtml(props.preserve)}<b>Not included</b>${listHtml(props.exclusions)}<p><b>Expected customer / marketing benefit:</b> ${safe(props.expected_benefit||"UNKNOWN")}</p><p><b>Expected visible result:</b> ${safe(props.expected_visible_result||"UNKNOWN")}</p><p><b>Target start:</b> ${safe(props.target_start||"UNKNOWN")}<br><b>Target completion:</b> ${safe(props.target_completion||"UNKNOWN")}</p><p><b>Fixed proposed price:</b> ${formatMoney(props.price)} ${props.price_status!=="VALIDATED"?'<span class="status-warn">NEEDS PRODUCTION TEST / NOT YET VALIDATED</span>':''}</p></div><div><h3>Featured before photographs (${new Set(props.before_photo_ids||[]).size})</h3><p>Click any photo, then use Previous / Next within this proposal only.</p><div class="proposal-photo-row">${proposalPhotoButtons(zone)}</div><div class="next-opportunities"><b>OPTIONAL NEXT OPPORTUNITIES</b>${listHtml(next)}</div></div></article>`;
     document.querySelectorAll("[data-proposal-photo]").forEach((button)=>button.onclick=()=>{const photo=state.source.photos.features.find((item)=>p(item).photo_id===button.dataset.proposalPhoto);if(photo)openPhoto(photo,{photos:photosForProposal(zone.id),label:`${props.name} PHOTOS`});});
     const lastWork=state.model.work_orders[state.model.work_orders.length-1];
@@ -684,13 +684,13 @@
     if(!coach)return;
     coach.hidden=false;
     if(step==="FIRST"){
-      title.textContent="1 OF 2 â€” TAP WHERE THE BOX STARTS";
+      title.textContent="1 OF 2 — TAP WHERE THE BOX STARTS";
       text.textContent="Tap one corner of the area you want to mark.";
       actions.hidden=true;
       savedActions.hidden=true;
       cancel.hidden=false;
     }else if(step==="SECOND"){
-      title.textContent="2 OF 2 â€” TAP WHERE THE BOX ENDS";
+      title.textContent="2 OF 2 — TAP WHERE THE BOX ENDS";
       text.textContent="Tap the opposite corner. A box will appear.";
       actions.hidden=true;
       savedActions.hidden=true;
@@ -849,11 +849,11 @@
   function projectExport(point,bounds,width,height){const x=(point[0]-bounds.minX)/(bounds.maxX-bounds.minX)*width,y=height-(point[1]-bounds.minY)/(bounds.maxY-bounds.minY)*height;return[x,y];}
   function exportImage(){
     const all=[];function walk(coords){if(typeof coords[0]==="number")all.push(coords);else coords.forEach(walk);}state.source.parcel.features.forEach(feature=>walk(feature.geometry.coordinates));const bounds={minX:Math.min(...all.map(x=>x[0])),maxX:Math.max(...all.map(x=>x[0])),minY:Math.min(...all.map(x=>x[1])),maxY:Math.max(...all.map(x=>x[1]))};const W=1800,H=1200,pad=70,inner={minX:bounds.minX-(bounds.maxX-bounds.minX)*.04,maxX:bounds.maxX+(bounds.maxX-bounds.minX)*.04,minY:bounds.minY-(bounds.maxY-bounds.minY)*.04,maxY:bounds.maxY+(bounds.maxY-bounds.minY)*.04};
-    const path=(coords)=>coords.map((pt,i)=>`${i?"L":"M"}${projectExport(pt,inner,W,H).join(" ")}`).join(" ");let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#e8eee9"/><text x="${pad}" y="48" font-family="Arial" font-size="32" font-weight="bold">PEARSON ROAD â€” WATER &amp; CLEARING REVIEW</text>`;
+    const path=(coords)=>coords.map((pt,i)=>`${i?"L":"M"}${projectExport(pt,inner,W,H).join(" ")}`).join(" ");let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="100%" height="100%" fill="#e8eee9"/><text x="${pad}" y="48" font-family="Arial" font-size="32" font-weight="bold">PEARSON ROAD — WATER &amp; CLEARING REVIEW</text>`;
     const rings=state.source.parcel.features.flatMap(feature=>feature.geometry.coordinates);svg+=rings.map(r=>`<path d="${path(r)}Z" fill="#f4d03f18" stroke="#9c7d00" stroke-width="7"/>`).join("");
     state.source.waterSections.features.filter((feature)=>visibleDate(dateOf(feature))).forEach((feature)=>{const kind=String(p(feature).condition||p(feature).section_type||"").toUpperCase();const color=kind.includes("DRY")&&!kind.includes("WET")?"#e0a400":"#00a5cf";svg+=`<path d="${path(feature.geometry.coordinates)}" fill="none" stroke="#ffffff" stroke-width="11"/><path d="${path(feature.geometry.coordinates)}" fill="none" stroke="${color}" stroke-width="6"/>`;});
-    state.model.proposals.features.forEach((f,index)=>{const color=p(f).color||"#f29f05";svg+=`<path d="${path(f.geometry.coordinates[0])}Z" fill="${color}55" stroke="${color}" stroke-width="8"/><text x="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[0]}" y="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[1]}" font-family="Arial" font-size="28" font-weight="bold">${String.fromCharCode(65+index)} â€” ${p(f).name} (${p(f).acreage} ac)</text>`;});
-    state.source.waterPhotos.features.filter((feature)=>visibleDate(dateOf(feature))).forEach(f=>{const q=projectExport(f.geometry.coordinates,inner,W,H);const kind=waterReviewClass(f);const fill=kind==="RECORDED_WATER"?"#0756a3":kind==="VISIBLE_WATER_IN_PHOTO"?"#00b8d9":"#ffffff";const label=kind==="POSSIBLE_WATER_IN_PHOTO"?"?":"W";svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="10" fill="${fill}" stroke="#063e66" stroke-width="3"/><text x="${q[0]}" y="${q[1]+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${kind==="POSSIBLE_WATER_IN_PHOTO"?'#063e66':'#ffffff'}">${label}</text>`;});svg+=`<g font-family="Arial" font-size="22"><text x="${pad}" y="${H-90}">Dark blue W: recorded water Â· Cyan W: water visible in photo Â· White ?: possible water</text><text x="${pad}" y="${H-50}" font-weight="bold">APPROXIMATE PHONE GPS AND COUNTY PARCEL â€” NOT A SURVEY</text></g></svg>`;
+    state.model.proposals.features.forEach((f,index)=>{const color=p(f).color||"#f29f05";svg+=`<path d="${path(f.geometry.coordinates[0])}Z" fill="${color}55" stroke="${color}" stroke-width="8"/><text x="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[0]}" y="${projectExport(f.geometry.coordinates[0][0],inner,W,H)[1]}" font-family="Arial" font-size="28" font-weight="bold">${String.fromCharCode(65+index)} — ${p(f).name} (${p(f).acreage} ac)</text>`;});
+    state.source.waterPhotos.features.filter((feature)=>visibleDate(dateOf(feature))).forEach(f=>{const q=projectExport(f.geometry.coordinates,inner,W,H);const kind=waterReviewClass(f);const fill=kind==="RECORDED_WATER"?"#0756a3":kind==="VISIBLE_WATER_IN_PHOTO"?"#00b8d9":"#ffffff";const label=kind==="POSSIBLE_WATER_IN_PHOTO"?"?":"W";svg+=`<circle cx="${q[0]}" cy="${q[1]}" r="10" fill="${fill}" stroke="#063e66" stroke-width="3"/><text x="${q[0]}" y="${q[1]+5}" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${kind==="POSSIBLE_WATER_IN_PHOTO"?'#063e66':'#ffffff'}">${label}</text>`;});svg+=`<g font-family="Arial" font-size="22"><text x="${pad}" y="${H-90}">Dark blue W: recorded water · Cyan W: water visible in photo · White ?: possible water</text><text x="${pad}" y="${H-50}" font-weight="bold">APPROXIMATE PHONE GPS AND COUNTY PARCEL — NOT A SURVEY</text></g></svg>`;
     const image=new Image(),url=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"}));image.onload=()=>{const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;canvas.getContext("2d").drawImage(image,0,0);URL.revokeObjectURL(url);canvas.toBlob(blob=>download("PEARSON_ROAD_WATER_CLEARING_REVIEW.png",blob),"image/png");};image.src=url;
   }
 
