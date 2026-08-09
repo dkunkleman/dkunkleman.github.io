@@ -1,0 +1,18 @@
+{
+  "proposal_generator":{
+    "direction":"Production Intelligence to Proposal Generator",
+    "operator_price_approval_required":true,
+    "price_status_required":"OPERATOR_APPROVED",
+    "forbidden_automatic_actions":["VALIDATE_SELL_PRICE","ACCEPT_PROPOSAL","ALTER_PROPOSAL_GEOMETRY","SEND_TO_CUSTOMER"]
+  },
+  "work_order":{
+    "direction":"Completed Work Phase to Production Intelligence candidate",
+    "automatic_baseline_eligibility":false,
+    "operator_confirmations_required":["MEASURED_QUANTITY_CREDIBLE","TIME_RECORD_CREDIBLE","PRODUCTION_CLASS_CORRECT","ABNORMAL_DELAYS_IDENTIFIED"]
+  },
+  "evidence":{
+    "record_class":"BUSINESS_WORK_RECORD",
+    "may_link_to":["BEFORE_EVIDENCE_IDS","WORK_EVIDENCE_IDS","AFTER_EVIDENCE_IDS"],
+    "may_modify_source_evidence":false
+  }
+}

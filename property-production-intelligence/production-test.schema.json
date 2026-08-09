@@ -1,0 +1,14 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"property-intelligence-production-test-v0.1",
+  "title":"Property Intelligence Production Test",
+  "type":"object",
+  "required":["production_test_id","property_id","service_code","production_class","finish_level","test_date","crew_model_id","quantity_type","quantity","unit","crew_count","time","cost_inputs","status","baseline_eligibility","history"],
+  "properties":{
+    "production_test_id":{"type":"string"},"property_id":{"type":"string"},"work_order_id":{"type":["string","null"]},"proposal_zone_id":{"type":["string","null"]},
+    "service_code":{"type":"string"},"production_class":{"type":"string"},"finish_level":{"enum":["REVEAL_FINISH","CLEAN_STAGING_FINISH","OTHER"]},"test_date":{"type":"string"},"crew_model_id":{"type":"string"},
+    "quantity_type":{"enum":["SQUARE_FEET","LINEAR_FEET","COUNT","OTHER"]},"quantity":{"type":["number","null"]},"unit":{"type":"string"},"length_ft":{"type":["number","null"]},"width_ft":{"type":["number","null"]},"area_sq_ft":{"type":["number","null"]},"acreage":{"type":["number","null"]},
+    "dominant_material_class":{"type":"string"},"density_status":{"type":"string"},"terrain_status":{"type":"string"},"wetness_status":{"type":"string"},"slope_status":{"type":"string"},"access_status":{"type":"string"},"debris_handling_method":{"type":"string"},"preservation_complexity":{"type":"string"},"obstacle_notes":{"type":"string"},
+    "time":{"type":"object"},"crew_count":{"type":"number"},"cost_inputs":{"type":"object"},"status":{"enum":["DRAFT","ACTIVE","PARTIAL","COMPLETED","ABORTED"]},"baseline_eligibility":{"enum":["NOT_REVIEWED","ELIGIBLE","INELIGIBLE"]},"before_evidence_ids":{"type":"array"},"work_evidence_ids":{"type":"array"},"after_evidence_ids":{"type":"array"},"history":{"type":"array"}
+  }
+}

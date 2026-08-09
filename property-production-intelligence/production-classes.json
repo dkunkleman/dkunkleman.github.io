@@ -1,0 +1,12 @@
+[
+  {"code":"LIGHT_BRUSH_1_2","label":"Light Brush 1-2 inch","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"MEDIUM_BRUSH_2_3","label":"Medium Brush 2-3 inch","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"HEAVY_BRUSH_3_4","label":"Heavy Brush 3-4 inch","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"DELICATE_CREEK_REVEAL","label":"Delicate Creek Reveal","normal_quantity_type":"LINEAR_FEET","rate_status":"NO_DATA"},
+  {"code":"SELECTIVE_HOMESITE_REVEAL","label":"Selective Homesite Reveal","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"WALKING_PATH_REVEAL","label":"Walking Path Reveal","normal_quantity_type":"LINEAR_FEET","rate_status":"NO_DATA"},
+  {"code":"VIEW_WINDOW_REVEAL","label":"View Window Reveal","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"CLEAN_STAGING_FINISH","label":"Clean Staging Finish","normal_quantity_type":"SQUARE_FEET","rate_status":"NO_DATA"},
+  {"code":"DEBRIS_HANDLING_ONLY","label":"Debris Handling Only","normal_quantity_type":"OTHER","rate_status":"NO_DATA"},
+  {"code":"CUSTOM","label":"Custom","normal_quantity_type":"OTHER","rate_status":"NO_DATA"}
+]

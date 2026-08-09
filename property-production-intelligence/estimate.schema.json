@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"property-intelligence-production-estimate-v0.1",
+  "title":"Property Intelligence Production Estimate",
+  "type":"object",
+  "required":["estimate_id","property_id","proposal_zone_id","production_class","finish_level","measured_quantity","source_production_test_ids","selected_production_rate","production_rate_basis","estimated_crew_hours","estimated_direct_cost","contingency","estimated_cost_with_contingency","target_gross_margin","minimum_job_profit","recommended_minimum_sell_price","operator_selected_sell_price","pricing_status","original_estimate_created_at"],
+  "properties":{
+    "estimate_id":{"type":"string"},"property_id":{"type":"string"},"proposal_zone_id":{"type":"string"},"production_class":{"type":"string"},"finish_level":{"type":"string"},"quantity_type":{"type":"string"},"measured_quantity":{"type":["number","null"]},
+    "source_production_test_ids":{"type":"array","items":{"type":"string"}},"selected_production_rate":{"type":["number","null"]},"production_rate_basis":{"type":"string"},"estimated_crew_hours":{"type":["number","null"]},
+    "estimated_labor_cost":{"type":["number","null"]},"estimated_equipment_cost":{"type":["number","null"]},"estimated_fuel_consumables":{"type":["number","null"]},"estimated_transportation":{"type":["number","null"]},"estimated_debris":{"type":["number","null"]},"estimated_documentation":{"type":["number","null"]},"estimated_other_direct_cost":{"type":["number","null"]},"estimated_direct_cost":{"type":["number","null"]},
+    "contingency":{"type":["number","null"]},"estimated_cost_with_contingency":{"type":["number","null"]},"target_gross_margin":{"type":["number","null"]},"minimum_job_profit":{"type":["number","null"]},"recommended_minimum_sell_price":{"type":["number","null"]},"operator_selected_sell_price":{"type":["number","null"]},"pricing_status":{"enum":["UNKNOWN","DRAFT","OPERATOR_APPROVED"]},"original_estimate_created_at":{"type":"string"}
+  }
+}

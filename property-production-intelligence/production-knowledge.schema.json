@@ -1,0 +1,26 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"property-intelligence-production-knowledge-v0.1",
+  "title":"Aggregated Internal Production Knowledge",
+  "type":"object",
+  "required":["production_class","finish_level","quantity_type","test_count","source_production_test_ids","data_maturity_status","reliability_explanation"],
+  "properties":{
+    "production_class":{"type":"string"},
+    "finish_level":{"enum":["REVEAL_FINISH","CLEAN_STAGING_FINISH","OTHER"]},
+    "quantity_type":{"enum":["SQUARE_FEET","LINEAR_FEET","COUNT","OTHER"]},
+    "test_count":{"type":"integer","minimum":0},
+    "property_count":{"type":"integer","minimum":0},
+    "total_quantity":{"type":["number","null"]},
+    "total_crew_hours":{"type":["number","null"]},
+    "weighted_average_rate":{"type":["number","null"]},
+    "minimum_observed_rate":{"type":["number","null"]},
+    "maximum_observed_rate":{"type":["number","null"]},
+    "median_rate":{"type":["number","null"]},
+    "fast_observed_rate":{"type":["number","null"]},
+    "typical_internal_rate":{"type":["number","null"]},
+    "slow_conservative_rate":{"type":["number","null"]},
+    "source_production_test_ids":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "data_maturity_status":{"enum":["NO_DATA","ONE_TEST_ONLY","EARLY_RANGE","DEVELOPING_BASELINE","ESTABLISHED_INTERNAL_BASELINE"]},
+    "reliability_explanation":{"type":"string"}
+  }
+}
