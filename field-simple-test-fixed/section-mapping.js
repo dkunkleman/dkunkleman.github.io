@@ -8,13 +8,13 @@
 
   const CONDITION_GROUPS = Object.freeze({
     large_trees: Object.freeze(["NO LARGE TREES OBSERVED", "SCATTERED LARGE TREES", "MANY LARGE TREES", "NEARLY CONTINUOUS LARGE-TREE CANOPY", "UNKNOWN"]),
-    underbrush: Object.freeze(["OPEN UNDERNEATH", "LIGHT SMALL BRUSH", "DENSE 1â€“2-INCH BRUSH", "DENSE 2â€“3-INCH TANGLED BRUSH", "BRUSH DIAMETER UNKNOWN", "UNKNOWN"]),
+    underbrush: Object.freeze(["OPEN UNDERNEATH", "LIGHT SMALL BRUSH", "DENSE 1–2-INCH BRUSH", "DENSE 2–3-INCH TANGLED BRUSH", "BRUSH DIAMETER UNKNOWN", "UNKNOWN"]),
     travel_difficulty: Object.freeze(["EASY TO WALK THROUGH", "MODERATELY DIFFICULT", "VERY DIFFICULT", "CANNOT TRAVEL WITHOUT CUTTING", "UNKNOWN"]),
-    ground_and_water: Object.freeze(["DRY AND FIRM", "SOFT WITHOUT VISIBLE WATER", "STANDING WATER MOSTLY 2â€“4 INCHES", "LOCAL WATER APPROXIMATELY 8 INCHES", "WATER DEPTH UNKNOWN", "GROUND UNKNOWN"])
+    ground_and_water: Object.freeze(["DRY AND FIRM", "SOFT WITHOUT VISIBLE WATER", "STANDING WATER MOSTLY 2–4 INCHES", "LOCAL WATER APPROXIMATELY 8 INCHES", "WATER DEPTH UNKNOWN", "GROUND UNKNOWN"])
   });
   const PRIMARY_DESCRIPTIONS = Object.freeze(Array.from(new Set(Object.values(CONDITION_GROUPS).flat())));
   const OTHER_DESCRIPTIONS = Object.freeze(["BRUSH LARGER THAN 3 INCHES", "TOO THICK TO WALK", "OTHER"]);
-  const LEGACY_DESCRIPTIONS = Object.freeze(["SMALL BRUSH", "MOSTLY 2â€“3-INCH BRUSH", "MIXED BRUSH AND TREES", "OPEN UNDER LARGE TREES", "ABOUT 10â€“12 FOOT CANOPY", "DIFFICULT TO TRAVEL THROUGH", "WET / SOFT", "UNDER WATER", "SOFT GROUND WITHOUT VISIBLE WATER", "FIRM / DRY GROUND", "LOCAL WET SPOT", "WET / SOFT GROUND", "FIRM GROUND", "UNSURE"]);
+  const LEGACY_DESCRIPTIONS = Object.freeze(["SMALL BRUSH", "MOSTLY 2–3-INCH BRUSH", "MIXED BRUSH AND TREES", "OPEN UNDER LARGE TREES", "ABOUT 10–12 FOOT CANOPY", "DIFFICULT TO TRAVEL THROUGH", "WET / SOFT", "UNDER WATER", "SOFT GROUND WITHOUT VISIBLE WATER", "FIRM / DRY GROUND", "LOCAL WET SPOT", "WET / SOFT GROUND", "FIRM GROUND", "UNSURE"]);
   const DESCRIPTIONS = Object.freeze([...PRIMARY_DESCRIPTIONS, ...OTHER_DESCRIPTIONS, ...LEGACY_DESCRIPTIONS]);
 
   const METHODS = Object.freeze({
@@ -34,19 +34,19 @@
     model.next_section_number = Math.max(Number(model.next_section_number) || 1, model.sections.length + 1);
     model.active_section_id = model.active_section_id || null;
     model.planning_suggestions = Array.isArray(model.planning_suggestions) && model.planning_suggestions.length ? model.planning_suggestions : [
-      { suggestion_id: "small-parcel-east", area_label: "Small parcel â€” eastern portion", conditions: { large_trees: "NO LARGE TREES OBSERVED", underbrush: "DENSE 2â€“3-INCH TANGLED BRUSH" }, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
-      { suggestion_id: "small-parcel-west", area_label: "Small parcel â€” western portion", conditions: { large_trees: "MANY LARGE TREES" }, prompt: "Confirm the underbrush, walking, and ground separately.", status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
-      { suggestion_id: "large-parcel-curved-road", area_label: "Large parcel near the curved road toward the north boundary", conditions: { large_trees: "MANY LARGE TREES", underbrush: "DENSE 2â€“3-INCH TANGLED BRUSH", travel_difficulty: "VERY DIFFICULT" }, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
-      { suggestion_id: "large-parcel-pearson", area_label: "Large parcel along northâ€“south Pearson", conditions: {}, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" }
+      { suggestion_id: "small-parcel-east", area_label: "Small parcel — eastern portion", conditions: { large_trees: "NO LARGE TREES OBSERVED", underbrush: "DENSE 2–3-INCH TANGLED BRUSH" }, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
+      { suggestion_id: "small-parcel-west", area_label: "Small parcel — western portion", conditions: { large_trees: "MANY LARGE TREES" }, prompt: "Confirm the underbrush, walking, and ground separately.", status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
+      { suggestion_id: "large-parcel-curved-road", area_label: "Large parcel near the curved road toward the north boundary", conditions: { large_trees: "MANY LARGE TREES", underbrush: "DENSE 2–3-INCH TANGLED BRUSH", travel_difficulty: "VERY DIFFICULT" }, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" },
+      { suggestion_id: "large-parcel-pearson", area_label: "Large parcel along north–south Pearson", conditions: {}, status: "INSPECTOR_SUPPLIED_STARTING_INFORMATION_NOT_FIELD_CONFIRMED" }
     ];
     model.open_and_reveal_lanes = Array.isArray(model.open_and_reveal_lanes) ? model.open_and_reveal_lanes : [];
     model.next_open_and_reveal_number = Math.max(Number(model.next_open_and_reveal_number) || 1, model.open_and_reveal_lanes.length + 1);
     model.inspector_interpretations = Array.isArray(model.inspector_interpretations) && model.inspector_interpretations.length ? model.inspector_interpretations : [{
       interpretation_id: "VEGETATION-LAYERS-2026-08-04", recorded_at: "2026-08-04", append_only: true,
       statements: [
-        "Large mature-tree areas can be easier to travel through than areas dominated by dense 2â€“3-inch brush.",
-        "Dense 2â€“3-inch brush may occur without large trees, under scattered large trees, or under many large trees.",
-        "Along the curved road toward the north boundary, large trees and dense 2â€“3-inch tangled brush occur together.",
+        "Large mature-tree areas can be easier to travel through than areas dominated by dense 2–3-inch brush.",
+        "Dense 2–3-inch brush may occur without large trees, under scattered large trees, or under many large trees.",
+        "Along the curved road toward the north boundary, large trees and dense 2–3-inch tangled brush occur together.",
         "Selective brush cutting could improve visibility and foot travel but would not resolve standing water or soft ground."
       ]
     }];
@@ -133,7 +133,7 @@
       walked_edge: [], inferred_edge: null, outlined_section: null,
       distance_walked_m: 0, approximate_perimeter_m: null,
       approximate_square_feet: null, approximate_acres: null,
-      calculation_label: "APPROXIMATE â€” PHONE GPS, NOT A SURVEY",
+      calculation_label: "APPROXIMATE — PHONE GPS, NOT A SURVEY",
       photo_ids: [], voice_note_ids: [], corrections: [], events: [
         { event_type: "SECTION_STARTED", recorded_at: now, information_class: "OBSERVED_ON_SITE", method: settings.method, descriptions, conditions }
       ]
@@ -203,7 +203,7 @@
       section.outlined_section = { type: "Polygon", coordinates: [ring.map(point => [point.longitude, point.latitude])], information_class: "CALCULATED" };
       if (!closure.reasonably_close || completion !== "AUTO_CLOSE_NEAR_START") {
         section.inferred_edge = {
-          label: "INFERRED EDGE â€” NOT PHYSICALLY WALKED",
+          label: "INFERRED EDGE — NOT PHYSICALLY WALKED",
           information_class: "CALCULATED",
           reason: completion,
           from: last,
@@ -249,7 +249,7 @@
   function startOpenAndRevealLane(inspection, options) {
     const model = ensureModel(inspection);
     const settings = options || {};
-    if (!settings.position) throw new Error("WAIT HERE â€” GPS is not ready. Nothing was recorded yet.");
+    if (!settings.position) throw new Error("WAIT HERE — GPS is not ready. Nothing was recorded yet.");
     const laneTypes = ["ROAD-TO-INTERIOR WALKING LANE", "WET-AREA VIEWING LANE", "CREEK-INSPECTION LANE", "SECTION-EDGE LANE", "CROSS-LANE", "CANDIDATE-AREA VIEWING LANE", "OTHER"];
     const laneType = laneTypes.includes(settings.lane_type) ? settings.lane_type : "OTHER";
     const number = Number(model.next_open_and_reveal_number) || 1;
@@ -293,7 +293,7 @@
     const totals = {};
     DESCRIPTIONS.forEach(description => {
       const matching = sections.filter(section => section.approximate_acres != null && section.effective_description_selections.includes(description));
-      if (matching.length) totals[description] = { approximate_acres: Math.round(matching.reduce((sum, section) => sum + section.approximate_acres, 0) * 100) / 100, section_ids: matching.map(section => section.section_id), label: "APPROXIMATE â€” PHONE GPS, NOT A SURVEY" };
+      if (matching.length) totals[description] = { approximate_acres: Math.round(matching.reduce((sum, section) => sum + section.approximate_acres, 0) * 100) / 100, section_ids: matching.map(section => section.section_id), label: "APPROXIMATE — PHONE GPS, NOT A SURVEY" };
     });
     return {
       schema_name: model.schema_name,
@@ -320,4 +320,3 @@
 
   return { CONDITION_GROUPS, DESCRIPTIONS, PRIMARY_DESCRIPTIONS, OTHER_DESCRIPTIONS, METHODS, ensureModel, startSection, sectionById, activeSection, appendWalkPoint, markCorner, closureState, finishSection, addCorrection, effectiveDescriptions, startOpenAndRevealLane, finishOpenAndRevealLane, analysisModel, distanceMeters, pathDistance, areaSquareMeters };
 });
-

@@ -36,4 +36,3 @@
     {"button_id":"simpleFinish","visible_label":"FINISH","screen":"field grid","event_handler":"renderSimpleFinish","required_state":"inspection active","disabled_state_reason":null,"expected_result":"export screen shown","saving_behavior":"inspection not cleared","failure_behavior":"return to capture available","automated_test_name":"finish-control"}
   ]
 }
-
