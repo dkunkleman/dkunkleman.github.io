@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d22">
+  <title>Isolated Production Intelligence Test</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">ISOLATED PRODUCTION INTELLIGENCE TEST</p>
+    <h1>Production Test</h1>
+    <p class="build-line">SOURCE BUILD:<br><strong>9a6e8e070c3cec1437ee3c8a74342edf4cbe6575</strong></p>
+    <p class="offline-line" id="offlineStatus">PREPARING OFFLINE STORAGE</p>
+  </header>
+
+  <main>
+    <section class="card" id="setupCard">
+      <h2>1. Test dimensions</h2>
+      <div class="measure-grid">
+        <label>Length (ft)<input id="lengthFt" type="number" inputmode="decimal" min="0" value="20"></label>
+        <label>Width (ft)<input id="widthFt" type="number" inputmode="decimal" min="0" value="50"></label>
+      </div>
+      <output class="area-answer" id="areaAnswer">1,000 sq ft</output>
+      <label>Production class<select id="productionClass"></select></label>
+      <label>Finish
+        <select id="finishLevel">
+          <option value="REVEAL_FINISH">Reveal Finish — make it visible and usable</option>
+          <option value="CLEAN_STAGING_FINISH">Clean Staging — presentation-ready finishing pass</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </label>
+      <label>Crew
+        <select id="crewCount">
+          <option value="1">David only</option>
+          <option value="2" selected>David + 1 helper</option>
+          <option value="3">3 people</option>
+          <option value="4">4 people</option>
+        </select>
+      </label>
+      <details>
+        <summary>Describe conditions (optional)</summary>
+        <label>Dominant material<input id="materialClass" placeholder="Example: mostly 3–4 inch woody brush"></label>
+        <label>Density<select id="density"><option>UNKNOWN</option><option>SPARSE</option><option>MODERATE</option><option>DENSE</option><option>TANGLED</option></select></label>
+        <label>Ground<select id="terrain"><option>UNKNOWN</option><option>FIRM</option><option>SOFT</option><option>UNEVEN</option><option>ROOTED</option></select></label>
+        <label>Wetness<select id="wetness"><option>UNKNOWN</option><option>DRY</option><option>DAMP</option><option>WET</option><option>STANDING_WATER</option></select></label>
+        <label>Notes<textarea id="conditionNotes" rows="3" placeholder="Obstacles, trees preserved, access, debris plan"></textarea></label>
+      </details>
+      <button class="primary" id="startTest">START TEST</button>
+    </section>
+
+    <section class="card hidden" id="activeCard" aria-live="polite">
+      <div class="status-row"><h2>2. Record the work</h2><span class="status active">TEST ACTIVE</span></div>
+      <p class="test-id" id="testId"></p>
+      <div class="timer-grid">
+        <button class="work-button" id="cuttingButton">START CUTTING</button>
+        <button class="work-button" id="debrisButton">START DEBRIS</button>
+        <button class="secondary" id="delayButton">ADD DELAY</button>
+        <button class="secondary" id="finishButton">FINISH TEST</button>
+      </div>
+      <p class="plain-help">A delay stays separate from productive work. Stop an active phase before finishing.</p>
+      <div id="liveFacts" class="facts"></div>
+    </section>
+
+    <section class="card hidden" id="finishCard">
+      <h2>How did the test end?</h2>
+      <label>Completed measured quantity<input id="completedQuantity" type="number" inputmode="decimal" min="0"></label>
+      <p class="plain-help">Enter the square feet actually completed.</p>
+      <div class="finish-grid">
+        <button class="primary" data-finish="COMPLETED">COMPLETED</button>
+        <button class="secondary" data-finish="PARTIAL">PARTIAL</button>
+        <button class="danger" data-finish="ABORTED">ABORTED</button>
+      </div>
+    </section>
+
+    <section class="card hidden" id="resultsCard" aria-live="polite">
+      <h2>3. Test result</h2>
+      <div id="resultFacts" class="facts"></div>
+      <div class="unknown-box"><strong>Unavailable information remains UNKNOWN.</strong><p>No cost or production rate is invented.</p></div>
+      <details>
+        <summary>Add actual cost inputs (optional)</summary>
+        <p class="plain-help">Enter explicit zeroes where a real cost was zero. Otherwise direct cost remains UNKNOWN.</p>
+        <div id="costInputs" class="cost-grid"></div>
+        <button class="secondary" id="recalculateCost">RECALCULATE ACTUAL COST</button>
+      </details>
+      <fieldset>
+        <legend>Operator review for future internal baseline</legend>
+        <label class="check"><input type="checkbox" data-confirm="measured_quantity_credible"> Quantity is confirmed</label>
+        <label class="check"><input type="checkbox" data-confirm="time_record_credible"> Time is confirmed</label>
+        <label class="check"><input type="checkbox" data-confirm="production_class_correct"> Work class is confirmed</label>
+        <label class="check"><input type="checkbox" data-confirm="abnormal_delays_identified"> Delays are confirmed</label>
+        <button class="secondary" id="baselineButton">CONFIRM FOR BASELINE REVIEW</button>
+        <p id="baselineStatus">Not reviewed. This test cannot influence estimates yet.</p>
+      </fieldset>
+      <div class="button-row">
+        <button class="primary" id="downloadTest">DOWNLOAD THIS TEST</button>
+        <button class="secondary" id="newTest">START ANOTHER TEST</button>
+      </div>
+    </section>
+
+    <section class="card" id="savedCard">
+      <h2>Saved isolated tests</h2>
+      <p id="savedCount">0 saved tests</p>
+      <div id="savedTests" class="saved-tests"></div>
+    </section>
+
+    <section class="card test-card">
+      <h2>Physical iPhone test</h2>
+      <ol>
+        <li>Confirm the source build and OFFLINE STORAGE READY.</li>
+        <li>Keep 20 × 50 ft, Heavy Brush 3–4 inch, and David + 1 helper.</li>
+        <li>Start the test and start cutting.</li>
+        <li>Background Safari, reopen it, and confirm TEST ACTIVE remains.</li>
+        <li>Stop cutting. Start and stop debris.</li>
+        <li>Add a sample delay and reason.</li>
+        <li>Finish and verify quantity, productive time, delay, crew-hours, worker-hours, rate, cost status, and baseline status.</li>
+        <li>Turn on Airplane Mode. Reopen and confirm the saved test remains.</li>
+        <li>Create another test offline. Return online and confirm both remain.</li>
+        <li>Confirm nothing runs off the side of the screen.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer><strong>Isolated Production Intelligence Test</strong><br>Business/work test records only. No private property evidence is included.</footer>
+  <script src="production-engine-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

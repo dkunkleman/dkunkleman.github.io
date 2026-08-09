@@ -1,0 +1,14 @@
+{
+  "application":"Property Intelligence Production Intelligence & Job-Cost Engine V0.1",
+  "deployment_kind":"ISOLATED_PHYSICAL_IPHONE_TEST",
+  "source_branch":"review/property-production-intelligence-v0.1-20260808",
+  "source_commit":"9a6e8e070c3cec1437ee3c8a74342edf4cbe6575",
+  "storage_namespace":"property-production-intelligence-poc-v1",
+  "cache_name":"property-production-intelligence-poc-v1-cache-9a6e8e0",
+  "service_worker_scope":"/property-production-intelligence-test/",
+  "initial_test_storage":"EMPTY",
+  "private_property_evidence_included":false,
+  "protected_field_apps_modified":false,
+  "protected_property_map_modified":false,
+  "deployed_product_feature_changes":false
+}

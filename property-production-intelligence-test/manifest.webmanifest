@@ -1,0 +1,9 @@
+{
+  "name":"Isolated Production Intelligence Test",
+  "short_name":"Production Test",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#edf2ec",
+  "theme_color":"#0b3d22"
+}
