@@ -1,0 +1,20 @@
+{
+  "proposal_generator": {
+    "direction": "Opportunity Engine to Proposal Generator",
+    "operator_approval_required": true,
+    "minimum_opportunity_status": "READY_FOR_PROPOSAL",
+    "output_status": "DRAFT_INPUT_ONLY",
+    "forbidden_automatic_actions": ["SET_PRICE","VALIDATE_PRICE","ACCEPT_PROPOSAL","ALTER_GEOMETRY","SEND_TO_CUSTOMER"]
+  },
+  "repeat_photo": {
+    "direction": "Opportunity Engine recommendation to Repeat Photo Points",
+    "creates_record_automatically": false,
+    "supported_phases": ["BEFORE","WORK","AFTER","MONITORING"],
+    "operator_approval_required": true
+  },
+  "evidence_separation": {
+    "physical_sources": ["OBSERVATION","PHOTO","ASSET","WORK_RECORD"],
+    "customer_interest_sources": ["FAVORITE","ZONE_SELECTION","QUESTION","CHANGE_REQUEST"],
+    "rule": "Customer behavior may affect priority but never proves a physical condition."
+  }
+}

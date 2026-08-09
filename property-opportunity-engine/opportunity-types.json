@@ -1,0 +1,16 @@
+[
+  {"code":"CREEK_WATER_FEATURE_REVEAL","label":"Creek / Water-Feature Reveal","eligible_service_codes":["CREEK-PATH","WALK-PATH"],"customer_types":["SELLER_LISTING_AGENT","BUYER","OWNER"]},
+  {"code":"LIGHT_BRUSH_REVEAL","label":"Light Brush Reveal","eligible_service_codes":["LIGHT-BRUSH"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"HEAVY_BRUSH_REVEAL","label":"Heavy Brush Reveal","eligible_service_codes":["HEAVY-BRUSH"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"HOMESITE_USE_AREA_REVEAL","label":"Homesite / Use-Area Reveal","eligible_service_codes":["HOMESITE-REVEAL"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"WALKING_PATH_ACCESS_REVEAL","label":"Walking Path / Access Reveal","eligible_service_codes":["WALK-PATH"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"VIEW_SUNSET_REVEAL","label":"View / Sunset Reveal","eligible_service_codes":["VIEW-REVEAL"],"customer_types":["SELLER_LISTING_AGENT","BUYER","OWNER"]},
+  {"code":"TREE_PRESERVATION_SELECTIVE_CLEARING","label":"Tree-Preservation / Selective Clearing","eligible_service_codes":["HOMESITE-REVEAL","LIGHT-BRUSH","HEAVY-BRUSH"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"ADDITIONAL_REVEAL_WORK","label":"Additional Reveal Work","eligible_service_codes":["LIGHT-BRUSH","HEAVY-BRUSH","WALK-PATH","VIEW-REVEAL"],"customer_types":["SELLER_LISTING_AGENT","OWNER"]},
+  {"code":"PRE_SHOWING_REFRESH","label":"Pre-Showing Refresh","eligible_service_codes":["PRE-SHOWING-REFRESH"],"customer_types":["SELLER_LISTING_AGENT"]},
+  {"code":"MAINTENANCE_REGROWTH_VISIT","label":"Maintenance / Regrowth Visit","eligible_service_codes":["MAINTENANCE"],"customer_types":["SELLER_LISTING_AGENT","OWNER"]},
+  {"code":"POST_STORM_INSPECTION","label":"Post-Storm Inspection","eligible_service_codes":["POST-STORM-INSPECTION"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"REPEAT_PHOTO_MONITORING","label":"Repeat-Photo Monitoring","eligible_service_codes":["REPEAT-PHOTO-MONITORING"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"WATER_CULVERT_MONITORING","label":"Water / Culvert Monitoring","eligible_service_codes":["WATER-MONITORING"],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"]},
+  {"code":"PROFESSIONAL_HANDOFF","label":"Professional Handoff","eligible_service_codes":[],"customer_types":["SELLER_LISTING_AGENT","BUYER","BUILDER","OWNER"],"professional_types":["SURVEYOR","BUILDER","DRAINAGE_PROFESSIONAL","FORESTER","SEPTIC_PROFESSIONAL","WETLAND_PROFESSIONAL"]}
+]

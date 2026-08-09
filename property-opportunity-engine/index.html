@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Property Intelligence Opportunity Engine V0.1</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><strong>PROPERTY INTELLIGENCE</strong><span>Opportunity Engine V0.1 — isolated review candidate</span></div>
+    <div class="build">NOT DEPLOYED · REVIEW ONLY</div>
+  </header>
+  <main>
+    <section class="notice" aria-label="Evidence warning">
+      <strong>Candidates, not claims.</strong> Observations, interpretations, unknowns, opportunities, proposals, and customer decisions remain separate.
+      <span id="exampleStatus"></span>
+    </section>
+    <section class="controls" aria-label="Opportunity filters">
+      <label>Customer intent
+        <select id="customerType">
+          <option value="SELLER_LISTING_AGENT">Seller / Listing Agent</option>
+          <option value="BUYER">Buyer</option>
+          <option value="BUILDER">Builder</option>
+          <option value="OWNER">Owner</option>
+        </select>
+      </label>
+      <label>Status
+        <select id="statusFilter"><option value="ALL">All statuses</option></select>
+      </label>
+      <label>Show
+        <select id="visibilityFilter"><option value="RELEVANT">Relevant to this customer</option><option value="ALL">All discovered candidates</option></select>
+      </label>
+    </section>
+    <section class="pipeline" aria-label="Evidence-to-decision pipeline">
+      <span>Observed condition</span><b>→</b><span>Interpretation</span><b>→</b><span>Unknown / verification</span><b>→</b><span>Possible opportunity</span><b>→</b><span>Proposal eligibility</span><b>→</b><span>Customer decision</span>
+    </section>
+    <section class="summary" aria-label="Candidate summary">
+      <article><span>Discovered</span><strong id="countAll">0</strong></article>
+      <article><span>Needs verification</span><strong id="countVerify">0</strong></article>
+      <article><span>Ready for proposal</span><strong id="countReady">0</strong></article>
+      <article><span>Professional handoffs</span><strong id="countHandoff">0</strong></article>
+    </section>
+    <section class="workspace">
+      <div class="opportunity-list" id="opportunityList" aria-label="Opportunity candidates"></div>
+      <article class="detail" id="opportunityDetail" aria-live="polite"></article>
+    </section>
+  </main>
+  <script src="opportunity-engine-core.js"></script>
+  <script src="pearson-road-examples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
